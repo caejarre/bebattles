@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Be Battles - Survival Horizon</title>
+    <style>
+        body { margin:0; background:#020617; color:#f8fafc; font-family:'Segoe UI',sans-serif; display:flex; align-items:center; justify-content:center; height:100vh; }
+        #loading-msg { text-align:center; }
+        #loading-msg .spinner { width:36px; height:36px; border:4px solid #1e293b; border-top-color:#38bdf8; border-radius:50%; margin:0 auto 16px; animation:spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div id="loading-msg">
+        <div class="spinner"></div>
+        <div>Carregando Be Battles...</div>
+    </div>
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // LOADER — resolve o problema de cache do GitHub Pages/Fastly.
+        //
+        // Como funciona: este arquivo (index.html) é o único com nome fixo, então é o único
+        // que o navegador/CDN pode teimar em manter em cache. Mas ele não contém o jogo —
+        // ele só descobre qual é a versão mais recente e REDIRECIONA pra ela. Como o nome do
+        // arquivo do jogo muda a cada atualização (game-v1.html, game-v8.html, ...), uma URL
+        // nova NUNCA está em cache, então é sempre baixada do zero, sem exceção.
+        //
+        // COMO ATUALIZAR O JOGO (toda vez que for subir uma mudança nova):
+        //   1. Sobe o arquivo novo do jogo com um nome novo, ex: game-v8.html, game-v3.html...
+        //      (nunca reaproveite um nome antigo)
+        //   2. Troca o número em CURRENT_VERSION aqui embaixo pro novo arquivo
+        //   3. Sobe este index.html também (ele é pequeno, sempre pode subir de novo)
+        //
+        // Isso elimina de vez a tela travada/"azul" causada por cache antigo do CDN.
+        // ═══════════════════════════════════════════════════════════
+        const CURRENT_VERSION = "game-v8.html";
+
+        // cache-buster extra: adiciona um parâmetro único na URL toda vez, então mesmo
+        // dentro da MESMA versão o navegador não reaproveita uma cópia antiga por engano
+        // (ex: se você reenviar o mesmo game-vN.html corrigindo algo pequeno sem subir versão nova)
+        const bustedUrl = CURRENT_VERSION + "?t=" + Date.now();
+
+        fetch(bustedUrl, { cache: "no-store" })
+            .then(res => {
+                if (!res.ok) throw new Error("Falha ao carregar " + bustedUrl + " (status " + res.status + ")");
+                window.location.replace(bustedUrl);
+            })
+            .catch(err => {
+                document.getElementById('loading-msg').innerHTML =
+                    '<div style="color:#f87171;">Erro ao carregar o jogo.<br>Tenta atualizar a página (Ctrl+Shift+R).<br><span style="font-size:0.8rem;color:#64748b;">' +
+                    (err.message || err) + '</span></div>';
+            });
+    </script>
+</body>
+</html>
