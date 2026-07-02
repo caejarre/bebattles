@@ -2619,6 +2619,13 @@
             document.addEventListener('visibilitychange', () => {
                 console.log('[Chat] visibilitychange, hidden =', document.hidden);
                 if (document.hidden) return;
+                // TESTE DE DIAGNÓSTICO: fetch cru, sem passar pelo supabase-js, pra descobrir se
+                // o travamento é do navegador/rede em si (nesse caso isso também trava) ou
+                // específico da lib supabase-js (nesse caso isso responde normal).
+                const testStart = Date.now();
+                fetch(SUPABASE_URL + '/rest/v1/', { headers: { apikey: SUPABASE_ANON_KEY } })
+                    .then(() => console.log('[Chat] TESTE fetch cru OK em', Date.now() - testStart, 'ms'))
+                    .catch(e => console.log('[Chat] TESTE fetch cru FALHOU em', Date.now() - testStart, 'ms', e));
                 if (this._peerId && !document.getElementById('chat-screen').classList.contains('hidden')) {
                     console.log('[Chat] voltou a ficar visível com chat aberto, recarregando e reconectando');
                     this._loadMessages();
