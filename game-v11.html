@@ -2634,12 +2634,13 @@
         closeChat() {
             document.getElementById('chat-screen').classList.add('hidden');
             if (this._channel) { sb.removeChannel(this._channel); this._channel = null; }
+            this._stopPolling();
             this._peerId = null;
             this._peerName = null;
             if (!document.getElementById('search-screen').classList.contains('hidden')) this.loadConversations();
         },
 
-        async _loadMessages() {
+        async _loadMessages(silent) {
             let container = document.getElementById('chat-messages');
             try {
                 const { data, error } = await sb
@@ -2649,6 +2650,14 @@
                     .order('created_at', { ascending: true })
                     .limit(200);
                 if (error) throw error;
+                if (silent) {
+                    // Modo polling: só adiciona o que ainda não está na tela, sem apagar nada
+                    // (evita "piscar" a conversa a cada 3s e preserva o que o usuário está lendo).
+                    (data || []).forEach(m => this._appendIfNew(m));
+                    let hasAnyUnread = (data || []).some(m => m.from_id === this._peerId && !m.read);
+                    if (hasAnyUnread) this._markConversationRead();
+                    return;
+                }
                 container.innerHTML = '';
                 if (!data || data.length === 0) {
                     container.innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
@@ -2657,7 +2666,7 @@
                 data.forEach(m => this._appendBubble(m));
                 container.scrollTop = container.scrollHeight;
             } catch (err) {
-                container.innerHTML = `<div class="chat-empty-hint">${t('chatLoadError')}</div>`;
+                if (!silent) container.innerHTML = `<div class="chat-empty-hint">${t('chatLoadError')}</div>`;
                 console.error('Erro ao carregar mensagens:', err && (err.message || err.details || err.hint) || err);
             }
         },
@@ -2669,6 +2678,7 @@
             let mine = m.from_id === Accounts.current.uid;
             let row = document.createElement('div');
             row.className = 'chat-bubble-row' + (mine ? ' mine' : '');
+            row.setAttribute('data-msg-id', m.id);
             let time = new Date(m.created_at);
             let hh = String(time.getHours()).padStart(2, '0');
             let mm = String(time.getMinutes()).padStart(2, '0');
@@ -2684,12 +2694,41 @@
                     let isThisConvo = (m.from_id === this._peerId && m.to_id === Accounts.current.uid) ||
                                        (m.from_id === Accounts.current.uid && m.to_id === this._peerId);
                     if (!isThisConvo) return;
-                    let container = document.getElementById('chat-messages');
-                    this._appendBubble(m);
-                    container.scrollTop = container.scrollHeight;
+                    this._appendIfNew(m);
                     if (m.from_id === this._peerId) this._markConversationRead();
                 })
-                .subscribe();
+                .subscribe((status) => {
+                    console.log('[Chat] status do canal da conversa:', status);
+                });
+            this._startPolling();
+        },
+
+        // Rede de segurança: independente do Realtime estar funcionando ou não, verifica a
+        // conversa periodicamente enquanto a tela de chat estiver aberta e visível. Isso garante
+        // que mensagens sempre apareçam mesmo se o WebSocket cair silenciosamente (o que o
+        // navegador pode fazer em abas em segundo plano) — sem isso, ficamos 100% reféns do
+        // Realtime nunca falhar, o que na prática não é garantido.
+        _startPolling() {
+            this._stopPolling();
+            this._pollInt = setInterval(() => {
+                if (document.hidden) return;
+                if (!this._peerId) return;
+                if (document.getElementById('chat-screen').classList.contains('hidden')) return;
+                this._loadMessages(true);
+            }, 3000);
+        },
+
+        _stopPolling() {
+            if (this._pollInt) { clearInterval(this._pollInt); this._pollInt = null; }
+        },
+
+        // Evita desenhar a mesma mensagem duas vezes quando ela chega tanto pelo polling quanto
+        // pelo Realtime (ou por duas rodadas de polling seguidas).
+        _appendIfNew(m) {
+            let container = document.getElementById('chat-messages');
+            if (container.querySelector(`[data-msg-id="${m.id}"]`)) return;
+            this._appendBubble(m);
+            container.scrollTop = container.scrollHeight;
         },
 
         async _markConversationRead() {
@@ -2707,16 +2746,20 @@
             if (!text || !this._peerId || !Accounts.current) return;
             input.value = '';
             try {
-                // Não chamamos _appendBubble aqui: a subscrição realtime (_subscribeToConversation)
-                // já escuta INSERT nessa conversa e desenha a bolha assim que o INSERT é confirmado
-                // pelo servidor — inclusive para a própria mensagem enviada. Chamar _appendBubble
-                // aqui também causava a mensagem aparecer duplicada no lado de quem enviou.
-                const { error } = await sb.from('messages').insert({
+                // Desenhamos a bolha aqui mesmo, usando o retorno do insert. Isso não duplica
+                // porque _appendIfNew checa o data-msg-id antes de desenhar — então se o Realtime
+                // (ou o polling de segurança) também entregar esse mesmo INSERT depois, ele é
+                // ignorado. Isolar a UI do Realtime é necessário porque o WebSocket do Supabase
+                // pode cair silenciosamente (ex: aba em segundo plano) e não temos garantia de
+                // que ele volte sozinho — sem isso, o próprio remetente ficava sem ver a mensagem
+                // que acabou de mandar.
+                const { data, error } = await sb.from('messages').insert({
                     from_id: Accounts.current.uid,
                     to_id: this._peerId,
                     content: text
-                });
+                }).select().single();
                 if (error) throw error;
+                if (data) this._appendIfNew(data);
             } catch (err) {
                 console.warn('Erro ao enviar mensagem:', err && (err.message || err.details || err.hint) || err);
                 input.value = text;
@@ -2854,6 +2897,7 @@
         stopAll() {
             if (this._channel) { sb.removeChannel(this._channel); this._channel = null; }
             if (this._listChannel) { sb.removeChannel(this._listChannel); this._listChannel = null; }
+            this._stopPolling();
             this._peerId = null;
             this._unreadTotal = 0;
         }
