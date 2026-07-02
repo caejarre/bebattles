@@ -261,48 +261,49 @@
     <div id="auth-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
             <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">v1.5</span></div>
-            <div class="auth-sub">Horizon Survival Tournament 2026</div>
+            <div class="auth-sub" data-i18n="authSubtitle">Horizon Survival Tournament 2026</div>
             <div class="auth-tabs" id="auth-tabs">
-                <button id="tab-login" class="active" onclick="Accounts.showTab('login')">🔑 Entrar</button>
-                <button id="tab-register" onclick="Accounts.showTab('register')">➕ Criar Conta</button>
+                <button id="tab-login" class="active" onclick="Accounts.showTab('login')" data-i18n="authTabLogin">🔑 Entrar</button>
+                <button id="tab-register" onclick="Accounts.showTab('register')" data-i18n="authTabRegister">➕ Criar Conta</button>
             </div>
             <div id="auth-form-login" style="display:flex; flex-direction:column; gap:10px;">
-                <input class="auth-input" id="auth-email" type="email" placeholder="E-mail" maxlength="120" autocomplete="email">
-                <input class="auth-input" id="auth-password" type="password" placeholder="Senha" maxlength="32" autocomplete="current-password">
-                <button onclick="Accounts.doLogin()" style="background:linear-gradient(to right,#3b82f6,#6366f1); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;">ENTRAR</button>
-                <a href="#" onclick="Accounts.showForgotPassword(); return false;" style="color:#38bdf8; font-size:0.78rem; text-decoration:none; text-align:right;">Esqueci minha senha</a>
+                <input class="auth-input" id="auth-email" type="email" placeholder="E-mail" data-i18n-placeholder="emailPlaceholder" maxlength="120" autocomplete="email">
+                <input class="auth-input" id="auth-password" type="password" placeholder="Senha" data-i18n-placeholder="passwordPlaceholder" maxlength="32" autocomplete="current-password">
+                <button onclick="Accounts.doLogin()" style="background:linear-gradient(to right,#3b82f6,#6366f1); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;" data-i18n="loginBtn">ENTRAR</button>
+                <a href="#" onclick="Accounts.showForgotPassword(); return false;" style="color:#38bdf8; font-size:0.78rem; text-decoration:none; text-align:right;" data-i18n="forgotPasswordLink">Esqueci minha senha</a>
             </div>
             <div id="auth-form-register" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
-                <input class="auth-input" id="reg-email" type="email" placeholder="E-mail" maxlength="120" autocomplete="email">
-                <input class="auth-input" id="reg-username" type="text" placeholder="Nome de exibição (letras, números, _)" maxlength="20">
-                <input class="auth-input" id="reg-password" type="password" placeholder="Senha (mínimo 6 chars)" maxlength="32">
-                <input class="auth-input" id="reg-password2" type="password" placeholder="Confirmar senha" maxlength="32">
-                <button onclick="Accounts.doRegister()" style="background:linear-gradient(to right,#10b981,#059669); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;">CRIAR CONTA</button>
+                <input class="auth-input" id="reg-email" type="email" placeholder="E-mail" data-i18n-placeholder="emailPlaceholder" maxlength="120" autocomplete="email">
+                <input class="auth-input" id="reg-username" type="text" placeholder="Nome de exibição (letras, números, _)" data-i18n-placeholder="displayNamePlaceholder" maxlength="20">
+                <input class="auth-input" id="reg-password" type="password" placeholder="Senha (mínimo 6 chars)" data-i18n-placeholder="regPasswordPlaceholder" maxlength="32">
+                <input class="auth-input" id="reg-password2" type="password" placeholder="Confirmar senha" data-i18n-placeholder="confirmPasswordPlaceholder" maxlength="32">
+                <button onclick="Accounts.doRegister()" style="background:linear-gradient(to right,#10b981,#059669); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;" data-i18n="registerBtn">CRIAR CONTA</button>
             </div>
             <div id="auth-form-forgot" class="hidden" style="display:flex; flex-direction:column; gap:10px;">
-                <div style="font-size:0.82rem; color:#94a3b8; line-height:1.4;">Digite seu e-mail cadastrado. Enviaremos um link para você redefinir sua senha.</div>
-                <input class="auth-input" id="forgot-email" type="email" placeholder="E-mail" maxlength="120" autocomplete="email">
-                <button onclick="Accounts.doForgotPassword()" style="background:linear-gradient(to right,#3b82f6,#6366f1); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;">ENVIAR LINK DE REDEFINIÇÃO</button>
-                <a href="#" onclick="Accounts.showTab('login'); return false;" style="color:#64748b; font-size:0.8rem; text-align:center; text-decoration:none;">&larr; Voltar para o login</a>
+                <div style="font-size:0.82rem; color:#94a3b8; line-height:1.4;" data-i18n="forgotPasswordDesc">Digite seu e-mail cadastrado. Enviaremos um link para você redefinir sua senha.</div>
+                <input class="auth-input" id="forgot-email" type="email" placeholder="E-mail" data-i18n-placeholder="emailPlaceholder" maxlength="120" autocomplete="email">
+                <button onclick="Accounts.doForgotPassword()" style="background:linear-gradient(to right,#3b82f6,#6366f1); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;" data-i18n="sendResetLinkBtn">ENVIAR LINK DE REDEFINIÇÃO</button>
+                <a href="#" onclick="Accounts.showTab('login'); return false;" style="color:#64748b; font-size:0.8rem; text-align:center; text-decoration:none;" data-i18n="backToLoginLink">&larr; Voltar para o login</a>
             </div>
             <div id="auth-error" class="auth-error hidden"></div>
-            <div class="auth-info">☁️ Sua conta funciona em qualquer dispositivo.</div>
+            <div class="auth-info" data-i18n="authCloudInfo">☁️ Sua conta funciona em qualquer dispositivo.</div>
         </div>
     </div>
 
     <!-- TELA DE REDEFINIÇÃO DE SENHA (via link de "esqueci minha senha") -->
     <div id="recovery-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
-            <div class="auth-title">Nova Senha</div>
-            <div class="auth-sub">Digite sua nova senha para continuar</div>
+            <div class="auth-title" data-i18n="recoveryTitle">Nova Senha</div>
+            <div class="auth-sub" data-i18n="recoverySubtitle">Digite sua nova senha para continuar</div>
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <input class="auth-input" id="recovery-new-password" type="password" placeholder="Nova senha (mínimo 6 caracteres)" maxlength="32" autocomplete="new-password">
-                <input class="auth-input" id="recovery-new-password2" type="password" placeholder="Confirmar nova senha" maxlength="32" autocomplete="new-password">
-                <button onclick="Accounts.doRecoverySetPassword()" style="background:linear-gradient(to right,#3b82f6,#6366f1); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;">SALVAR NOVA SENHA E ENTRAR</button>
+                <input class="auth-input" id="recovery-new-password" type="password" placeholder="Nova senha (mínimo 6 caracteres)" data-i18n-placeholder="newPasswordPlaceholder" maxlength="32" autocomplete="new-password">
+                <input class="auth-input" id="recovery-new-password2" type="password" placeholder="Confirmar nova senha" data-i18n-placeholder="confirmNewPasswordPlaceholder" maxlength="32" autocomplete="new-password">
+                <button onclick="Accounts.doRecoverySetPassword()" style="background:linear-gradient(to right,#3b82f6,#6366f1); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;" data-i18n="recoverySaveBtn">SALVAR NOVA SENHA E ENTRAR</button>
             </div>
             <div id="recovery-error" class="auth-error hidden"></div>
         </div>
     </div>
+
 
 
 
@@ -606,7 +607,7 @@
     const I18N = {
         'pt-BR': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
-            settingsBtn: "⚙ Configurações",
+            settingsBtn: "⚙",
             arenaStructureTitle: "Estrutura de Arena",
             worldLabel: "Mundo Aberto", worldOff: "DESATIVADO", worldOn: "INFINITO (SOLO)",
             combatModeTitle: "Modo de Combate",
@@ -704,11 +705,23 @@
             deleteAccountTypeLabel: "Digite APAGAR para confirmar:",
             deleteAccountInputPlaceholder: "Digite APAGAR",
             cancelBtn: "Cancelar",
-            deleteForeverBtn: "Apagar de vez"
+            deleteForeverBtn: "Apagar de vez",
+            authSubtitle: "Horizon Survival Tournament 2026",
+            authTabLogin: "🔑 Entrar", authTabRegister: "➕ Criar Conta",
+            emailPlaceholder: "E-mail", passwordPlaceholder: "Senha",
+            loginBtn: "ENTRAR", forgotPasswordLink: "Esqueci minha senha",
+            displayNamePlaceholder: "Nome de exibição (letras, números, _)",
+            regPasswordPlaceholder: "Senha (mínimo 6 chars)", confirmPasswordPlaceholder: "Confirmar senha",
+            registerBtn: "CRIAR CONTA",
+            forgotPasswordDesc: "Digite seu e-mail cadastrado. Enviaremos um link para você redefinir sua senha.",
+            sendResetLinkBtn: "ENVIAR LINK DE REDEFINIÇÃO", backToLoginLink: "← Voltar para o login",
+            authCloudInfo: "☁️ Sua conta funciona em qualquer dispositivo.",
+            recoveryTitle: "Nova Senha", recoverySubtitle: "Digite sua nova senha para continuar",
+            recoverySaveBtn: "SALVAR NOVA SENHA E ENTRAR"
         },
         'en': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
-            settingsBtn: "⚙ Settings", arenaStructureTitle: "Arena Structure",
+            settingsBtn: "⚙", arenaStructureTitle: "Arena Structure",
             worldLabel: "Open World", worldOff: "DISABLED", worldOn: "INFINITE (SOLO)",
             combatModeTitle: "Combat Mode",
             modeHorda: "Solo Horde", modeDuelo: "Local 1v1 Duel", modeGoldfush: "Gold Rush",
@@ -804,11 +817,23 @@
             deleteAccountTypeLabel: "Type DELETE to confirm:",
             deleteAccountInputPlaceholder: "Type DELETE",
             cancelBtn: "Cancel",
-            deleteForeverBtn: "Delete Permanently"
+            deleteForeverBtn: "Delete Permanently",
+            authSubtitle: "Horizon Survival Tournament 2026",
+            authTabLogin: "🔑 Log In", authTabRegister: "➕ Create Account",
+            emailPlaceholder: "Email", passwordPlaceholder: "Password",
+            loginBtn: "LOG IN", forgotPasswordLink: "Forgot my password",
+            displayNamePlaceholder: "Display name (letters, numbers, _)",
+            regPasswordPlaceholder: "Password (min. 6 chars)", confirmPasswordPlaceholder: "Confirm password",
+            registerBtn: "CREATE ACCOUNT",
+            forgotPasswordDesc: "Enter your registered email. We'll send you a link to reset your password.",
+            sendResetLinkBtn: "SEND RESET LINK", backToLoginLink: "← Back to login",
+            authCloudInfo: "☁️ Your account works on any device.",
+            recoveryTitle: "New Password", recoverySubtitle: "Enter your new password to continue",
+            recoverySaveBtn: "SAVE NEW PASSWORD AND LOG IN"
         },
         'de': {
             tagline: "Horizon Survival Turnier — Cosmic Engine 2026",
-            settingsBtn: "⚙ Einstellungen", arenaStructureTitle: "Arena-Struktur",
+            settingsBtn: "⚙", arenaStructureTitle: "Arena-Struktur",
             worldLabel: "Offene Welt", worldOff: "DEAKTIVIERT", worldOn: "UNENDLICH (SOLO)",
             combatModeTitle: "Kampfmodus",
             modeHorda: "Solo-Horde", modeDuelo: "Lokales 1-gegen-1-Duell", modeGoldfush: "Goldrausch",
@@ -904,11 +929,23 @@
             deleteAccountTypeLabel: "Gib LÖSCHEN ein, um zu bestätigen:",
             deleteAccountInputPlaceholder: "LÖSCHEN eingeben",
             cancelBtn: "Abbrechen",
-            deleteForeverBtn: "Endgültig löschen"
+            deleteForeverBtn: "Endgültig löschen",
+            authSubtitle: "Horizon Survival Turnier 2026",
+            authTabLogin: "🔑 Anmelden", authTabRegister: "➕ Konto Erstellen",
+            emailPlaceholder: "E-Mail", passwordPlaceholder: "Passwort",
+            loginBtn: "ANMELDEN", forgotPasswordLink: "Passwort vergessen",
+            displayNamePlaceholder: "Anzeigename (Buchstaben, Zahlen, _)",
+            regPasswordPlaceholder: "Passwort (mind. 6 Zeichen)", confirmPasswordPlaceholder: "Passwort bestätigen",
+            registerBtn: "KONTO ERSTELLEN",
+            forgotPasswordDesc: "Gib deine registrierte E-Mail-Adresse ein. Wir senden dir einen Link zum Zurücksetzen deines Passworts.",
+            sendResetLinkBtn: "RESET-LINK SENDEN", backToLoginLink: "← Zurück zur Anmeldung",
+            authCloudInfo: "☁️ Dein Konto funktioniert auf jedem Gerät.",
+            recoveryTitle: "Neues Passwort", recoverySubtitle: "Gib dein neues Passwort ein, um fortzufahren",
+            recoverySaveBtn: "NEUES PASSWORT SPEICHERN UND ANMELDEN"
         },
         'es': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
-            settingsBtn: "⚙ Configuración", arenaStructureTitle: "Estructura de Arena",
+            settingsBtn: "⚙", arenaStructureTitle: "Estructura de Arena",
             worldLabel: "Mundo Abierto", worldOff: "DESACTIVADO", worldOn: "INFINITO (SOLO)",
             combatModeTitle: "Modo de Combate",
             modeHorda: "Horda Solo", modeDuelo: "Duelo 1v1 Local", modeGoldfush: "Búsqueda de Oro",
@@ -1004,11 +1041,23 @@
             deleteAccountTypeLabel: "Escribe ELIMINAR para confirmar:",
             deleteAccountInputPlaceholder: "Escribe ELIMINAR",
             cancelBtn: "Cancelar",
-            deleteForeverBtn: "Eliminar definitivamente"
+            deleteForeverBtn: "Eliminar definitivamente",
+            authSubtitle: "Horizon Survival Tournament 2026",
+            authTabLogin: "🔑 Entrar", authTabRegister: "➕ Crear Cuenta",
+            emailPlaceholder: "Correo electrónico", passwordPlaceholder: "Contraseña",
+            loginBtn: "ENTRAR", forgotPasswordLink: "Olvidé mi contraseña",
+            displayNamePlaceholder: "Nombre visible (letras, números, _)",
+            regPasswordPlaceholder: "Contraseña (mínimo 6 caracteres)", confirmPasswordPlaceholder: "Confirmar contraseña",
+            registerBtn: "CREAR CUENTA",
+            forgotPasswordDesc: "Escribe tu correo registrado. Te enviaremos un enlace para restablecer tu contraseña.",
+            sendResetLinkBtn: "ENVIAR ENLACE DE RESTABLECIMIENTO", backToLoginLink: "← Volver al inicio de sesión",
+            authCloudInfo: "☁️ Tu cuenta funciona en cualquier dispositivo.",
+            recoveryTitle: "Nueva Contraseña", recoverySubtitle: "Escribe tu nueva contraseña para continuar",
+            recoverySaveBtn: "GUARDAR NUEVA CONTRASEÑA Y ENTRAR"
         },
         'it': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
-            settingsBtn: "⚙ Impostazioni", arenaStructureTitle: "Struttura dell'Arena",
+            settingsBtn: "⚙", arenaStructureTitle: "Struttura dell'Arena",
             worldLabel: "Mondo Aperto", worldOff: "DISATTIVATO", worldOn: "INFINITO (SOLO)",
             combatModeTitle: "Modalità di Combattimento",
             modeHorda: "Orda Solitaria", modeDuelo: "Duello 1v1 Locale", modeGoldfush: "Caccia all'Oro",
@@ -1104,11 +1153,23 @@
             deleteAccountTypeLabel: "Digita ELIMINA per confermare:",
             deleteAccountInputPlaceholder: "Digita ELIMINA",
             cancelBtn: "Annulla",
-            deleteForeverBtn: "Elimina definitivamente"
+            deleteForeverBtn: "Elimina definitivamente",
+            authSubtitle: "Horizon Survival Tournament 2026",
+            authTabLogin: "🔑 Accedi", authTabRegister: "➕ Crea Account",
+            emailPlaceholder: "Email", passwordPlaceholder: "Password",
+            loginBtn: "ACCEDI", forgotPasswordLink: "Ho dimenticato la password",
+            displayNamePlaceholder: "Nome visualizzato (lettere, numeri, _)",
+            regPasswordPlaceholder: "Password (minimo 6 caratteri)", confirmPasswordPlaceholder: "Conferma password",
+            registerBtn: "CREA ACCOUNT",
+            forgotPasswordDesc: "Inserisci la tua email registrata. Ti invieremo un link per reimpostare la password.",
+            sendResetLinkBtn: "INVIA LINK DI RESET", backToLoginLink: "← Torna al login",
+            authCloudInfo: "☁️ Il tuo account funziona su qualsiasi dispositivo.",
+            recoveryTitle: "Nuova Password", recoverySubtitle: "Inserisci la nuova password per continuare",
+            recoverySaveBtn: "SALVA NUOVA PASSWORD E ACCEDI"
         },
         'fr': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
-            settingsBtn: "⚙ Paramètres", arenaStructureTitle: "Structure de l'Arène",
+            settingsBtn: "⚙", arenaStructureTitle: "Structure de l'Arène",
             worldLabel: "Monde Ouvert", worldOff: "DÉSACTIVÉ", worldOn: "INFINI (SOLO)",
             combatModeTitle: "Mode de Combat",
             modeHorda: "Horde Solo", modeDuelo: "Duel 1v1 Local", modeGoldfush: "Chasse à l'Or",
