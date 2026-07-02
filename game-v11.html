@@ -2571,6 +2571,25 @@
         _listChannel: null,
         _unreadTotal: 0,
 
+        // FIX (causa raiz real do travamento após trocar de aba): o cliente HTTP usado pelo
+        // supabase-js (fetch) pode deixar uma requisição pendurada pra sempre — nem resolve nem
+        // rejeita — quando ela é iniciada logo depois da aba voltar de segundo plano. O socket
+        // TCP subjacente ficou numa espécie de estado "morto" enquanto a aba estava oculta, e o
+        // navegador não avisa que ele morreu; o fetch só fica esperando para sempre por uma
+        // resposta que nunca chega. O Realtime (WebSocket) tem sua própria lógica de heartbeat e
+        // se recupera sozinho (por isso víamos "SUBSCRIBED" nos logs), mas chamadas REST comuns
+        // (select/insert/update) não têm proteção nenhuma contra isso por padrão. Usamos
+        // AbortController pra cancelar de verdade a requisição travada (não só ignorar a
+        // Promise), senão ela continua ocupando uma conexão e pode travar as chamadas seguintes.
+        _withTimeout(builder, ms = 6000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), ms);
+            return builder.abortSignal(controller.signal).then(
+                (res) => { clearTimeout(timeoutId); return res; },
+                (err) => { clearTimeout(timeoutId); throw err; }
+            );
+        },
+
         _dmKey(a, b) { return [a, b].sort().join('|'); },
 
         // FIX: o navegador suspende/throttla conexões WebSocket em abas que ficam em segundo
@@ -2645,12 +2664,13 @@
         async _loadMessages(silent) {
             let container = document.getElementById('chat-messages');
             try {
-                const { data, error } = await sb
-                    .from('messages')
-                    .select('*')
-                    .or(`and(from_id.eq.${Accounts.current.uid},to_id.eq.${this._peerId}),and(from_id.eq.${this._peerId},to_id.eq.${Accounts.current.uid})`)
-                    .order('created_at', { ascending: true })
-                    .limit(200);
+                const { data, error } = await this._withTimeout(
+                    sb.from('messages')
+                        .select('*')
+                        .or(`and(from_id.eq.${Accounts.current.uid},to_id.eq.${this._peerId}),and(from_id.eq.${this._peerId},to_id.eq.${Accounts.current.uid})`)
+                        .order('created_at', { ascending: true })
+                        .limit(200)
+                );
                 if (error) throw error;
                 if (silent) {
                     console.log('[Chat] poll retornou', (data||[]).length, 'mensagens');
@@ -2759,11 +2779,14 @@
                 // pode cair silenciosamente (ex: aba em segundo plano) e não temos garantia de
                 // que ele volte sozinho — sem isso, o próprio remetente ficava sem ver a mensagem
                 // que acabou de mandar.
-                const { data, error } = await sb.from('messages').insert({
-                    from_id: Accounts.current.uid,
-                    to_id: this._peerId,
-                    content: text
-                }).select().single();
+                const { data, error } = await this._withTimeout(
+                    sb.from('messages').insert({
+                        from_id: Accounts.current.uid,
+                        to_id: this._peerId,
+                        content: text
+                    }).select().single()
+                );
+                console.log('[Chat] insert respondeu');
                 if (error) throw error;
                 console.log('[Chat] mensagem inserida com sucesso, id =', data && data.id);
                 if (data) this._appendIfNew(data);
