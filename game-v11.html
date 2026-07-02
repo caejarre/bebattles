@@ -1857,6 +1857,41 @@
         global: { fetch: fetchWithTimeout }
     });
 
+    // FIX (causa raiz real, confirmada por teste isolado): um fetch cru pro mesmo domínio Supabase
+    // responde normalmente mesmo depois da aba voltar do segundo plano — ou seja, a rede e o
+    // navegador estão OK. O travamento é específico do client REST (`sb.from(...)`) do
+    // supabase-js: nossa hipótese, com base no comportamento observado, é que ele compartilha
+    // estado interno com o client Realtime, e destruir/recriar o canal Realtime ao reconectar
+    // deixa esse estado preso, fazendo toda chamada `.from()` seguinte nunca resolver, mesmo que
+    // o fetch por trás funcione. A correção é não depender do client REST do supabase-js para as
+    // chamadas do chat: falamos direto com a API REST via fetch puro, usando o token de sessão
+    // atual. Isso contorna o client problemático sem precisar recriá-lo (o que quebraria login,
+    // ranking, presença e todo o resto que usa "sb" normalmente).
+    async function restDirect(path, options = {}) {
+        const { data: { session } } = await sb.auth.getSession();
+        const token = (session && session.access_token) || SUPABASE_ANON_KEY;
+        const res = await fetchWithTimeout(SUPABASE_URL + '/rest/v1/' + path, {
+            ...options,
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json',
+                ...(options.headers || {})
+            }
+        });
+        if (!res.ok) {
+            let body = null;
+            try { body = await res.json(); } catch (e) {}
+            const err = new Error((body && (body.message || body.hint)) || ('HTTP ' + res.status));
+            err.status = res.status;
+            err.body = body;
+            throw err;
+        }
+        if (res.status === 204) return null;
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
+    }
+
     // FIX (rede de segurança): mesmo com a trava desativada acima, mantemos um watchdog bem mais
     // curto (2s) como último recurso, caso outro tipo de travamento apareça no futuro — ele limpa
     // só os dados de sessão do Supabase e recarrega automaticamente, sem exigir ação manual.
@@ -2619,13 +2654,6 @@
             document.addEventListener('visibilitychange', () => {
                 console.log('[Chat] visibilitychange, hidden =', document.hidden);
                 if (document.hidden) return;
-                // TESTE DE DIAGNÓSTICO: fetch cru, sem passar pelo supabase-js, pra descobrir se
-                // o travamento é do navegador/rede em si (nesse caso isso também trava) ou
-                // específico da lib supabase-js (nesse caso isso responde normal).
-                const testStart = Date.now();
-                fetch(SUPABASE_URL + '/rest/v1/', { headers: { apikey: SUPABASE_ANON_KEY } })
-                    .then(() => console.log('[Chat] TESTE fetch cru OK em', Date.now() - testStart, 'ms'))
-                    .catch(e => console.log('[Chat] TESTE fetch cru FALHOU em', Date.now() - testStart, 'ms', e));
                 if (this._peerId && !document.getElementById('chat-screen').classList.contains('hidden')) {
                     console.log('[Chat] voltou a ficar visível com chat aberto, recarregando e reconectando');
                     this._loadMessages();
@@ -2683,14 +2711,12 @@
         async _loadMessages(silent) {
             let container = document.getElementById('chat-messages');
             try {
-                const { data, error } = await this._withTimeout(
-                    sb.from('messages')
-                        .select('*')
-                        .or(`and(from_id.eq.${Accounts.current.uid},to_id.eq.${this._peerId}),and(from_id.eq.${this._peerId},to_id.eq.${Accounts.current.uid})`)
-                        .order('created_at', { ascending: true })
-                        .limit(200)
+                const myId = Accounts.current.uid;
+                const peerId = this._peerId;
+                const or = `and(from_id.eq.${myId},to_id.eq.${peerId}),and(from_id.eq.${peerId},to_id.eq.${myId})`;
+                const data = await restDirect(
+                    `messages?select=*&or=(${encodeURIComponent(or).replace(/%2C/g, ',')})&order=created_at.asc&limit=200`
                 );
-                if (error) throw error;
                 if (silent) {
                     console.log('[Chat] poll retornou', (data||[]).length, 'mensagens');
                     // Modo polling: só adiciona o que ainda não está na tela, sem apagar nada
@@ -2778,8 +2804,10 @@
         async _markConversationRead() {
             if (!this._peerId || !Accounts.current) return;
             try {
-                await sb.from('messages').update({ read: true })
-                    .eq('from_id', this._peerId).eq('to_id', Accounts.current.uid).eq('read', false);
+                await restDirect(
+                    `messages?from_id=eq.${this._peerId}&to_id=eq.${Accounts.current.uid}&read=eq.false`,
+                    { method: 'PATCH', body: JSON.stringify({ read: true }) }
+                );
                 this._refreshUnreadBadge();
             } catch (err) { console.warn('Erro ao marcar mensagens como lidas:', err); }
         },
@@ -2798,15 +2826,17 @@
                 // pode cair silenciosamente (ex: aba em segundo plano) e não temos garantia de
                 // que ele volte sozinho — sem isso, o próprio remetente ficava sem ver a mensagem
                 // que acabou de mandar.
-                const { data, error } = await this._withTimeout(
-                    sb.from('messages').insert({
+                const rows = await restDirect('messages', {
+                    method: 'POST',
+                    headers: { 'Prefer': 'return=representation' },
+                    body: JSON.stringify({
                         from_id: Accounts.current.uid,
                         to_id: this._peerId,
                         content: text
-                    }).select().single()
-                );
+                    })
+                });
                 console.log('[Chat] insert respondeu');
-                if (error) throw error;
+                const data = rows && rows[0];
                 console.log('[Chat] mensagem inserida com sucesso, id =', data && data.id);
                 if (data) this._appendIfNew(data);
             } catch (err) {
