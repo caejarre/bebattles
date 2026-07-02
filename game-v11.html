@@ -2586,8 +2586,10 @@
             if (this._visibilityHandlerAttached) return;
             this._visibilityHandlerAttached = true;
             document.addEventListener('visibilitychange', () => {
+                console.log('[Chat] visibilitychange, hidden =', document.hidden);
                 if (document.hidden) return;
                 if (this._peerId && !document.getElementById('chat-screen').classList.contains('hidden')) {
+                    console.log('[Chat] voltou a ficar visível com chat aberto, recarregando e reconectando');
                     this._loadMessages();
                     this._subscribeToConversation();
                 }
@@ -2651,6 +2653,7 @@
                     .limit(200);
                 if (error) throw error;
                 if (silent) {
+                    console.log('[Chat] poll retornou', (data||[]).length, 'mensagens');
                     // Modo polling: só adiciona o que ainda não está na tela, sem apagar nada
                     // (evita "piscar" a conversa a cada 3s e preserva o que o usuário está lendo).
                     (data || []).forEach(m => this._appendIfNew(m));
@@ -2710,10 +2713,12 @@
         // Realtime nunca falhar, o que na prática não é garantido.
         _startPolling() {
             this._stopPolling();
+            console.log('[Chat] polling iniciado');
             this._pollInt = setInterval(() => {
-                if (document.hidden) return;
-                if (!this._peerId) return;
-                if (document.getElementById('chat-screen').classList.contains('hidden')) return;
+                if (document.hidden) { console.log('[Chat] poll pulado (aba oculta)'); return; }
+                if (!this._peerId) { console.log('[Chat] poll pulado (sem peerId)'); return; }
+                if (document.getElementById('chat-screen').classList.contains('hidden')) { console.log('[Chat] poll pulado (tela fechada)'); return; }
+                console.log('[Chat] poll rodando...');
                 this._loadMessages(true);
             }, 3000);
         },
@@ -2745,6 +2750,7 @@
             let text = (input.value || '').trim();
             if (!text || !this._peerId || !Accounts.current) return;
             input.value = '';
+            console.log('[Chat] enviando mensagem...', text);
             try {
                 // Desenhamos a bolha aqui mesmo, usando o retorno do insert. Isso não duplica
                 // porque _appendIfNew checa o data-msg-id antes de desenhar — então se o Realtime
@@ -2759,6 +2765,7 @@
                     content: text
                 }).select().single();
                 if (error) throw error;
+                console.log('[Chat] mensagem inserida com sucesso, id =', data && data.id);
                 if (data) this._appendIfNew(data);
             } catch (err) {
                 console.warn('Erro ao enviar mensagem:', err && (err.message || err.details || err.hint) || err);
