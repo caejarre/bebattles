@@ -165,6 +165,9 @@
         .chat-bubble-row.mine .chat-bubble { background:#2563eb; color:white; border-bottom-right-radius:4px; }
         .chat-bubble-row:not(.mine) .chat-bubble { background:#1e293b; color:#e2e8f0; border-bottom-left-radius:4px; }
         .chat-bubble-time { font-size:0.62rem; opacity:0.65; margin-top:3px; text-align:right; }
+        .chat-read-tick { display:inline-block; margin-left:4px; }
+        .chat-read-tick.read { color:#38bdf8; }
+        .chat-read-tick.sent { color:currentColor; opacity:0.65; }
         .chat-input-row { display:flex; gap:8px; padding:12px 14px; border-top:1px solid #1e293b; flex-shrink:0; }
         .chat-input-row input { flex:1; background:#1e293b; border:1px solid #334155; border-radius:20px; padding:10px 16px; color:#e2e8f0; font-size:0.86rem; outline:none; }
         .chat-input-row input:focus { border-color:#38bdf8; }
@@ -2768,10 +2771,12 @@
             let row = document.createElement('div');
             row.className = 'chat-bubble-row' + (mine ? ' mine' : '');
             row.setAttribute('data-msg-id', m.id);
+            if (mine) row.setAttribute('data-read', m.read ? '1' : '0');
             let time = new Date(m.created_at);
             let hh = String(time.getHours()).padStart(2, '0');
             let mm = String(time.getMinutes()).padStart(2, '0');
-            row.innerHTML = `<div class="chat-bubble">${Social._esc(m.content)}<div class="chat-bubble-time">${hh}:${mm}</div></div>`;
+            let tick = mine ? `<span class="chat-read-tick ${m.read ? 'read' : 'sent'}">${m.read ? '✓✓' : '✓'}</span>` : '';
+            row.innerHTML = `<div class="chat-bubble">${Social._esc(m.content)}<div class="chat-bubble-time">${hh}:${mm}${tick}</div></div>`;
             container.appendChild(row);
         },
 
@@ -2785,6 +2790,15 @@
                     if (!isThisConvo) return;
                     this._appendIfNew(m);
                     if (m.from_id === this._peerId) this._markConversationRead();
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, payload => {
+                    // Usado pra refletir a confirmação de leitura (✓✓) assim que o outro lado
+                    // abre a conversa e marca as mensagens como lidas.
+                    let m = payload.new;
+                    let isThisConvo = (m.from_id === this._peerId && m.to_id === Accounts.current.uid) ||
+                                       (m.from_id === Accounts.current.uid && m.to_id === this._peerId);
+                    if (!isThisConvo) return;
+                    this._updateReadTick(m);
                 })
                 .subscribe((status) => {
                     console.log('[Chat] status do canal da conversa:', status);
@@ -2814,12 +2828,28 @@
         },
 
         // Evita desenhar a mesma mensagem duas vezes quando ela chega tanto pelo polling quanto
-        // pelo Realtime (ou por duas rodadas de polling seguidas).
+        // pelo Realtime (ou por duas rodadas de polling seguidas). Se a mensagem já estiver na
+        // tela mas o status de leitura mudou nesse meio tempo, só atualiza o tick.
         _appendIfNew(m) {
             let container = document.getElementById('chat-messages');
-            if (container.querySelector(`[data-msg-id="${m.id}"]`)) return;
+            let existing = container.querySelector(`[data-msg-id="${m.id}"]`);
+            if (existing) { this._updateReadTick(m); return; }
             this._appendBubble(m);
             container.scrollTop = container.scrollHeight;
+        },
+
+        // Atualiza só o ✓/✓✓ de uma bolha própria já desenhada, sem redesenhar a mensagem inteira.
+        _updateReadTick(m) {
+            if (m.from_id !== Accounts.current.uid) return; // só nos importa para mensagens que eu mandei
+            let row = document.querySelector(`#chat-messages [data-msg-id="${m.id}"]`);
+            if (!row) return;
+            if (row.getAttribute('data-read') === (m.read ? '1' : '0')) return;
+            row.setAttribute('data-read', m.read ? '1' : '0');
+            let tick = row.querySelector('.chat-read-tick');
+            if (tick) {
+                tick.textContent = m.read ? '✓✓' : '✓';
+                tick.className = 'chat-read-tick ' + (m.read ? 'read' : 'sent');
+            }
         },
 
         async _markConversationRead() {
