@@ -2684,17 +2684,18 @@
             if (!text || !this._peerId || !Accounts.current) return;
             input.value = '';
             try {
-                const { data, error } = await sb.from('messages').insert({
+                // Não chamamos _appendBubble aqui: a subscrição realtime (_subscribeToConversation)
+                // já escuta INSERT nessa conversa e desenha a bolha assim que o INSERT é confirmado
+                // pelo servidor — inclusive para a própria mensagem enviada. Chamar _appendBubble
+                // aqui também causava a mensagem aparecer duplicada no lado de quem enviou.
+                const { error } = await sb.from('messages').insert({
                     from_id: Accounts.current.uid,
                     to_id: this._peerId,
                     content: text
-                }).select().single();
+                });
                 if (error) throw error;
-                this._appendBubble(data);
-                let container = document.getElementById('chat-messages');
-                container.scrollTop = container.scrollHeight;
             } catch (err) {
-                console.warn('Erro ao enviar mensagem:', err);
+                console.warn('Erro ao enviar mensagem:', err && (err.message || err.details || err.hint) || err);
                 input.value = text;
             }
         },
