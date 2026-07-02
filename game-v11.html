@@ -1833,8 +1833,28 @@
     // resolvia antes. A solução oficial do próprio Supabase é substituir o mecanismo de trava por
     // um que não trava nada (não precisamos de proteção entre abas aqui, então é seguro remover).
     const noOpLock = async (name, acquireTimeout, fn) => { return await fn(); };
+
+    // FIX (causa raiz real do chat travar após trocar de aba): descobrimos, testando com logs
+    // detalhados, que o Realtime (WebSocket) reconecta normalmente quando a aba volta do segundo
+    // plano, mas as chamadas REST comuns (select/insert/update, usadas em toda consulta ao banco)
+    // ficam penduradas para sempre — nem resolvem, nem rejeitam, mesmo com AbortController
+    // aplicado individualmente em cada chamada via .abortSignal(). Isso indica que o problema não
+    // é a Promise em si, e sim a conexão HTTP/2 subjacente que o navegador reaproveita: ela fica
+    // "zumbi" enquanto a aba está oculta, e novas requisições no mesmo socket ficam enfileiradas
+    // atrás dela e nunca são despachadas de verdade. A correção definitiva é forçar cada
+    // requisição do supabase-js a passar por um fetch próprio, com timeout garantido pelo
+    // navegador (não só pelo JS): se a resposta não chegar em 8s, abortamos a conexão de verdade
+    // e o erro sobe normalmente pelo try/catch de quem chamou.
+    const fetchWithTimeout = (url, options = {}) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        const opts = { ...options, signal: controller.signal };
+        return fetch(url, opts).finally(() => clearTimeout(timeoutId));
+    };
+
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-        auth: { lock: noOpLock }
+        auth: { lock: noOpLock },
+        global: { fetch: fetchWithTimeout }
     });
 
     // FIX (rede de segurança): mesmo com a trava desativada acima, mantemos um watchdog bem mais
@@ -2571,23 +2591,15 @@
         _listChannel: null,
         _unreadTotal: 0,
 
-        // FIX (causa raiz real do travamento após trocar de aba): o cliente HTTP usado pelo
-        // supabase-js (fetch) pode deixar uma requisição pendurada pra sempre — nem resolve nem
-        // rejeita — quando ela é iniciada logo depois da aba voltar de segundo plano. O socket
-        // TCP subjacente ficou numa espécie de estado "morto" enquanto a aba estava oculta, e o
-        // navegador não avisa que ele morreu; o fetch só fica esperando para sempre por uma
-        // resposta que nunca chega. O Realtime (WebSocket) tem sua própria lógica de heartbeat e
-        // se recupera sozinho (por isso víamos "SUBSCRIBED" nos logs), mas chamadas REST comuns
-        // (select/insert/update) não têm proteção nenhuma contra isso por padrão. Usamos
-        // AbortController pra cancelar de verdade a requisição travada (não só ignorar a
-        // Promise), senão ela continua ocupando uma conexão e pode travar as chamadas seguintes.
-        _withTimeout(builder, ms = 6000) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), ms);
-            return builder.abortSignal(controller.signal).then(
-                (res) => { clearTimeout(timeoutId); return res; },
-                (err) => { clearTimeout(timeoutId); throw err; }
-            );
+        // O timeout real de rede agora é garantido no nível do fetch customizado passado pro
+        // client (veja fetchWithTimeout, perto da criação do "sb"), que aborta a conexão HTTP de
+        // verdade se ela não responder em 8s. Esse helper aqui é só uma camada extra em JS puro,
+        // caso o timeout do fetch por algum motivo não seja suficiente.
+        _withTimeout(builder, ms = 9000) {
+            return Promise.race([
+                builder,
+                new Promise((_, reject) => setTimeout(() => reject(new Error('timeout (fallback JS)')), ms))
+            ]);
         },
 
         _dmKey(a, b) { return [a, b].sort().join('|'); },
