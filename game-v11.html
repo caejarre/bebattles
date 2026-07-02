@@ -1857,6 +1857,28 @@
         global: { fetch: fetchWithTimeout }
     });
 
+    // FIX (causa raiz real #2): mesmo isolando as chamadas de mensagem do client REST do
+    // supabase-js e evitando `sb.auth.getSession()` no caminho quente, o travamento persistiu de
+    // um jeito que aponta pra algo mais fundo: o client de auth do supabase-js parece manter uma
+    // fila/lock interna própria (além do nosso "noOpLock") que, uma vez emperrada — por exemplo
+    // pelo watchdog de boot ou pela reconexão do Realtime mexendo em estado de sessão — deixa
+    // QUALQUER chamada futura relacionada a auth (getSession, onAuthStateChange, etc.) pendurada
+    // para sempre. Por isso até o polling (que também dependia dessa mesma peça) parou junto.
+    // A correção definitiva é não tocar em NENHUMA API do client de auth do supabase-js no
+    // caminho do chat: lemos o token de acesso direto de onde o próprio supabase-js já o guarda
+    // (localStorage, chave "sb-<ref>-auth-token"), sem passar por nenhuma Promise da lib.
+    function getCachedAccessToken() {
+        try {
+            const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\./)[1];
+            const raw = localStorage.getItem(`sb-${projectRef}-auth-token`);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            return (parsed && parsed.access_token) || null;
+        } catch (e) {
+            return null;
+        }
+    }
+
     // FIX (causa raiz real, confirmada por teste isolado): um fetch cru pro mesmo domínio Supabase
     // responde normalmente mesmo depois da aba voltar do segundo plano — ou seja, a rede e o
     // navegador estão OK. O travamento é específico do client REST (`sb.from(...)`) do
@@ -1868,8 +1890,7 @@
     // atual. Isso contorna o client problemático sem precisar recriá-lo (o que quebraria login,
     // ranking, presença e todo o resto que usa "sb" normalmente).
     async function restDirect(path, options = {}) {
-        const { data: { session } } = await sb.auth.getSession();
-        const token = (session && session.access_token) || SUPABASE_ANON_KEY;
+        const token = getCachedAccessToken() || SUPABASE_ANON_KEY;
         const res = await fetchWithTimeout(SUPABASE_URL + '/rest/v1/' + path, {
             ...options,
             headers: {
