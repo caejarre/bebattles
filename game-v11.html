@@ -3819,6 +3819,38 @@
                     }
                 });
             });
+            // FIX: colisão sólida entre atores — jogadores e monstros não podem mais "atravessar"
+            // uns aos outros. Cada par de atores sobrepostos é separado pelo eixo de menor
+            // penetração: se a sobreposição vertical for menor, um fica em pé sobre o outro
+            // (como se fosse uma plataforma); se a sobreposição horizontal for menor, eles são
+            // empurrados para os lados, metade cada.
+            for(let i = 0; i < actors.length; i++) {
+                for(let j = i + 1; j < actors.length; j++) {
+                    const a = actors[i], b = actors[j];
+                    const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
+                    const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
+                    if(overlapX <= 0 || overlapY <= 0) continue;
+
+                    if(overlapY < overlapX) {
+                        // Resolve verticalmente: quem está mais acima fica em pé sobre o outro.
+                        if(a.y < b.y) {
+                            a.y -= overlapY;
+                            if(a.vy > 0) a.vy = 0;
+                            a.isGrounded = true;
+                        } else {
+                            b.y -= overlapY;
+                            if(b.vy > 0) b.vy = 0;
+                            b.isGrounded = true;
+                        }
+                    } else {
+                        // Resolve horizontalmente: empurra cada um pra fora, metade cada.
+                        const push = overlapX / 2;
+                        if(a.x < b.x) { a.x -= push; b.x += push; }
+                        else { a.x += push; b.x -= push; }
+                    }
+                }
+            }
+
             Engine.enemies.forEach(e => {
                 playersAlive.forEach(p => {
                     if(e.x < p.x+p.w && e.x+e.w > p.x && e.y < p.y+p.h && e.y+e.h > p.y) {
