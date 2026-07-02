@@ -2573,6 +2573,28 @@
 
         _dmKey(a, b) { return [a, b].sort().join('|'); },
 
+        // FIX: o navegador suspende/throttla conexões WebSocket em abas que ficam em segundo
+        // plano (troca de aba, minimizar, etc.), e o canal Realtime do Supabase pode morrer
+        // nesse meio tempo sem disparar nenhum evento de erro visível — é uma desconexão
+        // silenciosa. Como o desenho das mensagens depende inteiramente do Realtime (pra não
+        // duplicar a própria mensagem), um canal morto significa que nada mais aparece pra
+        // nenhum dos dois lados, mesmo que os INSERTs continuem sendo salvos no banco. Aqui,
+        // sempre que a aba volta a ficar visível, recriamos a subscrição do zero (o que força
+        // uma reconexão) e recarregamos o histórico pra pegar qualquer mensagem perdida enquanto
+        // o canal estava morto.
+        _initVisibilityRecovery() {
+            if (this._visibilityHandlerAttached) return;
+            this._visibilityHandlerAttached = true;
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) return;
+                if (this._peerId && !document.getElementById('chat-screen').classList.contains('hidden')) {
+                    this._loadMessages();
+                    this._subscribeToConversation();
+                }
+                if (Accounts.current) this._subscribeToConversationList();
+            });
+        },
+
         openChatWithViewedProfile() {
             if (!Social._viewingProfileId) return;
             let name = document.getElementById('profile-name-lbl').textContent;
@@ -2582,6 +2604,7 @@
 
         async openChat(playerId, name, isOnline) {
             if (!Accounts.current) return;
+            this._initVisibilityRecovery();
             this._peerId = playerId;
             this._peerName = name;
             document.getElementById('profile-screen').classList.add('hidden');
@@ -2824,6 +2847,7 @@
         },
 
         initOnLogin() {
+            this._initVisibilityRecovery();
             this._bumpUnreadBadge();
         },
 
