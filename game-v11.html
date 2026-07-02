@@ -139,6 +139,39 @@
         .btn-accept-invite { background:#15803d; border-color:#166534; color:white; }
         .btn-decline-invite { background:#7f1d1d; border-color:#991b1b; color:#fecaca; }
 
+        /* ═══════════ CHAT (aba Conversas) ═══════════ */
+        .chat-list-item { display:flex; align-items:center; gap:10px; background:#1e293b; border:1px solid #334155; padding:10px 12px; border-radius:8px; cursor:pointer; transition:all 0.15s; }
+        .chat-list-item:hover { background:#334155; }
+        .chat-list-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#38bdf8,#818cf8); display:flex; align-items:center; justify-content:center; font-weight:900; color:#0f172a; flex-shrink:0; position:relative; }
+        .chat-list-avatar .online-dot { position:absolute; bottom:-1px; right:-1px; border:2px solid #1e293b; }
+        .chat-list-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+        .chat-list-name-row { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+        .chat-list-name { font-weight:700; font-size:0.92rem; }
+        .chat-list-time { font-size:0.68rem; color:#64748b; flex-shrink:0; }
+        .chat-list-preview { font-size:0.78rem; color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .chat-list-preview.unread { color:#e2e8f0; font-weight:700; }
+        .chat-unread-badge { background:#22c55e; color:#052e12; font-size:0.65rem; font-weight:800; border-radius:999px; min-width:18px; height:18px; padding:0 5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+        #chat-screen .social-box { width:440px; height:600px; padding:0; overflow:hidden; }
+        .chat-header { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid #1e293b; flex-shrink:0; }
+        .chat-header-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#38bdf8,#818cf8); display:flex; align-items:center; justify-content:center; font-weight:900; color:#0f172a; flex-shrink:0; }
+        .chat-header-info { flex:1; min-width:0; }
+        .chat-header-name { font-weight:700; font-size:0.95rem; }
+        .chat-header-status { font-size:0.72rem; color:#64748b; display:flex; align-items:center; gap:5px; }
+        .chat-messages { flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:8px; background:#0b1220; }
+        .chat-bubble-row { display:flex; }
+        .chat-bubble-row.mine { justify-content:flex-end; }
+        .chat-bubble { max-width:75%; padding:8px 12px; border-radius:14px; font-size:0.86rem; line-height:1.35; word-wrap:break-word; }
+        .chat-bubble-row.mine .chat-bubble { background:#2563eb; color:white; border-bottom-right-radius:4px; }
+        .chat-bubble-row:not(.mine) .chat-bubble { background:#1e293b; color:#e2e8f0; border-bottom-left-radius:4px; }
+        .chat-bubble-time { font-size:0.62rem; opacity:0.65; margin-top:3px; text-align:right; }
+        .chat-input-row { display:flex; gap:8px; padding:12px 14px; border-top:1px solid #1e293b; flex-shrink:0; }
+        .chat-input-row input { flex:1; background:#1e293b; border:1px solid #334155; border-radius:20px; padding:10px 16px; color:#e2e8f0; font-size:0.86rem; outline:none; }
+        .chat-input-row input:focus { border-color:#38bdf8; }
+        .chat-send-btn { width:40px; height:40px; border-radius:50%; background:#2563eb; border:none; color:white; font-size:1.1rem; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+        .chat-send-btn:hover { background:#1d4ed8; }
+        .chat-empty-hint { text-align:center; color:#64748b; font-size:0.85rem; margin:auto; padding:20px; }
+
         #delete-account-confirm-box { background:#1e0a0a; border:2px solid #7f1d1d; }
 
         #touch-controls { position: fixed; inset: 0; z-index: 40; pointer-events: none; display: none; }
@@ -508,6 +541,7 @@
             <div style="display:flex; gap:8px; margin-top:4px;">
                 <button id="social-tab-search" class="active" onclick="Social.switchTab('search')" style="flex:1; padding:8px; font-size:0.85rem;" data-i18n="socialTabSearch">🔎 Buscar</button>
                 <button id="social-tab-following" onclick="Social.switchTab('following')" style="flex:1; padding:8px; font-size:0.85rem;" data-i18n="socialTabFollowing">⭐ Seguindo</button>
+                <button id="social-tab-chats" onclick="Social.switchTab('chats')" style="flex:1; padding:8px; font-size:0.85rem; position:relative;" data-i18n="socialTabChats">💬 Conversas<span id="chats-tab-badge" class="chat-unread-badge hidden" style="position:absolute; top:-6px; right:-6px;">0</span></button>
             </div>
             <div id="social-search-panel">
                 <div class="social-search-row">
@@ -523,6 +557,32 @@
                     <div class="social-empty" data-i18n="socialLoading">Carregando...</div>
                 </div>
             </div>
+            <div id="social-chats-panel" class="hidden">
+                <div id="chats-results" class="social-results">
+                    <div class="social-empty" data-i18n="socialLoading">Carregando...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE CHAT INDIVIDUAL -->
+    <div id="chat-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="social-box" style="display:flex; flex-direction:column;">
+            <div class="chat-header">
+                <button onclick="Chat.closeChat()" style="padding:6px 10px; font-size:0.8rem;" data-i18n="socialBackBtn">✕ Voltar</button>
+                <div class="chat-header-avatar" id="chat-header-avatar">?</div>
+                <div class="chat-header-info">
+                    <div class="chat-header-name" id="chat-header-name">—</div>
+                    <div class="chat-header-status"><span class="online-dot" id="chat-header-dot"></span><span id="chat-header-status-text" data-i18n="socialOffline">Offline</span></div>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="chat-empty-hint" data-i18n="chatLoading">Carregando conversa...</div>
+            </div>
+            <div class="chat-input-row">
+                <input type="text" id="chat-input" placeholder="Digite uma mensagem..." data-i18n-placeholder="chatInputPlaceholder" maxlength="500" onkeydown="if(event.key==='Enter')Chat.sendMessage()">
+                <button class="chat-send-btn" onclick="Chat.sendMessage()">➤</button>
+            </div>
         </div>
     </div>
 
@@ -537,6 +597,7 @@
             <div id="profile-status-lbl"><span class="online-dot" id="profile-status-dot"></span><span id="profile-status-text" data-i18n="socialOffline">Offline</span></div>
             <div class="profile-actions">
                 <button id="btn-follow-toggle" class="btn-follow" onclick="Social.toggleFollow()" style="width:100%; padding:12px;" data-i18n="socialFollowBtn">+ Seguir</button>
+                <button id="btn-open-chat" onclick="Chat.openChatWithViewedProfile()" style="width:100%; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialChatBtn">💬 Conversar</button>
                 <button id="btn-invite-play" class="btn-play-invite" onclick="Social.sendInvite()" style="width:100%;" disabled data-i18n="socialInvitePlayBtn">🎮 Convidar para Jogar</button>
                 <div id="profile-invite-status" style="font-size:0.8rem; color:#94a3b8; min-height:18px;"></div>
             </div>
@@ -2116,19 +2177,26 @@
         switchTab(tab) {
             document.getElementById('social-tab-search').classList.toggle('active', tab === 'search');
             document.getElementById('social-tab-following').classList.toggle('active', tab === 'following');
+            document.getElementById('social-tab-chats').classList.toggle('active', tab === 'chats');
             document.getElementById('social-search-panel').classList.toggle('hidden', tab !== 'search');
             document.getElementById('social-following-panel').classList.toggle('hidden', tab !== 'following');
+            document.getElementById('social-chats-panel').classList.toggle('hidden', tab !== 'chats');
             if (tab === 'following') this.loadFollowing();
             if (tab === 'search') this._followingDirty = true; // força reload ao voltar pra Seguindo
+            if (tab === 'chats') Chat.loadConversations();
         },
 
         // FIX: reaplica os textos dinâmicos do painel social quando o idioma muda,
         // já que esses elementos são gerados via innerHTML/JS e não pegam o data-i18n automático.
         refreshTexts() {
             if (!document.getElementById('search-screen').classList.contains('hidden')) {
-                let activeTab = document.getElementById('social-tab-following').classList.contains('active') ? 'following' : 'search';
-                if (activeTab === 'following') this.loadFollowing(); else if ((document.getElementById('search-input').value||'').trim()) this.doSearch();
+                let activeTab = document.getElementById('social-tab-following').classList.contains('active') ? 'following'
+                    : (document.getElementById('social-tab-chats').classList.contains('active') ? 'chats' : 'search');
+                if (activeTab === 'following') this.loadFollowing();
+                else if (activeTab === 'chats') Chat.loadConversations();
+                else if ((document.getElementById('search-input').value||'').trim()) this.doSearch();
             }
+            if (!document.getElementById('chat-screen').classList.contains('hidden')) Chat.refreshTexts();
             if (this._pendingInvites) this._renderInvitePanel();
             if (this._viewingProfileId) {
                 let dot = document.getElementById('profile-status-dot');
@@ -2444,6 +2512,283 @@
         },
         stopPresenceHeartbeat() {
             if (this._heartbeatInt) { clearInterval(this._heartbeatInt); this._heartbeatInt = null; }
+        }
+    };
+
+    // ═══════════════════════════════════════════════════════════
+    // CHAT (mensagens diretas entre quem você segue, estilo WhatsApp)
+    // Requer uma tabela "messages" no Supabase com as colunas:
+    //   id (uuid, pk, default gen_random_uuid()), from_id (uuid), to_id (uuid),
+    //   content (text), created_at (timestamptz, default now()), read (bool, default false)
+    // Com Realtime ativado pra essa tabela.
+    // ═══════════════════════════════════════════════════════════
+    const Chat = {
+        _peerId: null,
+        _peerName: null,
+        _channel: null,
+        _listChannel: null,
+        _unreadTotal: 0,
+
+        _dmKey(a, b) { return [a, b].sort().join('|'); },
+
+        openChatWithViewedProfile() {
+            if (!Social._viewingProfileId) return;
+            let name = document.getElementById('profile-name-lbl').textContent;
+            let isOnline = document.getElementById('profile-status-dot').classList.contains('on');
+            this.openChat(Social._viewingProfileId, name, isOnline);
+        },
+
+        async openChat(playerId, name, isOnline) {
+            if (!Accounts.current) return;
+            this._peerId = playerId;
+            this._peerName = name;
+            document.getElementById('profile-screen').classList.add('hidden');
+            document.getElementById('search-screen').classList.add('hidden');
+            document.getElementById('chat-header-name').textContent = name || '—';
+            document.getElementById('chat-header-avatar').textContent = (name || '?').charAt(0).toUpperCase();
+            document.getElementById('chat-header-dot').classList.toggle('on', !!isOnline);
+            document.getElementById('chat-header-status-text').textContent = isOnline ? t('socialOnline') : t('socialOffline');
+            document.getElementById('chat-messages').innerHTML = `<div class="chat-empty-hint">${t('chatLoading')}</div>`;
+            document.getElementById('chat-input').value = '';
+            document.getElementById('chat-screen').classList.remove('hidden');
+
+            try {
+                const { data: fresh } = await sb.from('players').select('is_online').eq('id', playerId).single();
+                if (fresh) {
+                    document.getElementById('chat-header-dot').classList.toggle('on', !!fresh.is_online);
+                    document.getElementById('chat-header-status-text').textContent = fresh.is_online ? t('socialOnline') : t('socialOffline');
+                }
+            } catch (e) {}
+
+            await this._loadMessages();
+            this._subscribeToConversation();
+            this._markConversationRead();
+            document.getElementById('chat-input').focus();
+        },
+
+        closeChat() {
+            document.getElementById('chat-screen').classList.add('hidden');
+            if (this._channel) { sb.removeChannel(this._channel); this._channel = null; }
+            this._peerId = null;
+            this._peerName = null;
+            if (!document.getElementById('search-screen').classList.contains('hidden')) this.loadConversations();
+        },
+
+        async _loadMessages() {
+            let container = document.getElementById('chat-messages');
+            try {
+                const { data, error } = await sb
+                    .from('messages')
+                    .select('*')
+                    .or(`and(from_id.eq.${Accounts.current.uid},to_id.eq.${this._peerId}),and(from_id.eq.${this._peerId},to_id.eq.${Accounts.current.uid})`)
+                    .order('created_at', { ascending: true })
+                    .limit(200);
+                if (error) throw error;
+                container.innerHTML = '';
+                if (!data || data.length === 0) {
+                    container.innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
+                    return;
+                }
+                data.forEach(m => this._appendBubble(m));
+                container.scrollTop = container.scrollHeight;
+            } catch (err) {
+                container.innerHTML = `<div class="chat-empty-hint">${t('chatLoadError')}</div>`;
+                console.warn('Erro ao carregar mensagens:', err);
+            }
+        },
+
+        _appendBubble(m) {
+            let container = document.getElementById('chat-messages');
+            let hint = container.querySelector('.chat-empty-hint');
+            if (hint) hint.remove();
+            let mine = m.from_id === Accounts.current.uid;
+            let row = document.createElement('div');
+            row.className = 'chat-bubble-row' + (mine ? ' mine' : '');
+            let time = new Date(m.created_at);
+            let hh = String(time.getHours()).padStart(2, '0');
+            let mm = String(time.getMinutes()).padStart(2, '0');
+            row.innerHTML = `<div class="chat-bubble">${Social._esc(m.content)}<div class="chat-bubble-time">${hh}:${mm}</div></div>`;
+            container.appendChild(row);
+        },
+
+        _subscribeToConversation() {
+            if (this._channel) { sb.removeChannel(this._channel); this._channel = null; }
+            this._channel = sb.channel('dm-' + this._dmKey(Accounts.current.uid, this._peerId))
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+                    let m = payload.new;
+                    let isThisConvo = (m.from_id === this._peerId && m.to_id === Accounts.current.uid) ||
+                                       (m.from_id === Accounts.current.uid && m.to_id === this._peerId);
+                    if (!isThisConvo) return;
+                    let container = document.getElementById('chat-messages');
+                    this._appendBubble(m);
+                    container.scrollTop = container.scrollHeight;
+                    if (m.from_id === this._peerId) this._markConversationRead();
+                })
+                .subscribe();
+        },
+
+        async _markConversationRead() {
+            if (!this._peerId || !Accounts.current) return;
+            try {
+                await sb.from('messages').update({ read: true })
+                    .eq('from_id', this._peerId).eq('to_id', Accounts.current.uid).eq('read', false);
+                this._refreshUnreadBadge();
+            } catch (err) { console.warn('Erro ao marcar mensagens como lidas:', err); }
+        },
+
+        async sendMessage() {
+            let input = document.getElementById('chat-input');
+            let text = (input.value || '').trim();
+            if (!text || !this._peerId || !Accounts.current) return;
+            input.value = '';
+            try {
+                const { data, error } = await sb.from('messages').insert({
+                    from_id: Accounts.current.uid,
+                    to_id: this._peerId,
+                    content: text
+                }).select().single();
+                if (error) throw error;
+                this._appendBubble(data);
+                let container = document.getElementById('chat-messages');
+                container.scrollTop = container.scrollHeight;
+            } catch (err) {
+                console.warn('Erro ao enviar mensagem:', err);
+                input.value = text;
+            }
+        },
+
+        async loadConversations() {
+            let container = document.getElementById('chats-results');
+            if (!Accounts.current) { container.innerHTML = `<div class="social-empty">${t('socialLoginToSeeFollowing')}</div>`; return; }
+            container.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
+            try {
+                const { data: followRows, error: followErr } = await sb
+                    .from('follows')
+                    .select('followed_id')
+                    .eq('follower_id', Accounts.current.uid);
+                if (followErr) throw followErr;
+                if (!followRows || followRows.length === 0) {
+                    container.innerHTML = `<div class="social-empty">${t('chatNoFollowingHint')}</div>`;
+                    this._unreadTotal = 0; this._refreshUnreadBadge();
+                    return;
+                }
+                const ids = followRows.map(r => r.followed_id);
+                const { data: players, error: playersErr } = await sb
+                    .from('players')
+                    .select('id, name, is_online')
+                    .in('id', ids);
+                if (playersErr) throw playersErr;
+                if (!players || players.length === 0) {
+                    container.innerHTML = `<div class="social-empty">${t('chatNoFollowingHint')}</div>`;
+                    this._unreadTotal = 0; this._refreshUnreadBadge();
+                    return;
+                }
+
+                const { data: allMsgs, error: msgErr } = await sb
+                    .from('messages')
+                    .select('*')
+                    .or(`from_id.eq.${Accounts.current.uid},to_id.eq.${Accounts.current.uid}`)
+                    .order('created_at', { ascending: false })
+                    .limit(500);
+                if (msgErr) console.warn('Erro ao carregar mensagens recentes:', msgErr);
+
+                let byPeer = {};
+                (allMsgs || []).forEach(m => {
+                    let peer = m.from_id === Accounts.current.uid ? m.to_id : m.from_id;
+                    if (!byPeer[peer]) byPeer[peer] = { last: m, unread: 0 };
+                    if (m.to_id === Accounts.current.uid && !m.read) byPeer[peer].unread++;
+                });
+
+                let rows = players.map(p => ({ player: p, conv: byPeer[p.id] || null }));
+                rows.sort((a, b) => {
+                    if (a.conv && b.conv) return new Date(b.conv.last.created_at) - new Date(a.conv.last.created_at);
+                    if (a.conv) return -1;
+                    if (b.conv) return 1;
+                    return (a.player.name || '').localeCompare(b.player.name || '');
+                });
+
+                this._unreadTotal = rows.reduce((sum, r) => sum + (r.conv ? r.conv.unread : 0), 0);
+                this._refreshUnreadBadge();
+
+                container.innerHTML = '';
+                rows.forEach(r => {
+                    let p = r.player, conv = r.conv;
+                    let el = document.createElement('div');
+                    el.className = 'chat-list-item';
+                    el.onclick = () => Chat.openChat(p.id, p.name, p.is_online);
+                    let preview = conv ? Social._esc(conv.last.content) : t('chatNoMessagesYet');
+                    let unread = conv ? conv.unread : 0;
+                    let timeStr = '';
+                    if (conv) {
+                        let d = new Date(conv.last.created_at);
+                        timeStr = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                    }
+                    el.innerHTML = `
+                        <div class="chat-list-avatar">${Social._esc((p.name || '?').charAt(0).toUpperCase())}<span class="online-dot ${p.is_online ? 'on' : ''}"></span></div>
+                        <div class="chat-list-info">
+                            <div class="chat-list-name-row">
+                                <span class="chat-list-name">${Social._esc(p.name)}</span>
+                                <span class="chat-list-time">${timeStr}</span>
+                            </div>
+                            <div class="chat-list-preview ${unread > 0 ? 'unread' : ''}">${preview}</div>
+                        </div>
+                        ${unread > 0 ? `<span class="chat-unread-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
+                    `;
+                    container.appendChild(el);
+                });
+
+                this._subscribeToConversationList();
+            } catch (err) {
+                container.innerHTML = `<div class="social-empty">${t('chatLoadError')}</div>`;
+                console.warn('Erro ao carregar conversas:', err);
+            }
+        },
+
+        _subscribeToConversationList() {
+            if (this._listChannel) { sb.removeChannel(this._listChannel); this._listChannel = null; }
+            if (!Accounts.current) return;
+            this._listChannel = sb.channel('dm-list-' + Accounts.current.uid)
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `to_id=eq.${Accounts.current.uid}` }, () => {
+                    let chatsTabVisible = !document.getElementById('search-screen').classList.contains('hidden') &&
+                        document.getElementById('social-tab-chats').classList.contains('active');
+                    if (chatsTabVisible) this.loadConversations();
+                    else this._bumpUnreadBadge();
+                })
+                .subscribe();
+        },
+
+        async _bumpUnreadBadge() {
+            try {
+                const { count } = await sb.from('messages').select('*', { count: 'exact', head: true })
+                    .eq('to_id', Accounts.current.uid).eq('read', false);
+                this._unreadTotal = count || 0;
+                this._refreshUnreadBadge();
+            } catch (e) {}
+        },
+
+        _refreshUnreadBadge() {
+            let badge = document.getElementById('chats-tab-badge');
+            if (!badge) return;
+            badge.textContent = this._unreadTotal > 9 ? '9+' : this._unreadTotal;
+            badge.classList.toggle('hidden', this._unreadTotal <= 0);
+        },
+
+        refreshTexts() {
+            if (this._peerId) {
+                let dot = document.getElementById('chat-header-dot');
+                document.getElementById('chat-header-status-text').textContent = dot.classList.contains('on') ? t('socialOnline') : t('socialOffline');
+            }
+        },
+
+        initOnLogin() {
+            this._bumpUnreadBadge();
+        },
+
+        stopAll() {
+            if (this._channel) { sb.removeChannel(this._channel); this._channel = null; }
+            if (this._listChannel) { sb.removeChannel(this._listChannel); this._listChannel = null; }
+            this._peerId = null;
+            this._unreadTotal = 0;
         }
     };
 
