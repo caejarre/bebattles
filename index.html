@@ -23,11 +23,11 @@
         // Como funciona: este arquivo (index.html) é o único com nome fixo, então é o único
         // que o navegador/CDN pode teimar em manter em cache. Mas ele não contém o jogo —
         // ele só descobre qual é a versão mais recente e REDIRECIONA pra ela. Como o nome do
-        // arquivo do jogo muda a cada atualização (game-v1.html, game-v11.html, ...), uma URL
+        // arquivo do jogo muda a cada atualização (game-v1.html, game-v12.html, ...), uma URL
         // nova NUNCA está em cache, então é sempre baixada do zero, sem exceção.
         //
         // COMO ATUALIZAR O JOGO (toda vez que for subir uma mudança nova):
-        //   1. Sobe o arquivo novo do jogo com um nome novo, ex: game-v11.html, game-v3.html...
+        //   1. Sobe o arquivo novo do jogo com um nome novo, ex: game-v12.html, game-v3.html...
         //      (nunca reaproveite um nome antigo)
         //   2. Troca o número em CURRENT_VERSION aqui embaixo pro novo arquivo
         //   3. Sobe este index.html também (ele é pequeno, sempre pode subir de novo)
