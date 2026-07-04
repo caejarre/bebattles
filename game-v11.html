@@ -69,6 +69,30 @@
 
         #game-hud { position: absolute; top: 0; inset-x: 0; height: 90px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; z-index: 5; font-family: monospace; }
         .hud-player { background: rgba(15,23,42,0.85); border: 1px solid rgba(51,65,85,0.5); padding: 10px 15px; border-radius: 8px; width: 320px; backdrop-filter: blur(4px); }
+        .hud-player-compact { width: 230px; padding: 7px 11px; }
+        .hud-player-compact .hud-meta { font-size: 0.75rem; margin-bottom: 3px; }
+        .hud-player-compact .hud-row-bottom { font-size: 0.7rem; }
+        .lobby-player-chip { background: rgba(30,41,59,0.7); border: 1px solid #334155; border-radius: 6px; padding: 6px 10px; font-size: 0.82rem; color: #e2e8f0; }
+        .lobby-player-chip-empty { color: #475569; font-style: italic; }
+        #chat-sidebar-panel.collapsed { width: 0 !important; padding-left: 0 !important; padding-right: 0 !important; border-left: none !important; }
+        .cosmetic-swatch { width: 42px; height: 42px; border-radius: 8px; border: 2px solid #334155; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); position: relative; }
+        .cosmetic-swatch.selected { border-color: #38bdf8; box-shadow: 0 0 0 2px rgba(56,189,248,0.4); }
+        .cosmetic-skin-btn { padding: 8px 10px; border-radius: 8px; border: 2px solid #334155; cursor: pointer; background: #1e293b; color: #cbd5e1; font-size: 0.75rem; font-weight: 700; }
+        .cosmetic-skin-btn.selected { border-color: #38bdf8; color: #38bdf8; }
+        .achievement-card { background: rgba(30,41,59,0.5); border: 1px solid #334155; border-radius: 10px; padding: 12px 14px; }
+        .achievement-card.completed { border-color: #b45309; background: rgba(120,53,15,0.25); }
+        .achievement-card .ach-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+        .achievement-card .ach-name { font-weight:800; font-size:0.88rem; color:#e2e8f0; }
+        .achievement-card.completed .ach-name { color:#fcd34d; }
+        .achievement-card .ach-xp { font-size:0.72rem; color:#eab308; font-weight:700; white-space:nowrap; }
+        .achievement-card .ach-desc { font-size:0.76rem; color:#94a3b8; margin-bottom:8px; }
+        .achievement-card .ach-bar-bg { height:7px; background:#0f172a; border-radius:4px; overflow:hidden; }
+        .achievement-card .ach-bar-fill { height:100%; background:linear-gradient(to right,#38bdf8,#818cf8); }
+        .achievement-card.completed .ach-bar-fill { background:linear-gradient(to right,#eab308,#fbbf24); }
+        .achievement-card .ach-progress-text { font-size:0.68rem; color:#64748b; margin-top:3px; text-align:right; }
+        #toast-stack { position:absolute; top:20px; left:50%; transform:translateX(-50%); z-index:60; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
+        .game-toast { background:rgba(15,23,42,0.95); border:1px solid #b45309; color:#fcd34d; padding:10px 18px; border-radius:10px; font-weight:700; font-size:0.85rem; box-shadow:0 4px 15px rgba(0,0,0,0.4); animation: toast-in-out 3.2s ease forwards; }
+        @keyframes toast-in-out { 0%{opacity:0; transform:translateY(-12px);} 10%{opacity:1; transform:translateY(0);} 85%{opacity:1;} 100%{opacity:0; transform:translateY(-8px);} }
         .hud-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; font-weight: bold; }
         .bar-container { background: #334155; height: 10px; border-radius: 4px; overflow: hidden; margin-bottom: 6px; border: 1px solid #1e293b; }
         .bar-fill { height: 100%; width: 100%; transition: width 0.1s ease; }
@@ -179,6 +203,14 @@
 
         #touch-controls { position: fixed; inset: 0; z-index: 40; pointer-events: none; display: none; }
         #touch-controls.active { display: block; }
+        /* FIX: o jogo é fixo em formato paisagem (1280x720). Em celular na vertical o container
+           encolhe demais pra caber na tela (só sobra a largura como limite de escala), deixando
+           tudo minúsculo e difícil de jogar. Como isso só afeta telas com dedo (pointer: coarse),
+           um notebook com touchscreen usado deitado continua sem ver esse aviso. */
+        #rotate-hint { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,0.97); color: #f8fafc; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; gap: 14px; }
+        @media (pointer: coarse) and (orientation: portrait) {
+            #rotate-hint { display: flex; }
+        }
         .tc-btn { position: absolute; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; border-radius: 50%; background: rgba(30,41,59,0.55); border: 2px solid rgba(148,163,184,0.45); color: #f1f5f9; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; user-select: none; }
         .tc-btn:active { background: rgba(56,189,248,0.5); border-color: #38bdf8; }
         #tc-left { left: calc(16px + env(safe-area-inset-left)); bottom: calc(76px + env(safe-area-inset-bottom)); width: 64px; height: 64px; }
@@ -228,6 +260,7 @@
 </div>
 
 <div id="game-container">
+    <div id="toast-stack"></div>
     
     <div id="game-hud">
         <div id="hud-p1" class="hud-player">
@@ -253,22 +286,49 @@
             <div id="chest-alert" onclick="Engine.tryOpenChest()" data-i18n="chestAlert">Pressione [B] para Abrir o Baú</div>
         </div>
 
-        <div id="hud-p2" class="hud-player hidden">
-            <div class="hud-meta">
-                <span id="hud-p2-name" style="color:#ef4444"></span>
-                <span id="lbl-p2-lives">❤❤❤</span>
-            </div>
-            <div class="bar-container"><div id="bar-p2-hp" class="bar-fill bar-hp"></div></div>
-            <div class="bar-container" style="height:6px;"><div id="bar-p2-mp" class="bar-fill bar-mp"></div></div>
-            <div class="hud-row-bottom">
-                <span id="lbl-p2-gold">Ganhos: $0</span>
-                <div id="inv-p2" class="hud-inventory">
-                    <div class="hud-slot empty" onclick="Engine.useItemViaClick(2,'potion')" style="pointer-events:auto; cursor:pointer;"></div>
-                    <div class="hud-slot empty" onclick="Engine.useItemViaClick(2,'shield')" style="pointer-events:auto; cursor:pointer;"></div>
+        <div id="hud-guests" style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+            <div id="hud-p2" class="hud-player hud-player-compact hidden">
+                <div class="hud-meta">
+                    <span id="hud-p2-name" style="color:#ef4444"></span>
+                    <span id="lbl-p2-lives">❤❤❤</span>
                 </div>
-                <span id="lbl-p2-weapon" style="font-size:0.75rem; color:#94a3b8;">Arma: Padrão</span>
+                <div class="bar-container"><div id="bar-p2-hp" class="bar-fill bar-hp"></div></div>
+                <div class="hud-row-bottom">
+                    <span id="lbl-p2-gold">Ganhos: $0</span>
+                    <div id="inv-p2" class="hud-inventory">
+                        <div class="hud-slot empty" onclick="Engine.useItemViaClick(2,'potion')" style="pointer-events:auto; cursor:pointer;"></div>
+                        <div class="hud-slot empty" onclick="Engine.useItemViaClick(2,'shield')" style="pointer-events:auto; cursor:pointer;"></div>
+                    </div>
+                </div>
             </div>
-            <div class="hud-item-legend" id="legend-p2" data-i18n="hudLegendP2">[8] Cura um pouco de vida • [9] Escudo (fica invulnerável)</div>
+            <div id="hud-p3" class="hud-player hud-player-compact hidden">
+                <div class="hud-meta">
+                    <span id="hud-p3-name" style="color:#eab308"></span>
+                    <span id="lbl-p3-lives">❤❤❤</span>
+                </div>
+                <div class="bar-container"><div id="bar-p3-hp" class="bar-fill bar-hp"></div></div>
+                <div class="hud-row-bottom">
+                    <span id="lbl-p3-gold">Ganhos: $0</span>
+                    <div id="inv-p3" class="hud-inventory">
+                        <div class="hud-slot empty" onclick="Engine.useItemViaClick(3,'potion')" style="pointer-events:auto; cursor:pointer;"></div>
+                        <div class="hud-slot empty" onclick="Engine.useItemViaClick(3,'shield')" style="pointer-events:auto; cursor:pointer;"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="hud-p4" class="hud-player hud-player-compact hidden">
+                <div class="hud-meta">
+                    <span id="hud-p4-name" style="color:#a855f7"></span>
+                    <span id="lbl-p4-lives">❤❤❤</span>
+                </div>
+                <div class="bar-container"><div id="bar-p4-hp" class="bar-fill bar-hp"></div></div>
+                <div class="hud-row-bottom">
+                    <span id="lbl-p4-gold">Ganhos: $0</span>
+                    <div id="inv-p4" class="hud-inventory">
+                        <div class="hud-slot empty" onclick="Engine.useItemViaClick(4,'potion')" style="pointer-events:auto; cursor:pointer;"></div>
+                        <div class="hud-slot empty" onclick="Engine.useItemViaClick(4,'shield')" style="pointer-events:auto; cursor:pointer;"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -296,7 +356,7 @@
     <!-- TELA DE LOGIN / REGISTRO -->
     <div id="auth-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
-            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">v1.5</span></div>
+            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 3.0</span></div>
             <div class="auth-sub" data-i18n="authSubtitle">Horizon Survival Tournament 2026</div>
             <div class="auth-tabs" id="auth-tabs">
                 <button id="tab-login" class="active" onclick="Accounts.showTab('login')" data-i18n="authTabLogin">🔑 Entrar</button>
@@ -347,7 +407,7 @@
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">v1.5</span></h1>
+                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 3.0</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
                         <div id="invite-bell" onclick="Social.toggleInvitePanel()">
@@ -358,13 +418,21 @@
                             </div>
                         </div>
                         <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
+                        <button onclick="Engine.openAchievements()" style="padding:8px 12px; font-size:0.82rem; background:#78350f; border-color:#b45309; color:#fcd34d;" data-i18n="achievementsBtn">🏆 Conquistas</button>
                         <button onclick="Engine.openSettings()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="settingsBtn">⚙</button>
                     </div>
                 </div>
                 <p data-i18n="tagline">Horizon Survival Tournament — Cosmic Engine 2026</p>
-                <div class="user-bar">
+                <div class="user-bar" style="flex-wrap:wrap; row-gap:8px;">
                     <span id="lbl-logged-in-user"></span>
-                    <button onclick="Engine.logoutAccount()" style="padding:3px 10px; font-size:0.74rem; background:transparent; border-color:#334155; color:#64748b;" data-i18n="logoutAccountBtn">Sair da Conta</button>
+                    <div id="level-badge" onclick="Engine.openAchievements()" style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-left:10px;">
+                        <span id="lbl-level-badge" style="background:#1e293b; border:1px solid #b45309; color:#fcd34d; font-weight:800; font-size:0.75rem; padding:3px 9px; border-radius:20px;">Nv. 1</span>
+                        <div style="width:110px; height:7px; background:#1e293b; border-radius:4px; overflow:hidden;">
+                            <div id="bar-xp" style="height:100%; width:0%; background:linear-gradient(to right,#eab308,#fbbf24);"></div>
+                        </div>
+                        <span id="lbl-xp-text" style="font-size:0.68rem; color:#64748b;">0/100 XP</span>
+                    </div>
+                    <button onclick="Engine.logoutAccount()" style="padding:3px 10px; font-size:0.74rem; background:transparent; border-color:#334155; color:#64748b; margin-left:auto;" data-i18n="logoutAccountBtn">Sair da Conta</button>
                 </div>
             </div>
 
@@ -415,16 +483,60 @@
 
         <div class="menu-side-panel">
             <div>
-                <div class="section-title" style="margin-bottom:8px;" data-i18n="shopTitle">Arsenal de Upgrades</div>
+                <div class="section-title" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span data-i18n="shopTitle">Arsenal de Upgrades</span>
+                    <span id="shop-wallet-display" style="color:#eab308; font-weight:800; font-size:0.95rem;">$100</span>
+                </div>
                 <div id="menu-shop-items" class="shop-catalog"></div>
             </div>
 
             <hr style="border:none; border-top:1px solid #1e293b;">
+            <div>
+                <div class="section-title" style="margin-bottom:8px;" data-i18n="cosmeticsTitle">Aparência do Personagem</div>
+                <div style="font-size:0.72rem; color:#64748b; margin-bottom:6px;" data-i18n="cosmeticsColorLabel">Cor</div>
+                <div id="cosmetic-colors" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;"></div>
+                <div style="font-size:0.72rem; color:#64748b; margin-bottom:6px;" data-i18n="cosmeticsSkinLabel">Visual</div>
+                <div id="cosmetic-skins" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+            </div>
 
             <div>
                 <div class="section-title" data-i18n="sessionLogTitle">Registro de Sessão</div>
                 <div id="ranking-container" class="ranking-box"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Chat lateral fixo no menu (item pedido): fica sempre visível junto com a tela de menu,
+         nunca aparece na tela de login, e pode ser recolhido/expandido pela setinha. -->
+    <div id="chat-sidebar" class="hidden" style="position:absolute; top:0; right:0; height:100%; z-index:15; display:flex; align-items:stretch; pointer-events:none;">
+        <button id="chat-sidebar-toggle" onclick="Engine.toggleChatSidebar()" style="pointer-events:auto; align-self:center; width:22px; height:70px; background:#1e293b; border:1px solid #334155; border-right:none; border-radius:8px 0 0 8px; color:#38bdf8; cursor:pointer; font-size:0.85rem; padding:0;">◀</button>
+        <div id="chat-sidebar-panel" style="pointer-events:auto; width:250px; background:rgba(15,23,42,0.97); border-left:1px solid #1e293b; display:flex; flex-direction:column; padding:14px 12px; box-sizing:border-box; overflow:hidden; transition:width 0.2s ease, padding 0.2s ease;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; white-space:nowrap;">
+                <h3 style="margin:0; font-size:0.95rem; color:#38bdf8;" data-i18n="sidebarChatTitle">💬 Conversas</h3>
+                <button onclick="Social.openSearch()" style="padding:4px 8px; font-size:0.68rem;" data-i18n="sidebarChatSeeAllBtn">Ver tudo</button>
+            </div>
+            <div id="sidebar-chats-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+                <div class="social-empty" data-i18n="socialLoading">Carregando...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TELA DE CONQUISTAS -->
+    <div id="achievements-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="lobby-box" style="max-width:520px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 style="font-size:1.35rem; color:#fcd34d; margin:0;" data-i18n="achievementsTitle">🏆 Conquistas</h2>
+                <button onclick="Engine.closeAchievements()" style="padding:7px 13px; font-size:0.83rem;" data-i18n="lobbyBackBtn">✕ Voltar</button>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;">
+                <span id="ach-level-badge" style="background:#1e293b; border:1px solid #b45309; color:#fcd34d; font-weight:800; font-size:0.85rem; padding:5px 12px; border-radius:20px;">Nv. 1</span>
+                <div style="flex:1; height:9px; background:#1e293b; border-radius:5px; overflow:hidden;">
+                    <div id="ach-bar-xp" style="height:100%; width:0%; background:linear-gradient(to right,#eab308,#fbbf24);"></div>
+                </div>
+                <span id="ach-xp-text" style="font-size:0.72rem; color:#94a3b8; white-space:nowrap;">0/100 XP</span>
+            </div>
+            <p style="font-size:0.78rem; color:#64748b; margin:2px 0 0;" data-i18n="achievementsHint">Ganhe experiência jogando e completando desafios para subir de nível.</p>
+            <div id="achievements-list" style="display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; margin-top:4px;"></div>
         </div>
     </div>
 
@@ -510,6 +622,12 @@
                 <button onclick="Engine.closeOnlineLobby()" style="padding:7px 13px; font-size:0.83rem;" data-i18n="lobbyBackBtn">✕ Voltar</button>
             </div>
             <div id="lobby-create-section">
+                <div style="font-size:0.78rem; color:#94a3b8; margin-bottom:6px;" data-i18n="lobbyPlayerCountLabel">Quantos jogadores no total?</div>
+                <div class="btn-group" id="lobby-player-count-group" style="margin-bottom:12px;">
+                    <button class="lobby-count-btn active" data-count="2" onclick="OnlineSync.setDesiredPlayers(2)" style="flex:1;">2</button>
+                    <button class="lobby-count-btn" data-count="3" onclick="OnlineSync.setDesiredPlayers(3)" style="flex:1;">3</button>
+                    <button class="lobby-count-btn" data-count="4" onclick="OnlineSync.setDesiredPlayers(4)" style="flex:1;">4</button>
+                </div>
                 <button onclick="OnlineSync.createRoom()" id="btn-create-room" style="width:100%; padding:13px; background:linear-gradient(to right,#10b981,#059669); color:white; border:none; font-size:1rem; font-weight:800; border-radius:8px; cursor:pointer;" data-i18n="lobbyCreateBtn">➕ CRIAR SALA</button>
             </div>
             <div id="lobby-room-display" class="hidden">
@@ -518,9 +636,11 @@
                     <div class="lobby-code" id="room-code-text" data-code="">--------</div>
                 </div>
                 <div class="lobby-status" id="lobby-status-text" data-i18n="lobbyWaiting">Aguardando amigo...</div>
+                <div id="lobby-players-list" style="display:flex; flex-direction:column; gap:6px; margin:10px 0;"></div>
+                <button onclick="OnlineSync.hostStartNow()" id="btn-lobby-start-now" class="hidden" style="width:100%; padding:12px; background:linear-gradient(to right,#0ea5e9,#0284c7); color:white; border:none; font-size:0.95rem; font-weight:800; border-radius:8px; cursor:pointer; margin-bottom:4px;" data-i18n="lobbyStartNowBtn">▶ COMEÇAR AGORA</button>
             </div>
-            <div class="lobby-divider" data-i18n="lobbyOrJoin">ou entre em uma sala existente</div>
-            <div style="display:flex; gap:8px;">
+            <div id="lobby-divider-row" class="lobby-divider" data-i18n="lobbyOrJoin">ou entre em uma sala existente</div>
+            <div id="lobby-join-row" style="display:flex; gap:8px;">
                 <input class="auth-input" id="join-code-input" type="text" placeholder="Cole o código da sala aqui..." data-i18n-placeholder="lobbyJoinPlaceholder" maxlength="40" style="flex:1; letter-spacing:1px; font-size:0.85rem;">
                 <button onclick="OnlineSync.joinRoom()" id="btn-join-room" style="padding:10px 16px; background:#3b82f6; color:white; border:none; border-radius:6px; font-weight:700; white-space:nowrap; cursor:pointer;" data-i18n="lobbyJoinBtn">ENTRAR</button>
             </div>
@@ -531,6 +651,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- TELA DE BUSCA DE JOGADORES -->
     <div id="search-screen" class="screen hidden" style="justify-content:center; align-items:center;">
@@ -613,12 +734,17 @@
 <div id="touch-controls">
     <button class="tc-btn" id="tc-left" onpointerdown="Engine.touchKey('a',true,event)" onpointerup="Engine.touchKey('a',false,event)" onpointercancel="Engine.touchKey('a',false,event)" onpointerleave="Engine.touchKey('a',false,event)">◀</button>
     <button class="tc-btn" id="tc-right" onpointerdown="Engine.touchKey('d',true,event)" onpointerup="Engine.touchKey('d',false,event)" onpointercancel="Engine.touchKey('d',false,event)" onpointerleave="Engine.touchKey('d',false,event)">▶</button>
-    <button class="tc-btn" id="tc-potion" onpointerdown="Engine.useItemViaClick(1,'potion')">🧪</button>
-    <button class="tc-btn" id="tc-shield" onpointerdown="Engine.useItemViaClick(1,'shield')">🛡</button>
-    <button class="tc-btn" id="tc-dash" onpointerdown="Engine.triggerDash(1)">DASH</button>
+    <button class="tc-btn" id="tc-potion" onpointerdown="Engine.useItemViaClick(Engine.mySlot,'potion')">🧪</button>
+    <button class="tc-btn" id="tc-shield" onpointerdown="Engine.useItemViaClick(Engine.mySlot,'shield')">🛡</button>
+    <button class="tc-btn" id="tc-dash" onpointerdown="Engine.triggerDash(Engine.mySlot)">DASH</button>
     <button class="tc-btn" id="tc-jump" onpointerdown="Engine.touchKey('w',true,event)" onpointerup="Engine.touchKey('w',false,event)" onpointercancel="Engine.touchKey('w',false,event)" onpointerleave="Engine.touchKey('w',false,event)">⤒</button>
     <button class="tc-btn" id="tc-special" onpointerdown="Engine.touchKey('g',true,event)" onpointerup="Engine.touchKey('g',false,event)" onpointercancel="Engine.touchKey('g',false,event)" onpointerleave="Engine.touchKey('g',false,event)">✦</button>
     <button class="tc-btn" id="tc-attack" onpointerdown="Engine.touchKey('f',true,event)" onpointerup="Engine.touchKey('f',false,event)" onpointercancel="Engine.touchKey('f',false,event)" onpointerleave="Engine.touchKey('f',false,event)">⚔</button>
+</div>
+
+<div id="rotate-hint">
+    <div style="font-size:3rem;">🔄</div>
+    <div style="font-size:1.1rem; font-weight:700;" data-i18n="rotateDeviceHint">Gire seu aparelho para jogar na horizontal</div>
 </div>
 
 <script>
@@ -671,6 +797,7 @@
     const I18N = {
         'pt-BR': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
+            rotateDeviceHint: "Gire seu aparelho para jogar na horizontal",
             settingsBtn: "⚙",
             arenaStructureTitle: "Estrutura de Arena",
             worldLabel: "Mundo Aberto", worldOff: "DESATIVADO", worldOn: "INFINITO (SOLO)",
@@ -719,6 +846,21 @@
             deathTitle: "SISTEMA APAGADO", deathDesc: "Você pereceu perante os monstros.",
             p2WinsTitle: "JOGADOR 2 VENCEU!", p2WinsDesc: "O Jogador 2 destruiu seu rival em combate.",
             p1WinsTitle: "JOGADOR 1 VENCEU!", p1WinsDesc: "O Jogador 1 destruiu seu rival em combate.",
+            genericWinsTitle: "{name} VENCEU!", genericWinsDesc: "{name} destruiu os rivais em combate.",
+            guestMatchEndDesc: "A partida terminou.",
+            cosmeticsTitle: "Aparência do Personagem", cosmeticsColorLabel: "Cor", cosmeticsSkinLabel: "Visual",
+            achievementsBtn: "🏆 Conquistas", levelBadgeLabel: "Nv.", achievementsTitle: "🏆 Conquistas",
+            achievementsHint: "Ganhe experiência jogando e completando desafios para subir de nível.",
+            levelUpToast: "Você subiu para o nível {level}!", achievementUnlockedToast: "Conquista desbloqueada: {name}",
+            ach_first_win_name: "Primeira Vitória", ach_first_win_desc: "Vença 1 partida.",
+            ach_veteran_name: "Veterano", ach_veteran_desc: "Jogue 10 partidas.",
+            ach_gold_hunter_name: "Caçador de Ouro", ach_gold_hunter_desc: "Ganhe 1000 de ouro no total.",
+            ach_exterminator_name: "Exterminador", ach_exterminator_desc: "Elimine 200 inimigos no total.",
+            ach_collector_name: "Colecionador", ach_collector_desc: "Desbloqueie 3 cores ou visuais na loja.",
+            ach_champion_name: "Campeão", ach_champion_desc: "Vença 10 partidas.",
+            ach_legend_name: "Lenda", ach_legend_desc: "Alcance o nível 10.",
+            cosColor_default: "Padrão do Arquétipo", cosColor_gold: "Dourado", cosColor_purple: "Roxo", cosColor_cyan: "Ciano", cosColor_pink: "Rosa", cosColor_white: "Branco", cosColor_obsidian: "Obsidiana",
+            cosSkin_default: "Padrão", cosSkin_stripes: "Listras", cosSkin_glow: "Brilho", cosSkin_stars: "Estrelado", cosSkin_flame: "Chamas",
             netRewardLabel: "Recompensas", playerLabel: "Jogador",
             modeLabelOpenWorld: "MUNDO ABERTO", modeLabelBoss: "Chefe Nível", modeLabelWave: "Onda",
             hideoutAlertTitle: "Esconderijo Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Sair: E",
@@ -739,6 +881,7 @@
             socialInviteCalledYou: "te chamou pra jogar", socialAcceptBtn: "Aceitar", socialDeclineBtn: "Recusar",
             socialOnlineBtn: "🌐 Online",
             socialTabChats: "💬 Conversas",
+            sidebarChatTitle: "💬 Conversas", sidebarChatSeeAllBtn: "Ver tudo",
             socialChatBtn: "💬 Conversar",
             chatLoading: "Carregando conversa...", chatEmptyHint: "Nenhuma mensagem ainda. Diga oi!",
             chatLoadError: "Erro ao carregar mensagens. Tente de novo.",
@@ -747,6 +890,7 @@
             chatNoMessagesYet: "Nenhuma mensagem ainda",
             lobbyTitle: "🌐 Jogo Online", lobbyBackBtn: "✕ Voltar",
             lobbyCreateBtn: "➕ CRIAR SALA", lobbyCodeLabel: "Código da Sala (clique para copiar)",
+            lobbyPlayerCountLabel: "Quantos jogadores no total?", lobbyStartNowBtn: "▶ COMEÇAR AGORA", lobbyWaitingCount: "Aguardando jogadores",
             lobbyWaiting: "Aguardando amigo...", lobbyOrJoin: "ou entre em uma sala existente",
             lobbyJoinPlaceholder: "Cole o código da sala aqui...", lobbyJoinBtn: "ENTRAR",
             lobbyFooterHint: "Requer conexão com a internet &bull; WebRTC via PeerJS &bull; Funciona no GitHub Pages",
@@ -774,7 +918,8 @@
             deleteAccountWarning: "Isso apaga sua conta, progresso, seguidores e convites para sempre. Não tem como desfazer.",
             deleteAccountConfirmTitle: "Tem certeza? Isso não pode ser desfeito.",
             deleteAccountTypeLabel: "Digite APAGAR para confirmar:",
-            deleteAccountInputPlaceholder: "Digite APAGAR",
+            deleteAccountInputPlaceholder: "Digite APAGAR", deleteConfirmWord: "APAGAR",
+            deleteConfirmMismatchMsg: "Digite exatamente \"{word}\" para confirmar.", deletingAccountMsg: "Apagando sua conta, aguarde...", deleteAccountErrorMsg: "Erro ao apagar conta: {err}",
             cancelBtn: "Cancelar",
             deleteForeverBtn: "Apagar de vez",
             authSubtitle: "Horizon Survival Tournament 2026",
@@ -814,6 +959,7 @@
         },
         'en': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
+            rotateDeviceHint: "Rotate your device to play in landscape",
             settingsBtn: "⚙", arenaStructureTitle: "Arena Structure",
             worldLabel: "Open World", worldOff: "DISABLED", worldOn: "INFINITE (SOLO)",
             combatModeTitle: "Combat Mode",
@@ -860,6 +1006,21 @@
             deathTitle: "SYSTEM OFFLINE", deathDesc: "You perished before the monsters.",
             p2WinsTitle: "PLAYER 2 WINS!", p2WinsDesc: "Player 2 destroyed their rival in combat.",
             p1WinsTitle: "PLAYER 1 WINS!", p1WinsDesc: "Player 1 destroyed their rival in combat.",
+            genericWinsTitle: "{name} WINS!", genericWinsDesc: "{name} destroyed the rivals in combat.",
+            guestMatchEndDesc: "The match has ended.",
+            cosmeticsTitle: "Character Appearance", cosmeticsColorLabel: "Color", cosmeticsSkinLabel: "Look",
+            achievementsBtn: "🏆 Achievements", levelBadgeLabel: "Lv.", achievementsTitle: "🏆 Achievements",
+            achievementsHint: "Earn experience by playing and completing challenges to level up.",
+            levelUpToast: "You leveled up to level {level}!", achievementUnlockedToast: "Achievement unlocked: {name}",
+            ach_first_win_name: "First Victory", ach_first_win_desc: "Win 1 match.",
+            ach_veteran_name: "Veteran", ach_veteran_desc: "Play 10 matches.",
+            ach_gold_hunter_name: "Gold Hunter", ach_gold_hunter_desc: "Earn 1000 gold in total.",
+            ach_exterminator_name: "Exterminator", ach_exterminator_desc: "Defeat 200 enemies in total.",
+            ach_collector_name: "Collector", ach_collector_desc: "Unlock 3 colors or looks in the shop.",
+            ach_champion_name: "Champion", ach_champion_desc: "Win 10 matches.",
+            ach_legend_name: "Legend", ach_legend_desc: "Reach level 10.",
+            cosColor_default: "Archetype Default", cosColor_gold: "Gold", cosColor_purple: "Purple", cosColor_cyan: "Cyan", cosColor_pink: "Pink", cosColor_white: "White", cosColor_obsidian: "Obsidian",
+            cosSkin_default: "Default", cosSkin_stripes: "Stripes", cosSkin_glow: "Glow", cosSkin_stars: "Starry", cosSkin_flame: "Flame",
             netRewardLabel: "Rewards", playerLabel: "Player",
             modeLabelOpenWorld: "OPEN WORLD", modeLabelBoss: "Boss Level", modeLabelWave: "Wave",
             hideoutAlertTitle: "Secret Hideout", hideoutAlertEnter: "Enter: E", hideoutHudExit: "Exit: E",
@@ -880,6 +1041,7 @@
             socialInviteCalledYou: "invited you to play", socialAcceptBtn: "Accept", socialDeclineBtn: "Decline",
             socialOnlineBtn: "🌐 Online",
             socialTabChats: "💬 Chats",
+            sidebarChatTitle: "💬 Chats", sidebarChatSeeAllBtn: "See all",
             socialChatBtn: "💬 Chat",
             chatLoading: "Loading conversation...", chatEmptyHint: "No messages yet. Say hi!",
             chatLoadError: "Error loading messages. Please try again.",
@@ -888,6 +1050,7 @@
             chatNoMessagesYet: "No messages yet",
             lobbyTitle: "🌐 Online Game", lobbyBackBtn: "✕ Back",
             lobbyCreateBtn: "➕ CREATE ROOM", lobbyCodeLabel: "Room Code (click to copy)",
+            lobbyPlayerCountLabel: "How many players in total?", lobbyStartNowBtn: "▶ START NOW", lobbyWaitingCount: "Waiting for players",
             lobbyWaiting: "Waiting for friend...", lobbyOrJoin: "or join an existing room",
             lobbyJoinPlaceholder: "Paste the room code here...", lobbyJoinBtn: "JOIN",
             lobbyFooterHint: "Requires internet connection &bull; WebRTC via PeerJS &bull; Works on GitHub Pages",
@@ -915,7 +1078,8 @@
             deleteAccountWarning: "This permanently deletes your account, progress, followers and invites. This cannot be undone.",
             deleteAccountConfirmTitle: "Are you sure? This cannot be undone.",
             deleteAccountTypeLabel: "Type DELETE to confirm:",
-            deleteAccountInputPlaceholder: "Type DELETE",
+            deleteAccountInputPlaceholder: "Type DELETE", deleteConfirmWord: "DELETE",
+            deleteConfirmMismatchMsg: "Type exactly \"{word}\" to confirm.", deletingAccountMsg: "Deleting your account, please wait...", deleteAccountErrorMsg: "Error deleting account: {err}",
             cancelBtn: "Cancel",
             deleteForeverBtn: "Delete Permanently",
             authSubtitle: "Horizon Survival Tournament 2026",
@@ -955,6 +1119,7 @@
         },
         'de': {
             tagline: "Horizon Survival Turnier — Cosmic Engine 2026",
+            rotateDeviceHint: "Drehen Sie Ihr Gerät, um im Querformat zu spielen",
             settingsBtn: "⚙", arenaStructureTitle: "Arena-Struktur",
             worldLabel: "Offene Welt", worldOff: "DEAKTIVIERT", worldOn: "UNENDLICH (SOLO)",
             combatModeTitle: "Kampfmodus",
@@ -1001,6 +1166,21 @@
             deathTitle: "SYSTEM AUSGEFALLEN", deathDesc: "Du bist den Monstern unterlegen.",
             p2WinsTitle: "SPIELER 2 GEWINNT!", p2WinsDesc: "Spieler 2 hat seinen Rivalen vernichtet.",
             p1WinsTitle: "SPIELER 1 GEWINNT!", p1WinsDesc: "Spieler 1 hat seinen Rivalen vernichtet.",
+            genericWinsTitle: "{name} GEWINNT!", genericWinsDesc: "{name} hat die Rivalen im Kampf vernichtet.",
+            guestMatchEndDesc: "Die Partie ist beendet.",
+            cosmeticsTitle: "Charakter-Aussehen", cosmeticsColorLabel: "Farbe", cosmeticsSkinLabel: "Look",
+            achievementsBtn: "🏆 Erfolge", levelBadgeLabel: "Lv.", achievementsTitle: "🏆 Erfolge",
+            achievementsHint: "Sammle Erfahrung durch Spielen und das Abschließen von Herausforderungen, um aufzusteigen.",
+            levelUpToast: "Du bist auf Level {level} aufgestiegen!", achievementUnlockedToast: "Erfolg freigeschaltet: {name}",
+            ach_first_win_name: "Erster Sieg", ach_first_win_desc: "Gewinne 1 Partie.",
+            ach_veteran_name: "Veteran", ach_veteran_desc: "Spiele 10 Partien.",
+            ach_gold_hunter_name: "Goldjäger", ach_gold_hunter_desc: "Verdiene insgesamt 1000 Gold.",
+            ach_exterminator_name: "Exterminator", ach_exterminator_desc: "Besiege insgesamt 200 Gegner.",
+            ach_collector_name: "Sammler", ach_collector_desc: "Schalte 3 Farben oder Looks im Shop frei.",
+            ach_champion_name: "Champion", ach_champion_desc: "Gewinne 10 Partien.",
+            ach_legend_name: "Legende", ach_legend_desc: "Erreiche Level 10.",
+            cosColor_default: "Archetyp-Standard", cosColor_gold: "Gold", cosColor_purple: "Lila", cosColor_cyan: "Türkis", cosColor_pink: "Pink", cosColor_white: "Weiß", cosColor_obsidian: "Obsidian",
+            cosSkin_default: "Standard", cosSkin_stripes: "Streifen", cosSkin_glow: "Leuchten", cosSkin_stars: "Sternenglanz", cosSkin_flame: "Flammen",
             netRewardLabel: "Belohnungen", playerLabel: "Spieler",
             modeLabelOpenWorld: "OFFENE WELT", modeLabelBoss: "Boss-Level", modeLabelWave: "Welle",
             hideoutAlertTitle: "Geheimes Versteck", hideoutAlertEnter: "Eintreten: E", hideoutHudExit: "Verlassen: E",
@@ -1021,6 +1201,7 @@
             socialInviteCalledYou: "hat dich zum Spielen eingeladen", socialAcceptBtn: "Annehmen", socialDeclineBtn: "Ablehnen",
             socialOnlineBtn: "🌐 Online",
             socialTabChats: "💬 Chats",
+            sidebarChatTitle: "💬 Chats", sidebarChatSeeAllBtn: "Alle anzeigen",
             socialChatBtn: "💬 Chatten",
             chatLoading: "Unterhaltung wird geladen...", chatEmptyHint: "Noch keine Nachrichten. Sag Hallo!",
             chatLoadError: "Fehler beim Laden der Nachrichten. Bitte erneut versuchen.",
@@ -1029,6 +1210,7 @@
             chatNoMessagesYet: "Noch keine Nachrichten",
             lobbyTitle: "🌐 Online-Spiel", lobbyBackBtn: "✕ Zurück",
             lobbyCreateBtn: "➕ RAUM ERSTELLEN", lobbyCodeLabel: "Raumcode (zum Kopieren klicken)",
+            lobbyPlayerCountLabel: "Wie viele Spieler insgesamt?", lobbyStartNowBtn: "▶ JETZT STARTEN", lobbyWaitingCount: "Warte auf Spieler",
             lobbyWaiting: "Warte auf Freund...", lobbyOrJoin: "oder einem bestehenden Raum beitreten",
             lobbyJoinPlaceholder: "Raumcode hier einfügen...", lobbyJoinBtn: "BEITRETEN",
             lobbyFooterHint: "Erfordert Internetverbindung &bull; WebRTC über PeerJS &bull; Funktioniert auf GitHub Pages",
@@ -1056,7 +1238,8 @@
             deleteAccountWarning: "Dies löscht dein Konto, deinen Fortschritt, Follower und Einladungen dauerhaft. Dies kann nicht rückgängig gemacht werden.",
             deleteAccountConfirmTitle: "Bist du sicher? Dies kann nicht rückgängig gemacht werden.",
             deleteAccountTypeLabel: "Gib LÖSCHEN ein, um zu bestätigen:",
-            deleteAccountInputPlaceholder: "LÖSCHEN eingeben",
+            deleteAccountInputPlaceholder: "LÖSCHEN eingeben", deleteConfirmWord: "LÖSCHEN",
+            deleteConfirmMismatchMsg: "Gib genau \"{word}\" ein, um zu bestätigen.", deletingAccountMsg: "Dein Konto wird gelöscht, bitte warten...", deleteAccountErrorMsg: "Fehler beim Löschen des Kontos: {err}",
             cancelBtn: "Abbrechen",
             deleteForeverBtn: "Endgültig löschen",
             authSubtitle: "Horizon Survival Turnier 2026",
@@ -1096,6 +1279,7 @@
         },
         'es': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
+            rotateDeviceHint: "Gira tu dispositivo para jugar en horizontal",
             settingsBtn: "⚙", arenaStructureTitle: "Estructura de Arena",
             worldLabel: "Mundo Abierto", worldOff: "DESACTIVADO", worldOn: "INFINITO (SOLO)",
             combatModeTitle: "Modo de Combate",
@@ -1142,6 +1326,21 @@
             deathTitle: "SISTEMA APAGADO", deathDesc: "Pereciste ante los monstruos.",
             p2WinsTitle: "¡EL JUGADOR 2 GANÓ!", p2WinsDesc: "El Jugador 2 destruyó a su rival.",
             p1WinsTitle: "¡EL JUGADOR 1 GANÓ!", p1WinsDesc: "El Jugador 1 destruyó a su rival.",
+            genericWinsTitle: "¡{name} GANÓ!", genericWinsDesc: "{name} destruyó a los rivales en combate.",
+            guestMatchEndDesc: "La partida ha terminado.",
+            cosmeticsTitle: "Apariencia del Personaje", cosmeticsColorLabel: "Color", cosmeticsSkinLabel: "Aspecto",
+            achievementsBtn: "🏆 Logros", levelBadgeLabel: "Niv.", achievementsTitle: "🏆 Logros",
+            achievementsHint: "Gana experiencia jugando y completando desafíos para subir de nivel.",
+            levelUpToast: "¡Subiste al nivel {level}!", achievementUnlockedToast: "Logro desbloqueado: {name}",
+            ach_first_win_name: "Primera Victoria", ach_first_win_desc: "Gana 1 partida.",
+            ach_veteran_name: "Veterano", ach_veteran_desc: "Juega 10 partidas.",
+            ach_gold_hunter_name: "Cazador de Oro", ach_gold_hunter_desc: "Gana 1000 de oro en total.",
+            ach_exterminator_name: "Exterminador", ach_exterminator_desc: "Elimina 200 enemigos en total.",
+            ach_collector_name: "Coleccionista", ach_collector_desc: "Desbloquea 3 colores o aspectos en la tienda.",
+            ach_champion_name: "Campeón", ach_champion_desc: "Gana 10 partidas.",
+            ach_legend_name: "Leyenda", ach_legend_desc: "Alcanza el nivel 10.",
+            cosColor_default: "Predeterminado del Arquetipo", cosColor_gold: "Dorado", cosColor_purple: "Morado", cosColor_cyan: "Cian", cosColor_pink: "Rosa", cosColor_white: "Blanco", cosColor_obsidian: "Obsidiana",
+            cosSkin_default: "Predeterminado", cosSkin_stripes: "Rayas", cosSkin_glow: "Brillo", cosSkin_stars: "Estrellado", cosSkin_flame: "Llamas",
             netRewardLabel: "Recompensas", playerLabel: "Jugador",
             modeLabelOpenWorld: "MUNDO ABIERTO", modeLabelBoss: "Nivel de Jefe", modeLabelWave: "Oleada",
             hideoutAlertTitle: "Escondite Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Salir: E",
@@ -1162,6 +1361,7 @@
             socialInviteCalledYou: "te invitó a jugar", socialAcceptBtn: "Aceptar", socialDeclineBtn: "Rechazar",
             socialOnlineBtn: "🌐 En línea",
             socialTabChats: "💬 Chats",
+            sidebarChatTitle: "💬 Chats", sidebarChatSeeAllBtn: "Ver todo",
             socialChatBtn: "💬 Chatear",
             chatLoading: "Cargando conversación...", chatEmptyHint: "Aún no hay mensajes. ¡Saluda!",
             chatLoadError: "Error al cargar mensajes. Inténtalo de nuevo.",
@@ -1170,6 +1370,7 @@
             chatNoMessagesYet: "Aún no hay mensajes",
             lobbyTitle: "🌐 Juego en Línea", lobbyBackBtn: "✕ Volver",
             lobbyCreateBtn: "➕ CREAR SALA", lobbyCodeLabel: "Código de Sala (clic para copiar)",
+            lobbyPlayerCountLabel: "¿Cuántos jugadores en total?", lobbyStartNowBtn: "▶ EMPEZAR AHORA", lobbyWaitingCount: "Esperando jugadores",
             lobbyWaiting: "Esperando a un amigo...", lobbyOrJoin: "o únete a una sala existente",
             lobbyJoinPlaceholder: "Pega el código de la sala aquí...", lobbyJoinBtn: "ENTRAR",
             lobbyFooterHint: "Requiere conexión a internet &bull; WebRTC vía PeerJS &bull; Funciona en GitHub Pages",
@@ -1197,7 +1398,8 @@
             deleteAccountWarning: "Esto elimina tu cuenta, progreso, seguidores e invitaciones para siempre. No se puede deshacer.",
             deleteAccountConfirmTitle: "¿Estás seguro? Esto no se puede deshacer.",
             deleteAccountTypeLabel: "Escribe ELIMINAR para confirmar:",
-            deleteAccountInputPlaceholder: "Escribe ELIMINAR",
+            deleteAccountInputPlaceholder: "Escribe ELIMINAR", deleteConfirmWord: "ELIMINAR",
+            deleteConfirmMismatchMsg: "Escribe exactamente \"{word}\" para confirmar.", deletingAccountMsg: "Eliminando tu cuenta, espera...", deleteAccountErrorMsg: "Error al eliminar la cuenta: {err}",
             cancelBtn: "Cancelar",
             deleteForeverBtn: "Eliminar definitivamente",
             authSubtitle: "Horizon Survival Tournament 2026",
@@ -1237,6 +1439,7 @@
         },
         'it': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
+            rotateDeviceHint: "Ruota il tuo dispositivo per giocare in orizzontale",
             settingsBtn: "⚙", arenaStructureTitle: "Struttura dell'Arena",
             worldLabel: "Mondo Aperto", worldOff: "DISATTIVATO", worldOn: "INFINITO (SOLO)",
             combatModeTitle: "Modalità di Combattimento",
@@ -1283,6 +1486,21 @@
             deathTitle: "SISTEMA SPENTO", deathDesc: "Sei perito davanti ai mostri.",
             p2WinsTitle: "IL GIOCATORE 2 VINCE!", p2WinsDesc: "Il Giocatore 2 ha distrutto il suo rivale.",
             p1WinsTitle: "IL GIOCATORE 1 VINCE!", p1WinsDesc: "Il Giocatore 1 ha distrutto il suo rivale.",
+            genericWinsTitle: "{name} VINCE!", genericWinsDesc: "{name} ha distrutto i rivali in combattimento.",
+            guestMatchEndDesc: "La partita è terminata.",
+            cosmeticsTitle: "Aspetto del Personaggio", cosmeticsColorLabel: "Colore", cosmeticsSkinLabel: "Aspetto Visivo",
+            achievementsBtn: "🏆 Obiettivi", levelBadgeLabel: "Lv.", achievementsTitle: "🏆 Obiettivi",
+            achievementsHint: "Guadagna esperienza giocando e completando le sfide per salire di livello.",
+            levelUpToast: "Sei salito al livello {level}!", achievementUnlockedToast: "Obiettivo sbloccato: {name}",
+            ach_first_win_name: "Prima Vittoria", ach_first_win_desc: "Vinci 1 partita.",
+            ach_veteran_name: "Veterano", ach_veteran_desc: "Gioca 10 partite.",
+            ach_gold_hunter_name: "Cacciatore d'Oro", ach_gold_hunter_desc: "Guadagna 1000 oro in totale.",
+            ach_exterminator_name: "Sterminatore", ach_exterminator_desc: "Sconfiggi 200 nemici in totale.",
+            ach_collector_name: "Collezionista", ach_collector_desc: "Sblocca 3 colori o aspetti nel negozio.",
+            ach_champion_name: "Campione", ach_champion_desc: "Vinci 10 partite.",
+            ach_legend_name: "Leggenda", ach_legend_desc: "Raggiungi il livello 10.",
+            cosColor_default: "Predefinito dell'Archetipo", cosColor_gold: "Oro", cosColor_purple: "Viola", cosColor_cyan: "Ciano", cosColor_pink: "Rosa", cosColor_white: "Bianco", cosColor_obsidian: "Ossidiana",
+            cosSkin_default: "Predefinito", cosSkin_stripes: "Strisce", cosSkin_glow: "Bagliore", cosSkin_stars: "Stellato", cosSkin_flame: "Fiamme",
             netRewardLabel: "Ricompense", playerLabel: "Giocatore",
             modeLabelOpenWorld: "MONDO APERTO", modeLabelBoss: "Livello Boss", modeLabelWave: "Ondata",
             hideoutAlertTitle: "Nascondiglio Segreto", hideoutAlertEnter: "Entra: E", hideoutHudExit: "Esci: E",
@@ -1303,6 +1521,7 @@
             socialInviteCalledYou: "ti ha invitato a giocare", socialAcceptBtn: "Accetta", socialDeclineBtn: "Rifiuta",
             socialOnlineBtn: "🌐 Online",
             socialTabChats: "💬 Chat",
+            sidebarChatTitle: "💬 Chat", sidebarChatSeeAllBtn: "Vedi tutto",
             socialChatBtn: "💬 Chatta",
             chatLoading: "Caricamento conversazione...", chatEmptyHint: "Ancora nessun messaggio. Saluta!",
             chatLoadError: "Errore nel caricamento dei messaggi. Riprova.",
@@ -1311,6 +1530,7 @@
             chatNoMessagesYet: "Ancora nessun messaggio",
             lobbyTitle: "🌐 Gioco Online", lobbyBackBtn: "✕ Indietro",
             lobbyCreateBtn: "➕ CREA STANZA", lobbyCodeLabel: "Codice Stanza (clicca per copiare)",
+            lobbyPlayerCountLabel: "Quanti giocatori in totale?", lobbyStartNowBtn: "▶ INIZIA ORA", lobbyWaitingCount: "In attesa di giocatori",
             lobbyWaiting: "In attesa di un amico...", lobbyOrJoin: "oppure unisciti a una stanza esistente",
             lobbyJoinPlaceholder: "Incolla qui il codice della stanza...", lobbyJoinBtn: "ENTRA",
             lobbyFooterHint: "Richiede connessione internet &bull; WebRTC via PeerJS &bull; Funziona su GitHub Pages",
@@ -1338,7 +1558,8 @@
             deleteAccountWarning: "Questo elimina definitivamente il tuo account, progressi, follower e inviti. Non può essere annullato.",
             deleteAccountConfirmTitle: "Sei sicuro? Questa azione non può essere annullata.",
             deleteAccountTypeLabel: "Digita ELIMINA per confermare:",
-            deleteAccountInputPlaceholder: "Digita ELIMINA",
+            deleteAccountInputPlaceholder: "Digita ELIMINA", deleteConfirmWord: "ELIMINA",
+            deleteConfirmMismatchMsg: "Digita esattamente \"{word}\" per confermare.", deletingAccountMsg: "Eliminazione dell'account in corso, attendi...", deleteAccountErrorMsg: "Errore durante l'eliminazione dell'account: {err}",
             cancelBtn: "Annulla",
             deleteForeverBtn: "Elimina definitivamente",
             authSubtitle: "Horizon Survival Tournament 2026",
@@ -1378,6 +1599,7 @@
         },
         'fr': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
+            rotateDeviceHint: "Tournez votre appareil pour jouer en mode paysage",
             settingsBtn: "⚙", arenaStructureTitle: "Structure de l'Arène",
             worldLabel: "Monde Ouvert", worldOff: "DÉSACTIVÉ", worldOn: "INFINI (SOLO)",
             combatModeTitle: "Mode de Combat",
@@ -1424,6 +1646,21 @@
             deathTitle: "SYSTÈME HORS LIGNE", deathDesc: "Vous avez péri face aux monstres.",
             p2WinsTitle: "LE JOUEUR 2 GAGNE !", p2WinsDesc: "Le Joueur 2 a détruit son rival.",
             p1WinsTitle: "LE JOUEUR 1 GAGNE !", p1WinsDesc: "Le Joueur 1 a détruit son rival.",
+            genericWinsTitle: "{name} GAGNE !", genericWinsDesc: "{name} a détruit les rivaux au combat.",
+            guestMatchEndDesc: "La partie est terminée.",
+            cosmeticsTitle: "Apparence du Personnage", cosmeticsColorLabel: "Couleur", cosmeticsSkinLabel: "Apparence",
+            achievementsBtn: "🏆 Succès", levelBadgeLabel: "Niv.", achievementsTitle: "🏆 Succès",
+            achievementsHint: "Gagnez de l'expérience en jouant et en relevant des défis pour monter de niveau.",
+            levelUpToast: "Vous êtes passé au niveau {level} !", achievementUnlockedToast: "Succès débloqué : {name}",
+            ach_first_win_name: "Première Victoire", ach_first_win_desc: "Gagnez 1 partie.",
+            ach_veteran_name: "Vétéran", ach_veteran_desc: "Jouez 10 parties.",
+            ach_gold_hunter_name: "Chasseur d'Or", ach_gold_hunter_desc: "Gagnez 1000 or au total.",
+            ach_exterminator_name: "Exterminateur", ach_exterminator_desc: "Éliminez 200 ennemis au total.",
+            ach_collector_name: "Collectionneur", ach_collector_desc: "Débloquez 3 couleurs ou apparences dans la boutique.",
+            ach_champion_name: "Champion", ach_champion_desc: "Gagnez 10 parties.",
+            ach_legend_name: "Légende", ach_legend_desc: "Atteignez le niveau 10.",
+            cosColor_default: "Défaut de l'Archétype", cosColor_gold: "Or", cosColor_purple: "Violet", cosColor_cyan: "Cyan", cosColor_pink: "Rose", cosColor_white: "Blanc", cosColor_obsidian: "Obsidienne",
+            cosSkin_default: "Défaut", cosSkin_stripes: "Rayures", cosSkin_glow: "Lueur", cosSkin_stars: "Étoilé", cosSkin_flame: "Flammes",
             netRewardLabel: "Récompenses", playerLabel: "Joueur",
             modeLabelOpenWorld: "MONDE OUVERT", modeLabelBoss: "Niveau Boss", modeLabelWave: "Vague",
             hideoutAlertTitle: "Cachette Secrète", hideoutAlertEnter: "Entrer : E", hideoutHudExit: "Sortir : E",
@@ -1444,6 +1681,7 @@
             socialInviteCalledYou: "vous a invité à jouer", socialAcceptBtn: "Accepter", socialDeclineBtn: "Refuser",
             socialOnlineBtn: "🌐 En ligne",
             socialTabChats: "💬 Discussions",
+            sidebarChatTitle: "💬 Discussions", sidebarChatSeeAllBtn: "Tout voir",
             socialChatBtn: "💬 Discuter",
             chatLoading: "Chargement de la conversation...", chatEmptyHint: "Pas encore de messages. Dites bonjour !",
             chatLoadError: "Erreur lors du chargement des messages. Réessayez.",
@@ -1452,6 +1690,7 @@
             chatNoMessagesYet: "Pas encore de messages",
             lobbyTitle: "🌐 Jeu en Ligne", lobbyBackBtn: "✕ Retour",
             lobbyCreateBtn: "➕ CRÉER UNE SALLE", lobbyCodeLabel: "Code de la Salle (cliquez pour copier)",
+            lobbyPlayerCountLabel: "Combien de joueurs au total ?", lobbyStartNowBtn: "▶ COMMENCER MAINTENANT", lobbyWaitingCount: "En attente de joueurs",
             lobbyWaiting: "En attente d'un ami...", lobbyOrJoin: "ou rejoignez une salle existante",
             lobbyJoinPlaceholder: "Collez le code de la salle ici...", lobbyJoinBtn: "REJOINDRE",
             lobbyFooterHint: "Nécessite une connexion internet &bull; WebRTC via PeerJS &bull; Fonctionne sur GitHub Pages",
@@ -1479,9 +1718,22 @@
             deleteAccountWarning: "Ceci supprime définitivement votre compte, votre progression, vos abonnés et vos invitations. Cette action est irréversible.",
             deleteAccountConfirmTitle: "Êtes-vous sûr ? Cette action est irréversible.",
             deleteAccountTypeLabel: "Tapez SUPPRIMER pour confirmer :",
-            deleteAccountInputPlaceholder: "Tapez SUPPRIMER",
+            deleteAccountInputPlaceholder: "Tapez SUPPRIMER", deleteConfirmWord: "SUPPRIMER",
+            deleteConfirmMismatchMsg: "Tapez exactement \"{word}\" pour confirmer.", deletingAccountMsg: "Suppression de votre compte, veuillez patienter...", deleteAccountErrorMsg: "Erreur lors de la suppression du compte : {err}",
             cancelBtn: "Annuler",
             deleteForeverBtn: "Supprimer définitivement",
+            authSubtitle: "Horizon Survival Tournament 2026",
+            authTabLogin: "🔑 Connexion", authTabRegister: "➕ Créer un Compte",
+            emailPlaceholder: "E-mail", passwordPlaceholder: "Mot de passe",
+            loginBtn: "CONNEXION", forgotPasswordLink: "Mot de passe oublié",
+            displayNamePlaceholder: "Nom d'affichage (lettres, chiffres, _)",
+            regPasswordPlaceholder: "Mot de passe (min. 6 caractères)", confirmPasswordPlaceholder: "Confirmer le mot de passe",
+            registerBtn: "CRÉER UN COMPTE",
+            forgotPasswordDesc: "Entrez votre e-mail enregistré. Nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+            sendResetLinkBtn: "ENVOYER LE LIEN DE RÉINITIALISATION", backToLoginLink: "← Retour à la connexion",
+            authCloudInfo: "☁️ Votre compte fonctionne sur n'importe quel appareil.",
+            recoveryTitle: "Nouveau Mot de Passe", recoverySubtitle: "Entrez votre nouveau mot de passe pour continuer",
+            recoverySaveBtn: "ENREGISTRER ET SE CONNECTER",
             errFillAllFields: "Remplissez tous les champs.",
             errValidEmail: "Entrez un e-mail valide.",
             errValidUsername: "Le nom doit contenir 3-20 caractères : lettres, chiffres ou _.",
@@ -2898,8 +3150,13 @@
 
         async loadConversations() {
             let container = document.getElementById('chats-results');
-            if (!Accounts.current) { container.innerHTML = `<div class="social-empty">${t('socialLoginToSeeFollowing')}</div>`; return; }
-            container.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
+            let sidebarContainer = document.getElementById('sidebar-chats-list');
+            let targets = [container, sidebarContainer].filter(Boolean);
+            if (!Accounts.current) {
+                targets.forEach(el => el.innerHTML = `<div class="social-empty">${t('socialLoginToSeeFollowing')}</div>`);
+                return;
+            }
+            if (container) container.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
             try {
                 const { data: followRows, error: followErr } = await sb
                     .from('follows')
@@ -2907,7 +3164,7 @@
                     .eq('follower_id', Accounts.current.uid);
                 if (followErr) throw followErr;
                 if (!followRows || followRows.length === 0) {
-                    container.innerHTML = `<div class="social-empty">${t('chatNoFollowingHint')}</div>`;
+                    targets.forEach(el => el.innerHTML = `<div class="social-empty">${t('chatNoFollowingHint')}</div>`);
                     this._unreadTotal = 0; this._refreshUnreadBadge();
                     return;
                 }
@@ -2918,7 +3175,7 @@
                     .in('id', ids);
                 if (playersErr) throw playersErr;
                 if (!players || players.length === 0) {
-                    container.innerHTML = `<div class="social-empty">${t('chatNoFollowingHint')}</div>`;
+                    targets.forEach(el => el.innerHTML = `<div class="social-empty">${t('chatNoFollowingHint')}</div>`);
                     this._unreadTotal = 0; this._refreshUnreadBadge();
                     return;
                 }
@@ -2948,39 +3205,49 @@
 
                 this._unreadTotal = rows.reduce((sum, r) => sum + (r.conv ? r.conv.unread : 0), 0);
                 this._refreshUnreadBadge();
+                // FIX: chat lateral fixo no menu — a lista de conversas é guardada aqui pra ambos os
+                // containers (o modal de busca e a barra lateral) chamarem Chat.openChatByIndex()
+                // sem precisar escapar nomes/ids dentro de strings de HTML.
+                this._lastRows = rows;
 
-                container.innerHTML = '';
-                rows.forEach(r => {
-                    let p = r.player, conv = r.conv;
-                    let el = document.createElement('div');
-                    el.className = 'chat-list-item';
-                    el.onclick = () => Chat.openChat(p.id, p.name, p.is_online);
-                    let preview = conv ? Social._esc(conv.last.content) : t('chatNoMessagesYet');
-                    let unread = conv ? conv.unread : 0;
-                    let timeStr = '';
-                    if (conv) {
-                        let d = new Date(conv.last.created_at);
-                        timeStr = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
-                    }
-                    el.innerHTML = `
-                        <div class="chat-list-avatar">${Social._esc((p.name || '?').charAt(0).toUpperCase())}<span class="online-dot ${p.is_online ? 'on' : ''}"></span></div>
-                        <div class="chat-list-info">
-                            <div class="chat-list-name-row">
-                                <span class="chat-list-name">${Social._esc(p.name)}</span>
-                                <span class="chat-list-time">${timeStr}</span>
+                targets.forEach(el => {
+                    el.innerHTML = '';
+                    rows.forEach((r, idx) => {
+                        let p = r.player, conv = r.conv;
+                        let elRow = document.createElement('div');
+                        elRow.className = 'chat-list-item';
+                        elRow.onclick = () => Chat.openChat(p.id, p.name, p.is_online);
+                        let preview = conv ? Social._esc(conv.last.content) : t('chatNoMessagesYet');
+                        let unread = conv ? conv.unread : 0;
+                        let timeStr = '';
+                        if (conv) {
+                            let d = new Date(conv.last.created_at);
+                            timeStr = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                        }
+                        elRow.innerHTML = `
+                            <div class="chat-list-avatar">${Social._esc((p.name || '?').charAt(0).toUpperCase())}<span class="online-dot ${p.is_online ? 'on' : ''}"></span></div>
+                            <div class="chat-list-info">
+                                <div class="chat-list-name-row">
+                                    <span class="chat-list-name">${Social._esc(p.name)}</span>
+                                    <span class="chat-list-time">${timeStr}</span>
+                                </div>
+                                <div class="chat-list-preview ${unread > 0 ? 'unread' : ''}">${preview}</div>
                             </div>
-                            <div class="chat-list-preview ${unread > 0 ? 'unread' : ''}">${preview}</div>
-                        </div>
-                        ${unread > 0 ? `<span class="chat-unread-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
-                    `;
-                    container.appendChild(el);
+                            ${unread > 0 ? `<span class="chat-unread-badge">${unread > 9 ? '9+' : unread}</span>` : ''}
+                        `;
+                        el.appendChild(elRow);
+                    });
                 });
 
                 this._subscribeToConversationList();
             } catch (err) {
-                container.innerHTML = `<div class="social-empty">${t('chatLoadError')}</div>`;
+                targets.forEach(el => el.innerHTML = `<div class="social-empty">${t('chatLoadError')}</div>`);
                 console.warn('Erro ao carregar conversas:', err);
             }
+        },
+        openChatByIndex(idx) {
+            let r = (this._lastRows||[])[idx]; if(!r) return;
+            this.openChat(r.player.id, r.player.name, r.player.is_online);
         },
 
         _subscribeToConversationList() {
@@ -2990,7 +3257,10 @@
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `to_id=eq.${Accounts.current.uid}` }, () => {
                     let chatsTabVisible = !document.getElementById('search-screen').classList.contains('hidden') &&
                         document.getElementById('social-tab-chats').classList.contains('active');
-                    if (chatsTabVisible) this.loadConversations();
+                    // FIX: barra lateral de chat fixa no menu — sempre atualiza a lista ali também,
+                    // mesmo com a tela de busca/conversas fechada.
+                    let sidebarVisible = document.getElementById('sidebar-chats-list') && !document.getElementById('menu-screen').classList.contains('hidden');
+                    if (chatsTabVisible || sidebarVisible) this.loadConversations();
                     else this._bumpUnreadBadge();
                 })
                 .subscribe();
@@ -3038,18 +3308,35 @@
     // Host roda a simulação completa; Guest envia inputs e renderiza o estado recebido.
     // ═══════════════════════════════════════════════════════════
     const OnlineSync = {
-        peer:null, conn:null, isHost:false, isOnline:false, roomCode:null, guestKeys:{}, _fc:0,
+        peer:null, conn:null, conns:[], isHost:false, isOnline:false, roomCode:null,
+        guestKeysBySlot:{2:{},3:{},4:{}}, desiredPlayers:2, _fc:0, _matchStarting:false,
         _hbInterval:null, _hbTimeout:null, _lastMsgAt:0,
         _err(msg){ let e=document.getElementById('lobby-error'); e.textContent=msg; e.classList.toggle('hidden',!msg); },
         _st(msg,cls){ let e=document.getElementById('lobby-status-text'); e.textContent=msg; e.className='lobby-status '+(cls||''); },
         _jst(msg,cls){ let e=document.getElementById('lobby-join-status'); e.textContent=msg; e.className='lobby-status '+(cls||''); e.classList.remove('hidden'); },
 
+        // FIX (f): número de jogadores da sala (host + até 3 convidados) agora é escolhido
+        // antes de criar a sala, em vez de sempre travar em 1v1.
+        setDesiredPlayers(n) {
+            this.desiredPlayers = n;
+            document.querySelectorAll('.lobby-count-btn').forEach(b => b.classList.toggle('active', parseInt(b.getAttribute('data-count'),10) === n));
+        },
+
+        _nextFreeSlot() {
+            for(let s=2; s<=4; s++){ if(!this.conns.some(c=>c.slot===s)) return s; }
+            return null;
+        },
+
         createRoom() {
-            this._err(''); this._st('Conectando ao servidor...','');
+            this._err(''); this._st(t('lobbyConnecting'),'');
             document.getElementById('lobby-room-display').classList.remove('hidden');
             document.getElementById('btn-create-room').disabled=true;
             document.getElementById('btn-join-room').disabled=true;
-            this.isHost=true;
+            let cntGroup = document.getElementById('lobby-player-count-group');
+            if(cntGroup){ cntGroup.style.pointerEvents='none'; cntGroup.style.opacity='0.5'; }
+            let joinRow = document.getElementById('lobby-join-row'); if(joinRow) joinRow.classList.add('hidden');
+            let divRow = document.getElementById('lobby-divider-row'); if(divRow) divRow.classList.add('hidden');
+            this.isHost=true; this.conns=[]; this.guestKeysBySlot={2:{},3:{},4:{}}; this._matchStarting=false;
             // Deixa o PeerJS gerar o ID automaticamente — evita erros de ID customizado
             this.peer=new Peer({
                 config:{iceServers:[
@@ -3061,16 +3348,18 @@
                 this.roomCode=id;
                 let el=document.getElementById('room-code-text');
                 el.textContent=id; el.dataset.code=id;
-                this._st('⏳ Aguardando amigo entrar na sala...','');
+                this._refreshLobbyUI();
             });
             this.peer.on('connection',conn=>{
-                if(this.conn){conn.close();return;}
-                this.conn=conn;
-                this._st('✅ Amigo conectado! Iniciando...','ok');
-                this._setup();
+                if(this.conns.length >= this.desiredPlayers - 1){ conn.close(); return; } // sala cheia
+                let slot = this._nextFreeSlot();
+                if(!slot){ conn.close(); return; }
+                let entry = {conn, slot, name:null, arch:null, col:null, skn:null, ready:false, lastMsgAt:Date.now()};
+                this.conns.push(entry);
+                this._setupHostConn(entry);
+                this._startHostHeartbeat();
             });
             this.peer.on('disconnected',()=>{
-                // Peer perdeu conexão com o servidor de sinalização (não é o data channel em si)
                 if(Engine.state==='IN_GAME') this._handleConnectionLost('A conexão com o servidor foi perdida.');
             });
             this.peer.on('error',err=>{
@@ -3105,7 +3394,7 @@
             this.peer.on('open',()=>{
                 // Conecta direto ao ID do host (sem prefixo)
                 this.conn=this.peer.connect(code,{reliable:true});
-                this._setup();
+                this._setupGuestConn();
             });
             this.peer.on('disconnected',()=>{
                 if(Engine.state==='IN_GAME') this._handleConnectionLost('A conexão com o servidor foi perdida.');
@@ -3130,44 +3419,110 @@
                      document.getElementById('room-code-text').textContent;
             if(navigator.clipboard){
                 navigator.clipboard.writeText(code)
-                    .then(()=>{this._st('✅ Código copiado! Manda pro amigo.','ok');setTimeout(()=>this._st('⏳ Aguardando amigo...',''),3000);})
+                    .then(()=>{this._st('✅ Código copiado! Manda pro amigo.','ok');setTimeout(()=>this._refreshLobbyUI(),3000);})
                     .catch(()=>prompt('Copie o código completo da sala:',code));
             } else { prompt('Copie o código completo da sala:',code); }
         },
 
-        _setup() {
+        // FIX (f): lista jogadores já conectados na sala e mostra o botão de começar manualmente
+        // assim que há pelo menos 1 convidado, além de iniciar sozinho quando a sala enche.
+        _refreshLobbyUI() {
+            let list = document.getElementById('lobby-players-list'); if(!list) return;
+            let readyConns = this.conns.filter(c=>c.ready);
+            let html = `<div class="lobby-player-chip">👑 ${Engine.getProfileName(1)}</div>`;
+            readyConns.forEach(c => { html += `<div class="lobby-player-chip">🎮 ${(c.name||'Convidado')}</div>`; });
+            for(let i=readyConns.length; i<this.desiredPlayers-1; i++){ html += `<div class="lobby-player-chip lobby-player-chip-empty">…</div>`; }
+            list.innerHTML = html;
+            let total = 1 + readyConns.length;
+            this._st(`⏳ ${t('lobbyWaitingCount')} (${total}/${this.desiredPlayers})`, '');
+            let startBtn = document.getElementById('btn-lobby-start-now');
+            if(startBtn) startBtn.classList.toggle('hidden', readyConns.length < 1);
+        },
+
+        hostStartNow() {
+            if(!this.isHost) return;
+            let readyCount = this.conns.filter(c=>c.ready).length;
+            if(readyCount < 1) return;
+            this._hostBeginMatch();
+        },
+
+        _hostBeginMatch() {
+            if(this._matchStarting || Engine.state==='IN_GAME') return;
+            let readyConns = this.conns.filter(c=>c.ready);
+            if(readyConns.length < 1) return;
+            this._matchStarting = true;
+            let cos1 = (Engine.persistentUpgradesP1.cosmetics) || {color:null, skin:'default'};
+            let roster = [{slot:1, name:Engine.getProfileName(1), arch:Engine.selectedArchP1, col:cos1.color, skn:cos1.skin}];
+            readyConns.forEach(c => roster.push({slot:c.slot, name:c.name||'Convidado', arch:c.arch||'vilan', col:c.col||null, skn:c.skn||'default'}));
+            readyConns.forEach(c => { try{ c.conn.send({type:'start', roster, mySlot:c.slot}); }catch(e){} });
+            Engine.startOnlineMatch(roster, 1);
+        },
+
+        _setupHostConn(entry) {
+            let conn = entry.conn;
+            conn.on('open',()=>{ entry.open = true; this.isOnline = true; });
+            conn.on('data',data=>{
+                entry.lastMsgAt = Date.now(); this._lastMsgAt = Date.now();
+                if(data.type==='ping'){ try{conn.send({type:'pong'});}catch(e){} return; }
+                if(data.type==='pong'){ return; }
+                if(data.type==='hello'){
+                    // Bloqueia se quem está entrando usa a mesma conta que o dono da sala
+                    if(data.uid && Accounts.current && data.uid===Accounts.current.uid){
+                        try{ conn.send({type:'reject',reason:'same-account'}); }catch(e){}
+                        setTimeout(()=>{ try{conn.close();}catch(e){} }, 300);
+                        this._err('Alguém tentou entrar com a mesma conta que a sua. Avise seu amigo para usar a própria conta.');
+                        this.conns = this.conns.filter(c=>c!==entry);
+                        this._refreshLobbyUI();
+                        return;
+                    }
+                    entry.name = (data.name||'Convidado').toString().slice(0,24);
+                    entry.arch = (data.arch==='hero'||data.arch==='vilan'||data.arch==='killer') ? data.arch : 'vilan';
+                    entry.uid = data.uid || null;
+                    entry.col = data.col || null;
+                    entry.skn = data.skn || 'default';
+                    entry.ready = true;
+                    this._refreshLobbyUI();
+                    let readyCount = this.conns.filter(c=>c.ready).length;
+                    if(readyCount >= (this.desiredPlayers - 1)) setTimeout(()=> this._hostBeginMatch(), 600);
+                } else if(data.type==='keys') {
+                    this.guestKeysBySlot[entry.slot] = data.k || {};
+                } else if(data.type==='action') {
+                    if(data.a==='dash') Engine.triggerDash(entry.slot);
+                    else if(data.a==='potion'||data.a==='shield') Engine.useItemViaClick(entry.slot, data.a);
+                }
+            });
+            conn.on('close', ()=>{ this._onGuestGone(entry.slot); });
+            conn.on('error', err=>{ console.warn('PeerJS conn error:',err); this._onGuestGone(entry.slot); });
+        },
+
+        // FIX (i): antes, a queda de UM jogador (de até 4) encerrava a partida inteira pra todo mundo.
+        // Agora só remove esse jogador (ele perde as vidas restantes) e o jogo continua pros demais.
+        _onGuestGone(slot) {
+            this.conns = this.conns.filter(c=>c.slot!==slot);
+            if(this.guestKeysBySlot) this.guestKeysBySlot[slot] = {};
+            if(Engine.state==='IN_GAME' && Engine.players && Engine.players.length){
+                let p = Engine.players.find(pl=>pl && pl.id===slot);
+                if(p) p.lives = 0;
+            } else {
+                this._refreshLobbyUI();
+            }
+        },
+
+        _setupGuestConn() {
             this.conn.on('open',()=>{
                 this.isOnline=true;
                 this._lastMsgAt=Date.now();
-                this._startHeartbeat();
-                if(!this.isHost){
-                    this._jst('✅ Conectado! Aguardando início...','ok');
-                    this.conn.send({type:'hello',name:Accounts.current?Accounts.current.name:'Convidado',uid:Accounts.current?Accounts.current.uid:null});
-                }
+                this._startGuestHeartbeat();
+                this._jst('✅ Conectado! Aguardando início...','ok');
+                let cos = (Engine.persistentUpgradesP1.cosmetics) || {color:null, skin:'default'};
+                this.conn.send({type:'hello', name:Accounts.current?Accounts.current.name:'Convidado', uid:Accounts.current?Accounts.current.uid:null,
+                    arch:Engine.selectedArchP1, col:cos.color, skn:cos.skin});
             });
             this.conn.on('data',data=>{
                 this._lastMsgAt=Date.now();
                 if(data.type==='ping'){ try{this.conn.send({type:'pong'});}catch(e){} return; }
                 if(data.type==='pong'){ return; }
-                if(data.type==='hello'&&this.isHost){
-                    // Bloqueia se quem está entrando usa a mesma conta que o dono da sala
-                    if(data.uid && Accounts.current && data.uid===Accounts.current.uid){
-                        try{ this.conn.send({type:'reject',reason:'same-account'}); }catch(e){}
-                        setTimeout(()=>{ this.conn && this.conn.close(); }, 300);
-                        this._err('Alguém tentou entrar com a mesma conta que a sua. Avise seu amigo para usar a própria conta.');
-                        this._st('⏳ Aguardando amigo entrar na sala...','');
-                        return;
-                    }
-                    Engine.playerNames.p2=data.name||'Convidado';
-                    setTimeout(()=>{
-                        Engine.startOnlineMatch();
-                        this.conn.send({type:'start',
-                            a1:Engine.selectedArchP1,a2:Engine.selectedArchP2,
-                            gm:Engine.gameMode,ow:Engine.isOpenWorld,
-                            n1:Engine.getProfileName(1),n2:Engine.playerNames.p2
-                        });
-                    },600);
-                } else if(data.type==='reject'&&!this.isHost){
+                if(data.type==='reject'){
                     if(data.reason==='same-account'){
                         this._jst('','');
                         this._err('O dono da sala está usando a mesma conta que você. É necessário trocar de conta para jogar online.');
@@ -3177,14 +3532,9 @@
                     document.getElementById('btn-create-room').disabled=false;
                     document.getElementById('btn-join-room').disabled=false;
                     this.disconnect();
-                } else if(data.type==='start'&&!this.isHost){
-                    Engine.selectedArchP1=data.a1; Engine.selectedArchP2=data.a2;
-                    Engine.gameMode=data.gm; Engine.isOpenWorld=data.ow;
-                    Engine.playerNames.p1=data.n1; Engine.playerNames.p2=data.n2;
-                    Engine.startOnlineMatch();
-                } else if(data.type==='keys'&&this.isHost){
-                    this.guestKeys=data.k||{};
-                } else if(data.type==='state'&&!this.isHost){
+                } else if(data.type==='start'){
+                    Engine.startOnlineMatch(data.roster, data.mySlot);
+                } else if(data.type==='state'){
                     this._apply(data);
                 }
             });
@@ -3199,7 +3549,7 @@
 
         // FIX: ping/pong a cada 3s + watchdog de 9s — detecta quedas "silenciosas" de wifi/rede
         // em que nem 'close' nem 'error' chegam a disparar, evitando que o jogo fique travado.
-        _startHeartbeat() {
+        _startGuestHeartbeat() {
             this._stopHeartbeat();
             this._hbInterval = setInterval(()=>{
                 if(this.conn && this.conn.open){ try{ this.conn.send({type:'ping'}); }catch(e){} }
@@ -3208,6 +3558,20 @@
                 if(this.isOnline && Date.now() - this._lastMsgAt > 9000){
                     this._handleConnectionLost('A conexão com o amigo foi perdida (sem resposta).');
                 }
+            }, 1500);
+        },
+        // FIX (f): heartbeat do host agora cobre TODAS as conexões (até 3 convidados), removendo
+        // individualmente quem ficar em silêncio por mais de 9s, sem derrubar a partida inteira.
+        _startHostHeartbeat() {
+            this._stopHeartbeat();
+            this._hbInterval = setInterval(()=>{
+                this.conns.forEach(c=>{ if(c.conn && c.conn.open){ try{ c.conn.send({type:'ping'}); }catch(e){} } });
+            }, 3000);
+            this._hbTimeout = setInterval(()=>{
+                let now = Date.now();
+                this.conns.slice().forEach(c=>{
+                    if(now - (c.lastMsgAt||now) > 9000){ try{ c.conn.close(); }catch(e){} this._onGuestGone(c.slot); }
+                });
             }, 1500);
         },
         _stopHeartbeat() {
@@ -3229,42 +3593,49 @@
         },
 
         sendState() {
-            if(!this.conn||!this.conn.open) return;
+            let openConns = this.conns.filter(c=>c.conn && c.conn.open);
+            if(openConns.length===0) return;
             if(++this._fc%2!==0) return;
-            // FIX: sequência crescente por pacote de estado — o guest usa isso pra descartar
+            // FIX: sequência crescente por pacote de estado — os convidados usam isso pra descartar
             // pacotes que chegam fora de ordem (ex: rede instável), evitando que o personagem
             // "trave" parado porque um estado antigo sobrescreveu um mais recente.
             this._seq = (this._seq||0) + 1;
-            try{
-                this.conn.send({type:'state', seq:this._seq,
-                    pl:Engine.players.map(p=>p?{
-                        x:p.x|0,y:p.y|0,hp:p.hp|0,mhp:p.maxHp,mp:p.mp|0,
-                        lv:p.lives,fa:p.facing,sh:p.shieldTime>0,
-                        inv:p.inventory,gc:p.goldCollected,wk:p.weaponKey
-                    }:null),
-                    en:Engine.enemies.map(e=>({x:e.x|0,y:e.y|0,hp:e.hp,mhp:e.maxHp,t:e.type,w:e.w,h:e.h,c:e.color})),
-                    pr:Engine.projectiles.filter(p=>!p.destroyed).map(p=>({x:p.x|0,y:p.y|0,vx:p.vx,vy:p.vy,c:p.color})),
-                    it:Engine.items.filter(i=>!i.destroyed).map(i=>({x:i.x|0,y:i.y|0,t:i.type})),
-                    cx:Engine.cameraX|0,tl:Engine.timeLeftSeconds,rn:Engine.round,
-                    gs:Engine.state==='GAMEOVER'
-                });
-            }catch(e){}
+            let payload = {type:'state', seq:this._seq,
+                pl:Engine.players.map(p=>p?{
+                    x:p.x|0,y:p.y|0,hp:p.hp|0,mhp:p.maxHp,mp:p.mp|0,
+                    lv:p.lives,fa:p.facing,sh:p.shieldTime>0,
+                    inv:p.inventory,gc:p.goldCollected,wk:p.weaponKey,kl:p.kills||0
+                }:null),
+                en:Engine.enemies.map(e=>({x:e.x|0,y:e.y|0,hp:e.hp,mhp:e.maxHp,t:e.type,w:e.w,h:e.h,c:e.color})),
+                pr:Engine.projectiles.filter(p=>!p.destroyed).map(p=>({x:p.x|0,y:p.y|0,vx:p.vx,vy:p.vy,c:p.color})),
+                it:Engine.items.filter(i=>!i.destroyed).map(i=>({x:i.x|0,y:i.y|0,t:i.type})),
+                cx:Engine.cameraX|0,tl:Engine.timeLeftSeconds,rn:Engine.round,
+                gs:Engine.state==='GAMEOVER', ei:Engine._lastEndInfo||null
+            };
+            openConns.forEach(c => { try{ c.conn.send(payload); }catch(e){} });
+        },
+
+        // FIX (i): antes, dash/poção/escudo do convidado eram aplicados SÓ localmente no cliente
+        // dele, que não roda a física da partida — ou seja, não tinham NENHUM efeito real no jogo.
+        // Agora o convidado manda um pedido de ação pro host, que é quem de fato aplica o efeito.
+        sendAction(a) {
+            if(!this.conn||!this.conn.open) return;
+            try{ this.conn.send({type:'action', a}); }catch(e){}
         },
 
         sendKeys() {
             if(!this.conn||!this.conn.open) return;
             // FIX: enviar a cada frame (sem throttle) — o throttle a cada 2 frames somado à
             // latência da rede fazia o host perder toques rápidos de movimento/ataque do guest,
-            // travando o Jogador 2 (não andava nem atirava).
+            // travando o jogador convidado (não andava nem atirava).
             let k=Engine.inputKeys;
             try{
-                // Remapeia WASD+F+G do guest para os controles do P2 (arrows+n+m)
                 this.conn.send({type:'keys',k:{
-                    'arrowleft': !!(k['a']||k['arrowleft']),
-                    'arrowright':!!(k['d']||k['arrowright']),
-                    'arrowup':   !!(k['w']||k['arrowup']),
-                    'n':         !!(k['f']||k['n']),
-                    'm':         !!(k['g']||k['m'])
+                    left:    !!(k['a']||k['arrowleft']),
+                    right:   !!(k['d']||k['arrowright']),
+                    up:      !!(k['w']||k['arrowup']),
+                    attack:  !!k['f'],
+                    special: !!k['g']
                 }});
             }catch(e){}
         },
@@ -3273,7 +3644,7 @@
             // FIX: ignora pacotes de estado desatualizados/fora de ordem (ver comentário em
             // sendState). Sem isso, um pacote antigo chegando depois de um mais novo podia
             // "puxar" o jogador de volta pra uma posição velha e dar a impressão de personagem
-            // travado, mesmo com o guest apertando as teclas corretamente.
+            // travado, mesmo com o jogador apertando as teclas corretamente.
             if(typeof data.seq === 'number') {
                 if(this._lastAppliedSeq && data.seq <= this._lastAppliedSeq) return;
                 this._lastAppliedSeq = data.seq;
@@ -3285,7 +3656,7 @@
                     p.x=pd.x; p.y=pd.y; p.hp=pd.hp; p.maxHp=pd.mhp; p.mp=pd.mp;
                     p.lives=pd.lv; p.facing=pd.fa; p.shieldTime=pd.sh?20:0;
                     if(pd.inv) p.inventory=pd.inv;
-                    p.goldCollected=pd.gc; p.weaponKey=pd.wk; p.syncHUD();
+                    p.goldCollected=pd.gc; p.weaponKey=pd.wk; p.kills=pd.kl||0; p.syncHUD();
                 }
             });
             if(data.en) Engine.enemies=data.en.map(ed=>{
@@ -3298,14 +3669,32 @@
             let mn=String(Math.floor(Engine.timeLeftSeconds/60)).padStart(2,'0');
             let sc=String(Engine.timeLeftSeconds%60).padStart(2,'0');
             document.getElementById('hud-timer-text').innerText=`${mn}:${sc} | Onda ${Engine.round}`;
-            if(data.gs&&Engine.state!=='GAMEOVER')
-                Engine.triggerMatchEnd(null,'FIM DE JOGO','Partida encerrada pelo host.');
+            if(data.gs&&Engine.state!=='GAMEOVER') {
+                Engine.state = 'GAMEOVER'; Engine.activeMatch = false;
+                Hideout.active = false;
+                let hh=document.getElementById('hideout-hud'); if(hh) hh.style.display='none';
+                let ha=document.getElementById('hideout-alert'); if(ha) ha.style.display='none';
+                document.getElementById('gameover-screen').classList.remove('hidden');
+                let ei = data.ei || { type:'elim', winnerId:null };
+                let myP = Engine.players.find(p=>p && p.id===Engine.mySlot);
+                let iWon = ei.type==='time' || (ei.type==='elim' && ei.winnerId===Engine.mySlot);
+                let earned = (iWon && myP) ? Math.min(350, myP.goldCollected||0) : 0;
+                if(earned > 0) { Engine.walletP1 += earned; Engine.saveProfile(); }
+                let myName = Engine.getProfileName(Engine.mySlot);
+                let title = ei.type==='time' ? t('timeVictoryTitle') : (iWon ? t('genericWinsTitle').replace('{name}', myName.toUpperCase()) : t('deathTitle'));
+                document.getElementById('lbl-gameover-title').innerText = title;
+                let rewardTxt = earned>0 ? `<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${earned}</span>` : '';
+                document.getElementById('lbl-gameover-stats').innerHTML = t('guestMatchEndDesc') + rewardTxt;
+                if(myP) Engine.registerMatchStats({ kills: myP.kills, goldEarned: earned, won: iWon });
+            }
         },
 
         disconnect() {
             this._stopHeartbeat();
-            this.isOnline=false; this.guestKeys={}; this._fc=0; this._seq=0; this._lastAppliedSeq=0;
+            this.isOnline=false; this.guestKeysBySlot={2:{},3:{},4:{}}; this._fc=0; this._seq=0; this._lastAppliedSeq=0; this._matchStarting=false;
             if(this.conn){try{this.conn.close();}catch(e){}this.conn=null;}
+            if(this.conns && this.conns.length){ this.conns.forEach(c=>{ try{c.conn.close();}catch(e){} }); }
+            this.conns=[];
             if(this.peer){try{this.peer.destroy();}catch(e){}this.peer=null;}
             this.isHost=false; this.roomCode=null;
         }
@@ -3321,6 +3710,97 @@
         arenaWidth: 1920, modeSolo: false, soloActivePlayer: 1, device: 'pc',
         players: [], enemies: [], projectiles: [], particles: [], items: [], platforms: [], chunksLoaded: {},
         secretZones: [], inputKeys: {}, pendingSpawns: [], openWorldSpawnCd: 0,
+
+        // FIX (i): "mySlot" identifica qual player SOU EU nesta partida (1 no solo/host, 2-4 se eu
+        // for convidado). "myAccountName" é sempre o nome da MINHA conta, nunca sobrescrito pelo
+        // nome de quem eu jogar online — corrige o bug de partidas solo aparecerem no nome do amigo
+        // depois de uma partida online.
+        mySlot: 1, myAccountName: '', rosterNames: {},
+
+        // Item (c): catálogo de cores e visuais do personagem. 'default' = grátis, o resto custa ouro.
+        cosmeticColors: [
+            { id:'default', hex:null, price:0 },
+            { id:'gold',    hex:'#eab308', price:150 },
+            { id:'purple',  hex:'#a855f7', price:150 },
+            { id:'cyan',    hex:'#06b6d4', price:200 },
+            { id:'pink',    hex:'#ec4899', price:200 },
+            { id:'white',   hex:'#f8fafc', price:250 },
+            { id:'obsidian',hex:'#1e293b', price:250 }
+        ],
+        cosmeticSkins: [
+            { id:'default', price:0 },
+            { id:'stripes', price:150 },
+            { id:'glow',    price:200 },
+            { id:'stars',   price:250 },
+            { id:'flame',   price:300 }
+        ],
+        defaultCosmetics() { return { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }; },
+        defaultProgress() { return { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }; },
+
+        // SISTEMA DE NÍVEIS: ganha XP jogando (base por partida + desempenho + vitória).
+        levelFromXp(xp) {
+            let level = 1, needed = 100, remaining = xp;
+            while(remaining >= needed) { remaining -= needed; level++; needed = 100 + (level-1)*40; }
+            return { level, xpIntoLevel: remaining, xpForNext: needed };
+        },
+        awardXp(amount) {
+            if(!amount || amount <= 0) return;
+            if(!this.persistentUpgradesP1.progress) this.persistentUpgradesP1.progress = this.defaultProgress();
+            let before = this.levelFromXp(this.persistentUpgradesP1.progress.xp).level;
+            this.persistentUpgradesP1.progress.xp += Math.round(amount);
+            let after = this.levelFromXp(this.persistentUpgradesP1.progress.xp).level;
+            this.checkAchievements();
+            this.refreshLevelBadge();
+            if(after > before) this.showLevelUpToast(after);
+            this.saveProfile();
+        },
+
+        // CONQUISTAS: completar desafios dá XP e mostra progresso. Cada conquista lê uma estatística
+        // já rastreada (ou calculada na hora, como nível e cosméticos comprados).
+        achievementCatalog: [
+            { id:'first_win',    xp:50,  target:1,   nameKey:'ach_first_win_name',    descKey:'ach_first_win_desc',    stat:'matchesWon' },
+            { id:'veteran',      xp:100, target:10,  nameKey:'ach_veteran_name',      descKey:'ach_veteran_desc',      stat:'matchesPlayed' },
+            { id:'gold_hunter',  xp:100, target:1000,nameKey:'ach_gold_hunter_name',  descKey:'ach_gold_hunter_desc',  stat:'totalGoldEarned' },
+            { id:'exterminator', xp:150, target:200, nameKey:'ach_exterminator_name', descKey:'ach_exterminator_desc', stat:'totalKills' },
+            { id:'collector',    xp:100, target:3,   nameKey:'ach_collector_name',    descKey:'ach_collector_desc',   stat:'cosmeticsOwned' },
+            { id:'champion',     xp:200, target:10,  nameKey:'ach_champion_name',     descKey:'ach_champion_desc',    stat:'matchesWon' },
+            { id:'legend',       xp:250, target:10,  nameKey:'ach_legend_name',       descKey:'ach_legend_desc',      stat:'level' }
+        ],
+        getAchievementProgress(ach) {
+            let prog = this.persistentUpgradesP1.progress || this.defaultProgress();
+            if(ach.stat === 'level') return this.levelFromXp(prog.xp).level;
+            if(ach.stat === 'cosmeticsOwned') {
+                let cos = this.persistentUpgradesP1.cosmetics || this.defaultCosmetics();
+                return Math.max(0, cos.ownedColors.length - 1) + Math.max(0, cos.ownedSkins.length - 1);
+            }
+            return prog.stats[ach.stat] || 0;
+        },
+        checkAchievements() {
+            if(!this.persistentUpgradesP1.progress) this.persistentUpgradesP1.progress = this.defaultProgress();
+            let prog = this.persistentUpgradesP1.progress;
+            let changed = false, newlyCompleted = [];
+            let pass = true;
+            while(pass) {
+                pass = false;
+                this.achievementCatalog.forEach(ach => {
+                    if(prog.claimed.includes(ach.id)) return;
+                    if(this.getAchievementProgress(ach) >= ach.target) {
+                        prog.claimed.push(ach.id); prog.xp += ach.xp;
+                        changed = true; pass = true; newlyCompleted.push(ach);
+                    }
+                });
+            }
+            if(changed) { newlyCompleted.forEach(ach => this.showAchievementToast(ach)); this.renderAchievements(); }
+            return changed;
+        },
+        registerMatchStats({ kills, goldEarned, won }) {
+            if(!this.persistentUpgradesP1.progress) this.persistentUpgradesP1.progress = this.defaultProgress();
+            let s = this.persistentUpgradesP1.progress.stats;
+            s.matchesPlayed++; if(won) s.matchesWon++;
+            s.totalKills += kills||0; s.totalGoldEarned += goldEarned||0;
+            let xpGain = 20 + (kills||0)*2 + Math.floor((goldEarned||0)/10) + (won ? 30 : 0);
+            this.awardXp(xpGain);
+        },
 
         modeSoloLabelKeys: { GOLDFUSH: 'soloLabelGoldfush', TITAN: 'soloLabelTitan', BOSS: 'soloLabelBoss' },
 
@@ -3339,8 +3819,8 @@
             { id: 'itm_shd2', price: 140, type: 'item', itemKey: 'shield', qty: 2 }
         ],
 
-        persistentUpgradesP1: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0 },
-        persistentUpgradesP2: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0 },
+        persistentUpgradesP1: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] } },
+        persistentUpgradesP2: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] } },
         ranking: [], playerNames: { p1: '', p2: '' },
 
         init() {
@@ -3348,24 +3828,29 @@
             this.ctx = this.canvas.getContext('2d');
             this.canvas.width = 1280; this.canvas.height = 720;
 
+            // FIX: chat lateral fixo — some/aparece automaticamente junto com a tela de menu,
+            // e nunca aparece na tela de login (auth-screen), sem precisar tocar em cada função
+            // que troca de tela pra mostrar/esconder o menu.
+            let menuScreenEl = document.getElementById('menu-screen');
+            let chatSidebarEl = document.getElementById('chat-sidebar');
+            if(menuScreenEl && chatSidebarEl) {
+                let syncSidebar = () => { chatSidebarEl.classList.toggle('hidden', menuScreenEl.classList.contains('hidden')); };
+                syncSidebar();
+                new MutationObserver(syncSidebar).observe(menuScreenEl, { attributes:true, attributeFilter:['class'] });
+            }
+
             window.addEventListener('keydown', e => {
                 let k = e.key.toLowerCase();
                 this.inputKeys[k] = true;
                 if(e.repeat) return;
-                // FIX: em partida online, o convidado (guest) só pode acionar os próprios itens
-                // (Jogador 2) e o host só os do Jogador 1 — antes qualquer um dos dois clientes
-                // conseguia ativar poção/escudo dos DOIS jogadores, pois as teclas 1/2/8/9 chamavam
-                // useItemViaClick() localmente sem checar de quem é a partida/quem está jogando.
-                let isOnlineMatch = OnlineSync.isOnline;
-                let canControlP1 = !isOnlineMatch || OnlineSync.isHost;
-                let canControlP2 = !isOnlineMatch || !OnlineSync.isHost;
-                if(k === 'q' && canControlP1) this.triggerDash(1);
-                if(k === '1' && canControlP1) this.useItemViaClick(1, 'potion');
-                if(k === '2' && canControlP1) this.useItemViaClick(1, 'shield');
+                // FIX (f/i): agora TODO mundo (host, solo, ou qualquer convidado slot 2/3/4) usa as
+                // MESMAS teclas (Q/1/2) pro próprio personagem, identificado por Engine.mySlot.
+                // Isso também corrige o bug de dash/poção/escudo do convidado não terem efeito real:
+                // triggerDash/useItemViaClick agora mandam a ação pro host quando quem clicou não é o host.
+                if(k === 'q') this.triggerDash(this.mySlot);
+                if(k === '1') this.useItemViaClick(this.mySlot, 'potion');
+                if(k === '2') this.useItemViaClick(this.mySlot, 'shield');
                 if(k === 'b') this.tryOpenChest();
-                if(k === '0' && canControlP2) this.triggerDash(2);
-                if(k === '8' && canControlP2) this.useItemViaClick(2, 'potion');
-                if(k === '9' && canControlP2) this.useItemViaClick(2, 'shield');
                 if(k === 'e') {
                     if(!Hideout.active) this.tryEnterHideout();
                 }
@@ -3392,8 +3877,13 @@
             this.selectArch(1, 'hero');
             this.selectArch(2, 'vilan');
             this.applyLanguage();
-            this.device = 'pc';
+            this.device = this.detectDevice();
             this.applyDeviceUI();
+            // FIX: recalcula o tipo de aparelho se a janela mudar de forma relevante (ex: tablet
+            // alternando entre modo mesa/tablet, ou o usuário girando o celular), pra os controles
+            // de toque aparecerem/sumirem sozinhos sem precisar recarregar a página.
+            window.addEventListener('resize', () => { this.device = this.detectDevice(); });
+            window.addEventListener('orientationchange', () => { this.device = this.detectDevice(); });
             Accounts.init();
             requestAnimationFrame(t => this.loop(t));
         },
@@ -3405,6 +3895,34 @@
 
         applyDeviceUI() {
             this.setGameMode(this.gameMode);
+        },
+
+        // Chat lateral fixo no menu: recolhe/expande pela setinha, sem nunca sumir da tela de menu
+        toggleChatSidebar() {
+            let panel = document.getElementById('chat-sidebar-panel');
+            let btn = document.getElementById('chat-sidebar-toggle');
+            let collapsed = panel.classList.toggle('collapsed');
+            btn.textContent = collapsed ? '▶' : '◀';
+        },
+
+        // FIX: detecção automática de celular/tablet vs computador. Antes o dispositivo ficava
+        // sempre travado em 'pc' (a tela antiga de escolha manual foi removida), então os
+        // controles de toque nunca apareciam em celulares. Agora checamos:
+        // 1) se o navegador tem um ponteiro "grosso" (dedo, sem precisão de mouse);
+        // 2) se o aparelho realmente suporta toque;
+        // 3) e reforçamos com o user-agent (Android/iPhone/iPad/Quest/etc) pra cobrir casos raros
+        //    onde só um dos dois sinais acima falha (ex: alguns emuladores e híbridos).
+        // Um notebook com tela touchscreen mas usado com mouse continua sendo tratado como 'pc'.
+        detectDevice() {
+            try {
+                let coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+                let hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+                let ua = navigator.userAgent || '';
+                let uaLooksMobile = /Android|iPhone|iPad|iPod|Mobile|Silk|Windows Phone|Meta Quest|Oculus/i.test(ua);
+                return (hasTouch && (coarsePointer || uaLooksMobile)) ? 'mobile' : 'pc';
+            } catch(e) {
+                return 'pc';
+            }
         },
 
         // FIX: alterna as teclas virtuais de toque (mesmo objeto inputKeys usado pelo teclado)
@@ -3440,8 +3958,16 @@
             try {
                 this.walletP1 = (typeof acc.wallet === 'number') ? acc.wallet : 100;
                 if(acc.upg) this.persistentUpgradesP1 = {...acc.upg};
+                if(!this.persistentUpgradesP1.cosmetics) this.persistentUpgradesP1.cosmetics = this.defaultCosmetics();
+                if(!this.persistentUpgradesP1.progress) this.persistentUpgradesP1.progress = this.defaultProgress();
                 this.ranking = acc.ranking || [];
                 this.playerNames.p1 = acc.name;
+                // FIX (i): "myAccountName" e "mySlot" são sempre restaurados aqui no boot/login,
+                // garantindo que uma partida solo jogada depois de uma partida online NUNCA
+                // mostre o nome do amigo no lugar do seu.
+                this.myAccountName = acc.name;
+                this.mySlot = 1;
+                this.rosterNames = {};
                 if(!this.playerNames.p2) this.playerNames.p2 = 'Convidado';
                 if(acc.lang && I18N[acc.lang]) Settings.language = acc.lang;
                 if(typeof acc.vol === 'number') Settings.volume = acc.vol;
@@ -3457,12 +3983,16 @@
                         if(d.p2name) this.playerNames.p2 = d.p2name;
                     }
                 } catch(e) { console.warn('localStorage bloqueado/indisponível, seguindo sem dados locais do P2:', e); }
+                if(!this.persistentUpgradesP2.cosmetics) this.persistentUpgradesP2.cosmetics = this.defaultCosmetics();
                 document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === Settings.language));
                 let volSlider = document.getElementById('rng-volume');
                 if(volSlider) volSlider.value = Math.round(Settings.volume * 100);
                 this.applyLanguage();
                 let lblUser = document.getElementById('lbl-logged-in-user');
                 if(lblUser) lblUser.textContent = '👤 ' + acc.name;
+                // Chat lateral fixo: carrega a lista de conversas assim que o menu aparece
+                if(typeof Chat !== 'undefined') Chat.loadConversations();
+                this.refreshLevelBadge();
             } catch(err) {
                 console.error('Erro ao aplicar dados da conta (seguindo mesmo assim pro menu):', err);
             }
@@ -3514,12 +4044,12 @@
             document.getElementById('menu-screen').classList.remove('hidden');
         },
 
-        startOnlineMatch() {
+        startOnlineMatch(roster, mySlot) {
             document.getElementById('online-lobby-screen').classList.add('hidden');
             this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999;
             this.enemies = []; this.projectiles = []; this.particles = []; this.items = []; this.platforms = [];
             this.chunksLoaded = {}; this.cameraX = 0; this.secretZones = []; this.pendingSpawns = []; this.openWorldSpawnCd = 0;
-            this.timeLeftSeconds = 300; this.timerTicker = 0; this.activeMatch = false;
+            this.timeLeftSeconds = 300; this.timerTicker = 0; this.activeMatch = false; this._lastEndInfo = null;
             this.isOpenWorld = false; this.gameMode = 'DUELO';
             Hideout.active = false;
             document.getElementById('hideout-hud').style.display = 'none';
@@ -3529,31 +4059,48 @@
             this.platforms.push(new Platform(490,350,300,20)); this.platforms.push(new Platform(200,200,250,20));
             this.platforms.push(new Platform(830,200,250,20)); this.platforms.push(new Platform(1180,500,320,20));
             this.platforms.push(new Platform(1300,200,280,20)); this.platforms.push(new Platform(1620,350,260,20));
-            // Guest envia WASD→ remapeado para arrowleft/right/up + n/m pelo OnlineSync.sendKeys()
-            this.players = [
-                new Player(1,300,400,this.selectedArchP1,{left:'a',right:'d',up:'w',attack:'f',special:'g'},this.persistentUpgradesP1,1),
-                new Player(2,900,400,this.selectedArchP2,{left:'arrowleft',right:'arrowright',up:'arrowup',attack:'n',special:'m'},this.persistentUpgradesP2,2)
-            ];
-            document.getElementById('hud-p2').classList.remove('hidden');
+
+            // FIX (f): partida agora suporta de 2 a 4 jogadores, montados a partir de um "roster"
+            // enviado pelo host (cada slot com seu próprio arquétipo/cor/visual escolhidos).
+            // FIX (i): "mySlot" e "rosterNames" garantem que CADA cliente sempre saiba corretamente
+            // qual personagem é o SEU PRÓPRIO, sem nunca sobrescrever o nome da própria conta.
+            roster = roster || [{slot:1, name:this.getProfileName(1), arch:this.selectedArchP1, col:null, skn:'default'}];
+            this.mySlot = mySlot || 1;
+            this.rosterNames = {}; roster.forEach(r => { this.rosterNames[r.slot] = r.name; });
+            let spawnXs = [250, 700, 1150, 1600];
+            this.players = roster.map((r, idx) => {
+                let upg = (r.slot === 1) ? this.persistentUpgradesP1 : this.persistentUpgradesP2;
+                let cosmetics = { color: r.col || null, skin: r.skn || 'default' };
+                return new Player(r.slot, spawnXs[idx] || (250 + idx*450), 400, r.arch || 'vilan', null, upg, r.slot, cosmetics);
+            });
+            for(let i=1; i<=4; i++) {
+                let el = document.getElementById('hud-p'+i);
+                if(el) el.classList.toggle('hidden', !roster.some(r => r.slot === i));
+            }
             this.players.forEach(p => { p.inventory.potion = Math.max(1, p.inventory.potion); p.syncHUD(); });
             this.state = 'IN_GAME';
             setTimeout(() => { this.activeMatch = true; }, 600);
         },
 
         getProfileName(profileId) {
+            if(profileId === this.mySlot) {
+                let mine = this.myAccountName || this.playerNames.p1;
+                return (mine && mine.length) ? mine : 'Jogador';
+            }
+            if(this.rosterNames && this.rosterNames[profileId]) return this.rosterNames[profileId];
             let nm = profileId === 1 ? this.playerNames.p1 : this.playerNames.p2;
-            return (nm && nm.length) ? nm : (profileId === 1 ? 'Player 1' : 'Player 2');
+            return (nm && nm.length) ? nm : ('Player ' + profileId);
         },
 
         async resetSavedData() {
             this.walletP1 = 100; this.walletP2 = 100;
-            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0 };
-            this.persistentUpgradesP2 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0 };
+            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress() };
+            this.persistentUpgradesP2 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress() };
             this.ranking = []; this.soloActivePlayer = 1;
             Settings.language = 'pt-BR'; Settings.volume = 0.7; Settings.sfxEnabled = true; Settings.musicEnabled = true;
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === 'pt-BR'));
             let volSlider = document.getElementById('rng-volume'); if(volSlider) volSlider.value = 70;
-            this.applyLanguage(); this.saveProfile(); this.closeSettings(); this.updateMenu();
+            this.applyLanguage(); this.saveProfile(); this.closeSettings(); this.updateMenu(); this.refreshLevelBadge();
         },
 
         openSettings() { document.getElementById('settings-screen').classList.remove('hidden'); },
@@ -3573,14 +4120,15 @@
             const input = (document.getElementById('delete-account-confirm-input').value || '').trim();
             const msg = document.getElementById('delete-account-msg');
             const setMsg = (m) => { msg.textContent = m; msg.classList.toggle('hidden', !m); };
-            if (input.toUpperCase() !== 'APAGAR') { setMsg('Digite exatamente "APAGAR" para confirmar.'); return; }
+            const confirmWord = t('deleteConfirmWord') || 'APAGAR';
+            if (input.toUpperCase() !== confirmWord.toUpperCase()) { setMsg(t('deleteConfirmMismatchMsg').replace('{word}', confirmWord)); return; }
             const btn = document.getElementById('btn-confirm-delete');
-            btn.disabled = true; setMsg('Apagando sua conta, aguarde...');
+            btn.disabled = true; setMsg(t('deletingAccountMsg'));
             try {
                 await Accounts.deleteAccountForever();
                 // Se chegou aqui sem erro, a conta já foi apagada; a sessão será encerrada automaticamente.
             } catch (err) {
-                setMsg('Erro ao apagar conta: ' + (err.message || err));
+                setMsg(t('deleteAccountErrorMsg').replace('{err}', err.message || err));
                 btn.disabled = false;
             }
         },
@@ -3665,6 +4213,7 @@
             });
         },
         updateMenu() {
+            this.refreshLevelBadge();
             let desc = document.getElementById('lbl-arch-desc');
             let solo = this.isSoloMatch();
             if(solo) {
@@ -3680,13 +4229,119 @@
         },
         renderShop() {
             let activeWallet = this.walletP1;
+            let walletEl = document.getElementById('shop-wallet-display'); if(walletEl) walletEl.innerText = `$${activeWallet}`;
             let container = document.getElementById('menu-shop-items'); container.innerHTML = '';
             this.shopCatalog.forEach(item => {
                 let div = document.createElement('div'); div.className = 'shop-item';
                 div.innerHTML = `<div class="item-info"><h4>${tShop(item.id,'name')}</h4><p>${tShop(item.id,'desc')}</p></div><button class="btn-buy" ${activeWallet < item.price ? 'disabled' : ''} onclick="Engine.buyItemMenu('${item.id}')">$${item.price}</button>`;
                 container.appendChild(div);
             });
+            this.renderCosmetics();
         },
+
+        // Item (c): cor e visual do personagem — visuais melhores custam ouro, uma vez comprados ficam
+        // liberados pra sempre e podem ser trocados livremente.
+        renderCosmetics() {
+            if(!this.persistentUpgradesP1.cosmetics) this.persistentUpgradesP1.cosmetics = this.defaultCosmetics();
+            let cos = this.persistentUpgradesP1.cosmetics;
+            let colWrap = document.getElementById('cosmetic-colors');
+            if(colWrap) {
+                colWrap.innerHTML = '';
+                this.cosmeticColors.forEach(c => {
+                    let owned = cos.ownedColors.includes(c.id);
+                    let selected = c.id === 'default' ? !cos.color : (cos.color === c.hex);
+                    let btn = document.createElement('div');
+                    btn.className = 'cosmetic-swatch' + (selected ? ' selected' : '');
+                    btn.style.background = c.hex || 'linear-gradient(135deg,#22c55e,#ef4444,#38bdf8)';
+                    btn.title = t('cosColor_' + c.id) + (owned ? '' : ` — $${c.price}`);
+                    btn.innerHTML = selected ? '✓' : (owned ? '' : `🔒<br>$${c.price}`);
+                    btn.onclick = () => this.selectCosmeticColor(c.id);
+                    colWrap.appendChild(btn);
+                });
+            }
+            let sknWrap = document.getElementById('cosmetic-skins');
+            if(sknWrap) {
+                sknWrap.innerHTML = '';
+                this.cosmeticSkins.forEach(s => {
+                    let owned = cos.ownedSkins.includes(s.id);
+                    let selected = cos.skin === s.id;
+                    let btn = document.createElement('div');
+                    btn.className = 'cosmetic-skin-btn' + (selected ? ' selected' : '');
+                    btn.innerHTML = `${t('cosSkin_' + s.id)}${owned ? '' : ` 🔒 $${s.price}`}`;
+                    btn.onclick = () => this.selectCosmeticSkin(s.id);
+                    sknWrap.appendChild(btn);
+                });
+            }
+        },
+        selectCosmeticColor(id) {
+            let cos = this.persistentUpgradesP1.cosmetics;
+            let def = this.cosmeticColors.find(c => c.id === id); if(!def) return;
+            if(!cos.ownedColors.includes(id)) {
+                if(this.walletP1 < def.price) return;
+                this.walletP1 -= def.price; cos.ownedColors.push(id);
+            }
+            cos.color = def.hex;
+            AudioFX.play('coin'); this.saveProfile(); this.renderShop();
+        },
+        selectCosmeticSkin(id) {
+            let cos = this.persistentUpgradesP1.cosmetics;
+            let def = this.cosmeticSkins.find(s => s.id === id); if(!def) return;
+            if(!cos.ownedSkins.includes(id)) {
+                if(this.walletP1 < def.price) return;
+                this.walletP1 -= def.price; cos.ownedSkins.push(id);
+            }
+            cos.skin = id;
+            AudioFX.play('coin'); this.saveProfile(); this.renderShop();
+        },
+
+        // SISTEMA DE NÍVEIS + CONQUISTAS (item pedido)
+        openAchievements() {
+            this.renderAchievements();
+            document.getElementById('achievements-screen').classList.remove('hidden');
+        },
+        closeAchievements() { document.getElementById('achievements-screen').classList.add('hidden'); },
+        refreshLevelBadge() {
+            if(!this.persistentUpgradesP1.progress) this.persistentUpgradesP1.progress = this.defaultProgress();
+            let { level, xpIntoLevel, xpForNext } = this.levelFromXp(this.persistentUpgradesP1.progress.xp);
+            let pct = Math.min(100, Math.round((xpIntoLevel / xpForNext) * 100));
+            [['lbl-level-badge','bar-xp','lbl-xp-text'], ['ach-level-badge','ach-bar-xp','ach-xp-text']].forEach(([badgeId, barId, textId]) => {
+                let badge = document.getElementById(badgeId); if(badge) badge.textContent = `${t('levelBadgeLabel')} ${level}`;
+                let bar = document.getElementById(barId); if(bar) bar.style.width = pct + '%';
+                let txt = document.getElementById(textId); if(txt) txt.textContent = `${xpIntoLevel}/${xpForNext} XP`;
+            });
+        },
+        renderAchievements() {
+            this.refreshLevelBadge();
+            let list = document.getElementById('achievements-list'); if(!list) return;
+            let prog = this.persistentUpgradesP1.progress || this.defaultProgress();
+            list.innerHTML = '';
+            this.achievementCatalog.forEach(ach => {
+                let current = Math.min(ach.target, this.getAchievementProgress(ach));
+                let done = prog.claimed.includes(ach.id);
+                let pct = Math.round((current / ach.target) * 100);
+                let card = document.createElement('div');
+                card.className = 'achievement-card' + (done ? ' completed' : '');
+                card.innerHTML = `
+                    <div class="ach-head">
+                        <span class="ach-name">${done ? '✅ ' : ''}${t(ach.nameKey)}</span>
+                        <span class="ach-xp">+${ach.xp} XP</span>
+                    </div>
+                    <div class="ach-desc">${t(ach.descKey)}</div>
+                    <div class="ach-bar-bg"><div class="ach-bar-fill" style="width:${pct}%"></div></div>
+                    <div class="ach-progress-text">${current}/${ach.target}</div>
+                `;
+                list.appendChild(card);
+            });
+        },
+        showToast(text) {
+            let stack = document.getElementById('toast-stack'); if(!stack) return;
+            let el = document.createElement('div'); el.className = 'game-toast'; el.textContent = text;
+            stack.appendChild(el);
+            setTimeout(() => el.remove(), 3300);
+        },
+        showLevelUpToast(level) { this.showToast(`⭐ ${t('levelUpToast').replace('{level}', level)}`); },
+        showAchievementToast(ach) { this.showToast(`🏆 ${t('achievementUnlockedToast').replace('{name}', t(ach.nameKey))}`); },
+
         buyItemMenu(itemId) {
             let item = this.shopCatalog.find(i => i.id === itemId); if(!item) return;
             if(this.walletP1 < item.price) return; this.walletP1 -= item.price; this.applyUpgradeData(this.persistentUpgradesP1, item);
@@ -3731,18 +4386,21 @@
                 // (sem baús na arena — apenas no mundo infinito)
             }
 
+            this.mySlot = 1; this.rosterNames = {};
             let soloMatch = this.isSoloMatch();
             if(soloMatch) {
                 let profileNum = this.soloActivePlayer;
                 let archChoice = profileNum === 1 ? this.selectedArchP1 : this.selectedArchP2;
                 let upgData = profileNum === 1 ? this.persistentUpgradesP1 : this.persistentUpgradesP2;
-                this.players = [new Player(1, 300, 400, archChoice, { left: 'a', right: 'd', up: 'w', attack: 'f', special: 'g' }, upgData, profileNum)];
+                this.players = [new Player(1, 300, 400, archChoice, { left: 'a', right: 'd', up: 'w', attack: 'f', special: 'g' }, upgData, profileNum, upgData.cosmetics)];
                 document.getElementById('hud-p2').classList.add('hidden');
             } else {
-                this.players = [new Player(1, 300, 400, this.selectedArchP1, { left: 'a', right: 'd', up: 'w', attack: 'f', special: 'g' }, this.persistentUpgradesP1, 1)];
-                this.players.push(new Player(2, 900, 400, this.selectedArchP2, { left: 'arrowleft', right: 'arrowright', up: 'arrowup', attack: 'n', special: 'm' }, this.persistentUpgradesP2, 2));
+                this.players = [new Player(1, 300, 400, this.selectedArchP1, { left: 'a', right: 'd', up: 'w', attack: 'f', special: 'g' }, this.persistentUpgradesP1, 1, this.persistentUpgradesP1.cosmetics)];
+                this.players.push(new Player(2, 900, 400, this.selectedArchP2, { left: 'arrowleft', right: 'arrowright', up: 'arrowup', attack: 'n', special: 'm' }, this.persistentUpgradesP2, 2, this.persistentUpgradesP2.cosmetics));
                 document.getElementById('hud-p2').classList.remove('hidden');
             }
+            let p3el = document.getElementById('hud-p3'); if(p3el) p3el.classList.add('hidden');
+            let p4el = document.getElementById('hud-p4'); if(p4el) p4el.classList.add('hidden');
 
             if(this.gameMode === 'TITAN') {
                 this.players.forEach(titan => { titan.maxHp *= 2.5; titan.hp = titan.maxHp; titan.baseSpd *= 1.6; titan.dmgMod *= 2.5; titan.lives = 5; });
@@ -3755,12 +4413,11 @@
 
         // FIX: Dash não reduz escudo ativo — usa Math.max para preservar duração maior
         triggerDash(pId) {
-            // FIX: mesma trava online do useItemViaClick — impede dash "por controle remoto"
-            // do jogador que não é o seu em partidas online.
-            if(OnlineSync.isOnline) {
-                let canControl = OnlineSync.isHost ? (pId === 1) : (pId === 2);
-                if(!canControl) return;
-            }
+            if(pId !== this.mySlot) return; // só posso acionar o dash do MEU próprio personagem
+            // FIX (i): antes, o convidado aplicava o dash SÓ no seu próprio cliente, que não roda a
+            // física real da partida (o host é quem manda) — ou seja, o dash do convidado nunca
+            // tinha efeito nenhum no jogo de verdade. Agora ele pede pro host aplicar por ele.
+            if(OnlineSync.isOnline && !OnlineSync.isHost) { OnlineSync.sendAction('dash'); return; }
             let p = this.players.find(pl => pl && pl.id === pId);
             if(p && p.lives > 0 && p.dashCooldown <= 0) {
                 p.vx = p.facing * (p.baseSpd * 2.5);
@@ -3772,12 +4429,10 @@
         },
 
         useItemViaClick(pId, type) {
-            // FIX: mesmo bloqueio do teclado, mas aqui pros cliques de HUD/touch — em partida
-            // online cada cliente só pode acionar o item do jogador que ele de fato controla.
-            if(OnlineSync.isOnline) {
-                let canControl = OnlineSync.isHost ? (pId === 1) : (pId === 2);
-                if(!canControl) return;
-            }
+            if(pId !== this.mySlot) return; // só posso usar item do MEU próprio personagem
+            // FIX (i): mesmo problema do dash — poção/escudo do convidado eram inúteis antes,
+            // porque só mexiam numa cópia local sem efeito na simulação real (rodando no host).
+            if(OnlineSync.isOnline && !OnlineSync.isHost) { OnlineSync.sendAction(type); return; }
             let p = this.players.find(pl => pl && pl.id === pId);
             if(!p || p.lives <= 0 || this.state !== 'IN_GAME') return;
             if(p.inventory[type] > 0) {
@@ -3789,7 +4444,7 @@
         },
 
         tryOpenChest() {
-            let p = this.players[0];
+            let p = this.players.find(pl => pl && pl.id === this.mySlot) || this.players[0];
             if(!p || p.lives <= 0 || this.state !== 'IN_GAME') return;
             if(Hideout.active) { Hideout.openHideoutChest(p); return; }
             Engine.items.forEach(it => {
@@ -3853,52 +4508,58 @@
         updateProceduralWorld(dt) {
             if(!this.isOpenWorld) return;
             let p = this.players[0]; if(!p) return;
-            let currentChunk = Math.floor(p.x / 1280);
+            let aliveP = this.players.filter(pl => pl && pl.lives > 0);
+            if(aliveP.length === 0) aliveP = [p];
 
-            for(let i = currentChunk - 2; i <= currentChunk + 2; i++) {
-                if(!this.chunksLoaded[i]) {
-                    this.chunksLoaded[i] = true;
-                    let startX = i * 1280;
-                    this.platforms.push(new Platform(startX, 680, 1285, 40));
-                    if(i !== 0) {
-                        let heights = [530, 390, 250], widthOfPlatform = 280;
-                        this.platforms.push(new Platform(startX + 100, heights[0], widthOfPlatform, 20));
-                        this.platforms.push(new Platform(startX + 500, heights[1], widthOfPlatform, 20));
-                        this.platforms.push(new Platform(startX + 900, heights[2], widthOfPlatform, 20));
+            // FIX: carrega chunks ao redor de TODOS os jogadores vivos (antes só considerava o Jogador 1),
+            // o que fazia o Jogador 2 cair em áreas sem chão/inimigos ("sumir") quando se afastava no mundo aberto online
+            aliveP.forEach(pl => {
+                let currentChunk = Math.floor(pl.x / 1280);
+                for(let i = currentChunk - 2; i <= currentChunk + 2; i++) {
+                    if(!this.chunksLoaded[i]) {
+                        this.chunksLoaded[i] = true;
+                        let startX = i * 1280;
+                        this.platforms.push(new Platform(startX, 680, 1285, 40));
+                        if(i !== 0) {
+                            let heights = [530, 390, 250], widthOfPlatform = 280;
+                            this.platforms.push(new Platform(startX + 100, heights[0], widthOfPlatform, 20));
+                            this.platforms.push(new Platform(startX + 500, heights[1], widthOfPlatform, 20));
+                            this.platforms.push(new Platform(startX + 900, heights[2], widthOfPlatform, 20));
 
-                        if(Math.random() < 0.5) this.items.push(new Item(startX + 620, heights[1] - 28, 'chest'));
-                        if(Math.random() < 0.5) this.items.push(new Item(startX + 1020, heights[2] - 28, 'chest'));
+                            if(Math.random() < 0.5) this.items.push(new Item(startX + 620, heights[1] - 28, 'chest'));
+                            if(Math.random() < 0.5) this.items.push(new Item(startX + 1020, heights[2] - 28, 'chest'));
 
-                        // FIX: esconderijos mais raros no mundo infinito
-                        if(Math.random() < 0.12) {
-                            let platIdx = Math.floor(Math.random() * 3);
-                            let szX = startX + [100, 500, 900][platIdx] + 110;
-                            let szY = heights[platIdx] - 50;
-                            this.secretZones.push(new SecretZone(szX, szY));
-                        }
-
-                        // FIX: spawns entram numa fila e não são mais perdidos quando o limite de monstros está cheio,
-                        // garantindo que continuem aparecendo conforme o jogador avança pelo mundo infinito
-                        if(this.gameMode !== 'BOSS') {
-                            if(Math.random() < 0.85) {
-                                let types = ['slime', 'shadow', 'shooter'];
-                                let spotX = startX + (Math.random() < 0.5 ? 200 : 600);
-                                let spotH = heights[Math.floor(Math.random() * 2)];
-                                this.pendingSpawns.push({ x: spotX, y: spotH - 40, type: types[Math.floor(Math.random()*types.length)] });
+                            // FIX: esconderijos mais raros no mundo infinito
+                            if(Math.random() < 0.12) {
+                                let platIdx = Math.floor(Math.random() * 3);
+                                let szX = startX + [100, 500, 900][platIdx] + 110;
+                                let szY = heights[platIdx] - 50;
+                                this.secretZones.push(new SecretZone(szX, szY));
                             }
-                            if(Math.random() < 0.4) {
-                                let types = ['slime', 'shadow', 'shooter'];
-                                this.pendingSpawns.push({ x: startX + 900, y: heights[2] - 40, type: types[Math.floor(Math.random()*types.length)] });
+
+                            // FIX: spawns entram numa fila e não são mais perdidos quando o limite de monstros está cheio,
+                            // garantindo que continuem aparecendo conforme o jogador avança pelo mundo infinito
+                            if(this.gameMode !== 'BOSS') {
+                                if(Math.random() < 0.85) {
+                                    let types = ['slime', 'shadow', 'shooter'];
+                                    let spotX = startX + (Math.random() < 0.5 ? 200 : 600);
+                                    let spotH = heights[Math.floor(Math.random() * 2)];
+                                    this.pendingSpawns.push({ x: spotX, y: spotH - 40, type: types[Math.floor(Math.random()*types.length)] });
+                                }
+                                if(Math.random() < 0.4) {
+                                    let types = ['slime', 'shadow', 'shooter'];
+                                    this.pendingSpawns.push({ x: startX + 900, y: heights[2] - 40, type: types[Math.floor(Math.random()*types.length)] });
+                                }
                             }
                         }
                     }
                 }
-            }
+            });
 
-            this.enemies = this.enemies.filter(e => Math.abs(e.x - p.x) < 3200);
-
-            // FIX: consome a fila de spawns pendentes gradualmente conforme há espaço, em vez de descartá-los
-            this.pendingSpawns = this.pendingSpawns.filter(s => Math.abs(s.x - p.x) < 6400);
+            // FIX: distância de limpeza/manutenção agora é medida até o jogador vivo mais próximo (não só o Jogador 1),
+            // pra inimigos e spawns pendentes não sumirem do lado do Jogador 2 quando ele se afasta do Jogador 1
+            this.enemies = this.enemies.filter(e => aliveP.some(pl => Math.abs(e.x - pl.x) < 3200));
+            this.pendingSpawns = this.pendingSpawns.filter(s => aliveP.some(pl => Math.abs(s.x - pl.x) < 6400));
             this.openWorldSpawnCd -= dt;
             if(this.gameMode !== 'BOSS' && this.pendingSpawns.length > 0 && this.enemies.length < 11 && this.openWorldSpawnCd <= 0) {
                 let next = this.pendingSpawns.shift();
@@ -3928,7 +4589,22 @@
                 }
             }
 
-            this.cameraX = p.x - 640 + p.w/2;
+            // FIX: câmera agora centraliza a MÉDIA de todos os jogadores vivos (antes só seguia o Jogador 1,
+            // fazendo o Jogador 2 sair da tela). Em multiplayer, os jogadores também são mantidos dentro da
+            // área visível da câmera compartilhada pra nenhum "sumir" quando cada um vai pra um canto do mapa.
+            if(aliveP.length > 1) {
+                let avgX = aliveP.reduce((s, pl) => s + pl.x + pl.w/2, 0) / aliveP.length;
+                this.cameraX = avgX - 640;
+                const PAD = 60;
+                aliveP.forEach(pl => {
+                    let minPx = this.cameraX + PAD;
+                    let maxPx = this.cameraX + 1280 - pl.w - PAD;
+                    if(pl.x < minPx) pl.x = minPx;
+                    else if(pl.x > maxPx) pl.x = maxPx;
+                });
+            } else {
+                this.cameraX = p.x - 640 + p.w/2;
+            }
         },
 
         loop(timestamp) {
@@ -3974,6 +4650,19 @@
                     let avgX = aliveP.reduce((s, p) => s + p.x + p.w/2, 0) / aliveP.length;
                     this.cameraX = Math.max(0, Math.min(maxCam, avgX - 640));
                 } else { this.cameraX = Math.max(0, Math.min(maxCam, this.cameraX)); }
+
+                // FIX: mantém todos os jogadores vivos dentro da área visível da câmera compartilhada.
+                // Antes, se cada um corresse pra um canto oposto da arena, a câmera centralizava a média
+                // e um dos dois ficava fora da tela ("sumia"). Agora eles são suavemente segurados na borda.
+                if(aliveP.length > 1) {
+                    const PAD = 60;
+                    aliveP.forEach(p => {
+                        let minPx = this.cameraX + PAD;
+                        let maxPx = this.cameraX + 1280 - p.w - PAD;
+                        if(p.x < minPx) p.x = minPx;
+                        else if(p.x > maxPx) p.x = maxPx;
+                    });
+                }
 
                 if(this.gameMode === 'BOSS') {
                     this.bossSpawnTimer += dt;
@@ -4036,10 +4725,17 @@
                 if(this.players.length === 1) {
                     if(this.players[0].lives <= 0) this.triggerMatchEnd(null, t('deathTitle'), t('deathDesc'));
                 } else {
-                    let p1Alive = this.players[0] && this.players[0].lives > 0;
-                    let p2Alive = this.players[1] && this.players[1].lives > 0;
-                    if(!p1Alive) this.triggerMatchEnd(this.players[1], t('p2WinsTitle'), t('p2WinsDesc'));
-                    else if(!p2Alive) this.triggerMatchEnd(this.players[0], t('p1WinsTitle'), t('p1WinsDesc'));
+                    // FIX (f): condição de vitória generalizada pra até 4 jogadores — antes só
+                    // considerava exatamente 2 (Jogador 1 x Jogador 2), quebrando partidas com
+                    // 3 ou 4 pessoas (a partida nunca terminava quando restava só 1 vivo).
+                    let alive = this.players.filter(p => p && p.lives > 0);
+                    if(alive.length <= 1) {
+                        let winner = alive[0] || null;
+                        if(winner && winner.id === 1) this.triggerMatchEnd(winner, t('p1WinsTitle'), t('p1WinsDesc'));
+                        else if(winner && winner.id === 2 && this.players.length === 2) this.triggerMatchEnd(winner, t('p2WinsTitle'), t('p2WinsDesc'));
+                        else if(winner) this.triggerMatchEnd(winner, t('genericWinsTitle').replace('{name}', this.getProfileName(winner.profileId).toUpperCase()), t('genericWinsDesc').replace('{name}', this.getProfileName(winner.profileId)));
+                        else this.triggerMatchEnd(null, t('deathTitle'), t('deathDesc'));
+                    }
                 }
             }
         },
@@ -4052,14 +4748,18 @@
             document.getElementById('hideout-alert').style.display = 'none';
             document.getElementById('gameover-screen').classList.remove('hidden');
             document.getElementById('lbl-gameover-title').innerText = t('timeVictoryTitle');
+            this._lastEndInfo = { type: 'time' };
 
             let goldLines = [];
             this.players.forEach(p => {
                 if(!p) return;
-                // Credita ouro na carteira de cada jogador
-                if(p.profileId === 1) this.walletP1 += p.goldCollected;
-                else this.walletP2 += p.goldCollected;
-                goldLines.push(`${this.getProfileName(p.profileId)}: +$${p.goldCollected}`);
+                // FIX (e): recompensa de vitória agora tem um teto de 350 de ouro, mesmo que o
+                // jogador tenha coletado mais durante a partida — sem isso ficava fácil demais
+                // acumular ouro rápido.
+                let reward = Math.min(350, p.goldCollected);
+                if(p.profileId === 1) this.walletP1 += reward;
+                else if(p.profileId === 2) this.walletP2 += reward;
+                goldLines.push(`${this.getProfileName(p.profileId)}: +$${reward}`);
                 // Registra vitória no ranking para cada jogador
                 let nameLabel = `${this.getProfileName(p.profileId)} (${p.archetype.toUpperCase()})`;
                 let record = this.ranking.find(r => r.name === nameLabel);
@@ -4069,6 +4769,8 @@
             let desc = t('timeVictoryDesc').replace('{mins}', mins);
             document.getElementById('lbl-gameover-stats').innerHTML =
                 `${desc}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: ${goldLines.join(' | ')}</span>`;
+            let myP = this.players.find(p => p && p.id === this.mySlot);
+            if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: Math.min(350, myP.goldCollected), won: true });
             this.saveProfile();
         },
 
@@ -4079,15 +4781,21 @@
             document.getElementById('hideout-alert').style.display = 'none';
             document.getElementById('gameover-screen').classList.remove('hidden');
             document.getElementById('lbl-gameover-title').innerText = titleMsg;
+            this._lastEndInfo = { type: 'elim', winnerId: winner ? winner.id : null };
+            let myP = this.players.find(p => p && p.id === this.mySlot);
+            let iWon = !!(winner && winner.id === this.mySlot);
             if(winner) {
-                if(winner.profileId === 1) this.walletP1 += winner.goldCollected;
-                else this.walletP2 += winner.goldCollected;
-                document.getElementById('lbl-gameover-stats').innerHTML = `${descMsg}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${winner.goldCollected}</span>`;
+                // FIX (e): mesmo teto de 350 de ouro aplicado aqui (vitória por eliminação)
+                let reward = Math.min(350, winner.goldCollected);
+                if(winner.profileId === 1) this.walletP1 += reward;
+                else if(winner.profileId === 2) this.walletP2 += reward;
+                document.getElementById('lbl-gameover-stats').innerHTML = `${descMsg}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${reward}</span>`;
                 let nameLabel = `${this.getProfileName(winner.profileId)} (${winner.archetype.toUpperCase()})`;
                 let record = this.ranking.find(r => r.name === nameLabel);
                 if(record) record.wins++; else this.ranking.push({ name: nameLabel, wins: 1 });
-                this.saveProfile();
             } else { document.getElementById('lbl-gameover-stats').innerText = descMsg; }
+            if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: iWon ? Math.min(350, myP.goldCollected) : 0, won: iWon });
+            this.saveProfile();
         },
 
         backToMenu() {
@@ -4129,7 +4837,7 @@
     };
 
     class Player {
-        constructor(id, x, y, archetype, controls, upg, profileId) {
+        constructor(id, x, y, archetype, controls, upg, profileId, cosmetics) {
             this.id = id; this.x = x; this.y = y; this.w = 32; this.h = 46; this.vx = 0; this.vy = 0;
             this.archetype = archetype; this.controls = controls; this.isGrounded = false; this.facing = id === 1 ? 1 : -1;
             this.lives = 3; this.goldCollected = 0; this.profileId = (profileId !== undefined) ? profileId : id;
@@ -4138,8 +4846,11 @@
             this.weaponKey = upg.weaponKey; this.dmgMod = upg.weaponDmg; this.projSpd = upg.weaponSpd;
             this.atkCd = upg.atkCd || 16;
             this.inventory = { potion: upg.potion, shield: upg.shield };
-            this.mp = 100; this.cdAttack = 0; this.cdSpecial = 0; this.shieldTime = 0; this.dashCooldown = 0;
-            this.color = archetype === 'hero' ? '#22c55e' : (archetype === 'vilan' ? '#ef4444' : '#38bdf8');
+            this.mp = 100; this.cdAttack = 0; this.cdSpecial = 0; this.shieldTime = 0; this.dashCooldown = 0; this.kills = 0;
+            // Item (c): cor/visual customizados têm prioridade sobre a cor padrão do arquétipo
+            let archColor = archetype === 'hero' ? '#22c55e' : (archetype === 'vilan' ? '#ef4444' : '#38bdf8');
+            this.color = (cosmetics && cosmetics.color) ? cosmetics.color : archColor;
+            this.skin = (cosmetics && cosmetics.skin) ? cosmetics.skin : 'default';
         }
 
         update(dt, inHideout) {
@@ -4152,15 +4863,22 @@
             if(this.dashCooldown > 0) this.dashCooldown -= dt * 60;
             if(this.mp < 100) this.mp += dt * 15;
 
-            // Host usa as teclas recebidas do guest para P2; todos os outros usam o teclado local
-            let keys = (OnlineSync.isOnline && OnlineSync.isHost && this.id === 2)
-                ? OnlineSync.guestKeys : Engine.inputKeys;
+            // FIX (f): generalizado pra até 4 jogadores. Só o meu próprio personagem (id===1 quando
+            // sou host/solo) lê o teclado local; os demais (id 2/3/4) são convidados remotos e usam
+            // o "intent" normalizado que cada um envia pela rede.
+            let keys;
+            if(this.id === 1) {
+                let k = Engine.inputKeys;
+                keys = { left: !!(k['a']||k['arrowleft']), right: !!(k['d']||k['arrowright']), up: !!(k['w']||k['arrowup']), attack: !!k['f'], special: !!k['g'] };
+            } else {
+                keys = OnlineSync.guestKeysBySlot[this.id] || {};
+            }
 
             if(!inHideout) {
-                if(keys[this.controls.left]) { this.vx = -this.baseSpd; this.facing = -1; }
-                else if(keys[this.controls.right]) { this.vx = this.baseSpd; this.facing = 1; }
+                if(keys.left) { this.vx = -this.baseSpd; this.facing = -1; }
+                else if(keys.right) { this.vx = this.baseSpd; this.facing = 1; }
                 else { this.vx *= Math.pow(0.7, dt * 60); }
-                if(keys[this.controls.up] && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); }
+                if(keys.up && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); }
                 this.vy += 0.68 * dt * 60; if(this.vy > 16) this.vy = 16;
                 this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
                 if(!Engine.isOpenWorld) {
@@ -4169,14 +4887,14 @@
                     // FIX: Queda infinita com escudo — remove escudo antes do dano para garantir morte
                     if(this.y > 750) { this.shieldTime = 0; this.takeDamage(100, null); }
                 }
-                if(keys[this.controls.attack] && this.cdAttack <= 0) this.castAttack();
-                if(keys[this.controls.special] && this.cdSpecial <= 0 && this.mp >= 40) this.castSpecial();
+                if(keys.attack && this.cdAttack <= 0) this.castAttack();
+                if(keys.special && this.cdSpecial <= 0 && this.mp >= 40) this.castSpecial();
                 this.checkChestProximity();
             } else {
-                if(keys[this.controls.left]) { this.vx = -this.baseSpd; this.facing = -1; }
-                else if(keys[this.controls.right]) { this.vx = this.baseSpd; this.facing = 1; }
+                if(keys.left) { this.vx = -this.baseSpd; this.facing = -1; }
+                else if(keys.right) { this.vx = this.baseSpd; this.facing = 1; }
                 else { this.vx *= Math.pow(0.7, dt * 60); }
-                if(keys[this.controls.up] && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); }
+                if(keys.up && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); }
                 this.vy += 0.68 * dt * 60; if(this.vy > 16) this.vy = 16;
                 this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
             }
@@ -4185,7 +4903,7 @@
         }
 
         checkChestProximity() {
-            if(this.id !== 1) return;
+            if(this.id !== Engine.mySlot) return;
             let near = false;
             Engine.items.forEach(it => {
                 if(it.type === 'chest' && !it.destroyed) {
@@ -4227,22 +4945,50 @@
         }
 
         syncHUD() {
-            let pfx = this.id === 1 ? 'p1' : 'p2';
+            // FIX (f): generalizado de "p1"/"p2" fixo para "p"+id, suportando até 4 jogadores
+            let pfx = 'p' + this.id;
             let fillHp = document.getElementById(`bar-${pfx}-hp`); if(fillHp) fillHp.style.width = `${Math.max(0,(this.hp/this.maxHp)*100)}%`;
             let fillMp = document.getElementById(`bar-${pfx}-mp`); if(fillMp) fillMp.style.width = `${this.mp}%`;
-            document.getElementById(`lbl-${pfx}-lives`).innerText = "❤".repeat(Math.max(0,this.lives));
-            document.getElementById(`lbl-${pfx}-gold`).innerText = `${t('earningsLabel')}: $${this.goldCollected}`;
-            document.getElementById(`lbl-${pfx}-weapon`).innerText = `${t('weaponLabel')}: ${t('weaponName_' + this.weaponKey)}`;
-            let nameEl = document.getElementById(`hud-${pfx}-name`); if(nameEl) nameEl.innerText = `${Engine.getProfileName(this.profileId)} - ${t(pfx === 'p1' ? 'p1Label' : 'p2Label')}`;
-            let slots = document.getElementById(`inv-${pfx}`).children;
-            slots[0].className = `hud-slot ${this.inventory.potion<=0?'empty':''}`; slots[0].innerHTML = this.inventory.potion>0?`P<span class="count">${this.inventory.potion}</span>`:'';
-            slots[1].className = `hud-slot ${this.inventory.shield<=0?'empty':''}`; slots[1].innerHTML = this.inventory.shield>0?`E<span class="count">${this.inventory.shield}</span>`:'';
+            let livesEl = document.getElementById(`lbl-${pfx}-lives`); if(livesEl) livesEl.innerText = "❤".repeat(Math.max(0,this.lives));
+            let goldEl = document.getElementById(`lbl-${pfx}-gold`); if(goldEl) goldEl.innerText = `${t('earningsLabel')}: $${this.goldCollected}`;
+            let wpnEl = document.getElementById(`lbl-${pfx}-weapon`); if(wpnEl) wpnEl.innerText = `${t('weaponLabel')}: ${t('weaponName_' + this.weaponKey)}`;
+            let nameEl = document.getElementById(`hud-${pfx}-name`); if(nameEl) nameEl.innerText = `${Engine.getProfileName(this.profileId)}${this.id===Engine.mySlot?' ★':''}`;
+            let invEl = document.getElementById(`inv-${pfx}`);
+            if(invEl) {
+                let slots = invEl.children;
+                if(slots[0]){ slots[0].className = `hud-slot ${this.inventory.potion<=0?'empty':''}`; slots[0].innerHTML = this.inventory.potion>0?`P<span class="count">${this.inventory.potion}</span>`:''; }
+                if(slots[1]){ slots[1].className = `hud-slot ${this.inventory.shield<=0?'empty':''}`; slots[1].innerHTML = this.inventory.shield>0?`E<span class="count">${this.inventory.shield}</span>`:''; }
+            }
         }
 
         draw(ctx) {
             ctx.save(); ctx.fillStyle = this.color;
-            ctx.shadowBlur = this.shieldTime > 0 ? 15 : 4; ctx.shadowColor = this.color;
+            ctx.shadowBlur = (this.shieldTime > 0 ? 15 : 4) + (this.skin === 'glow' ? 10 : 0); ctx.shadowColor = this.color;
             ctx.fillRect(this.x, this.y, this.w, this.h);
+
+            // Item (c): flourish visual conforme o "skin" escolhido nas configurações
+            if(this.skin === 'stripes') {
+                ctx.save(); ctx.beginPath(); ctx.rect(this.x, this.y, this.w, this.h); ctx.clip();
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 4;
+                for(let i=-1; i<3; i++) { ctx.beginPath(); ctx.moveTo(this.x + i*14, this.y + this.h); ctx.lineTo(this.x + i*14 + this.h, this.y); ctx.stroke(); }
+                ctx.restore();
+            } else if(this.skin === 'glow') {
+                ctx.save(); ctx.strokeStyle = this.color; ctx.globalAlpha = 0.6; ctx.lineWidth = 3;
+                ctx.strokeRect(this.x-3, this.y-3, this.w+6, this.h+6);
+                ctx.restore();
+            } else if(this.skin === 'stars') {
+                ctx.save(); ctx.fillStyle = '#fde68a';
+                [[-6,-4],[this.w+3,-2],[-4,this.h*0.55],[this.w+5,this.h*0.65]].forEach(([dx,dy]) => {
+                    ctx.beginPath(); ctx.arc(this.x+dx, this.y+dy, 2.3, 0, Math.PI*2); ctx.fill();
+                });
+                ctx.restore();
+            } else if(this.skin === 'flame') {
+                ctx.save(); ctx.fillStyle = 'rgba(249,115,22,0.85)';
+                ctx.beginPath(); ctx.moveTo(this.x+3, this.y+this.h); ctx.lineTo(this.x+9, this.y+this.h+11); ctx.lineTo(this.x+15, this.y+this.h); ctx.fill();
+                ctx.beginPath(); ctx.moveTo(this.x+this.w-15, this.y+this.h); ctx.lineTo(this.x+this.w-9, this.y+this.h+11); ctx.lineTo(this.x+this.w-3, this.y+this.h); ctx.fill();
+                ctx.restore();
+            }
+
             ctx.fillStyle = '#000'; ctx.fillRect(this.facing===1?this.x+20:this.x+6, this.y+10, 6, 6);
             ctx.restore();
         }
@@ -4324,6 +5070,7 @@
             if(this.dead) return; this.hp -= amount;
             if(this.hp <= 0) {
                 this.dead = true; Engine.killsCounter++;
+                if(source && source instanceof Player) source.kills = (source.kills||0) + 1;
                 if(this.type === 'boss') {
                     if(source && source instanceof Player) { source.goldCollected += 250; source.syncHUD(); }
                     for(let i=0; i<5; i++) Engine.items.push(new Item(this.x + i*14, this.y+10, 'coin'));
