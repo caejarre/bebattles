@@ -20,15 +20,12 @@
         
         #game-container { position: relative; width: 1280px; height: 720px; background: #090d16; border: 4px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); border-radius: 12px; overflow: hidden; transform-origin: center center; }
         canvas { display: block; width: 100%; height: 100%; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
-
         .screen { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.95); display: flex; flex-direction: column; padding: 40px; z-index: 10; transition: opacity 0.3s ease; }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
-
         #menu-screen { display: grid; grid-template-columns: 1fr 340px; gap: 30px; height: 100%; }
         .menu-main-panel { display: flex; flex-direction: column; justify-content: space-between; height: 100%; overflow-y: auto; padding-right: 6px; }
         .menu-title-area h1 { font-size: 3.5rem; font-weight: 900; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 12px rgba(56,189,248,0.2); }
         .menu-title-area p { color: #64748b; font-size: 1.1rem; margin-top: 5px; }
-
         .config-section { background: #0f172a; border: 1px solid #1e293b; padding: 20px; border-radius: 8px; margin-top: 15px; }
         .section-title { font-size: 0.9rem; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
@@ -38,7 +35,6 @@
         button:active:not(:disabled) { transform: translateY(1px); }
         button.active { background: #38bdf8 !important; border-color: #0ea5e9 !important; color: #0f172a !important; box-shadow: 0 0 15px rgba(56,189,248,0.4); }
         button.disabled { opacity: 0.4; pointer-events: none; }
-
         .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .char-card { background: #1e293b; border: 2px solid transparent; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
         .char-card:hover { background: #334155; transform: scale(1.03); }
@@ -50,7 +46,6 @@
         .char-card .badge-p2 { right: 8px; background: #ef4444; }
         .char-card.show-p1 .badge-p1 { display: block; }
         .char-card.show-p2 .badge-p2 { display: block; }
-
         .menu-side-panel { background: #0f172a; border-left: 2px solid #1e293b; padding: 20px; display: flex; flex-direction: column; gap: 20px; height: 100%; overflow-y: auto; }
         .shop-catalog { display: flex; flex-direction: column; gap: 10px; }
         .shop-item { background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
@@ -62,11 +57,9 @@
         
         button.active-p1 { background: #22c55e !important; color: white !important; }
         button.active-p2 { background: #ef4444 !important; color: white !important; }
-
         .ranking-box { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
         .ranking-item { display: flex; justify-content: space-between; background: #1e293b; padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; }
         .ranking-empty { text-align: center; color: #64748b; font-size: 0.85rem; padding: 10px; }
-
         #game-hud { position: absolute; top: 0; inset-x: 0; height: 90px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; z-index: 5; font-family: monospace; }
         .hud-player { background: rgba(15,23,42,0.85); border: 1px solid rgba(51,65,85,0.5); padding: 10px 15px; border-radius: 8px; width: 320px; backdrop-filter: blur(4px); }
         .hud-player-compact { width: 230px; padding: 7px 11px; }
@@ -105,27 +98,19 @@
         .hud-slot { width: 26px; height: 26px; background: #1e293b; border: 1px solid #475569; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; position: relative; color: #f59e0b; }
         .hud-slot.empty { opacity: 0.3; border-style: dashed; color: transparent; }
         .hud-slot .count { position: absolute; bottom: 1px; right: 2px; font-size: 0.6rem; background: rgba(0,0,0,0.8); padding: 0 3px; border-radius: 2px; color: #fff; }
-
         #hud-center { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         #hud-timer-text { background: rgba(15,23,42,0.9); border: 2px solid #334155; padding: 6px 16px; border-radius: 20px; font-size: 1.2rem; font-weight: bold; color: #f1f5f9; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
         #chest-alert { background: #eab308; color: #0f172a; font-weight: bold; padding: 4px 12px; border-radius: 4px; animation: pulse 1s infinite alternate; font-size: 0.85rem; display: none; pointer-events: auto; cursor: pointer; }
         #chest-reward-popup { position: absolute; top: 100px; left: 50%; transform: translateX(-50%) translateY(-10px); background: rgba(15,23,42,0.95); border: 2px solid #eab308; color: #fde68a; font-weight: bold; padding: 8px 18px; border-radius: 8px; font-size: 0.95rem; z-index: 6; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; }
         #chest-reward-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
         #hideout-alert { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.97); border: 2px solid #818cf8; color: #c7d2fe; font-weight: bold; padding: 10px 22px; border-radius: 8px; font-size: 0.95rem; z-index: 6; pointer-events: auto; cursor: pointer; text-align: center; line-height: 1.6; display: none; }
         #hideout-alert .ht { font-size: 1rem; color: #a5b4fc; }
         #hideout-alert .hs { font-size: 0.85rem; color: #818cf8; margin-top: 2px; }
-
         #hideout-hud { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.95); border: 2px solid #818cf8; color: #c7d2fe; font-weight: bold; padding: 7px 20px; border-radius: 8px; font-size: 0.9rem; z-index: 6; pointer-events: auto; cursor: pointer; text-align: center; display: none; }
-
         #gameover-screen { justify-content: center; align-items: center; text-align: center; gap: 20px; background: rgba(2,6,23,0.98); }
         #lbl-gameover-title { font-size: 4rem; font-weight: 900; color: #ef4444; text-shadow: 0 0 30px rgba(239,68,68,0.4); }
         #lbl-gameover-stats { font-size: 1.2rem; color: #94a3b8; line-height: 1.6; max-width: 600px; }
-
         @keyframes pulse { from { transform: scale(1) translateX(-50%); opacity: 0.8; } to { transform: scale(1.05) translateX(-50%); opacity: 1; } }
-
-
-
         /* ═══════════ SOCIAL: busca, perfil, convites ═══════════ */
         .social-box { background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:24px; width:480px; max-height:640px; display:flex; flex-direction:column; gap:14px; }
         .social-search-row { display:flex; gap:8px; }
@@ -136,7 +121,6 @@
         .online-dot { width:9px; height:9px; border-radius:50%; background:#475569; flex-shrink:0; }
         .online-dot.on { background:#22c55e; box-shadow:0 0 6px #22c55e; }
         .social-empty { text-align:center; color:#64748b; font-size:0.85rem; padding:20px 10px; }
-
         #profile-screen .social-box { width:440px; align-items:center; text-align:center; }
         .profile-avatar-big { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,#38bdf8,#818cf8); display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:900; color:#0f172a; margin:0 auto; }
         #profile-name-lbl { font-size:1.5rem; font-weight:800; }
@@ -146,12 +130,10 @@
         .btn-follow.following { background:#334155; border-color:#475569; color:#cbd5e1; }
         .btn-play-invite { background:linear-gradient(to right,#10b981,#059669); color:white; border:none; font-weight:800; font-size:1.05rem; padding:14px; }
         .btn-play-invite:disabled { background:#334155; color:#64748b; cursor:not-allowed; }
-
         /* Sino de notificações de convite */
         #invite-bell { position:relative; }
         #invite-badge { position:absolute; top:-6px; right:-6px; background:#ef4444; color:white; font-size:0.65rem; font-weight:800; border-radius:50%; width:16px; height:16px; display:none; align-items:center; justify-content:center; }
         #invite-badge.show { display:flex; }
-
         #invite-panel { position:absolute; top:60px; right:20px; background:#0f172a; border:1px solid #334155; border-radius:10px; width:300px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:50; overflow:hidden; }
         #invite-panel.hidden { display:none; }
         .invite-panel-title { padding:12px 14px; font-size:0.8rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #1e293b; }
@@ -162,7 +144,6 @@
         .invite-actions-row button { flex:1; padding:7px; font-size:0.8rem; }
         .btn-accept-invite { background:#15803d; border-color:#166534; color:white; }
         .btn-decline-invite { background:#7f1d1d; border-color:#991b1b; color:#fecaca; }
-
         /* ═══════════ CHAT (aba Conversas) ═══════════ */
         .chat-list-item { display:flex; align-items:center; gap:10px; background:#1e293b; border:1px solid #334155; padding:10px 12px; border-radius:8px; cursor:pointer; transition:all 0.15s; }
         .chat-list-item:hover { background:#334155; }
@@ -175,7 +156,6 @@
         .chat-list-preview { font-size:0.78rem; color:#94a3b8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .chat-list-preview.unread { color:#e2e8f0; font-weight:700; }
         .chat-unread-badge { background:#22c55e; color:#052e12; font-size:0.65rem; font-weight:800; border-radius:999px; min-width:18px; height:18px; padding:0 5px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-
         #chat-screen .social-box { width:440px; height:600px; padding:0; overflow:hidden; }
         .chat-header { display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid #1e293b; flex-shrink:0; }
         .chat-header-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#38bdf8,#818cf8); display:flex; align-items:center; justify-content:center; font-weight:900; color:#0f172a; flex-shrink:0; }
@@ -198,15 +178,9 @@
         .chat-send-btn { width:40px; height:40px; border-radius:50%; background:#2563eb; border:none; color:white; font-size:1.1rem; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
         .chat-send-btn:hover { background:#1d4ed8; }
         .chat-empty-hint { text-align:center; color:#64748b; font-size:0.85rem; margin:auto; padding:20px; }
-
         #delete-account-confirm-box { background:#1e0a0a; border:2px solid #7f1d1d; }
-
         #touch-controls { position: fixed; inset: 0; z-index: 40; pointer-events: none; display: none; }
         #touch-controls.active { display: block; }
-        /* FIX: o jogo é fixo em formato paisagem (1280x720). Em celular na vertical o container
-           encolhe demais pra caber na tela (só sobra a largura como limite de escala), deixando
-           tudo minúsculo e difícil de jogar. Como isso só afeta telas com dedo (pointer: coarse),
-           um notebook com touchscreen usado deitado continua sem ver esse aviso. */
         #rotate-hint { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,0.97); color: #f8fafc; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; gap: 14px; }
         @media (pointer: coarse) and (orientation: portrait) {
             #rotate-hint { display: flex; }
@@ -221,8 +195,6 @@
         #tc-jump { right: calc(108px + env(safe-area-inset-right)); bottom: calc(158px + env(safe-area-inset-bottom)); width: 58px; height: 58px; font-size: 1.05rem; }
         #tc-special { right: calc(112px + env(safe-area-inset-right)); bottom: calc(76px + env(safe-area-inset-bottom)); width: 54px; height: 54px; font-size: 0.95rem; }
         #tc-dash { right: calc(20px + env(safe-area-inset-right)); bottom: calc(166px + env(safe-area-inset-bottom)); width: 46px; height: 46px; font-size: 0.65rem; }
-
-        /* Auth & Online Lobby */
         .auth-box, .lobby-box { background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:30px; display:flex; flex-direction:column; gap:14px; }
         .auth-box { width:400px; } .lobby-box { width:470px; }
         .auth-title { font-size:2.2rem; font-weight:900; background:linear-gradient(to right,#38bdf8,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; }
@@ -242,15 +214,16 @@
         .lobby-divider::before, .lobby-divider::after { content:''; flex:1; height:1px; background:#1e293b; }
         .user-bar { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
         #lbl-logged-in-user { font-size:0.8rem; color:#64748b; }
+        /* NOVO: menu de opções do chat, botão de sair de partida e tela de denúncia/boost */
+        .chat-menu-item { display:block; width:100%; text-align:left; padding:11px 14px; background:transparent; border:none; border-bottom:1px solid #1e293b; color:#e2e8f0; font-size:0.83rem; cursor:pointer; border-radius:0; }
+        .chat-menu-item:last-child { border-bottom:none; }
+        .chat-menu-item:hover { background:#1e293b; }
+        .chat-msg-delete-btn { cursor:pointer; opacity:0.6; margin-right:6px; font-size:0.7rem; }
+        .chat-msg-delete-btn:hover { opacity:1; }
+        .boost-option-btn { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; width:100%; }
     </style>
 </head>
 <body>
-
-<!-- FIX: tela de "falha ao carregar" — antes, se o boot travasse por qualquer motivo (CDN
-     externo do PeerJS/Supabase lento ou fora do ar, erro de JS não esperado, etc), a página
-     ficava só com o fundo escuro sem nenhuma mensagem, dando a impressão de "tela azul" travada
-     sem explicação. Agora, se o jogo não conseguir inicializar em alguns segundos, mostra um
-     aviso com botão de tentar de novo, em vez de ficar preso numa tela vazia sem saída. -->
 <div id="boot-error-screen" style="display:none; position:fixed; inset:0; z-index:99999; background:#020617; color:#f8fafc; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; padding:24px; font-family:'Segoe UI',sans-serif;">
     <div style="font-size:2.5rem;">⚠️</div>
     <div style="font-size:1.2rem; font-weight:700;">O jogo demorou demais pra carregar</div>
@@ -258,34 +231,35 @@
     <div id="boot-error-detail" style="font-size:0.75rem; color:#475569; max-width:520px; font-family:monospace; word-break:break-word; white-space:pre-wrap;"></div>
     <button onclick="window.location.reload()" style="padding:12px 24px; background:#38bdf8; color:#0f172a; border:none; border-radius:8px; font-weight:800; cursor:pointer; font-size:1rem;">🔄 Tentar de novo</button>
 </div>
-
 <div id="game-container">
     <div id="toast-stack"></div>
-    
-    <div id="game-hud">
-        <div id="hud-p1" class="hud-player">
-            <div class="hud-meta">
-                <span id="hud-p1-name" style="color:#22c55e"></span>
-                <span id="lbl-p1-lives">❤❤❤</span>
-            </div>
-            <div class="bar-container"><div id="bar-p1-hp" class="bar-fill bar-hp"></div></div>
-            <div class="bar-container" style="height:6px;"><div id="bar-p1-mp" class="bar-fill bar-mp"></div></div>
-            <div class="hud-row-bottom">
-                <span id="lbl-p1-gold">Ganhos: $0</span>
-                <div id="inv-p1" class="hud-inventory">
-                    <div class="hud-slot empty" onclick="Engine.useItemViaClick(1,'potion')" style="pointer-events:auto; cursor:pointer;"></div>
-                    <div class="hud-slot empty" onclick="Engine.useItemViaClick(1,'shield')" style="pointer-events:auto; cursor:pointer;"></div>
-                </div>
-                <span id="lbl-p1-weapon" style="font-size:0.75rem; color:#94a3b8;">Arma: Padrão</span>
-            </div>
-            <div class="hud-item-legend" id="legend-p1" data-i18n="hudLegendP1">[1] Cura um pouco de vida • [2] Escudo (fica invulnerável)</div>
-        </div>
 
+    <div id="game-hud">
+        <div style="display:flex; align-items:flex-start; gap:8px;">
+            <button id="btn-exit-match" onclick="Engine.confirmExitMatch()" data-i18n-title="exitMatchBtn" title="Sair da Partida" style="pointer-events:auto; cursor:pointer; width:34px; height:34px; border-radius:50%; background:rgba(15,23,42,0.85); border:1px solid rgba(51,65,85,0.6); color:#f87171; font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:0;">🚪</button>
+            <div id="hud-p1" class="hud-player">
+                <div class="hud-meta">
+                    <span id="hud-p1-name" style="color:#22c55e"></span>
+                    <span id="lbl-p1-lives">❤❤❤</span>
+                </div>
+                <div class="bar-container"><div id="bar-p1-hp" class="bar-fill bar-hp"></div></div>
+                <div class="bar-container" style="height:6px;"><div id="bar-p1-mp" class="bar-fill bar-mp"></div></div>
+                <div class="hud-row-bottom">
+                    <span id="lbl-p1-gold">Ganhos: $0</span>
+                    <div id="inv-p1" class="hud-inventory">
+                        <div class="hud-slot empty" onclick="Engine.useItemViaClick(1,'potion')" style="pointer-events:auto; cursor:pointer;"></div>
+                        <div class="hud-slot empty" onclick="Engine.useItemViaClick(1,'shield')" style="pointer-events:auto; cursor:pointer;"></div>
+                    </div>
+                    <span id="lbl-p1-weapon" style="font-size:0.75rem; color:#94a3b8;">Arma: Padrão</span>
+                </div>
+                <div class="hud-item-legend" id="legend-p1" data-i18n="hudLegendP1">[1] Cura um pouco de vida • [2] Escudo (fica invulnerável)</div>
+                <div id="hud-p1-boosts" style="font-size:0.68rem; color:#38bdf8; font-weight:700; margin-top:2px; display:none;"></div>
+            </div>
+        </div>
         <div id="hud-center">
             <div id="hud-timer-text">05:00 | Onda 1</div>
             <div id="chest-alert" onclick="Engine.tryOpenChest()" data-i18n="chestAlert">Pressione [B] para Abrir o Baú</div>
         </div>
-
         <div id="hud-guests" style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
             <div id="hud-p2" class="hud-player hud-player-compact hidden">
                 <div class="hud-meta">
@@ -331,20 +305,15 @@
             </div>
         </div>
     </div>
-
     <canvas id="ctxCanvas"></canvas>
     <div id="chest-reward-popup" class="hidden"></div>
-
     <div id="hideout-alert" onclick="Engine.handleHideoutTap()">
         <div class="ht" data-i18n="hideoutAlertTitle">Esconderijo Secreto</div>
         <div class="hs" data-i18n="hideoutAlertEnter">Entrar: E</div>
     </div>
-
     <div id="hideout-hud" onclick="Engine.handleHideoutTap()">
         <span id="hideout-timer-label">⏱ 01:00</span> &nbsp;|&nbsp; <span data-i18n="hideoutHudExit">Sair: E</span>
     </div>
-
-    <!-- TELA DE CARREGAMENTO INICIAL -->
     <div id="boot-loading-screen" class="screen" style="justify-content:center; align-items:center;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:14px;">
             <div style="width:42px; height:42px; border:4px solid #1e293b; border-top-color:#38bdf8; border-radius:50%; animation:spin 0.8s linear infinite;"></div>
@@ -352,8 +321,6 @@
         </div>
     </div>
     <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
-
-    <!-- TELA DE LOGIN / REGISTRO -->
     <div id="auth-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
             <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 3.0</span></div>
@@ -385,8 +352,6 @@
             <div class="auth-info" data-i18n="authCloudInfo">☁️ Sua conta funciona em qualquer dispositivo.</div>
         </div>
     </div>
-
-    <!-- TELA DE REDEFINIÇÃO DE SENHA (via link de "esqueci minha senha") -->
     <div id="recovery-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
             <div class="auth-title" data-i18n="recoveryTitle">Nova Senha</div>
@@ -399,10 +364,6 @@
             <div id="recovery-error" class="auth-error hidden"></div>
         </div>
     </div>
-
-
-
-
     <div id="menu-screen" class="screen hidden">
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
@@ -410,6 +371,13 @@
                     <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 3.0</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
+                        <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
+                        <button onclick="Engine.openAchievements()" style="padding:8px 12px; font-size:0.82rem; background:#78350f; border-color:#b45309; color:#fcd34d;" data-i18n="achievementsBtn">🏆 Conquistas</button>
+                        <button onclick="Engine.openSettings()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="settingsBtn">⚙</button>
+                        <!-- FIX: sino de notificações movido para ser o item MAIS À DIREITA da fileira —
+                             antes ficava no meio e o painel de convites (largura fixa 300px, ancorado à
+                             direita do próprio sino) estourava pra fora da borda esquerda do jogo quando
+                             aberto. Sendo o último item, o painel abre inteiramente dentro da tela. -->
                         <div id="invite-bell" onclick="Social.toggleInvitePanel()">
                             <button style="padding:8px 12px; font-size:0.82rem;">🔔<span id="invite-badge">0</span></button>
                             <div id="invite-panel" class="hidden">
@@ -417,9 +385,6 @@
                                 <div id="invite-list"></div>
                             </div>
                         </div>
-                        <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
-                        <button onclick="Engine.openAchievements()" style="padding:8px 12px; font-size:0.82rem; background:#78350f; border-color:#b45309; color:#fcd34d;" data-i18n="achievementsBtn">🏆 Conquistas</button>
-                        <button onclick="Engine.openSettings()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="settingsBtn">⚙</button>
                     </div>
                 </div>
                 <p data-i18n="tagline">Horizon Survival Tournament — Cosmic Engine 2026</p>
@@ -435,7 +400,6 @@
                     <button onclick="Engine.logoutAccount()" style="padding:3px 10px; font-size:0.74rem; background:transparent; border-color:#334155; color:#64748b; margin-left:auto;" data-i18n="logoutAccountBtn">Sair da Conta</button>
                 </div>
             </div>
-
             <div class="config-section">
                 <div class="section-title" data-i18n="arenaStructureTitle">Estrutura de Arena</div>
                 <button id="btn-world-type" onclick="Engine.toggleOpenWorld()" style="width:100%; margin-bottom:12px; background:#0ea5e9; color:#020617; font-weight:800;">Mundo Aberto: DESATIVADO</button>
@@ -450,7 +414,6 @@
                     <button id="btn-mode-boss" onclick="Engine.setGameMode('BOSS')" data-i18n="modeBoss">Modo Chefe (Boss)</button>
                 </div>
             </div>
-
             <div class="config-section">
                 <div class="section-title" data-i18n="archTitle">Arquétipos Disponíveis</div>
                 <div id="arch-hint-row" style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.8rem; color:#64748b;">
@@ -477,10 +440,8 @@
                 </div>
                 <div id="lbl-arch-desc" style="margin-top:12px; font-size:0.85rem; color:#94a3b8; min-height:40px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px;"></div>
             </div>
-
             <button onclick="Engine.startMatch()" style="background:linear-gradient(to right, #10b981, #059669); color:white; font-size:1.3rem; padding:16px; border:none; border-radius:8px; box-shadow:0 4px 15px rgba(16,185,129,0.3); margin-top:10px;" data-i18n="startBtn">INICIAR SIMULAÇÃO</button>
         </div>
-
         <div class="menu-side-panel">
             <div>
                 <div class="section-title" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
@@ -489,7 +450,6 @@
                 </div>
                 <div id="menu-shop-items" class="shop-catalog"></div>
             </div>
-
             <hr style="border:none; border-top:1px solid #1e293b;">
             <div>
                 <div class="section-title" style="margin-bottom:8px;" data-i18n="cosmeticsTitle">Aparência do Personagem</div>
@@ -498,16 +458,12 @@
                 <div style="font-size:0.72rem; color:#64748b; margin-bottom:6px;" data-i18n="cosmeticsSkinLabel">Visual</div>
                 <div id="cosmetic-skins" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
             </div>
-
             <div>
                 <div class="section-title" data-i18n="sessionLogTitle">Registro de Sessão</div>
                 <div id="ranking-container" class="ranking-box"></div>
             </div>
         </div>
     </div>
-
-    <!-- Chat lateral fixo no menu (item pedido): fica sempre visível junto com a tela de menu,
-         nunca aparece na tela de login, e pode ser recolhido/expandido pela setinha. -->
     <div id="chat-sidebar" class="hidden" style="position:absolute; top:0; right:0; height:100%; z-index:15; display:flex; align-items:stretch; pointer-events:none;">
         <button id="chat-sidebar-toggle" onclick="Engine.toggleChatSidebar()" style="pointer-events:auto; align-self:center; width:22px; height:70px; background:#1e293b; border:1px solid #334155; border-right:none; border-radius:8px 0 0 8px; color:#38bdf8; cursor:pointer; font-size:0.85rem; padding:0;">◀</button>
         <div id="chat-sidebar-panel" style="pointer-events:auto; width:250px; background:rgba(15,23,42,0.97); border-left:1px solid #1e293b; display:flex; flex-direction:column; padding:14px 12px; box-sizing:border-box; overflow:hidden; transition:width 0.2s ease, padding 0.2s ease;">
@@ -520,8 +476,6 @@
             </div>
         </div>
     </div>
-
-    <!-- TELA DE CONQUISTAS -->
     <div id="achievements-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="lobby-box" style="max-width:520px;">
             <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -539,37 +493,30 @@
             <div id="achievements-list" style="display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; margin-top:4px;"></div>
         </div>
     </div>
-
     <div id="gameover-screen" class="screen hidden">
         <h2 id="lbl-gameover-title" data-i18n="gameoverTitleDefault">SIMULAÇÃO ENCERRADA</h2>
         <p id="lbl-gameover-stats" data-i18n="gameoverStatsDefault">Estatísticas finais carregando...</p>
         <button onclick="Engine.backToMenu()" style="padding:15px 40px; font-size:1.1rem; background:#3b82f6; border-color:#2563eb; color:white; margin-top:20px;" data-i18n="backToMenuBtn">RETORNAR AO MENU CENTRAL</button>
     </div>
-
     <div id="settings-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div style="background:#0f172a; border:1px solid #1e293b; border-radius:10px; padding:30px; width:420px; max-height:100%; overflow-y:auto; display:flex; flex-direction:column; gap:18px;">
             <h2 style="font-size:1.6rem; color:#38bdf8;" data-i18n="settingsTitle">Configurações</h2>
-
             <div class="config-section" style="margin-top:0;">
                 <div class="section-title" data-i18n="volumeTitle">Volume Geral</div>
                 <input id="rng-volume" type="range" min="0" max="100" value="70" oninput="Engine.setVolume(this.value)" style="width:100%;">
             </div>
-
             <div class="config-section">
                 <div class="section-title" data-i18n="sfxSectionTitle">Efeitos Sonoros</div>
                 <button id="btn-toggle-sfx" class="active" onclick="Engine.toggleSfx()" style="width:100%;">Efeitos Sonoros: ATIVADOS</button>
             </div>
-
             <div class="config-section">
                 <div class="section-title" data-i18n="musicSectionTitle">Música de Fundo</div>
                 <button id="btn-toggle-music" class="active" onclick="Engine.toggleMusic()" style="width:100%;">Música: ATIVADA</button>
             </div>
-
             <div class="config-section">
                 <div class="section-title" data-i18n="resetDataTitle">Dados Salvos</div>
                 <button onclick="Engine.resetSavedData()" style="width:100%; background:#7f1d1d; border-color:#991b1b; color:#fecaca;" data-i18n="resetDataBtn">RESETAR DADOS SALVOS</button>
             </div>
-
             <div class="config-section">
                 <div class="section-title" data-i18n="changePasswordTitle">Alterar Senha</div>
                 <input class="auth-input" id="settings-new-password" type="password" placeholder="Nova senha (mínimo 6 caracteres)" data-i18n-placeholder="newPasswordPlaceholder" maxlength="32" autocomplete="new-password" style="margin-bottom:8px;">
@@ -577,7 +524,6 @@
                 <div id="settings-password-msg" class="auth-error hidden" style="margin-bottom:8px;"></div>
                 <button onclick="Engine.changePassword()" style="width:100%; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="savePasswordBtn">SALVAR NOVA SENHA</button>
             </div>
-
             <div class="config-section">
                 <div class="section-title" data-i18n="languageTitle">Idioma</div>
                 <div class="btn-group" style="flex-wrap:wrap;">
@@ -591,7 +537,6 @@
                     <button class="lang-btn" data-lang="fr" onclick="Engine.setLanguage('fr')" style="font-size:0.78rem; flex:1; padding:8px 4px;">Français</button>
                 </div>
             </div>
-
             <div class="config-section" id="delete-account-confirm-box" style="border-color:#7f1d1d;">
                 <div class="section-title" style="color:#fca5a5;" data-i18n="dangerZoneTitle">Zona de Perigo</div>
                 <div id="delete-account-step1">
@@ -609,12 +554,9 @@
                     </div>
                 </div>
             </div>
-
             <button onclick="Engine.closeSettings()" style="background:#3b82f6; border-color:#2563eb; color:white; padding:14px;" data-i18n="backBtn">VOLTAR</button>
         </div>
     </div>
-
-    <!-- TELA DE LOBBY ONLINE -->
     <div id="online-lobby-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="lobby-box">
             <div style="display:flex; align-items:center; justify-content:space-between;">
@@ -651,17 +593,12 @@
             </div>
         </div>
     </div>
-
-
-    <!-- TELA DE BUSCA DE JOGADORES -->
     <div id="search-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="social-box">
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <h2 style="font-size:1.3rem; color:#38bdf8; margin:0;" data-i18n="socialSearchTitle">🔎 Jogadores</h2>
                 <button onclick="Social.closeSearch()" style="padding:7px 13px; font-size:0.83rem;" data-i18n="socialBackBtn">✕ Voltar</button>
             </div>
-            <!-- FIX: nova aba "Seguindo" — antes não existia nenhum lugar pra ver quem você segue,
-                 só a busca. Agora dá pra alternar entre Buscar e Seguindo. -->
             <div style="display:flex; gap:8px; margin-top:4px;">
                 <button id="social-tab-search" class="active" onclick="Social.switchTab('search')" style="flex:1; padding:8px; font-size:0.85rem;" data-i18n="socialTabSearch">🔎 Buscar</button>
                 <button id="social-tab-following" onclick="Social.switchTab('following')" style="flex:1; padding:8px; font-size:0.85rem;" data-i18n="socialTabFollowing">⭐ Seguindo</button>
@@ -688,8 +625,6 @@
             </div>
         </div>
     </div>
-
-    <!-- TELA DE CHAT INDIVIDUAL -->
     <div id="chat-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="social-box" style="display:flex; flex-direction:column;">
             <div class="chat-header">
@@ -699,18 +634,26 @@
                     <div class="chat-header-name" id="chat-header-name">—</div>
                     <div class="chat-header-status"><span class="online-dot" id="chat-header-dot"></span><span id="chat-header-status-text" data-i18n="socialOffline">Offline</span></div>
                 </div>
+                <!-- NOVO: menu de opções da conversa (limpar / bloquear / denunciar) -->
+                <div style="position:relative;">
+                    <button onclick="Chat.toggleOptionsMenu()" data-i18n-title="chatOptionsBtn" title="Mais opções" style="padding:6px 10px; font-size:1rem;">⋮</button>
+                    <div id="chat-options-menu" class="hidden" style="position:absolute; top:40px; right:0; background:#0f172a; border:1px solid #334155; border-radius:8px; width:210px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:20; overflow:hidden;">
+                        <button class="chat-menu-item" onclick="Chat.clearConversation()" data-i18n="chatClearOption">🗑️ Limpar conversa</button>
+                        <button class="chat-menu-item" id="btn-chat-block-toggle" onclick="Chat.toggleBlock()" data-i18n="chatBlockOption">🚫 Bloquear jogador</button>
+                        <button class="chat-menu-item" onclick="Chat.openReport()" data-i18n="chatReportOption" style="color:#fca5a5;">🚩 Denunciar jogador</button>
+                    </div>
+                </div>
             </div>
             <div class="chat-messages" id="chat-messages">
                 <div class="chat-empty-hint" data-i18n="chatLoading">Carregando conversa...</div>
             </div>
-            <div class="chat-input-row">
+            <div id="chat-blocked-notice" class="hidden" style="padding:9px 16px; font-size:0.76rem; color:#f87171; text-align:center; border-top:1px solid #1e293b;"></div>
+            <div class="chat-input-row" id="chat-input-row">
                 <input type="text" id="chat-input" placeholder="Digite uma mensagem..." data-i18n-placeholder="chatInputPlaceholder" maxlength="500" onkeydown="if(event.key==='Enter')Chat.sendMessage()">
                 <button class="chat-send-btn" onclick="Chat.sendMessage()">➤</button>
             </div>
         </div>
     </div>
-
-    <!-- TELA DE PERFIL DE JOGADOR -->
     <div id="profile-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="social-box">
             <div style="display:flex; align-items:center; justify-content:flex-end; width:100%;">
@@ -726,11 +669,33 @@
                 <div id="profile-invite-status" style="font-size:0.8rem; color:#94a3b8; min-height:18px;"></div>
             </div>
         </div>
-
     </div>
-
+    <!-- NOVO: tela de denúncia (motivo + botão de enviar, dispara e-mail via edge function) -->
+    <div id="report-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="social-box" style="width:440px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 style="font-size:1.2rem; color:#ef4444; margin:0;" data-i18n="reportTitle">🚩 Denunciar Jogador</h2>
+                <button onclick="Chat.closeReport()" data-i18n="socialBackBtn">✕ Voltar</button>
+            </div>
+            <div id="report-target-label" style="font-size:0.85rem; color:#94a3b8;"></div>
+            <textarea id="report-reason-input" rows="5" maxlength="1000" placeholder="Descreva o motivo da denúncia..." data-i18n-placeholder="reportReasonPlaceholder" style="width:100%; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:10px; color:#f8fafc; font-size:0.9rem; resize:vertical; font-family:inherit;"></textarea>
+            <div id="report-error" class="auth-error hidden"></div>
+            <div id="report-success" class="auth-error hidden" style="color:#10b981; background:rgba(16,185,129,0.15);"></div>
+            <button onclick="Chat.submitReport()" id="btn-submit-report" style="background:linear-gradient(to right,#dc2626,#b91c1c); color:white; border:none; padding:13px; font-weight:800; border-radius:6px; cursor:pointer;" data-i18n="reportSendBtn">ENVIAR DENÚNCIA</button>
+        </div>
+    </div>
+    <!-- NOVO: tela de opções de duração do Boost (velocidade / HP extra) -->
+    <div id="boost-options-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="lobby-box" style="max-width:380px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 id="boost-options-title" style="font-size:1.15rem; color:#38bdf8; margin:0;">Boost</h2>
+                <button onclick="Engine.closeBoostOptions()" data-i18n="socialBackBtn">✕ Voltar</button>
+            </div>
+            <div id="boost-options-current" style="font-size:0.83rem; color:#94a3b8;"></div>
+            <div id="boost-options-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+    </div>
 </div>
-
 <div id="touch-controls">
     <button class="tc-btn" id="tc-left" onpointerdown="Engine.touchKey('a',true,event)" onpointerup="Engine.touchKey('a',false,event)" onpointercancel="Engine.touchKey('a',false,event)" onpointerleave="Engine.touchKey('a',false,event)">◀</button>
     <button class="tc-btn" id="tc-right" onpointerdown="Engine.touchKey('d',true,event)" onpointerup="Engine.touchKey('d',false,event)" onpointercancel="Engine.touchKey('d',false,event)" onpointerleave="Engine.touchKey('d',false,event)">▶</button>
@@ -741,22 +706,11 @@
     <button class="tc-btn" id="tc-special" onpointerdown="Engine.touchKey('g',true,event)" onpointerup="Engine.touchKey('g',false,event)" onpointercancel="Engine.touchKey('g',false,event)" onpointerleave="Engine.touchKey('g',false,event)">✦</button>
     <button class="tc-btn" id="tc-attack" onpointerdown="Engine.touchKey('f',true,event)" onpointerup="Engine.touchKey('f',false,event)" onpointercancel="Engine.touchKey('f',false,event)" onpointerleave="Engine.touchKey('f',false,event)">⚔</button>
 </div>
-
 <div id="rotate-hint">
     <div style="font-size:3rem;">🔄</div>
     <div style="font-size:1.1rem; font-weight:700;" data-i18n="rotateDeviceHint">Gire seu aparelho para jogar na horizontal</div>
 </div>
-
 <script>
-    // FIX: qualquer erro de JS não tratado durante o carregamento (ex: script externo do
-    // Supabase/PeerJS falhando por rede lenta, extensão do navegador etc) travava a página
-    // sem nenhuma mensagem — parecia "tela azul"/tela em branco travada. Isso não resolve
-    // problemas de hospedagem/CDN fora do ar, mas evita que um erro de JS deixe o jogador
-    // preso numa tela sem explicação nem forma de tentar de novo.
-    // IMPORTANTE: só mostra a tela de "falha ao carregar" se o erro acontecer ANTES do boot
-    // terminar. Depois que o jogo já carregou e está rodando, um erro de JS (ex: num efeito
-    // visual, numa função secundária) não deve tapar o jogo funcionando com uma tela de erro —
-    // isso só piora a experiência. Erros pós-boot só vão pro console, pra investigação.
     window.addEventListener('error', function(e) {
         console.error('Erro não tratado:', e.error || e.message);
         if (!_bootCompleted) showBootError((e.message || 'erro desconhecido') + (e.filename ? ('\n' + e.filename + ':' + e.lineno) : ''));
@@ -764,10 +718,6 @@
     window.addEventListener('unhandledrejection', function(e) {
         console.error('Promise rejeitada sem tratamento:', e.reason);
     });
-
-    // FIX: watchdog de boot — se o jogo não terminar de inicializar em 8s (CDN externo lento,
-    // travado, ou qualquer erro fatal antes do try/catch pegar), mostra a tela de erro em vez
-    // de deixar a pessoa presa numa tela escura sem nenhuma explicação nem ação possível.
     let _bootCompleted = false;
     let _bootWatchdog = setTimeout(function() {
         if (!_bootCompleted) showBootError('Tempo esgotado (8s) esperando o jogo inicializar — provavelmente PeerJS ou Supabase não responderam a tempo.');
@@ -786,14 +736,12 @@
         let el = document.getElementById('boot-error-screen');
         if (el) el.style.display = 'none';
     }
-
     const Settings = {
         volume: 0.7,
         sfxEnabled: true,
         musicEnabled: true,
         language: 'pt-BR'
     };
-
     const I18N = {
         'pt-BR': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -864,6 +812,15 @@
             netRewardLabel: "Recompensas", playerLabel: "Jogador",
             modeLabelOpenWorld: "MUNDO ABERTO", modeLabelBoss: "Chefe Nível", modeLabelWave: "Onda",
             hideoutAlertTitle: "Esconderijo Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Sair: E",
+            exitMatchBtn: "Sair da Partida", exitMatchConfirmMsg: "Tem certeza que quer sair da partida e voltar pro menu? Seu progresso nesta partida será perdido.",
+            chatOptionsBtn: "Mais opções", chatClearOption: "🗑️ Limpar conversa", chatBlockOption: "🚫 Bloquear jogador", chatUnblockOption: "✓ Desbloquear jogador", chatReportOption: "🚩 Denunciar jogador",
+            chatClearConfirmMsg: "Tem certeza que quer apagar todas as mensagens desta conversa? Isso não pode ser desfeito.", chatClearedToast: "Conversa limpa.",
+            chatBlockConfirmMsg: "Bloquear esse jogador? Vocês não vão mais poder trocar mensagens até você desbloquear.", chatBlockedToast: "Jogador bloqueado.", chatUnblockedToast: "Jogador desbloqueado.",
+            chatBlockedNotice: "Você bloqueou esse jogador. Desbloqueie para enviar mensagens.", chatBlockedByPeerNotice: "Você não pode enviar mensagens para esse jogador.",
+            chatDeleteMsgConfirmMsg: "Apagar essa mensagem?",
+            reportTitle: "🚩 Denunciar Jogador", reportAgainstLabel: "Denunciando", reportReasonPlaceholder: "Descreva o motivo da denúncia...", reportReasonRequired: "Escreva o motivo da denúncia.",
+            reportSendBtn: "ENVIAR DENÚNCIA", reportSentMsg: "Denúncia enviada. Obrigado por ajudar a manter o jogo seguro!", reportSendErrorMsg: "Erro ao enviar denúncia. Tente de novo.",
+            boostOptionsBtn: "Opções", boostRemainingLabel: "Restante", boostNoneActiveLabel: "Nenhum boost ativo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Jogadores",
             socialSearchTitle: "🔎 Jogadores", socialBackBtn: "✕ Voltar",
             socialTabSearch: "🔎 Buscar", socialTabFollowing: "⭐ Seguindo",
@@ -891,6 +848,7 @@
             lobbyTitle: "🌐 Jogo Online", lobbyBackBtn: "✕ Voltar",
             lobbyCreateBtn: "➕ CRIAR SALA", lobbyCodeLabel: "Código da Sala (clique para copiar)",
             lobbyPlayerCountLabel: "Quantos jogadores no total?", lobbyStartNowBtn: "▶ COMEÇAR AGORA", lobbyWaitingCount: "Aguardando jogadores",
+            lobbyConnecting: "🔌 Conectando...",
             lobbyWaiting: "Aguardando amigo...", lobbyOrJoin: "ou entre em uma sala existente",
             lobbyJoinPlaceholder: "Cole o código da sala aqui...", lobbyJoinBtn: "ENTRAR",
             lobbyFooterHint: "Requer conexão com a internet &bull; WebRTC via PeerJS &bull; Funciona no GitHub Pages",
@@ -906,7 +864,9 @@
                 itm_pot: { name: "Nanocápsula de Cura", desc: "Usa em jogo para recuperar 50 de vida." },
                 itm_pot3: { name: "Pacote de Cura (x3)", desc: "Usa em jogo: 3 Nanocápsulas de uma vez, +50 de vida cada." },
                 itm_shd: { name: "Bateria de Escudo", desc: "Usa em jogo para ficar invulnerável por 2s." },
-                itm_shd2: { name: "Pacote de Escudo (x2)", desc: "Usa em jogo: 2 Baterias de Escudo, 2s de invulnerabilidade cada." }
+                itm_shd2: { name: "Pacote de Escudo (x2)", desc: "Usa em jogo: 2 Baterias de Escudo, 2s de invulnerabilidade cada." },
+                boost_speed: { name: "Boost de Velocidade", desc: "Aumenta sua velocidade enquanto o tempo comprado não acabar. O tempo só passa durante partidas." },
+                boost_hp: { name: "Boost de HP Extra", desc: "Aumenta seu HP máximo enquanto o tempo comprado não acabar. O tempo só passa durante partidas." }
             },
             logoutAccountBtn: "Sair da Conta",
             changePasswordTitle: "Alterar Senha",
@@ -1024,6 +984,15 @@
             netRewardLabel: "Rewards", playerLabel: "Player",
             modeLabelOpenWorld: "OPEN WORLD", modeLabelBoss: "Boss Level", modeLabelWave: "Wave",
             hideoutAlertTitle: "Secret Hideout", hideoutAlertEnter: "Enter: E", hideoutHudExit: "Exit: E",
+            exitMatchBtn: "Exit Match", exitMatchConfirmMsg: "Are you sure you want to exit the match and return to the menu? Your progress in this match will be lost.",
+            chatOptionsBtn: "More options", chatClearOption: "🗑️ Clear conversation", chatBlockOption: "🚫 Block player", chatUnblockOption: "✓ Unblock player", chatReportOption: "🚩 Report player",
+            chatClearConfirmMsg: "Are you sure you want to delete all messages in this conversation? This cannot be undone.", chatClearedToast: "Conversation cleared.",
+            chatBlockConfirmMsg: "Block this player? You won't be able to message each other until you unblock.", chatBlockedToast: "Player blocked.", chatUnblockedToast: "Player unblocked.",
+            chatBlockedNotice: "You blocked this player. Unblock to send messages.", chatBlockedByPeerNotice: "You can't send messages to this player.",
+            chatDeleteMsgConfirmMsg: "Delete this message?",
+            reportTitle: "🚩 Report Player", reportAgainstLabel: "Reporting", reportReasonPlaceholder: "Describe the reason for the report...", reportReasonRequired: "Write the reason for the report.",
+            reportSendBtn: "SEND REPORT", reportSentMsg: "Report sent. Thanks for helping keep the game safe!", reportSendErrorMsg: "Error sending report. Try again.",
+            boostOptionsBtn: "Options", boostRemainingLabel: "Remaining", boostNoneActiveLabel: "No active boost", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Players",
             socialSearchTitle: "🔎 Players", socialBackBtn: "✕ Back",
             socialTabSearch: "🔎 Search", socialTabFollowing: "⭐ Following",
@@ -1066,7 +1035,9 @@
                 itm_pot: { name: "Healing Nanocapsule", desc: "Use in-game to restore 50 HP." },
                 itm_pot3: { name: "Healing Pack (x3)", desc: "Use in-game: 3 Nanocapsules at once, +50 HP each." },
                 itm_shd: { name: "Shield Battery", desc: "Use in-game to become invulnerable for 2s." },
-                itm_shd2: { name: "Shield Pack (x2)", desc: "Use in-game: 2 Shield Batteries, 2s of invulnerability each." }
+                itm_shd2: { name: "Shield Pack (x2)", desc: "Use in-game: 2 Shield Batteries, 2s of invulnerability each." },
+                boost_speed: { name: "Speed Boost", desc: "Increases your speed until the purchased time runs out. Time only passes during matches." },
+                boost_hp: { name: "Extra HP Boost", desc: "Increases your max HP until the purchased time runs out. Time only passes during matches." }
             },
             logoutAccountBtn: "Log Out",
             changePasswordTitle: "Change Password",
@@ -1184,6 +1155,15 @@
             netRewardLabel: "Belohnungen", playerLabel: "Spieler",
             modeLabelOpenWorld: "OFFENE WELT", modeLabelBoss: "Boss-Level", modeLabelWave: "Welle",
             hideoutAlertTitle: "Geheimes Versteck", hideoutAlertEnter: "Eintreten: E", hideoutHudExit: "Verlassen: E",
+            exitMatchBtn: "Partie verlassen", exitMatchConfirmMsg: "Bist du sicher, dass du die Partie verlassen und zum Menü zurückkehren willst? Dein Fortschritt in dieser Partie geht verloren.",
+            chatOptionsBtn: "Weitere Optionen", chatClearOption: "🗑️ Unterhaltung löschen", chatBlockOption: "🚫 Spieler blockieren", chatUnblockOption: "✓ Spieler entsperren", chatReportOption: "🚩 Spieler melden",
+            chatClearConfirmMsg: "Möchtest du wirklich alle Nachrichten dieser Unterhaltung löschen? Dies kann nicht rückgängig gemacht werden.", chatClearedToast: "Unterhaltung gelöscht.",
+            chatBlockConfirmMsg: "Diesen Spieler blockieren? Ihr könnt euch dann keine Nachrichten mehr schicken, bis du ihn entsperrst.", chatBlockedToast: "Spieler blockiert.", chatUnblockedToast: "Spieler entsperrt.",
+            chatBlockedNotice: "Du hast diesen Spieler blockiert. Entsperre ihn, um Nachrichten zu senden.", chatBlockedByPeerNotice: "Du kannst diesem Spieler keine Nachrichten senden.",
+            chatDeleteMsgConfirmMsg: "Diese Nachricht löschen?",
+            reportTitle: "🚩 Spieler melden", reportAgainstLabel: "Meldung gegen", reportReasonPlaceholder: "Beschreibe den Grund der Meldung...", reportReasonRequired: "Gib den Grund der Meldung ein.",
+            reportSendBtn: "MELDUNG SENDEN", reportSentMsg: "Meldung gesendet. Danke, dass du hilfst, das Spiel sicher zu halten!", reportSendErrorMsg: "Fehler beim Senden der Meldung. Versuch es erneut.",
+            boostOptionsBtn: "Optionen", boostRemainingLabel: "Verbleibend", boostNoneActiveLabel: "Kein aktiver Boost", boostMinutesLabel: "Min",
             socialPlayersBtn: "🔎 Spieler",
             socialSearchTitle: "🔎 Spieler", socialBackBtn: "✕ Zurück",
             socialTabSearch: "🔎 Suchen", socialTabFollowing: "⭐ Gefolgt",
@@ -1226,7 +1206,9 @@
                 itm_pot: { name: "Heil-Nanokapsel", desc: "Im Spiel verwenden, 50 Leben wiederherstellen." },
                 itm_pot3: { name: "Heilpaket (x3)", desc: "3 Nanokapseln auf einmal, je +50 Leben." },
                 itm_shd: { name: "Schildbatterie", desc: "2s unverwundbar werden." },
-                itm_shd2: { name: "Schildpaket (x2)", desc: "2 Schildbatterien, je 2s Unverwundbarkeit." }
+                itm_shd2: { name: "Schildpaket (x2)", desc: "2 Schildbatterien, je 2s Unverwundbarkeit." },
+                boost_speed: { name: "Geschwindigkeits-Boost", desc: "Erhöht deine Geschwindigkeit, bis die gekaufte Zeit abläuft. Die Zeit läuft nur während Partien." },
+                boost_hp: { name: "Extra-HP-Boost", desc: "Erhöht deine maximalen HP, bis die gekaufte Zeit abläuft. Die Zeit läuft nur während Partien." }
             },
             logoutAccountBtn: "Abmelden",
             changePasswordTitle: "Passwort ändern",
@@ -1344,6 +1326,15 @@
             netRewardLabel: "Recompensas", playerLabel: "Jugador",
             modeLabelOpenWorld: "MUNDO ABIERTO", modeLabelBoss: "Nivel de Jefe", modeLabelWave: "Oleada",
             hideoutAlertTitle: "Escondite Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Salir: E",
+            exitMatchBtn: "Salir de la Partida", exitMatchConfirmMsg: "¿Seguro que quieres salir de la partida y volver al menú? Tu progreso en esta partida se perderá.",
+            chatOptionsBtn: "Más opciones", chatClearOption: "🗑️ Limpiar conversación", chatBlockOption: "🚫 Bloquear jugador", chatUnblockOption: "✓ Desbloquear jugador", chatReportOption: "🚩 Denunciar jugador",
+            chatClearConfirmMsg: "¿Seguro que quieres borrar todos los mensajes de esta conversación? No se puede deshacer.", chatClearedToast: "Conversación borrada.",
+            chatBlockConfirmMsg: "¿Bloquear a este jugador? No podrán enviarse mensajes hasta que lo desbloquees.", chatBlockedToast: "Jugador bloqueado.", chatUnblockedToast: "Jugador desbloqueado.",
+            chatBlockedNotice: "Bloqueaste a este jugador. Desbloquéalo para enviar mensajes.", chatBlockedByPeerNotice: "No puedes enviar mensajes a este jugador.",
+            chatDeleteMsgConfirmMsg: "¿Borrar este mensaje?",
+            reportTitle: "🚩 Denunciar Jugador", reportAgainstLabel: "Denunciando a", reportReasonPlaceholder: "Describe el motivo de la denuncia...", reportReasonRequired: "Escribe el motivo de la denuncia.",
+            reportSendBtn: "ENVIAR DENUNCIA", reportSentMsg: "Denuncia enviada. ¡Gracias por ayudar a mantener el juego seguro!", reportSendErrorMsg: "Error al enviar la denuncia. Intenta de nuevo.",
+            boostOptionsBtn: "Opciones", boostRemainingLabel: "Restante", boostNoneActiveLabel: "Ningún boost activo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Jugadores",
             socialSearchTitle: "🔎 Jugadores", socialBackBtn: "✕ Volver",
             socialTabSearch: "🔎 Buscar", socialTabFollowing: "⭐ Siguiendo",
@@ -1386,7 +1377,9 @@
                 itm_pot: { name: "Nanocápsula de Curación", desc: "+50 de vida en juego." },
                 itm_pot3: { name: "Paquete de Curación (x3)", desc: "3 Nanocápsulas, +50 cada una." },
                 itm_shd: { name: "Batería de Escudo", desc: "2s invulnerable." },
-                itm_shd2: { name: "Paquete de Escudo (x2)", desc: "2 Baterías, 2s cada una." }
+                itm_shd2: { name: "Paquete de Escudo (x2)", desc: "2 Baterías, 2s cada una." },
+                boost_speed: { name: "Boost de Velocidad", desc: "Aumenta tu velocidad hasta que se acabe el tiempo comprado. El tiempo solo pasa durante las partidas." },
+                boost_hp: { name: "Boost de HP Extra", desc: "Aumenta tu HP máximo hasta que se acabe el tiempo comprado. El tiempo solo pasa durante las partidas." }
             },
             logoutAccountBtn: "Cerrar Sesión",
             changePasswordTitle: "Cambiar Contraseña",
@@ -1504,6 +1497,15 @@
             netRewardLabel: "Ricompense", playerLabel: "Giocatore",
             modeLabelOpenWorld: "MONDO APERTO", modeLabelBoss: "Livello Boss", modeLabelWave: "Ondata",
             hideoutAlertTitle: "Nascondiglio Segreto", hideoutAlertEnter: "Entra: E", hideoutHudExit: "Esci: E",
+            exitMatchBtn: "Esci dalla Partita", exitMatchConfirmMsg: "Sei sicuro di voler uscire dalla partita e tornare al menu? I tuoi progressi in questa partita andranno persi.",
+            chatOptionsBtn: "Altre opzioni", chatClearOption: "🗑️ Cancella conversazione", chatBlockOption: "🚫 Blocca giocatore", chatUnblockOption: "✓ Sblocca giocatore", chatReportOption: "🚩 Segnala giocatore",
+            chatClearConfirmMsg: "Sei sicuro di voler eliminare tutti i messaggi di questa conversazione? Non può essere annullato.", chatClearedToast: "Conversazione cancellata.",
+            chatBlockConfirmMsg: "Bloccare questo giocatore? Non potrete più scambiarvi messaggi finché non lo sblocchi.", chatBlockedToast: "Giocatore bloccato.", chatUnblockedToast: "Giocatore sbloccato.",
+            chatBlockedNotice: "Hai bloccato questo giocatore. Sblocca per inviare messaggi.", chatBlockedByPeerNotice: "Non puoi inviare messaggi a questo giocatore.",
+            chatDeleteMsgConfirmMsg: "Eliminare questo messaggio?",
+            reportTitle: "🚩 Segnala Giocatore", reportAgainstLabel: "Stai segnalando", reportReasonPlaceholder: "Descrivi il motivo della segnalazione...", reportReasonRequired: "Scrivi il motivo della segnalazione.",
+            reportSendBtn: "INVIA SEGNALAZIONE", reportSentMsg: "Segnalazione inviata. Grazie per aiutare a mantenere il gioco sicuro!", reportSendErrorMsg: "Errore nell'invio della segnalazione. Riprova.",
+            boostOptionsBtn: "Opzioni", boostRemainingLabel: "Rimanente", boostNoneActiveLabel: "Nessun boost attivo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Giocatori",
             socialSearchTitle: "🔎 Giocatori", socialBackBtn: "✕ Indietro",
             socialTabSearch: "🔎 Cerca", socialTabFollowing: "⭐ Seguiti",
@@ -1546,7 +1548,9 @@
                 itm_pot: { name: "Nanocapsula Curativa", desc: "+50 vita in gioco." },
                 itm_pot3: { name: "Pacchetto Curativo (x3)", desc: "3 Nanocapsule, +50 ciascuna." },
                 itm_shd: { name: "Batteria Scudo", desc: "2s invulnerabile." },
-                itm_shd2: { name: "Pacchetto Scudo (x2)", desc: "2 Batterie, 2s ciascuna." }
+                itm_shd2: { name: "Pacchetto Scudo (x2)", desc: "2 Batterie, 2s ciascuna." },
+                boost_speed: { name: "Boost di Velocità", desc: "Aumenta la tua velocità finché non finisce il tempo acquistato. Il tempo passa solo durante le partite." },
+                boost_hp: { name: "Boost HP Extra", desc: "Aumenta il tuo HP massimo finché non finisce il tempo acquistato. Il tempo passa solo durante le partite." }
             },
             logoutAccountBtn: "Esci dall'Account",
             changePasswordTitle: "Cambia Password",
@@ -1664,6 +1668,15 @@
             netRewardLabel: "Récompenses", playerLabel: "Joueur",
             modeLabelOpenWorld: "MONDE OUVERT", modeLabelBoss: "Niveau Boss", modeLabelWave: "Vague",
             hideoutAlertTitle: "Cachette Secrète", hideoutAlertEnter: "Entrer : E", hideoutHudExit: "Sortir : E",
+            exitMatchBtn: "Quitter la Partie", exitMatchConfirmMsg: "Voulez-vous vraiment quitter la partie et retourner au menu ? Votre progression dans cette partie sera perdue.",
+            chatOptionsBtn: "Plus d'options", chatClearOption: "🗑️ Effacer la conversation", chatBlockOption: "🚫 Bloquer le joueur", chatUnblockOption: "✓ Débloquer le joueur", chatReportOption: "🚩 Signaler le joueur",
+            chatClearConfirmMsg: "Voulez-vous vraiment supprimer tous les messages de cette conversation ? Cette action est irréversible.", chatClearedToast: "Conversation effacée.",
+            chatBlockConfirmMsg: "Bloquer ce joueur ? Vous ne pourrez plus vous envoyer de messages tant que vous ne le débloquez pas.", chatBlockedToast: "Joueur bloqué.", chatUnblockedToast: "Joueur débloqué.",
+            chatBlockedNotice: "Vous avez bloqué ce joueur. Débloquez-le pour envoyer des messages.", chatBlockedByPeerNotice: "Vous ne pouvez pas envoyer de messages à ce joueur.",
+            chatDeleteMsgConfirmMsg: "Supprimer ce message ?",
+            reportTitle: "🚩 Signaler un Joueur", reportAgainstLabel: "Signalement de", reportReasonPlaceholder: "Décrivez le motif du signalement...", reportReasonRequired: "Écrivez le motif du signalement.",
+            reportSendBtn: "ENVOYER LE SIGNALEMENT", reportSentMsg: "Signalement envoyé. Merci de nous aider à garder le jeu sûr !", reportSendErrorMsg: "Erreur lors de l'envoi du signalement. Réessayez.",
+            boostOptionsBtn: "Options", boostRemainingLabel: "Restant", boostNoneActiveLabel: "Aucun boost actif", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Joueurs",
             socialSearchTitle: "🔎 Joueurs", socialBackBtn: "✕ Retour",
             socialTabSearch: "🔎 Rechercher", socialTabFollowing: "⭐ Abonnements",
@@ -1706,7 +1719,9 @@
                 itm_pot: { name: "Nanocapsule de Soin", desc: "+50 de vie en jeu." },
                 itm_pot3: { name: "Pack de Soin (x3)", desc: "3 Nanocapsules, +50 chacune." },
                 itm_shd: { name: "Batterie de Bouclier", desc: "2s invulnérable." },
-                itm_shd2: { name: "Pack de Bouclier (x2)", desc: "2 Batteries, 2s chacune." }
+                itm_shd2: { name: "Pack de Bouclier (x2)", desc: "2 Batteries, 2s chacune." },
+                boost_speed: { name: "Boost de Vitesse", desc: "Augmente votre vitesse jusqu'à la fin du temps acheté. Le temps ne s'écoule que pendant les parties." },
+                boost_hp: { name: "Boost de PV Supplémentaires", desc: "Augmente vos PV max jusqu'à la fin du temps acheté. Le temps ne s'écoule que pendant les parties." }
             },
             logoutAccountBtn: "Se Déconnecter",
             changePasswordTitle: "Changer le Mot de Passe",
@@ -1758,19 +1773,16 @@
             errRecoveryLinkExpired: "Le lien de réinitialisation a expiré. Demandez un nouvel e-mail."
         }
     };
-
     function t(key) {
         let lang = Settings.language || 'pt-BR';
         let dict = I18N[lang] || I18N['pt-BR'];
         return (dict[key] !== undefined) ? dict[key] : (I18N['pt-BR'][key] || key);
     }
-
     function tShop(id, field) {
         let lang = Settings.language || 'pt-BR';
         let dict = (I18N[lang] && I18N[lang].shop && I18N[lang].shop[id]) ? I18N[lang].shop : I18N['pt-BR'].shop;
         return dict[id][field];
     }
-
     const AudioFX = {
         ctx: null,
         init() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -1805,7 +1817,6 @@
             }
         }
     };
-
     const MusicFX = {
         ctx: null, masterGain: null, compressor: null, noiseBuffer: null,
         isPlaying: false, schedulerTimer: null,
@@ -1952,13 +1963,11 @@
             });
         }
     };
-
     const Hideout = {
         active: false, timer: 60, timerTick: 0,
         savedX: 0, savedY: 0, chestOpened: false, chest: null, platforms: [],
         eKeyWasDown: false,
         ROOM_X: 390, ROOM_Y: 180, ROOM_W: 500, ROOM_H: 360,
-
         enter(player) {
             if(this.active) return;
             this.active = true; this.timer = 60; this.timerTick = 0;
@@ -1980,7 +1989,6 @@
             this.updateHudTimer();
             AudioFX.play('secret');
         },
-
         exit(player) {
             if(!this.active) return;
             this.active = false;
@@ -1989,7 +1997,6 @@
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
         },
-
         update(dt, player) {
             if(!this.active) return;
             this.timerTick += dt;
@@ -2018,7 +2025,6 @@
             if(eDown && !this.eKeyWasDown) { this.exit(player); }
             this.eKeyWasDown = eDown;
         },
-
         openHideoutChest(player) {
             if(!this.chest || this.chest.destroyed || !this.active) return;
             let dst = Math.hypot((player.x+player.w/2) - (this.chest.x+18), (player.y+player.h/2) - (this.chest.y+14));
@@ -2041,13 +2047,11 @@
             player.syncHUD(); Engine.showChestReward(rewardText);
             document.getElementById('chest-alert').style.display = 'none';
         },
-
         updateHudTimer() {
             let min = String(Math.floor(this.timer / 60)).padStart(2,'0');
             let sec = String(this.timer % 60).padStart(2,'0');
             document.getElementById('hideout-timer-label').innerText = `⏱ ${min}:${sec}`;
         },
-
         draw(ctx) {
             if(!this.active) return;
             let rx = this.ROOM_X, ry = this.ROOM_Y, rw = this.ROOM_W, rh = this.ROOM_H;
@@ -2064,64 +2068,22 @@
             if(this.chest && !this.chest.destroyed) this.chest.draw(ctx);
         }
     };
-
     class SecretZone {
         constructor(x, y) { this.x = x; this.y = y; this.w = 70; this.h = 70; this.triggered = false; }
     }
-
-    // ═══════════════════════════════════════════════════════════
-    // SISTEMA DE CONTAS (localStorage por dispositivo)
-    // ═══════════════════════════════════════════════════════════
-    // ═══════════════════════════════════════════════════════════
-    // FIREBASE — contas na nuvem (funciona em qualquer dispositivo)
-    // ═══════════════════════════════════════════════════════════
     const SUPABASE_URL = "https://hqweasvyuynrwztoovyv.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_su5FXrWrf4xYRApvkejHVQ_vOeoEmwp";
-
-    // FIX (causa raiz real): o supabase-js usa por padrão a Web Locks API do navegador
-    // (navigator.locks) pra evitar que duas abas mexam na sessão salva ao mesmo tempo. Só que
-    // essa trava tem um bug documentado e conhecido: se uma aba fechar ou recarregar no meio de
-    // uma operação de auth, a trava pode ficar "presa" (órfã) — e a próxima vez que o jogo abrir,
-    // ele fica esperando pra sempre por uma trava que nunca vai ser liberada. Não é um erro, não
-    // dá timeout: é uma Promise que nunca resolve. Isso explica por completo a "tela azul" que só
-    // acontecia depois de logar e atualizar a página, e por que só "excluir dados de navegação"
-    // resolvia antes. A solução oficial do próprio Supabase é substituir o mecanismo de trava por
-    // um que não trava nada (não precisamos de proteção entre abas aqui, então é seguro remover).
     const noOpLock = async (name, acquireTimeout, fn) => { return await fn(); };
-
-    // FIX (causa raiz real do chat travar após trocar de aba): descobrimos, testando com logs
-    // detalhados, que o Realtime (WebSocket) reconecta normalmente quando a aba volta do segundo
-    // plano, mas as chamadas REST comuns (select/insert/update, usadas em toda consulta ao banco)
-    // ficam penduradas para sempre — nem resolvem, nem rejeitam, mesmo com AbortController
-    // aplicado individualmente em cada chamada via .abortSignal(). Isso indica que o problema não
-    // é a Promise em si, e sim a conexão HTTP/2 subjacente que o navegador reaproveita: ela fica
-    // "zumbi" enquanto a aba está oculta, e novas requisições no mesmo socket ficam enfileiradas
-    // atrás dela e nunca são despachadas de verdade. A correção definitiva é forçar cada
-    // requisição do supabase-js a passar por um fetch próprio, com timeout garantido pelo
-    // navegador (não só pelo JS): se a resposta não chegar em 8s, abortamos a conexão de verdade
-    // e o erro sobe normalmente pelo try/catch de quem chamou.
     const fetchWithTimeout = (url, options = {}) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 8000);
         const opts = { ...options, signal: controller.signal };
         return fetch(url, opts).finally(() => clearTimeout(timeoutId));
     };
-
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
         auth: { lock: noOpLock },
         global: { fetch: fetchWithTimeout }
     });
-
-    // FIX (causa raiz real #2): mesmo isolando as chamadas de mensagem do client REST do
-    // supabase-js e evitando `sb.auth.getSession()` no caminho quente, o travamento persistiu de
-    // um jeito que aponta pra algo mais fundo: o client de auth do supabase-js parece manter uma
-    // fila/lock interna própria (além do nosso "noOpLock") que, uma vez emperrada — por exemplo
-    // pelo watchdog de boot ou pela reconexão do Realtime mexendo em estado de sessão — deixa
-    // QUALQUER chamada futura relacionada a auth (getSession, onAuthStateChange, etc.) pendurada
-    // para sempre. Por isso até o polling (que também dependia dessa mesma peça) parou junto.
-    // A correção definitiva é não tocar em NENHUMA API do client de auth do supabase-js no
-    // caminho do chat: lemos o token de acesso direto de onde o próprio supabase-js já o guarda
-    // (localStorage, chave "sb-<ref>-auth-token"), sem passar por nenhuma Promise da lib.
     function getCachedAccessToken() {
         try {
             const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\./)[1];
@@ -2133,17 +2095,6 @@
             return null;
         }
     }
-
-    // FIX (causa raiz real, confirmada por teste isolado): um fetch cru pro mesmo domínio Supabase
-    // responde normalmente mesmo depois da aba voltar do segundo plano — ou seja, a rede e o
-    // navegador estão OK. O travamento é específico do client REST (`sb.from(...)`) do
-    // supabase-js: nossa hipótese, com base no comportamento observado, é que ele compartilha
-    // estado interno com o client Realtime, e destruir/recriar o canal Realtime ao reconectar
-    // deixa esse estado preso, fazendo toda chamada `.from()` seguinte nunca resolver, mesmo que
-    // o fetch por trás funcione. A correção é não depender do client REST do supabase-js para as
-    // chamadas do chat: falamos direto com a API REST via fetch puro, usando o token de sessão
-    // atual. Isso contorna o client problemático sem precisar recriá-lo (o que quebraria login,
-    // ranking, presença e todo o resto que usa "sb" normalmente).
     async function restDirect(path, options = {}) {
         const token = getCachedAccessToken() || SUPABASE_ANON_KEY;
         const res = await fetchWithTimeout(SUPABASE_URL + '/rest/v1/' + path, {
@@ -2167,10 +2118,6 @@
         const text = await res.text();
         return text ? JSON.parse(text) : null;
     }
-
-    // FIX (rede de segurança): mesmo com a trava desativada acima, mantemos um watchdog bem mais
-    // curto (2s) como último recurso, caso outro tipo de travamento apareça no futuro — ele limpa
-    // só os dados de sessão do Supabase e recarrega automaticamente, sem exigir ação manual.
     (function guardraAuthDeadlock() {
         const RELOAD_FLAG = 'bb-auth-recovery-attempted';
         let resolved = false;
@@ -2193,7 +2140,6 @@
             window.location.reload();
         }, 2000);
     })();
-
     const Accounts = {
         current: null,
         _busy: false,
@@ -2203,7 +2149,7 @@
         _defaultProfile(name) {
             return {
                 name: name, wallet: 100,
-                upg: { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0 },
+                upg: { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, boosts: { speed:0, hp:0 } },
                 ranking: [], lang: 'pt-BR', vol: 0.7, sfx: true, mus: true
             };
         },
@@ -2247,7 +2193,6 @@
             try {
                 const { error } = await sb.auth.signInWithPassword({ email, password: p });
                 if (error) throw error;
-                // onAuthStateChange cuida do resto (carrega perfil e entra no menu)
             } catch(err) {
                 this._err(this._friendlyError(err));
                 this._setBusy(false);
@@ -2272,12 +2217,10 @@
                 });
                 if (error) throw error;
                 if (!data.session) {
-                    // Confirmação de e-mail obrigatória: perfil só é criado no primeiro login confirmado (ver init())
                     this._err(t('msgAccountCreated'), true);
                     this.showTab('login');
                     this._setBusy(false);
                 }
-                // Se já vier com sessão (confirmação desativada), onAuthStateChange cuida do resto
             } catch(err) {
                 this._err(this._friendlyError(err));
                 this._setBusy(false);
@@ -2312,8 +2255,6 @@
             if(newPass!==newPass2){ setMsg(t('errPasswordsDontMatch')); return; }
             setMsg('');
             try {
-                // Garante que a sessão está válida/atualizada antes de tentar trocar a senha,
-                // evitando que uma sessão expirada faça a troca "parecer" bem-sucedida sem persistir.
                 const { data: sessionData, error: sessionErr } = await sb.auth.getSession();
                 if (sessionErr) throw sessionErr;
                 if (!sessionData || !sessionData.session) {
@@ -2365,7 +2306,6 @@
                 document.getElementById('recovery-new-password').value = '';
                 document.getElementById('recovery-new-password2').value = '';
                 document.getElementById('recovery-screen').classList.add('hidden');
-                // Sessão de recuperação já está ativa e agora tem a nova senha: segue para o jogo normalmente
                 const { data: { session } } = await sb.auth.getSession();
                 const user = session ? session.user : null;
                 if(user) await this._loadProfileAndEnter(user);
@@ -2378,7 +2318,7 @@
         async _loadProfileAndEnter(user) {
             try {
                 let { data, error } = await sb.from('players').select('*').eq('id', user.id).single();
-                if (error && error.code !== 'PGRST116') throw error; // PGRST116 = nenhuma linha encontrada
+                if (error && error.code !== 'PGRST116') throw error;
                 if (!data) {
                     let displayName = (user.user_metadata && user.user_metadata.username) || user.email.split('@')[0];
                     data = this._defaultProfile(displayName);
@@ -2397,13 +2337,6 @@
             }
         },
         init() {
-            // FIX: watchdog específico da tela "Carregando..." inicial — ela só é escondida
-            // dentro do callback assíncrono onAuthStateChange do Supabase. Se esse callback
-            // demorar muito ou nunca disparar (rede lenta validando uma sessão salva, por
-            // exemplo logo depois de um login + F5), a pessoa ficava presa numa tela de
-            // carregamento pra sempre, sem nenhum aviso — essa era a "tela azul" que só
-            // acontecia depois de logar e atualizar a página. Depois de 10s sem resposta,
-            // esconde o loading e mostra a tela de login, permitindo tentar de novo.
             let bootLoadingResolved = false;
             let bootLoadingWatchdog = setTimeout(() => {
                 if (bootLoadingResolved) return;
@@ -2412,9 +2345,6 @@
                 document.getElementById('auth-screen').classList.remove('hidden');
             }, 10000);
             const resolveBootLoading = () => { bootLoadingResolved = true; clearTimeout(bootLoadingWatchdog); };
-
-            // Detecta o link de "esqueci minha senha": o Supabase dispara PASSWORD_RECOVERY
-            // ao processar o token da URL, antes do evento SIGNED_IN normal.
             sb.auth.onAuthStateChange(async (event, session) => {
                 resolveBootLoading();
                 if(event === 'PASSWORD_RECOVERY') {
@@ -2426,23 +2356,14 @@
                     return;
                 }
                 if(this._inRecovery) {
-                    // Enquanto o usuário ainda não definiu a nova senha, ignora outros eventos
-                    // (ex: SIGNED_IN disparado junto) para não pular direto pro menu.
                     document.getElementById('boot-loading-screen').classList.add('hidden');
                     return;
                 }
-                // FIX: a tela de "Carregando..." (boot-loading-screen) era escondida ANTES da
-                // próxima tela (login ou menu) estar pronta pra aparecer — e como decidir qual
-                // delas mostrar envolve uma consulta ao banco (await abaixo), sobrava um instante
-                // real, visível, sem NENHUMA tela cobrindo o jogo por trás. Era esse buraco que
-                // aparecia como um flash rápido de "tela azul" a cada login/reload. Agora o
-                // loading só é escondido depois que a tela seguinte já está decidida e visível,
-                // então a transição fica sempre coberta, sem brecha.
                 const user = session ? session.user : null;
                 if(user) {
                     try {
                         let { data, error } = await sb.from('players').select('*').eq('id', user.id).single();
-                        if (error && error.code !== 'PGRST116') throw error; // PGRST116 = nenhuma linha encontrada
+                        if (error && error.code !== 'PGRST116') throw error;
                         if (!data) {
                             let displayName = (user.user_metadata && user.user_metadata.username) || user.email.split('@')[0];
                             data = this._defaultProfile(displayName);
@@ -2481,22 +2402,14 @@
             });
         },
         logout() { let was=this.current; this.current=null; this._inRecovery=false; sb.auth.signOut().catch(e=>console.warn(e)); },
-
-        // Apaga a conta de verdade (login, senha, perfil, amigos, convites) via Edge Function.
-        // Essa function roda no servidor do Supabase com a chave admin — o jogo nunca tem essa chave.
         async deleteAccountForever() {
             if (!this.current) throw new Error('Você precisa estar logado.');
             const { data: sessionData } = await sb.auth.getSession();
             if (!sessionData || !sessionData.session) throw new Error('Sessão expirada. Faça login novamente.');
-
             const { data, error } = await sb.functions.invoke('delete-account', {
                 headers: { Authorization: `Bearer ${sessionData.session.access_token}` }
             });
             if (error) {
-                // FIX: o Supabase JS costuma devolver só "Edge Function returned a non-2xx status
-                // code" no error.message, escondendo o motivo real que a function respondeu no
-                // corpo (ex: "conta não encontrada", erro de permissão etc). Tentamos ler o corpo
-                // de verdade em error.context pra mostrar uma mensagem útil em vez de genérica.
                 let detail = '';
                 try {
                     if (error.context && typeof error.context.json === 'function') {
@@ -2509,8 +2422,6 @@
                 throw new Error(detail || error.message || 'Erro desconhecido ao apagar conta.');
             }
             if (data && data.error) throw new Error(data.error);
-
-            // Sucesso: limpa tudo localmente e volta pra tela de login
             Social.setOnline(false);
             Social.stopPresenceHeartbeat();
             this.current = null;
@@ -2526,18 +2437,13 @@
             await sb.auth.signOut().catch(e => console.warn(e));
         }
     };
-
-    // ═══════════════════════════════════════════════════════════
-    // SOCIAL — buscar jogadores, seguir, presença online, convites
-    // ═══════════════════════════════════════════════════════════
     const Social = {
         _viewingProfileId: null,
-        _pendingInvites: [], // convites recebidos pendentes
-        _outgoingInviteId: null, // convite que EU enviei e estou esperando resposta
+        _pendingInvites: [],
+        _outgoingInviteId: null,
         _presenceChannel: null,
         _invitesChannel: null,
         _heartbeatInt: null,
-
         openSearch() {
             document.getElementById('search-input').value = '';
             document.getElementById('search-results').innerHTML = `<div class="social-empty">${t('socialSearchHint')}</div>`;
@@ -2545,8 +2451,6 @@
             this.switchTab('search');
         },
         closeSearch() { document.getElementById('search-screen').classList.add('hidden'); },
-
-        // FIX: nova aba "Seguindo" (feature pedida que não existia antes).
         switchTab(tab) {
             document.getElementById('social-tab-search').classList.toggle('active', tab === 'search');
             document.getElementById('social-tab-following').classList.toggle('active', tab === 'following');
@@ -2555,12 +2459,9 @@
             document.getElementById('social-following-panel').classList.toggle('hidden', tab !== 'following');
             document.getElementById('social-chats-panel').classList.toggle('hidden', tab !== 'chats');
             if (tab === 'following') this.loadFollowing();
-            if (tab === 'search') this._followingDirty = true; // força reload ao voltar pra Seguindo
+            if (tab === 'search') this._followingDirty = true;
             if (tab === 'chats') Chat.loadConversations();
         },
-
-        // FIX: reaplica os textos dinâmicos do painel social quando o idioma muda,
-        // já que esses elementos são gerados via innerHTML/JS e não pegam o data-i18n automático.
         refreshTexts() {
             if (!document.getElementById('search-screen').classList.contains('hidden')) {
                 let activeTab = document.getElementById('social-tab-following').classList.contains('active') ? 'following'
@@ -2578,16 +2479,11 @@
                 this._setFollowBtn(followBtn.classList.contains('following'));
             }
         },
-
         async loadFollowing() {
             let container = document.getElementById('following-results');
             if (!Accounts.current) { container.innerHTML = `<div class="social-empty">${t('socialLoginToSeeFollowing')}</div>`; return; }
             container.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
             try {
-                // FIX: a tabela "follows" tem DUAS foreign keys pra "players" (follower_id e followed_id),
-                // então o embed automático players:followed_id(...) fica ambíguo pro PostgREST e
-                // retorna erro (era a causa do "Erro ao carregar quem você segue"). Solução: buscar
-                // os IDs seguidos primeiro e depois os dados dos jogadores em uma query separada.
                 const { data: followRows, error: followErr } = await sb
                     .from('follows')
                     .select('followed_id')
@@ -2626,7 +2522,6 @@
                 console.warn('Erro ao carregar seguindo:', err);
             }
         },
-
         async doSearch() {
             let q = (document.getElementById('search-input').value || '').trim();
             let container = document.getElementById('search-results');
@@ -2658,9 +2553,7 @@
                 console.warn('Erro na busca de jogadores:', err);
             }
         },
-
         _esc(s) { let d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; },
-
         async openProfile(playerId, name, isOnline) {
             this._viewingProfileId = playerId;
             document.getElementById('search-screen').classList.add('hidden');
@@ -2670,14 +2563,10 @@
             this._setProfileOnlineState(isOnline);
             document.getElementById('profile-invite-status').textContent = '';
             document.getElementById('profile-screen').classList.remove('hidden');
-
-            // Verifica se já sigo esse jogador
             try {
                 const { data } = await sb.from('follows').select('*').eq('follower_id', Accounts.current.uid).eq('followed_id', playerId).maybeSingle();
                 this._setFollowBtn(!!data);
             } catch (e) { console.warn(e); }
-
-            // Re-checa status online mais atualizado
             try {
                 const { data: fresh } = await sb.from('players').select('is_online').eq('id', playerId).single();
                 if (fresh) this._setProfileOnlineState(fresh.is_online);
@@ -2697,7 +2586,6 @@
             btn.textContent = following ? t('socialUnfollowBtn') : t('socialFollowBtn');
             btn.classList.toggle('following', following);
         },
-
         async toggleFollow() {
             if (!this._viewingProfileId || !Accounts.current) return;
             let btn = document.getElementById('btn-follow-toggle');
@@ -2711,7 +2599,6 @@
                     await sb.from('follows').insert({ follower_id: Accounts.current.uid, followed_id: this._viewingProfileId });
                     this._setFollowBtn(true);
                 }
-                // FIX: mantém a aba "Seguindo" sincronizada assim que você segue/deixa de seguir.
                 this._followingDirty = true;
             } catch (err) {
                 console.warn('Erro ao seguir/deixar de seguir:', err);
@@ -2719,7 +2606,6 @@
                 btn.disabled = false;
             }
         },
-
         async sendInvite() {
             if (!this._viewingProfileId || !Accounts.current) return;
             let statusEl = document.getElementById('profile-invite-status');
@@ -2743,9 +2629,7 @@
                 console.warn(err);
             }
         },
-
         _watchOutgoingInvite(inviteId) {
-            // Escuta via Realtime a resposta do convite que eu mandei
             let ch = sb.channel('invite-watch-' + inviteId)
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'game_invites', filter: `id=eq.${inviteId}` }, payload => {
                     let inv = payload.new;
@@ -2755,7 +2639,6 @@
                         statusEl.textContent = '✅ Convite aceito! Conectando...';
                         sb.removeChannel(ch);
                         this._outgoingInviteId = null;
-                        // Quem enviou o convite entra como convidado (guest) na sala criada por quem aceitou
                         document.getElementById('profile-screen').classList.add('hidden');
                         Engine.openOnlineLobby();
                         document.getElementById('join-code-input').value = inv.room_code;
@@ -2769,8 +2652,6 @@
                 })
                 .subscribe();
         },
-
-        // Escuta convites recebidos em tempo real (chamado uma vez no boot com conta logada)
         subscribeToIncomingInvites() {
             if (!Accounts.current) return;
             if (this._invitesChannel) { sb.removeChannel(this._invitesChannel); }
@@ -2780,8 +2661,6 @@
                     this._renderInvitePanel();
                 })
                 .subscribe();
-
-            // Carrega convites pendentes que já estavam lá (ex: fui offline e voltei)
             sb.from('game_invites').select('*').eq('to_id', Accounts.current.uid).eq('status', 'pending')
                 .then(({ data }) => {
                     if (data && data.length) {
@@ -2790,17 +2669,14 @@
                     }
                 });
         },
-
         toggleInvitePanel() {
             document.getElementById('invite-panel').classList.toggle('hidden');
         },
-
         _renderInvitePanel() {
             let badge = document.getElementById('invite-badge');
             let count = this._pendingInvites.length;
             badge.textContent = count;
             badge.classList.toggle('show', count > 0);
-
             let list = document.getElementById('invite-list');
             if (count === 0) {
                 list.innerHTML = `<div class="social-empty">${t('socialNoInvites')}</div>`;
@@ -2820,18 +2696,12 @@
                 list.appendChild(el);
             });
         },
-
         async acceptInvite(inviteId) {
-            // Ao aceitar, EU (convidado) crio a sala PeerJS e mando o código de volta via Supabase,
-            // assim quem convidou entra automaticamente sem precisar copiar/colar nada.
             this._pendingInvites = this._pendingInvites.filter(i => i.id !== inviteId);
             this._renderInvitePanel();
             document.getElementById('invite-panel').classList.add('hidden');
-
             Engine.openOnlineLobby();
             OnlineSync.createRoom();
-
-            // Espera o peer abrir pra pegar o código e então marcar o convite como aceito
             const waitForCode = setInterval(async () => {
                 if (OnlineSync.roomCode) {
                     clearInterval(waitForCode);
@@ -2840,9 +2710,8 @@
                     } catch (err) { console.warn('Erro ao aceitar convite:', err); }
                 }
             }, 300);
-            setTimeout(() => clearInterval(waitForCode), 15000); // failsafe
+            setTimeout(() => clearInterval(waitForCode), 15000);
         },
-
         async declineInvite(inviteId) {
             this._pendingInvites = this._pendingInvites.filter(i => i.id !== inviteId);
             this._renderInvitePanel();
@@ -2850,23 +2719,14 @@
                 await sb.from('game_invites').update({ status: 'declined' }).eq('id', inviteId);
             } catch (err) { console.warn(err); }
         },
-
-        // Presença online: marca o jogador como online/offline na tabela players
         async setOnline(isOnline) {
             if (!Accounts.current) return;
             try {
                 await sb.from('players').update({ is_online: isOnline, last_seen: new Date().toISOString() }).eq('id', Accounts.current.uid);
             } catch (err) { console.warn('Erro ao atualizar presença:', err); }
         },
-        // FIX: 'beforeunload' + await numa chamada assíncrona normal (fetch) quase nunca chega a
-        // completar — o navegador já matou a aba antes da resposta voltar, então "ficar marcado
-        // online pra sempre" era o resultado mais comum. Trocado por sendBeacon (não-bloqueante,
-        // sobrevive ao fechamento da aba) com fallback pro update normal.
         _setOfflineBeacon() {
             if (!Accounts.current) return;
-            // Best-effort: na maioria dos casos essa chamada é abortada pelo navegador antes de
-            // completar, porque a aba já está fechando. Por isso o status "online" real passa a
-            // depender do timestamp last_seen (ver nota abaixo) e não só deste update.
             try { this.setOnline(false); } catch (e) {}
         },
         startPresenceHeartbeat() {
@@ -2875,10 +2735,6 @@
             this._heartbeatInt = setInterval(() => this.setOnline(true), 30000);
             window.addEventListener('beforeunload', () => { this._setOfflineBeacon(); });
             window.addEventListener('pagehide', () => { this._setOfflineBeacon(); });
-            // FIX: trocar de aba/minimizar não deveria te marcar como offline imediatamente —
-            // isso fazia amigos verem "offline" mesmo com o jogo aberto em segundo plano. Agora só
-            // reafirma 'online' quando a aba volta a ficar visível; deixamos o servidor marcar
-            // offline por timeout de heartbeat (last_seen) se a aba realmente ficar fechada/inativa.
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) this.setOnline(true);
             });
@@ -2887,13 +2743,21 @@
             if (this._heartbeatInt) { clearInterval(this._heartbeatInt); this._heartbeatInt = null; }
         }
     };
-
     // ═══════════════════════════════════════════════════════════
     // CHAT (mensagens diretas entre quem você segue, estilo WhatsApp)
     // Requer uma tabela "messages" no Supabase com as colunas:
     //   id (uuid, pk, default gen_random_uuid()), from_id (uuid), to_id (uuid),
     //   content (text), created_at (timestamptz, default now()), read (bool, default false)
     // Com Realtime ativado pra essa tabela.
+    //
+    // NOVO — bloquear jogador: requer uma tabela "blocks" no Supabase:
+    //   id (uuid, pk, default gen_random_uuid()), blocker_id (uuid), blocked_id (uuid),
+    //   created_at (timestamptz, default now()), com uma constraint UNIQUE(blocker_id, blocked_id).
+    //
+    // NOVO — denunciar jogador: chama a Edge Function 'report-user' (precisa ser criada no
+    // Supabase, do mesmo jeito que a função 'delete-account' já existente), que deve enviar um
+    // e-mail para jaron.n.ackermann@gmail.com com os dados da denúncia (ex: usando a API da
+    // Resend) e, opcionalmente, salvar um registro numa tabela "reports" para histórico.
     // ═══════════════════════════════════════════════════════════
     const Chat = {
         _peerId: null,
@@ -2901,56 +2765,41 @@
         _channel: null,
         _listChannel: null,
         _unreadTotal: 0,
-
-        // O timeout real de rede agora é garantido no nível do fetch customizado passado pro
-        // client (veja fetchWithTimeout, perto da criação do "sb"), que aborta a conexão HTTP de
-        // verdade se ela não responder em 8s. Esse helper aqui é só uma camada extra em JS puro,
-        // caso o timeout do fetch por algum motivo não seja suficiente.
+        _isBlocked: false,
+        _blockedByPeer: false,
         _withTimeout(builder, ms = 9000) {
             return Promise.race([
                 builder,
                 new Promise((_, reject) => setTimeout(() => reject(new Error('timeout (fallback JS)')), ms))
             ]);
         },
-
         _dmKey(a, b) { return [a, b].sort().join('|'); },
-
-        // FIX: o navegador suspende/throttla conexões WebSocket em abas que ficam em segundo
-        // plano (troca de aba, minimizar, etc.), e o canal Realtime do Supabase pode morrer
-        // nesse meio tempo sem disparar nenhum evento de erro visível — é uma desconexão
-        // silenciosa. Como o desenho das mensagens depende inteiramente do Realtime (pra não
-        // duplicar a própria mensagem), um canal morto significa que nada mais aparece pra
-        // nenhum dos dois lados, mesmo que os INSERTs continuem sendo salvos no banco. Aqui,
-        // sempre que a aba volta a ficar visível, recriamos a subscrição do zero (o que força
-        // uma reconexão) e recarregamos o histórico pra pegar qualquer mensagem perdida enquanto
-        // o canal estava morto.
         _initVisibilityRecovery() {
             if (this._visibilityHandlerAttached) return;
             this._visibilityHandlerAttached = true;
             document.addEventListener('visibilitychange', () => {
-                console.log('[Chat] visibilitychange, hidden =', document.hidden);
                 if (document.hidden) return;
                 if (this._peerId && !document.getElementById('chat-screen').classList.contains('hidden')) {
-                    console.log('[Chat] voltou a ficar visível com chat aberto, recarregando e reconectando');
                     this._loadMessages();
                     this._subscribeToConversation();
                 }
                 if (Accounts.current) this._subscribeToConversationList();
             });
         },
-
         openChatWithViewedProfile() {
             if (!Social._viewingProfileId) return;
             let name = document.getElementById('profile-name-lbl').textContent;
             let isOnline = document.getElementById('profile-status-dot').classList.contains('on');
             this.openChat(Social._viewingProfileId, name, isOnline);
         },
-
         async openChat(playerId, name, isOnline) {
             if (!Accounts.current) return;
             this._initVisibilityRecovery();
             this._peerId = playerId;
             this._peerName = name;
+            this._isBlocked = false;
+            this._blockedByPeer = false;
+            this.closeOptionsMenu();
             document.getElementById('profile-screen').classList.add('hidden');
             document.getElementById('search-screen').classList.add('hidden');
             document.getElementById('chat-header-name').textContent = name || '—';
@@ -2960,7 +2809,6 @@
             document.getElementById('chat-messages').innerHTML = `<div class="chat-empty-hint">${t('chatLoading')}</div>`;
             document.getElementById('chat-input').value = '';
             document.getElementById('chat-screen').classList.remove('hidden');
-
             try {
                 const { data: fresh } = await sb.from('players').select('is_online').eq('id', playerId).single();
                 if (fresh) {
@@ -2968,22 +2816,147 @@
                     document.getElementById('chat-header-status-text').textContent = fresh.is_online ? t('socialOnline') : t('socialOffline');
                 }
             } catch (e) {}
-
+            await this._checkBlockStatus();
             await this._loadMessages();
             this._subscribeToConversation();
             this._markConversationRead();
             document.getElementById('chat-input').focus();
         },
-
         closeChat() {
             document.getElementById('chat-screen').classList.add('hidden');
+            this.closeOptionsMenu();
+            document.getElementById('report-screen').classList.add('hidden');
             if (this._channel) { sb.removeChannel(this._channel); this._channel = null; }
             this._stopPolling();
             this._peerId = null;
             this._peerName = null;
+            this._isBlocked = false;
+            this._blockedByPeer = false;
             if (!document.getElementById('search-screen').classList.contains('hidden')) this.loadConversations();
         },
-
+        // NOVO: menu de opções da conversa (limpar / bloquear / denunciar)
+        toggleOptionsMenu() { document.getElementById('chat-options-menu').classList.toggle('hidden'); },
+        closeOptionsMenu() { document.getElementById('chat-options-menu').classList.add('hidden'); },
+        // NOVO: checa se existe bloqueio (em qualquer direção) entre mim e a pessoa da conversa
+        async _checkBlockStatus() {
+            this._isBlocked = false; this._blockedByPeer = false;
+            if (!Accounts.current || !this._peerId) return;
+            try {
+                const myId = Accounts.current.uid, peerId = this._peerId;
+                const or = `and(blocker_id.eq.${myId},blocked_id.eq.${peerId}),and(blocker_id.eq.${peerId},blocked_id.eq.${myId})`;
+                const rows = await restDirect(`blocks?select=blocker_id,blocked_id&or=(${encodeURIComponent(or).replace(/%2C/g, ',')})`);
+                (rows || []).forEach(r => {
+                    if (r.blocker_id === myId) this._isBlocked = true;
+                    else this._blockedByPeer = true;
+                });
+            } catch (err) { console.warn('Erro ao checar bloqueio (tabela "blocks" existe no Supabase?):', err); }
+            this._refreshBlockUI();
+        },
+        _refreshBlockUI() {
+            let notice = document.getElementById('chat-blocked-notice');
+            let input = document.getElementById('chat-input');
+            let sendBtn = document.querySelector('#chat-input-row .chat-send-btn');
+            let blockBtn = document.getElementById('btn-chat-block-toggle');
+            if (blockBtn) blockBtn.innerHTML = this._isBlocked ? t('chatUnblockOption') : t('chatBlockOption');
+            if (this._isBlocked || this._blockedByPeer) {
+                notice.textContent = this._isBlocked ? t('chatBlockedNotice') : t('chatBlockedByPeerNotice');
+                notice.classList.remove('hidden');
+                if (input) input.disabled = true;
+                if (sendBtn) sendBtn.disabled = true;
+            } else {
+                notice.classList.add('hidden');
+                if (input) input.disabled = false;
+                if (sendBtn) sendBtn.disabled = false;
+            }
+        },
+        // NOVO: bloquear/desbloquear o jogador desta conversa
+        async toggleBlock() {
+            if (!this._peerId || !Accounts.current) return;
+            try {
+                if (this._isBlocked) {
+                    await restDirect(`blocks?blocker_id=eq.${Accounts.current.uid}&blocked_id=eq.${this._peerId}`, { method: 'DELETE' });
+                    this._isBlocked = false;
+                    Engine.showToast(t('chatUnblockedToast'));
+                } else {
+                    if (!window.confirm(t('chatBlockConfirmMsg'))) { this.closeOptionsMenu(); return; }
+                    await restDirect('blocks', { method: 'POST', body: JSON.stringify({ blocker_id: Accounts.current.uid, blocked_id: this._peerId }) });
+                    this._isBlocked = true;
+                    Engine.showToast(t('chatBlockedToast'));
+                }
+                this._refreshBlockUI();
+            } catch (err) { console.warn('Erro ao bloquear/desbloquear jogador (tabela "blocks" existe no Supabase?):', err); }
+            this.closeOptionsMenu();
+        },
+        // NOVO: apaga todas as mensagens da conversa atual (dos dois lados)
+        async clearConversation() {
+            if (!this._peerId || !Accounts.current) return;
+            this.closeOptionsMenu();
+            if (!window.confirm(t('chatClearConfirmMsg'))) return;
+            try {
+                const myId = Accounts.current.uid, peerId = this._peerId;
+                const or = `and(from_id.eq.${myId},to_id.eq.${peerId}),and(from_id.eq.${peerId},to_id.eq.${myId})`;
+                await restDirect(`messages?or=(${encodeURIComponent(or).replace(/%2C/g, ',')})`, { method: 'DELETE' });
+                document.getElementById('chat-messages').innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
+                Engine.showToast(t('chatClearedToast'));
+            } catch (err) { console.warn('Erro ao limpar conversa:', err); }
+        },
+        // NOVO: apaga uma mensagem específica (só as que eu mesmo enviei)
+        async deleteMessage(msgId) {
+            if (!window.confirm(t('chatDeleteMsgConfirmMsg'))) return;
+            try {
+                await restDirect(`messages?id=eq.${msgId}&from_id=eq.${Accounts.current.uid}`, { method: 'DELETE' });
+                let row = document.querySelector(`#chat-messages [data-msg-id="${msgId}"]`);
+                if (row) row.remove();
+                let container = document.getElementById('chat-messages');
+                if (!container.querySelector('.chat-bubble-row')) container.innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
+            } catch (err) { console.warn('Erro ao apagar mensagem:', err); }
+        },
+        // NOVO: denúncia — abre a tela de motivo para o jogador desta conversa
+        openReport() {
+            if (!this._peerId) return;
+            document.getElementById('report-target-label').textContent = `${t('reportAgainstLabel')}: ${this._peerName || ''}`;
+            document.getElementById('report-reason-input').value = '';
+            document.getElementById('report-error').classList.add('hidden');
+            document.getElementById('report-success').classList.add('hidden');
+            document.getElementById('report-screen').classList.remove('hidden');
+            this.closeOptionsMenu();
+        },
+        closeReport() { document.getElementById('report-screen').classList.add('hidden'); },
+        // NOVO: envia a denúncia. Chama a Edge Function 'report-user' (precisa ser criada no
+        // Supabase — ver comentário no topo do objeto Chat) que é responsável por mandar o
+        // e-mail de verdade para jaron.n.ackermann@gmail.com com todos os dados da denúncia.
+        async submitReport() {
+            let reason = (document.getElementById('report-reason-input').value || '').trim();
+            let errEl = document.getElementById('report-error'), okEl = document.getElementById('report-success');
+            errEl.classList.add('hidden'); okEl.classList.add('hidden');
+            if (!reason) { errEl.textContent = t('reportReasonRequired'); errEl.classList.remove('hidden'); return; }
+            if (!Accounts.current || !this._peerId) return;
+            let btn = document.getElementById('btn-submit-report'); btn.disabled = true;
+            try {
+                const { data: sessionData } = await sb.auth.getSession();
+                const token = sessionData && sessionData.session ? sessionData.session.access_token : null;
+                const { error } = await sb.functions.invoke('report-user', {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    body: {
+                        reporter_id: Accounts.current.uid,
+                        reporter_name: Accounts.current.name,
+                        reported_id: this._peerId,
+                        reported_name: this._peerName,
+                        reason: reason,
+                        sent_to: 'jaron.n.ackermann@gmail.com'
+                    }
+                });
+                if (error) throw error;
+                okEl.textContent = t('reportSentMsg'); okEl.classList.remove('hidden');
+                setTimeout(() => this.closeReport(), 1800);
+            } catch (err) {
+                errEl.textContent = t('reportSendErrorMsg');
+                errEl.classList.remove('hidden');
+                console.warn('Erro ao enviar denúncia (a Edge Function "report-user" já foi criada no Supabase?):', err);
+            } finally {
+                btn.disabled = false;
+            }
+        },
         async _loadMessages(silent) {
             let container = document.getElementById('chat-messages');
             try {
@@ -2994,9 +2967,6 @@
                     `messages?select=*&or=(${encodeURIComponent(or).replace(/%2C/g, ',')})&order=created_at.asc&limit=200`
                 );
                 if (silent) {
-                    console.log('[Chat] poll retornou', (data||[]).length, 'mensagens');
-                    // Modo polling: só adiciona o que ainda não está na tela, sem apagar nada
-                    // (evita "piscar" a conversa a cada 3s e preserva o que o usuário está lendo).
                     (data || []).forEach(m => this._appendIfNew(m));
                     let hasAnyUnread = (data || []).some(m => m.from_id === this._peerId && !m.read);
                     if (hasAnyUnread) this._markConversationRead();
@@ -3014,7 +2984,6 @@
                 console.error('Erro ao carregar mensagens:', err && (err.message || err.details || err.hint) || err);
             }
         },
-
         _appendBubble(m) {
             let container = document.getElementById('chat-messages');
             let hint = container.querySelector('.chat-empty-hint');
@@ -3028,10 +2997,10 @@
             let hh = String(time.getHours()).padStart(2, '0');
             let mm = String(time.getMinutes()).padStart(2, '0');
             let tick = mine ? `<span class="chat-read-tick ${m.read ? 'read' : 'sent'}">${m.read ? '✓✓' : '✓'}</span>` : '';
-            row.innerHTML = `<div class="chat-bubble">${Social._esc(m.content)}<div class="chat-bubble-time">${hh}:${mm}${tick}</div></div>`;
+            let delBtn = mine ? `<span class="chat-msg-delete-btn" onclick="Chat.deleteMessage('${m.id}')">🗑</span>` : '';
+            row.innerHTML = `<div class="chat-bubble">${Social._esc(m.content)}<div class="chat-bubble-time">${delBtn}${hh}:${mm}${tick}</div></div>`;
             container.appendChild(row);
         },
-
         _subscribeToConversation() {
             if (this._channel) { sb.removeChannel(this._channel); this._channel = null; }
             this._channel = sb.channel('dm-' + this._dmKey(Accounts.current.uid, this._peerId))
@@ -3044,44 +3013,27 @@
                     if (m.from_id === this._peerId) this._markConversationRead();
                 })
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, payload => {
-                    // Usado pra refletir a confirmação de leitura (✓✓) assim que o outro lado
-                    // abre a conversa e marca as mensagens como lidas.
                     let m = payload.new;
                     let isThisConvo = (m.from_id === this._peerId && m.to_id === Accounts.current.uid) ||
                                        (m.from_id === Accounts.current.uid && m.to_id === this._peerId);
                     if (!isThisConvo) return;
                     this._updateReadTick(m);
                 })
-                .subscribe((status) => {
-                    console.log('[Chat] status do canal da conversa:', status);
-                });
+                .subscribe();
             this._startPolling();
         },
-
-        // Rede de segurança: independente do Realtime estar funcionando ou não, verifica a
-        // conversa periodicamente enquanto a tela de chat estiver aberta e visível. Isso garante
-        // que mensagens sempre apareçam mesmo se o WebSocket cair silenciosamente (o que o
-        // navegador pode fazer em abas em segundo plano) — sem isso, ficamos 100% reféns do
-        // Realtime nunca falhar, o que na prática não é garantido.
         _startPolling() {
             this._stopPolling();
-            console.log('[Chat] polling iniciado');
             this._pollInt = setInterval(() => {
-                if (document.hidden) { console.log('[Chat] poll pulado (aba oculta)'); return; }
-                if (!this._peerId) { console.log('[Chat] poll pulado (sem peerId)'); return; }
-                if (document.getElementById('chat-screen').classList.contains('hidden')) { console.log('[Chat] poll pulado (tela fechada)'); return; }
-                console.log('[Chat] poll rodando...');
+                if (document.hidden) return;
+                if (!this._peerId) return;
+                if (document.getElementById('chat-screen').classList.contains('hidden')) return;
                 this._loadMessages(true);
             }, 3000);
         },
-
         _stopPolling() {
             if (this._pollInt) { clearInterval(this._pollInt); this._pollInt = null; }
         },
-
-        // Evita desenhar a mesma mensagem duas vezes quando ela chega tanto pelo polling quanto
-        // pelo Realtime (ou por duas rodadas de polling seguidas). Se a mensagem já estiver na
-        // tela mas o status de leitura mudou nesse meio tempo, só atualiza o tick.
         _appendIfNew(m) {
             let container = document.getElementById('chat-messages');
             let existing = container.querySelector(`[data-msg-id="${m.id}"]`);
@@ -3089,10 +3041,8 @@
             this._appendBubble(m);
             container.scrollTop = container.scrollHeight;
         },
-
-        // Atualiza só o ✓/✓✓ de uma bolha própria já desenhada, sem redesenhar a mensagem inteira.
         _updateReadTick(m) {
-            if (m.from_id !== Accounts.current.uid) return; // só nos importa para mensagens que eu mandei
+            if (m.from_id !== Accounts.current.uid) return;
             let row = document.querySelector(`#chat-messages [data-msg-id="${m.id}"]`);
             if (!row) return;
             if (row.getAttribute('data-read') === (m.read ? '1' : '0')) return;
@@ -3103,7 +3053,6 @@
                 tick.className = 'chat-read-tick ' + (m.read ? 'read' : 'sent');
             }
         },
-
         async _markConversationRead() {
             if (!this._peerId || !Accounts.current) return;
             try {
@@ -3114,21 +3063,13 @@
                 this._refreshUnreadBadge();
             } catch (err) { console.warn('Erro ao marcar mensagens como lidas:', err); }
         },
-
         async sendMessage() {
             let input = document.getElementById('chat-input');
             let text = (input.value || '').trim();
             if (!text || !this._peerId || !Accounts.current) return;
+            if (this._isBlocked || this._blockedByPeer) return;
             input.value = '';
-            console.log('[Chat] enviando mensagem...', text);
             try {
-                // Desenhamos a bolha aqui mesmo, usando o retorno do insert. Isso não duplica
-                // porque _appendIfNew checa o data-msg-id antes de desenhar — então se o Realtime
-                // (ou o polling de segurança) também entregar esse mesmo INSERT depois, ele é
-                // ignorado. Isolar a UI do Realtime é necessário porque o WebSocket do Supabase
-                // pode cair silenciosamente (ex: aba em segundo plano) e não temos garantia de
-                // que ele volte sozinho — sem isso, o próprio remetente ficava sem ver a mensagem
-                // que acabou de mandar.
                 const rows = await restDirect('messages', {
                     method: 'POST',
                     headers: { 'Prefer': 'return=representation' },
@@ -3138,16 +3079,13 @@
                         content: text
                     })
                 });
-                console.log('[Chat] insert respondeu');
                 const data = rows && rows[0];
-                console.log('[Chat] mensagem inserida com sucesso, id =', data && data.id);
                 if (data) this._appendIfNew(data);
             } catch (err) {
                 console.warn('Erro ao enviar mensagem:', err && (err.message || err.details || err.hint) || err);
                 input.value = text;
             }
         },
-
         async loadConversations() {
             let container = document.getElementById('chats-results');
             let sidebarContainer = document.getElementById('sidebar-chats-list');
@@ -3179,7 +3117,6 @@
                     this._unreadTotal = 0; this._refreshUnreadBadge();
                     return;
                 }
-
                 const { data: allMsgs, error: msgErr } = await sb
                     .from('messages')
                     .select('*')
@@ -3187,14 +3124,12 @@
                     .order('created_at', { ascending: false })
                     .limit(500);
                 if (msgErr) console.warn('Erro ao carregar mensagens recentes:', msgErr);
-
                 let byPeer = {};
                 (allMsgs || []).forEach(m => {
                     let peer = m.from_id === Accounts.current.uid ? m.to_id : m.from_id;
                     if (!byPeer[peer]) byPeer[peer] = { last: m, unread: 0 };
                     if (m.to_id === Accounts.current.uid && !m.read) byPeer[peer].unread++;
                 });
-
                 let rows = players.map(p => ({ player: p, conv: byPeer[p.id] || null }));
                 rows.sort((a, b) => {
                     if (a.conv && b.conv) return new Date(b.conv.last.created_at) - new Date(a.conv.last.created_at);
@@ -3202,14 +3137,9 @@
                     if (b.conv) return 1;
                     return (a.player.name || '').localeCompare(b.player.name || '');
                 });
-
                 this._unreadTotal = rows.reduce((sum, r) => sum + (r.conv ? r.conv.unread : 0), 0);
                 this._refreshUnreadBadge();
-                // FIX: chat lateral fixo no menu — a lista de conversas é guardada aqui pra ambos os
-                // containers (o modal de busca e a barra lateral) chamarem Chat.openChatByIndex()
-                // sem precisar escapar nomes/ids dentro de strings de HTML.
                 this._lastRows = rows;
-
                 targets.forEach(el => {
                     el.innerHTML = '';
                     rows.forEach((r, idx) => {
@@ -3238,7 +3168,6 @@
                         el.appendChild(elRow);
                     });
                 });
-
                 this._subscribeToConversationList();
             } catch (err) {
                 targets.forEach(el => el.innerHTML = `<div class="social-empty">${t('chatLoadError')}</div>`);
@@ -3249,7 +3178,6 @@
             let r = (this._lastRows||[])[idx]; if(!r) return;
             this.openChat(r.player.id, r.player.name, r.player.is_online);
         },
-
         _subscribeToConversationList() {
             if (this._listChannel) { sb.removeChannel(this._listChannel); this._listChannel = null; }
             if (!Accounts.current) return;
@@ -3257,15 +3185,12 @@
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `to_id=eq.${Accounts.current.uid}` }, () => {
                     let chatsTabVisible = !document.getElementById('search-screen').classList.contains('hidden') &&
                         document.getElementById('social-tab-chats').classList.contains('active');
-                    // FIX: barra lateral de chat fixa no menu — sempre atualiza a lista ali também,
-                    // mesmo com a tela de busca/conversas fechada.
                     let sidebarVisible = document.getElementById('sidebar-chats-list') && !document.getElementById('menu-screen').classList.contains('hidden');
                     if (chatsTabVisible || sidebarVisible) this.loadConversations();
                     else this._bumpUnreadBadge();
                 })
                 .subscribe();
         },
-
         async _bumpUnreadBadge() {
             try {
                 const { count } = await sb.from('messages').select('*', { count: 'exact', head: true })
@@ -3274,26 +3199,23 @@
                 this._refreshUnreadBadge();
             } catch (e) {}
         },
-
         _refreshUnreadBadge() {
             let badge = document.getElementById('chats-tab-badge');
             if (!badge) return;
             badge.textContent = this._unreadTotal > 9 ? '9+' : this._unreadTotal;
             badge.classList.toggle('hidden', this._unreadTotal <= 0);
         },
-
         refreshTexts() {
             if (this._peerId) {
                 let dot = document.getElementById('chat-header-dot');
                 document.getElementById('chat-header-status-text').textContent = dot.classList.contains('on') ? t('socialOnline') : t('socialOffline');
+                this._refreshBlockUI();
             }
         },
-
         initOnLogin() {
             this._initVisibilityRecovery();
             this._bumpUnreadBadge();
         },
-
         stopAll() {
             if (this._channel) { sb.removeChannel(this._channel); this._channel = null; }
             if (this._listChannel) { sb.removeChannel(this._listChannel); this._listChannel = null; }
@@ -3302,11 +3224,6 @@
             this._unreadTotal = 0;
         }
     };
-
-    // ═══════════════════════════════════════════════════════════
-    // MULTIPLAYER ONLINE (WebRTC via PeerJS)
-    // Host roda a simulação completa; Guest envia inputs e renderiza o estado recebido.
-    // ═══════════════════════════════════════════════════════════
     const OnlineSync = {
         peer:null, conn:null, conns:[], isHost:false, isOnline:false, roomCode:null,
         guestKeysBySlot:{2:{},3:{},4:{}}, desiredPlayers:2, _fc:0, _matchStarting:false,
@@ -3314,19 +3231,14 @@
         _err(msg){ let e=document.getElementById('lobby-error'); e.textContent=msg; e.classList.toggle('hidden',!msg); },
         _st(msg,cls){ let e=document.getElementById('lobby-status-text'); e.textContent=msg; e.className='lobby-status '+(cls||''); },
         _jst(msg,cls){ let e=document.getElementById('lobby-join-status'); e.textContent=msg; e.className='lobby-status '+(cls||''); e.classList.remove('hidden'); },
-
-        // FIX (f): número de jogadores da sala (host + até 3 convidados) agora é escolhido
-        // antes de criar a sala, em vez de sempre travar em 1v1.
         setDesiredPlayers(n) {
             this.desiredPlayers = n;
             document.querySelectorAll('.lobby-count-btn').forEach(b => b.classList.toggle('active', parseInt(b.getAttribute('data-count'),10) === n));
         },
-
         _nextFreeSlot() {
             for(let s=2; s<=4; s++){ if(!this.conns.some(c=>c.slot===s)) return s; }
             return null;
         },
-
         createRoom() {
             this._err(''); this._st(t('lobbyConnecting'),'');
             document.getElementById('lobby-room-display').classList.remove('hidden');
@@ -3337,7 +3249,6 @@
             let joinRow = document.getElementById('lobby-join-row'); if(joinRow) joinRow.classList.add('hidden');
             let divRow = document.getElementById('lobby-divider-row'); if(divRow) divRow.classList.add('hidden');
             this.isHost=true; this.conns=[]; this.guestKeysBySlot={2:{},3:{},4:{}}; this._matchStarting=false;
-            // Deixa o PeerJS gerar o ID automaticamente — evita erros de ID customizado
             this.peer=new Peer({
                 config:{iceServers:[
                     {urls:'stun:stun.l.google.com:19302'},
@@ -3351,7 +3262,7 @@
                 this._refreshLobbyUI();
             });
             this.peer.on('connection',conn=>{
-                if(this.conns.length >= this.desiredPlayers - 1){ conn.close(); return; } // sala cheia
+                if(this.conns.length >= this.desiredPlayers - 1){ conn.close(); return; }
                 let slot = this._nextFreeSlot();
                 if(!slot){ conn.close(); return; }
                 let entry = {conn, slot, name:null, arch:null, col:null, skn:null, ready:false, lastMsgAt:Date.now()};
@@ -3377,7 +3288,6 @@
                 this.peer=null;
             });
         },
-
         joinRoom() {
             let code=(document.getElementById('join-code-input').value||'').trim();
             if(code.length<6){this._err('Cole o código completo da sala.');return;}
@@ -3392,7 +3302,6 @@
                 ]}
             });
             this.peer.on('open',()=>{
-                // Conecta direto ao ID do host (sem prefixo)
                 this.conn=this.peer.connect(code,{reliable:true});
                 this._setupGuestConn();
             });
@@ -3413,7 +3322,6 @@
                 this.peer=null;
             });
         },
-
         copyCode() {
             let code=document.getElementById('room-code-text').dataset.code||
                      document.getElementById('room-code-text').textContent;
@@ -3423,9 +3331,6 @@
                     .catch(()=>prompt('Copie o código completo da sala:',code));
             } else { prompt('Copie o código completo da sala:',code); }
         },
-
-        // FIX (f): lista jogadores já conectados na sala e mostra o botão de começar manualmente
-        // assim que há pelo menos 1 convidado, além de iniciar sozinho quando a sala enche.
         _refreshLobbyUI() {
             let list = document.getElementById('lobby-players-list'); if(!list) return;
             let readyConns = this.conns.filter(c=>c.ready);
@@ -3438,14 +3343,12 @@
             let startBtn = document.getElementById('btn-lobby-start-now');
             if(startBtn) startBtn.classList.toggle('hidden', readyConns.length < 1);
         },
-
         hostStartNow() {
             if(!this.isHost) return;
             let readyCount = this.conns.filter(c=>c.ready).length;
             if(readyCount < 1) return;
             this._hostBeginMatch();
         },
-
         _hostBeginMatch() {
             if(this._matchStarting || Engine.state==='IN_GAME') return;
             let readyConns = this.conns.filter(c=>c.ready);
@@ -3457,7 +3360,6 @@
             readyConns.forEach(c => { try{ c.conn.send({type:'start', roster, mySlot:c.slot}); }catch(e){} });
             Engine.startOnlineMatch(roster, 1);
         },
-
         _setupHostConn(entry) {
             let conn = entry.conn;
             conn.on('open',()=>{ entry.open = true; this.isOnline = true; });
@@ -3466,7 +3368,6 @@
                 if(data.type==='ping'){ try{conn.send({type:'pong'});}catch(e){} return; }
                 if(data.type==='pong'){ return; }
                 if(data.type==='hello'){
-                    // Bloqueia se quem está entrando usa a mesma conta que o dono da sala
                     if(data.uid && Accounts.current && data.uid===Accounts.current.uid){
                         try{ conn.send({type:'reject',reason:'same-account'}); }catch(e){}
                         setTimeout(()=>{ try{conn.close();}catch(e){} }, 300);
@@ -3494,9 +3395,6 @@
             conn.on('close', ()=>{ this._onGuestGone(entry.slot); });
             conn.on('error', err=>{ console.warn('PeerJS conn error:',err); this._onGuestGone(entry.slot); });
         },
-
-        // FIX (i): antes, a queda de UM jogador (de até 4) encerrava a partida inteira pra todo mundo.
-        // Agora só remove esse jogador (ele perde as vidas restantes) e o jogo continua pros demais.
         _onGuestGone(slot) {
             this.conns = this.conns.filter(c=>c.slot!==slot);
             if(this.guestKeysBySlot) this.guestKeysBySlot[slot] = {};
@@ -3507,7 +3405,6 @@
                 this._refreshLobbyUI();
             }
         },
-
         _setupGuestConn() {
             this.conn.on('open',()=>{
                 this.isOnline=true;
@@ -3546,9 +3443,6 @@
                 this._handleConnectionLost('Erro de conexão com o amigo.');
             });
         },
-
-        // FIX: ping/pong a cada 3s + watchdog de 9s — detecta quedas "silenciosas" de wifi/rede
-        // em que nem 'close' nem 'error' chegam a disparar, evitando que o jogo fique travado.
         _startGuestHeartbeat() {
             this._stopHeartbeat();
             this._hbInterval = setInterval(()=>{
@@ -3560,8 +3454,6 @@
                 }
             }, 1500);
         },
-        // FIX (f): heartbeat do host agora cobre TODAS as conexões (até 3 convidados), removendo
-        // individualmente quem ficar em silêncio por mais de 9s, sem derrubar a partida inteira.
         _startHostHeartbeat() {
             this._stopHeartbeat();
             this._hbInterval = setInterval(()=>{
@@ -3578,27 +3470,18 @@
             if(this._hbInterval){ clearInterval(this._hbInterval); this._hbInterval=null; }
             if(this._hbTimeout){ clearInterval(this._hbTimeout); this._hbTimeout=null; }
         },
-
-        // FIX: ponto único de tratamento de queda de conexão — sempre limpa o estado do
-        // OnlineSync (peer/conn/isHost/isOnline) antes ou junto de avisar a tela de fim de
-        // partida, pra nunca deixar flags "online" zumbis que quebrem a próxima partida
-        // (era a causa raiz da "tela azul" travada e do Jogador 2 parar de se mover depois).
         _handleConnectionLost(msg) {
-            if(!this.isOnline && !this.conn && !this.peer) return; // já tratado
+            if(!this.isOnline && !this.conn && !this.peer) return;
             let wasInGame = Engine.state==='IN_GAME';
             this.disconnect();
             if(wasInGame){
                 Engine.triggerMatchEnd(null,'DESCONECTADO',msg||'A conexão com o amigo foi perdida.');
             }
         },
-
         sendState() {
             let openConns = this.conns.filter(c=>c.conn && c.conn.open);
             if(openConns.length===0) return;
             if(++this._fc%2!==0) return;
-            // FIX: sequência crescente por pacote de estado — os convidados usam isso pra descartar
-            // pacotes que chegam fora de ordem (ex: rede instável), evitando que o personagem
-            // "trave" parado porque um estado antigo sobrescreveu um mais recente.
             this._seq = (this._seq||0) + 1;
             let payload = {type:'state', seq:this._seq,
                 pl:Engine.players.map(p=>p?{
@@ -3614,20 +3497,12 @@
             };
             openConns.forEach(c => { try{ c.conn.send(payload); }catch(e){} });
         },
-
-        // FIX (i): antes, dash/poção/escudo do convidado eram aplicados SÓ localmente no cliente
-        // dele, que não roda a física da partida — ou seja, não tinham NENHUM efeito real no jogo.
-        // Agora o convidado manda um pedido de ação pro host, que é quem de fato aplica o efeito.
         sendAction(a) {
             if(!this.conn||!this.conn.open) return;
             try{ this.conn.send({type:'action', a}); }catch(e){}
         },
-
         sendKeys() {
             if(!this.conn||!this.conn.open) return;
-            // FIX: enviar a cada frame (sem throttle) — o throttle a cada 2 frames somado à
-            // latência da rede fazia o host perder toques rápidos de movimento/ataque do guest,
-            // travando o jogador convidado (não andava nem atirava).
             let k=Engine.inputKeys;
             try{
                 this.conn.send({type:'keys',k:{
@@ -3639,12 +3514,7 @@
                 }});
             }catch(e){}
         },
-
         _apply(data) {
-            // FIX: ignora pacotes de estado desatualizados/fora de ordem (ver comentário em
-            // sendState). Sem isso, um pacote antigo chegando depois de um mais novo podia
-            // "puxar" o jogador de volta pra uma posição velha e dar a impressão de personagem
-            // travado, mesmo com o jogador apertando as teclas corretamente.
             if(typeof data.seq === 'number') {
                 if(this._lastAppliedSeq && data.seq <= this._lastAppliedSeq) return;
                 this._lastAppliedSeq = data.seq;
@@ -3688,7 +3558,6 @@
                 if(myP) Engine.registerMatchStats({ kills: myP.kills, goldEarned: earned, won: iWon });
             }
         },
-
         disconnect() {
             this._stopHeartbeat();
             this.isOnline=false; this.guestKeysBySlot={2:{},3:{},4:{}}; this._fc=0; this._seq=0; this._lastAppliedSeq=0; this._matchStarting=false;
@@ -3699,7 +3568,6 @@
             this.isHost=false; this.roomCode=null;
         }
     };
-
     const Engine = {
         canvas: null, ctx: null, state: 'MENU', lastTime: 0,
         isOpenWorld: false, gameMode: 'HORDA',
@@ -3707,17 +3575,11 @@
         currentShopBuyer: 1, walletP1: 100, walletP2: 100,
         killsCounter: 0, round: 1, spawnTimer: 0, goldSpawnTimer: 0, bossSpawnTimer: 0,
         cameraX: 0, cameraShakeIntensity: 0, timeLeftSeconds: 300, timerTicker: 0, activeMatch: false,
-        arenaWidth: 1920, modeSolo: false, soloActivePlayer: 1, device: 'pc',
+        arenaWidth: 1920, MAX_PLAYER_SPEED: 9, BOOST_SPEED_BONUS: 1.4, BOOST_HP_BONUS: 50,
+        modeSolo: false, soloActivePlayer: 1, device: 'pc',
         players: [], enemies: [], projectiles: [], particles: [], items: [], platforms: [], chunksLoaded: {},
         secretZones: [], inputKeys: {}, pendingSpawns: [], openWorldSpawnCd: 0,
-
-        // FIX (i): "mySlot" identifica qual player SOU EU nesta partida (1 no solo/host, 2-4 se eu
-        // for convidado). "myAccountName" é sempre o nome da MINHA conta, nunca sobrescrito pelo
-        // nome de quem eu jogar online — corrige o bug de partidas solo aparecerem no nome do amigo
-        // depois de uma partida online.
         mySlot: 1, myAccountName: '', rosterNames: {},
-
-        // Item (c): catálogo de cores e visuais do personagem. 'default' = grátis, o resto custa ouro.
         cosmeticColors: [
             { id:'default', hex:null, price:0 },
             { id:'gold',    hex:'#eab308', price:150 },
@@ -3736,8 +3598,6 @@
         ],
         defaultCosmetics() { return { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }; },
         defaultProgress() { return { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }; },
-
-        // SISTEMA DE NÍVEIS: ganha XP jogando (base por partida + desempenho + vitória).
         levelFromXp(xp) {
             let level = 1, needed = 100, remaining = xp;
             while(remaining >= needed) { remaining -= needed; level++; needed = 100 + (level-1)*40; }
@@ -3754,9 +3614,6 @@
             if(after > before) this.showLevelUpToast(after);
             this.saveProfile();
         },
-
-        // CONQUISTAS: completar desafios dá XP e mostra progresso. Cada conquista lê uma estatística
-        // já rastreada (ou calculada na hora, como nível e cosméticos comprados).
         achievementCatalog: [
             { id:'first_win',    xp:50,  target:1,   nameKey:'ach_first_win_name',    descKey:'ach_first_win_desc',    stat:'matchesWon' },
             { id:'veteran',      xp:100, target:10,  nameKey:'ach_veteran_name',      descKey:'ach_veteran_desc',      stat:'matchesPlayed' },
@@ -3801,9 +3658,11 @@
             let xpGain = 20 + (kills||0)*2 + Math.floor((goldEarned||0)/10) + (won ? 30 : 0);
             this.awardXp(xpGain);
         },
-
         modeSoloLabelKeys: { GOLDFUSH: 'soloLabelGoldfush', TITAN: 'soloLabelTitan', BOSS: 'soloLabelBoss' },
-
+        // NOVO: Boost de Velocidade e Boost de HP Extra — em vez de um preço fixo, mostram um botão
+        // de "Opções" (Engine.openBoostOptions) que abre um menu pra escolher a duração; cada
+        // duração tem um preço diferente. O efeito fica sempre ativo automaticamente enquanto
+        // sobrar tempo comprado, e esse tempo só é descontado durante partidas (ver Engine.update).
         shopCatalog: [
             { id: 'stat_hp', price: 100, type: 'stat', statKey: 'maxHp', value: 25 },
             { id: 'stat_hp2', price: 170, type: 'stat', statKey: 'maxHp', value: 40 },
@@ -3816,21 +3675,22 @@
             { id: 'itm_pot', price: 60, type: 'item', itemKey: 'potion' },
             { id: 'itm_pot3', price: 150, type: 'item', itemKey: 'potion', qty: 3 },
             { id: 'itm_shd', price: 80, type: 'item', itemKey: 'shield' },
-            { id: 'itm_shd2', price: 140, type: 'item', itemKey: 'shield', qty: 2 }
+            { id: 'itm_shd2', price: 140, type: 'item', itemKey: 'shield', qty: 2 },
+            { id: 'boost_speed', type: 'boost', statKey: 'speed', options: [ {minutes:10, price:60}, {minutes:30, price:150}, {minutes:60, price:260} ] },
+            { id: 'boost_hp', type: 'boost', statKey: 'hp', options: [ {minutes:10, price:70}, {minutes:30, price:170}, {minutes:60, price:290} ] }
         ],
-
-        persistentUpgradesP1: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] } },
-        persistentUpgradesP2: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] } },
+        persistentUpgradesP1: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }, boosts: { speed:0, hp:0 } },
+        persistentUpgradesP2: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }, boosts: { speed:0, hp:0 } },
         ranking: [], playerNames: { p1: '', p2: '' },
-
+        formatBoostTime(seconds) {
+            seconds = Math.max(0, Math.floor(seconds));
+            let m = Math.floor(seconds/60), s = seconds%60;
+            return `${m}:${String(s).padStart(2,'0')}`;
+        },
         init() {
             this.canvas = document.getElementById('ctxCanvas');
             this.ctx = this.canvas.getContext('2d');
             this.canvas.width = 1280; this.canvas.height = 720;
-
-            // FIX: chat lateral fixo — some/aparece automaticamente junto com a tela de menu,
-            // e nunca aparece na tela de login (auth-screen), sem precisar tocar em cada função
-            // que troca de tela pra mostrar/esconder o menu.
             let menuScreenEl = document.getElementById('menu-screen');
             let chatSidebarEl = document.getElementById('chat-sidebar');
             if(menuScreenEl && chatSidebarEl) {
@@ -3838,15 +3698,10 @@
                 syncSidebar();
                 new MutationObserver(syncSidebar).observe(menuScreenEl, { attributes:true, attributeFilter:['class'] });
             }
-
             window.addEventListener('keydown', e => {
                 let k = e.key.toLowerCase();
                 this.inputKeys[k] = true;
                 if(e.repeat) return;
-                // FIX (f/i): agora TODO mundo (host, solo, ou qualquer convidado slot 2/3/4) usa as
-                // MESMAS teclas (Q/1/2) pro próprio personagem, identificado por Engine.mySlot.
-                // Isso também corrige o bug de dash/poção/escudo do convidado não terem efeito real:
-                // triggerDash/useItemViaClick agora mandam a ação pro host quando quem clicou não é o host.
                 if(k === 'q') this.triggerDash(this.mySlot);
                 if(k === '1') this.useItemViaClick(this.mySlot, 'potion');
                 if(k === '2') this.useItemViaClick(this.mySlot, 'shield');
@@ -3854,7 +3709,6 @@
                 if(k === 'e') {
                     if(!Hideout.active) this.tryEnterHideout();
                 }
-                // Enter nos formulários de auth
                 if(k === 'enter') {
                     let authEl = document.getElementById('auth-screen');
                     if(authEl && !authEl.classList.contains('hidden')) {
@@ -3867,52 +3721,30 @@
                 }
             });
             window.addEventListener('keyup', e => { this.inputKeys[e.key.toLowerCase()] = false; });
-            // FIX: se a janela perde o foco (troca de app, alt-tab, clique fora do jogo) o
-            // navegador não dispara 'keyup' pras teclas que estavam pressionadas — isso deixava
-            // o personagem "preso" andando sozinho (host) ou o guest travado enviando uma tecla
-            // fantasma pro host pra sempre. Ao perder o foco, solta tudo.
             window.addEventListener('blur', () => { this.inputKeys = {}; });
-
             this.setGameMode('HORDA');
             this.selectArch(1, 'hero');
             this.selectArch(2, 'vilan');
             this.applyLanguage();
             this.device = this.detectDevice();
             this.applyDeviceUI();
-            // FIX: recalcula o tipo de aparelho se a janela mudar de forma relevante (ex: tablet
-            // alternando entre modo mesa/tablet, ou o usuário girando o celular), pra os controles
-            // de toque aparecerem/sumirem sozinhos sem precisar recarregar a página.
             window.addEventListener('resize', () => { this.device = this.detectDevice(); });
             window.addEventListener('orientationchange', () => { this.device = this.detectDevice(); });
             Accounts.init();
             requestAnimationFrame(t => this.loop(t));
         },
-
-        // FIX: tela de seleção de dispositivo aparece no início; celular/Quest usam controles na tela e ficam restritos a 1 jogador
         changeDevice() {
             // device selection removed
         },
-
         applyDeviceUI() {
             this.setGameMode(this.gameMode);
         },
-
-        // Chat lateral fixo no menu: recolhe/expande pela setinha, sem nunca sumir da tela de menu
         toggleChatSidebar() {
             let panel = document.getElementById('chat-sidebar-panel');
             let btn = document.getElementById('chat-sidebar-toggle');
             let collapsed = panel.classList.toggle('collapsed');
             btn.textContent = collapsed ? '▶' : '◀';
         },
-
-        // FIX: detecção automática de celular/tablet vs computador. Antes o dispositivo ficava
-        // sempre travado em 'pc' (a tela antiga de escolha manual foi removida), então os
-        // controles de toque nunca apareciam em celulares. Agora checamos:
-        // 1) se o navegador tem um ponteiro "grosso" (dedo, sem precisão de mouse);
-        // 2) se o aparelho realmente suporta toque;
-        // 3) e reforçamos com o user-agent (Android/iPhone/iPad/Quest/etc) pra cobrir casos raros
-        //    onde só um dos dois sinais acima falha (ex: alguns emuladores e híbridos).
-        // Um notebook com tela touchscreen mas usado com mouse continua sendo tratado como 'pc'.
         detectDevice() {
             try {
                 let coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
@@ -3924,13 +3756,10 @@
                 return 'pc';
             }
         },
-
-        // FIX: alterna as teclas virtuais de toque (mesmo objeto inputKeys usado pelo teclado)
         touchKey(key, isDown, ev) {
             if(ev) ev.preventDefault();
             this.inputKeys[key] = isDown;
         },
-
         async saveProfile() {
             Accounts.saveProgress();
             try {
@@ -3941,30 +3770,18 @@
                 }));
             } catch(e) {}
         },
-
         async loadProfileAndBoot() {
             // Obsoleto — Accounts.init() (Firebase onAuthStateChanged) cuida disso agora
         },
-
         bootWithAccount(acc) {
-            // FIX: essa função tinha várias chamadas em sequência sem proteção contra erro
-            // (ex: applyLanguage(), updateMenu()) ANTES de mostrar a tela de menu. Se qualquer
-            // uma delas lançasse uma exceção no meio do caminho — por exemplo localStorage
-            // bloqueado pelo navegador (Tracking Prevention), ou um elemento de UI momentaneamente
-            // ausente — a função parava ali mesmo, a tela de auth já tinha sido escondida mas a
-            // de menu nunca chegava a aparecer. Resultado: nenhuma tela visível, só o HUD do jogo
-            // de fundo — exatamente a "tela azul" travada. Agora isso está protegido: mesmo que
-            // algo no meio falhe, o menu é garantidamente mostrado no final.
             try {
                 this.walletP1 = (typeof acc.wallet === 'number') ? acc.wallet : 100;
                 if(acc.upg) this.persistentUpgradesP1 = {...acc.upg};
                 if(!this.persistentUpgradesP1.cosmetics) this.persistentUpgradesP1.cosmetics = this.defaultCosmetics();
                 if(!this.persistentUpgradesP1.progress) this.persistentUpgradesP1.progress = this.defaultProgress();
+                if(!this.persistentUpgradesP1.boosts) this.persistentUpgradesP1.boosts = { speed:0, hp:0 };
                 this.ranking = acc.ranking || [];
                 this.playerNames.p1 = acc.name;
-                // FIX (i): "myAccountName" e "mySlot" são sempre restaurados aqui no boot/login,
-                // garantindo que uma partida solo jogada depois de uma partida online NUNCA
-                // mostre o nome do amigo no lugar do seu.
                 this.myAccountName = acc.name;
                 this.mySlot = 1;
                 this.rosterNames = {};
@@ -3973,7 +3790,6 @@
                 if(typeof acc.vol === 'number') Settings.volume = acc.vol;
                 if(typeof acc.sfx === 'boolean') Settings.sfxEnabled = acc.sfx;
                 if(typeof acc.mus === 'boolean') Settings.musicEnabled = acc.mus;
-                // Carrega dados do P2 (local)
                 try {
                     let raw = localStorage.getItem('bb-p2-data');
                     if(raw) {
@@ -3984,31 +3800,25 @@
                     }
                 } catch(e) { console.warn('localStorage bloqueado/indisponível, seguindo sem dados locais do P2:', e); }
                 if(!this.persistentUpgradesP2.cosmetics) this.persistentUpgradesP2.cosmetics = this.defaultCosmetics();
+                if(!this.persistentUpgradesP2.boosts) this.persistentUpgradesP2.boosts = { speed:0, hp:0 };
                 document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === Settings.language));
                 let volSlider = document.getElementById('rng-volume');
                 if(volSlider) volSlider.value = Math.round(Settings.volume * 100);
                 this.applyLanguage();
                 let lblUser = document.getElementById('lbl-logged-in-user');
                 if(lblUser) lblUser.textContent = '👤 ' + acc.name;
-                // Chat lateral fixo: carrega a lista de conversas assim que o menu aparece
                 if(typeof Chat !== 'undefined') Chat.loadConversations();
                 this.refreshLevelBadge();
             } catch(err) {
                 console.error('Erro ao aplicar dados da conta (seguindo mesmo assim pro menu):', err);
             }
-            // Garantido incondicionalmente: não importa o que falhou acima, a pessoa sempre
-            // chega no menu, em vez de ficar numa tela vazia sem explicação.
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.remove('hidden');
             try { this.updateMenu(); } catch(err) { console.error('Erro em updateMenu:', err); }
             try { Social.subscribeToIncomingInvites(); } catch(err) { console.error('Erro em subscribeToIncomingInvites:', err); }
             try { Social.startPresenceHeartbeat(); } catch(err) { console.error('Erro em startPresenceHeartbeat:', err); }
-            // FIX: recalcula a escala do jogo ao entrar no menu — é exatamente na transição
-            // login → menu que a tela ficava "azul travada" com o jogo encolhido num canto
-            // (ver comentário em fitGameContainer).
             if (typeof fitGameContainer === 'function') fitGameContainer();
         },
-
         logoutAccount() {
             this.saveProfile();
             Social.setOnline(false);
@@ -4017,7 +3827,7 @@
             OnlineSync.disconnect();
             this.walletP1 = 100; this.walletP2 = 100;
             this.ranking = []; this.playerNames = { p1: '', p2: 'Convidado' };
-            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0 };
+            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, boosts:{speed:0,hp:0} };
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('recovery-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
@@ -4025,7 +3835,6 @@
             document.getElementById('auth-password').value = '';
             Accounts.showTab('login');
         },
-
         openOnlineLobby() {
             OnlineSync.disconnect();
             document.getElementById('lobby-room-display').classList.add('hidden');
@@ -4037,13 +3846,11 @@
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('online-lobby-screen').classList.remove('hidden');
         },
-
         closeOnlineLobby() {
             OnlineSync.disconnect();
             document.getElementById('online-lobby-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.remove('hidden');
         },
-
         startOnlineMatch(roster, mySlot) {
             document.getElementById('online-lobby-screen').classList.add('hidden');
             this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999;
@@ -4059,11 +3866,6 @@
             this.platforms.push(new Platform(490,350,300,20)); this.platforms.push(new Platform(200,200,250,20));
             this.platforms.push(new Platform(830,200,250,20)); this.platforms.push(new Platform(1180,500,320,20));
             this.platforms.push(new Platform(1300,200,280,20)); this.platforms.push(new Platform(1620,350,260,20));
-
-            // FIX (f): partida agora suporta de 2 a 4 jogadores, montados a partir de um "roster"
-            // enviado pelo host (cada slot com seu próprio arquétipo/cor/visual escolhidos).
-            // FIX (i): "mySlot" e "rosterNames" garantem que CADA cliente sempre saiba corretamente
-            // qual personagem é o SEU PRÓPRIO, sem nunca sobrescrever o nome da própria conta.
             roster = roster || [{slot:1, name:this.getProfileName(1), arch:this.selectedArchP1, col:null, skn:'default'}];
             this.mySlot = mySlot || 1;
             this.rosterNames = {}; roster.forEach(r => { this.rosterNames[r.slot] = r.name; });
@@ -4081,7 +3883,6 @@
             this.state = 'IN_GAME';
             setTimeout(() => { this.activeMatch = true; }, 600);
         },
-
         getProfileName(profileId) {
             if(profileId === this.mySlot) {
                 let mine = this.myAccountName || this.playerNames.p1;
@@ -4091,21 +3892,35 @@
             let nm = profileId === 1 ? this.playerNames.p1 : this.playerNames.p2;
             return (nm && nm.length) ? nm : ('Player ' + profileId);
         },
-
         async resetSavedData() {
             this.walletP1 = 100; this.walletP2 = 100;
-            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress() };
-            this.persistentUpgradesP2 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress() };
+            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress(), boosts: { speed:0, hp:0 } };
+            this.persistentUpgradesP2 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress(), boosts: { speed:0, hp:0 } };
             this.ranking = []; this.soloActivePlayer = 1;
             Settings.language = 'pt-BR'; Settings.volume = 0.7; Settings.sfxEnabled = true; Settings.musicEnabled = true;
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === 'pt-BR'));
             let volSlider = document.getElementById('rng-volume'); if(volSlider) volSlider.value = 70;
             this.applyLanguage(); this.saveProfile(); this.closeSettings(); this.updateMenu(); this.refreshLevelBadge();
         },
-
         openSettings() { document.getElementById('settings-screen').classList.remove('hidden'); },
         closeSettings() { document.getElementById('settings-screen').classList.add('hidden'); },
-
+        // NOVO: botão de sair da partida (canto superior esquerdo do HUD), com confirmação.
+        confirmExitMatch() {
+            if(this.state !== 'IN_GAME') return;
+            if(window.confirm(t('exitMatchConfirmMsg'))) this.exitMatch();
+        },
+        exitMatch() {
+            OnlineSync.disconnect();
+            this.state = 'MENU';
+            this.activeMatch = false;
+            Hideout.active = false;
+            document.getElementById('hideout-hud').style.display = 'none';
+            document.getElementById('hideout-alert').style.display = 'none';
+            document.getElementById('chest-alert').style.display = 'none';
+            document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+            this.updateMenu();
+        },
         startDeleteAccount() {
             document.getElementById('delete-account-step1').classList.add('hidden');
             document.getElementById('delete-account-step2').classList.remove('hidden');
@@ -4126,7 +3941,6 @@
             btn.disabled = true; setMsg(t('deletingAccountMsg'));
             try {
                 await Accounts.deleteAccountForever();
-                // Se chegou aqui sem erro, a conta já foi apagada; a sessão será encerrada automaticamente.
             } catch (err) {
                 setMsg(t('deleteAccountErrorMsg').replace('{err}', err.message || err));
                 btn.disabled = false;
@@ -4158,6 +3972,7 @@
         applyLanguage() {
             document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder'))); });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => { el.setAttribute('title', t(el.getAttribute('data-i18n-title'))); });
             this.refreshWorldButton(); this.refreshSfxButton(); this.refreshMusicButton();
             this.setGameMode(this.gameMode);
             this.players.forEach(p => { if(p) p.syncHUD(); });
@@ -4231,16 +4046,24 @@
             let activeWallet = this.walletP1;
             let walletEl = document.getElementById('shop-wallet-display'); if(walletEl) walletEl.innerText = `$${activeWallet}`;
             let container = document.getElementById('menu-shop-items'); container.innerHTML = '';
+            if(!this.persistentUpgradesP1.boosts) this.persistentUpgradesP1.boosts = { speed:0, hp:0 };
             this.shopCatalog.forEach(item => {
                 let div = document.createElement('div'); div.className = 'shop-item';
-                div.innerHTML = `<div class="item-info"><h4>${tShop(item.id,'name')}</h4><p>${tShop(item.id,'desc')}</p></div><button class="btn-buy" ${activeWallet < item.price ? 'disabled' : ''} onclick="Engine.buyItemMenu('${item.id}')">$${item.price}</button>`;
+                if(item.type === 'boost') {
+                    // NOVO: item de boost mostra tempo restante (se houver) e um botão de "Opções"
+                    // em vez de preço fixo — o preço só aparece dentro do menu de duração.
+                    let remaining = this.persistentUpgradesP1.boosts[item.statKey] || 0;
+                    let remainingHtml = remaining > 0
+                        ? `<p style="color:#38bdf8; font-weight:700;">⚡ ${t('boostRemainingLabel')}: ${this.formatBoostTime(remaining)}</p>`
+                        : '';
+                    div.innerHTML = `<div class="item-info"><h4>${tShop(item.id,'name')}</h4><p>${tShop(item.id,'desc')}</p>${remainingHtml}</div><button class="btn-buy" style="background:#1e3a8a; border-color:#1d4ed8;" onclick="Engine.openBoostOptions('${item.id}')">${t('boostOptionsBtn')}</button>`;
+                } else {
+                    div.innerHTML = `<div class="item-info"><h4>${tShop(item.id,'name')}</h4><p>${tShop(item.id,'desc')}</p></div><button class="btn-buy" ${activeWallet < item.price ? 'disabled' : ''} onclick="Engine.buyItemMenu('${item.id}')">$${item.price}</button>`;
+                }
                 container.appendChild(div);
             });
             this.renderCosmetics();
         },
-
-        // Item (c): cor e visual do personagem — visuais melhores custam ouro, uma vez comprados ficam
-        // liberados pra sempre e podem ser trocados livremente.
         renderCosmetics() {
             if(!this.persistentUpgradesP1.cosmetics) this.persistentUpgradesP1.cosmetics = this.defaultCosmetics();
             let cos = this.persistentUpgradesP1.cosmetics;
@@ -4293,8 +4116,6 @@
             cos.skin = id;
             AudioFX.play('coin'); this.saveProfile(); this.renderShop();
         },
-
-        // SISTEMA DE NÍVEIS + CONQUISTAS (item pedido)
         openAchievements() {
             this.renderAchievements();
             document.getElementById('achievements-screen').classList.remove('hidden');
@@ -4341,9 +4162,8 @@
         },
         showLevelUpToast(level) { this.showToast(`⭐ ${t('levelUpToast').replace('{level}', level)}`); },
         showAchievementToast(ach) { this.showToast(`🏆 ${t('achievementUnlockedToast').replace('{name}', t(ach.nameKey))}`); },
-
         buyItemMenu(itemId) {
-            let item = this.shopCatalog.find(i => i.id === itemId); if(!item) return;
+            let item = this.shopCatalog.find(i => i.id === itemId); if(!item || item.type === 'boost') return;
             if(this.walletP1 < item.price) return; this.walletP1 -= item.price; this.applyUpgradeData(this.persistentUpgradesP1, item);
             AudioFX.play('coin'); this.renderShop(); this.saveProfile();
         },
@@ -4352,6 +4172,40 @@
             else if(item.type === 'stat') { profile[item.statKey] += item.value; }
             else if(item.type === 'item') { profile[item.itemKey] += (item.qty || 1); }
         },
+        // NOVO: menu de duração/preço do Boost. Ao clicar em "Opções" na loja, abre esta tela
+        // mostrando cada duração disponível com seu preço; comprar soma minutos ao banco de
+        // tempo daquele boost (que só é descontado durante partidas — ver Engine.update).
+        openBoostOptions(itemId) {
+            let item = this.shopCatalog.find(i => i.id === itemId); if(!item || item.type !== 'boost') return;
+            this._activeBoostItem = item;
+            document.getElementById('boost-options-title').textContent = tShop(item.id, 'name');
+            if(!this.persistentUpgradesP1.boosts) this.persistentUpgradesP1.boosts = { speed:0, hp:0 };
+            let remaining = this.persistentUpgradesP1.boosts[item.statKey] || 0;
+            document.getElementById('boost-options-current').textContent = remaining > 0
+                ? `⚡ ${t('boostRemainingLabel')}: ${this.formatBoostTime(remaining)}`
+                : t('boostNoneActiveLabel');
+            let list = document.getElementById('boost-options-list'); list.innerHTML = '';
+            item.options.forEach(opt => {
+                let canAfford = this.walletP1 >= opt.price;
+                let btn = document.createElement('button');
+                btn.className = 'boost-option-btn';
+                btn.disabled = !canAfford;
+                btn.innerHTML = `<span>${opt.minutes} ${t('boostMinutesLabel')}</span><span style="color:#eab308; font-weight:800;">$${opt.price}</span>`;
+                btn.onclick = () => this.buyBoostOption(item, opt);
+                list.appendChild(btn);
+            });
+            document.getElementById('boost-options-screen').classList.remove('hidden');
+        },
+        closeBoostOptions() { document.getElementById('boost-options-screen').classList.add('hidden'); },
+        buyBoostOption(item, opt) {
+            if(this.walletP1 < opt.price) return;
+            this.walletP1 -= opt.price;
+            if(!this.persistentUpgradesP1.boosts) this.persistentUpgradesP1.boosts = { speed:0, hp:0 };
+            this.persistentUpgradesP1.boosts[item.statKey] = (this.persistentUpgradesP1.boosts[item.statKey] || 0) + opt.minutes * 60;
+            AudioFX.play('coin');
+            this.saveProfile(); this.renderShop(); this.closeBoostOptions();
+            this.showToast(`⚡ ${tShop(item.id, 'name')}: +${opt.minutes} ${t('boostMinutesLabel')}`);
+        },
         renderRanking() {
             let container = document.getElementById('ranking-container'); container.innerHTML = '';
             if(this.ranking.length === 0) { container.innerHTML = `<div class="ranking-empty">${t('noWinsYet')}</div>`; return; }
@@ -4359,21 +4213,16 @@
                 container.innerHTML += `<div class="ranking-item"><span><b>#${idx+1}</b> ${rk.name}</span><span style="color:#22c55e; font-weight:bold;">${rk.wins} ${t('winsLabel')}</span></div>`;
             });
         },
-
         startMatch() {
             document.getElementById('menu-screen').classList.add('hidden');
             this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999;
             this.enemies = []; this.projectiles = []; this.particles = []; this.items = []; this.platforms = [];
             this.chunksLoaded = {}; this.cameraX = 0; this.secretZones = []; this.pendingSpawns = []; this.openWorldSpawnCd = 0;
             this.timeLeftSeconds = (this.gameMode === 'BOSS') ? 600 : 300; this.timerTicker = 0; this.activeMatch = false;
-
             Hideout.active = false;
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
-
             this.platforms.push(new Platform(-1000, 680, 3280, 40));
-
-            // FIX: Baús removidos do modo arena; existem apenas no Mundo Aberto (infinito)
             if(!this.isOpenWorld) {
                 this.platforms.push(new Platform(150, 500, 320, 20));
                 this.platforms.push(new Platform(810, 500, 320, 20));
@@ -4383,9 +4232,7 @@
                 this.platforms.push(new Platform(1180, 500, 320, 20));
                 this.platforms.push(new Platform(1300, 200, 280, 20));
                 this.platforms.push(new Platform(1620, 350, 260, 20));
-                // (sem baús na arena — apenas no mundo infinito)
             }
-
             this.mySlot = 1; this.rosterNames = {};
             let soloMatch = this.isSoloMatch();
             if(soloMatch) {
@@ -4401,37 +4248,26 @@
             }
             let p3el = document.getElementById('hud-p3'); if(p3el) p3el.classList.add('hidden');
             let p4el = document.getElementById('hud-p4'); if(p4el) p4el.classList.add('hidden');
-
             if(this.gameMode === 'TITAN') {
                 this.players.forEach(titan => { titan.maxHp *= 2.5; titan.hp = titan.maxHp; titan.baseSpd *= 1.6; titan.dmgMod *= 2.5; titan.lives = 5; });
             }
-
             this.players.forEach(p => { p.inventory.potion = Math.max(1, p.inventory.potion); p.syncHUD(); });
             this.state = 'IN_GAME';
             setTimeout(() => { this.activeMatch = true; }, 400);
         },
-
-        // FIX: Dash não reduz escudo ativo — usa Math.max para preservar duração maior
         triggerDash(pId) {
-            if(pId !== this.mySlot) return; // só posso acionar o dash do MEU próprio personagem
-            // FIX (i): antes, o convidado aplicava o dash SÓ no seu próprio cliente, que não roda a
-            // física real da partida (o host é quem manda) — ou seja, o dash do convidado nunca
-            // tinha efeito nenhum no jogo de verdade. Agora ele pede pro host aplicar por ele.
+            if(pId !== this.mySlot) return;
             if(OnlineSync.isOnline && !OnlineSync.isHost) { OnlineSync.sendAction('dash'); return; }
             let p = this.players.find(pl => pl && pl.id === pId);
             if(p && p.lives > 0 && p.dashCooldown <= 0) {
                 p.vx = p.facing * (p.baseSpd * 2.5);
-                p.shieldTime = Math.max(p.shieldTime, 10); // preserva escudo ativo
+                p.shieldTime = Math.max(p.shieldTime, 10);
                 p.dashCooldown = 40;
-                // FIX: partículas usam coordenadas de mundo (o translate do draw() já aplica a câmera)
                 createFXBurst(p.x+p.w/2, p.y+p.h/2, '#ffffff', 5);
             }
         },
-
         useItemViaClick(pId, type) {
-            if(pId !== this.mySlot) return; // só posso usar item do MEU próprio personagem
-            // FIX (i): mesmo problema do dash — poção/escudo do convidado eram inúteis antes,
-            // porque só mexiam numa cópia local sem efeito na simulação real (rodando no host).
+            if(pId !== this.mySlot) return;
             if(OnlineSync.isOnline && !OnlineSync.isHost) { OnlineSync.sendAction(type); return; }
             let p = this.players.find(pl => pl && pl.id === pId);
             if(!p || p.lives <= 0 || this.state !== 'IN_GAME') return;
@@ -4442,7 +4278,6 @@
                 AudioFX.play('jump'); p.syncHUD();
             }
         },
-
         tryOpenChest() {
             let p = this.players.find(pl => pl && pl.id === this.mySlot) || this.players[0];
             if(!p || p.lives <= 0 || this.state !== 'IN_GAME') return;
@@ -4465,7 +4300,6 @@
                 }
             });
         },
-
         tryEnterHideout() {
             if(!this.isOpenWorld || Hideout.active || this.state !== 'IN_GAME') return;
             let p = this.players[0]; if(!p || p.lives <= 0) return;
@@ -4475,13 +4309,10 @@
             });
             if(nearZone) { nearZone.triggered = true; Hideout.enter(p); }
         },
-
-        // FIX: permite entrar/sair do esconderijo tocando no alerta (sem teclado, para celular/Quest)
         handleHideoutTap() {
             if(Hideout.active) { let p = this.players[0]; if(p) Hideout.exit(p); }
             else this.tryEnterHideout();
         },
-
         showChestReward(text) {
             let el = document.getElementById('chest-reward-popup');
             el.innerText = `${t('chestOpenedPrefix')}: ${text}`;
@@ -4491,7 +4322,6 @@
                 el.classList.remove('show'); setTimeout(() => el.classList.add('hidden'), 300);
             }, 1800);
         },
-
         updateHideoutAlert() {
             if(!this.isOpenWorld || Hideout.active || this.state !== 'IN_GAME') {
                 document.getElementById('hideout-alert').style.display = 'none'; return;
@@ -4504,15 +4334,11 @@
             });
             document.getElementById('hideout-alert').style.display = near ? 'block' : 'none';
         },
-
         updateProceduralWorld(dt) {
             if(!this.isOpenWorld) return;
             let p = this.players[0]; if(!p) return;
             let aliveP = this.players.filter(pl => pl && pl.lives > 0);
             if(aliveP.length === 0) aliveP = [p];
-
-            // FIX: carrega chunks ao redor de TODOS os jogadores vivos (antes só considerava o Jogador 1),
-            // o que fazia o Jogador 2 cair em áreas sem chão/inimigos ("sumir") quando se afastava no mundo aberto online
             aliveP.forEach(pl => {
                 let currentChunk = Math.floor(pl.x / 1280);
                 for(let i = currentChunk - 2; i <= currentChunk + 2; i++) {
@@ -4525,20 +4351,14 @@
                             this.platforms.push(new Platform(startX + 100, heights[0], widthOfPlatform, 20));
                             this.platforms.push(new Platform(startX + 500, heights[1], widthOfPlatform, 20));
                             this.platforms.push(new Platform(startX + 900, heights[2], widthOfPlatform, 20));
-
                             if(Math.random() < 0.5) this.items.push(new Item(startX + 620, heights[1] - 28, 'chest'));
                             if(Math.random() < 0.5) this.items.push(new Item(startX + 1020, heights[2] - 28, 'chest'));
-
-                            // FIX: esconderijos mais raros no mundo infinito
                             if(Math.random() < 0.12) {
                                 let platIdx = Math.floor(Math.random() * 3);
                                 let szX = startX + [100, 500, 900][platIdx] + 110;
                                 let szY = heights[platIdx] - 50;
                                 this.secretZones.push(new SecretZone(szX, szY));
                             }
-
-                            // FIX: spawns entram numa fila e não são mais perdidos quando o limite de monstros está cheio,
-                            // garantindo que continuem aparecendo conforme o jogador avança pelo mundo infinito
                             if(this.gameMode !== 'BOSS') {
                                 if(Math.random() < 0.85) {
                                     let types = ['slime', 'shadow', 'shooter'];
@@ -4555,9 +4375,6 @@
                     }
                 }
             });
-
-            // FIX: distância de limpeza/manutenção agora é medida até o jogador vivo mais próximo (não só o Jogador 1),
-            // pra inimigos e spawns pendentes não sumirem do lado do Jogador 2 quando ele se afasta do Jogador 1
             this.enemies = this.enemies.filter(e => aliveP.some(pl => Math.abs(e.x - pl.x) < 3200));
             this.pendingSpawns = this.pendingSpawns.filter(s => aliveP.some(pl => Math.abs(s.x - pl.x) < 6400));
             this.openWorldSpawnCd -= dt;
@@ -4566,7 +4383,6 @@
                 this.enemies.push(new Enemy(next.x, next.y, next.type));
                 this.openWorldSpawnCd = 0.6;
             }
-
             if(this.gameMode === 'BOSS') {
                 this.bossSpawnTimer += dt;
                 let bossAlive = this.enemies.some(e => e.type === 'boss');
@@ -4575,7 +4391,6 @@
                     this.enemies.push(new Enemy(p.x + 700, 60, 'boss', this.round)); this.round++;
                 }
             }
-
             if(this.gameMode === 'GOLDFUSH') {
                 this.goldSpawnTimer = (this.goldSpawnTimer || 0) + dt;
                 if(this.goldSpawnTimer >= 4.5) {
@@ -4588,10 +4403,6 @@
                     }
                 }
             }
-
-            // FIX: câmera agora centraliza a MÉDIA de todos os jogadores vivos (antes só seguia o Jogador 1,
-            // fazendo o Jogador 2 sair da tela). Em multiplayer, os jogadores também são mantidos dentro da
-            // área visível da câmera compartilhada pra nenhum "sumir" quando cada um vai pra um canto do mapa.
             if(aliveP.length > 1) {
                 let avgX = aliveP.reduce((s, pl) => s + pl.x + pl.w/2, 0) / aliveP.length;
                 this.cameraX = avgX - 640;
@@ -4606,12 +4417,10 @@
                 this.cameraX = p.x - 640 + p.w/2;
             }
         },
-
         loop(timestamp) {
             let dt = (timestamp - this.lastTime) / 1000;
             if(dt > 0.1) dt = 0.1;
             this.lastTime = timestamp;
-            // FIX: controles de toque visíveis só durante a partida, e só em celular/Quest
             document.getElementById('touch-controls').classList.toggle('active', this.device !== 'pc' && this.state === 'IN_GAME');
             if(this.state === 'IN_GAME') {
                 if(OnlineSync.isOnline) {
@@ -4623,7 +4432,6 @@
             }
             requestAnimationFrame(t => this.loop(t));
         },
-
         update(dt) {
             this.timerTicker += dt;
             if(this.timerTicker >= 1) {
@@ -4633,14 +4441,24 @@
                 let sec = String(this.timeLeftSeconds%60).padStart(2,'0');
                 let modeLabel = this.isOpenWorld ? t('modeLabelOpenWorld') : (this.gameMode === 'BOSS' ? `${t('modeLabelBoss')} ${this.round}` : `${t('modeLabelWave')} ${this.round}`);
                 document.getElementById('hud-timer-text').innerText = `${min}:${sec} | ${modeLabel}`;
-                // FIX: Vitória por tempo recompensa TODOS os jogadores via triggerTimeVictory
                 if(this.timeLeftSeconds <= 0 && this.activeMatch) {
                     let mins = this.gameMode === 'BOSS' ? '10' : '5';
                     this.triggerTimeVictory(mins);
                     return;
                 }
             }
-
+            // NOVO: Boosts temporários comprados na loja (velocidade/HP extra). O "banco" de tempo
+            // (em segundos) fica guardado em persistentUpgradesP1.boosts e só é descontado aqui,
+            // dentro do update() da partida — ou seja, o boost fica "sempre ativado" (não precisa
+            // ligar/desligar manualmente) mas o relógio dele só corre enquanto você está de fato
+            // jogando (não no menu). O efeito em si é aplicado dentro de Player.update()/getEffectiveSpeed().
+            if(this.persistentUpgradesP1.boosts) {
+                let b = this.persistentUpgradesP1.boosts;
+                let hadSpeed = b.speed > 0, hadHp = b.hp > 0;
+                if(b.speed > 0) b.speed = Math.max(0, b.speed - dt);
+                if(b.hp > 0) b.hp = Math.max(0, b.hp - dt);
+                if((hadSpeed && b.speed === 0) || (hadHp && b.hp === 0)) this.saveProfile();
+            }
             if(this.isOpenWorld) {
                 this.updateProceduralWorld(dt);
             } else {
@@ -4650,10 +4468,6 @@
                     let avgX = aliveP.reduce((s, p) => s + p.x + p.w/2, 0) / aliveP.length;
                     this.cameraX = Math.max(0, Math.min(maxCam, avgX - 640));
                 } else { this.cameraX = Math.max(0, Math.min(maxCam, this.cameraX)); }
-
-                // FIX: mantém todos os jogadores vivos dentro da área visível da câmera compartilhada.
-                // Antes, se cada um corresse pra um canto oposto da arena, a câmera centralizava a média
-                // e um dos dois ficava fora da tela ("sumia"). Agora eles são suavemente segurados na borda.
                 if(aliveP.length > 1) {
                     const PAD = 60;
                     aliveP.forEach(p => {
@@ -4663,7 +4477,6 @@
                         else if(p.x > maxPx) p.x = maxPx;
                     });
                 }
-
                 if(this.gameMode === 'BOSS') {
                     this.bossSpawnTimer += dt;
                     let bossAlive = this.enemies.some(e => e.type === 'boss');
@@ -4689,7 +4502,6 @@
                     }
                     if(this.killsCounter >= targetKills && this.enemies.length === 0) { this.round++; this.killsCounter = 0; }
                 }
-
                 if(this.gameMode === 'GOLDFUSH') {
                     this.goldSpawnTimer = (this.goldSpawnTimer || 0) + dt;
                     if(this.goldSpawnTimer >= 4.5 && this.platforms.length > 0) {
@@ -4701,33 +4513,24 @@
                     }
                 }
             }
-
             if(Hideout.active && this.players[0]) Hideout.update(dt, this.players[0]);
-
             this.players.forEach(p => { if(p && p.lives > 0) p.update(dt, Hideout.active && p === this.players[0]); });
-
             if(!Hideout.active) {
                 this.enemies.forEach(e => e.update(dt));
                 this.projectiles.forEach(pr => pr.update(dt));
                 Physics.resolveAll(dt);
             }
-
             this.particles.forEach(pa => pa.update(dt));
             this.projectiles = this.projectiles.filter(pr => !pr.destroyed);
             this.particles = this.particles.filter(pa => pa.life > 0);
             this.items = this.items.filter(it => !it.destroyed);
             this.enemies = this.enemies.filter(e => e.hp > 0);
-
             if(this.cameraShakeIntensity > 0) this.cameraShakeIntensity -= 0.4;
             this.updateHideoutAlert();
-
             if(this.activeMatch) {
                 if(this.players.length === 1) {
                     if(this.players[0].lives <= 0) this.triggerMatchEnd(null, t('deathTitle'), t('deathDesc'));
                 } else {
-                    // FIX (f): condição de vitória generalizada pra até 4 jogadores — antes só
-                    // considerava exatamente 2 (Jogador 1 x Jogador 2), quebrando partidas com
-                    // 3 ou 4 pessoas (a partida nunca terminava quando restava só 1 vivo).
                     let alive = this.players.filter(p => p && p.lives > 0);
                     if(alive.length <= 1) {
                         let winner = alive[0] || null;
@@ -4739,8 +4542,6 @@
                 }
             }
         },
-
-        // FIX: Vitória por tempo — todos os jogadores ganham ouro e entram no ranking
         triggerTimeVictory(mins) {
             this.state = 'GAMEOVER'; this.activeMatch = false;
             Hideout.active = false;
@@ -4749,23 +4550,17 @@
             document.getElementById('gameover-screen').classList.remove('hidden');
             document.getElementById('lbl-gameover-title').innerText = t('timeVictoryTitle');
             this._lastEndInfo = { type: 'time' };
-
             let goldLines = [];
             this.players.forEach(p => {
                 if(!p) return;
-                // FIX (e): recompensa de vitória agora tem um teto de 350 de ouro, mesmo que o
-                // jogador tenha coletado mais durante a partida — sem isso ficava fácil demais
-                // acumular ouro rápido.
                 let reward = Math.min(350, p.goldCollected);
                 if(p.profileId === 1) this.walletP1 += reward;
                 else if(p.profileId === 2) this.walletP2 += reward;
                 goldLines.push(`${this.getProfileName(p.profileId)}: +$${reward}`);
-                // Registra vitória no ranking para cada jogador
                 let nameLabel = `${this.getProfileName(p.profileId)} (${p.archetype.toUpperCase()})`;
                 let record = this.ranking.find(r => r.name === nameLabel);
                 if(record) record.wins++; else this.ranking.push({ name: nameLabel, wins: 1 });
             });
-
             let desc = t('timeVictoryDesc').replace('{mins}', mins);
             document.getElementById('lbl-gameover-stats').innerHTML =
                 `${desc}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: ${goldLines.join(' | ')}</span>`;
@@ -4773,7 +4568,6 @@
             if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: Math.min(350, myP.goldCollected), won: true });
             this.saveProfile();
         },
-
         triggerMatchEnd(winner, titleMsg, descMsg) {
             this.state = 'GAMEOVER'; this.activeMatch = false;
             Hideout.active = false;
@@ -4785,7 +4579,6 @@
             let myP = this.players.find(p => p && p.id === this.mySlot);
             let iWon = !!(winner && winner.id === this.mySlot);
             if(winner) {
-                // FIX (e): mesmo teto de 350 de ouro aplicado aqui (vitória por eliminação)
                 let reward = Math.min(350, winner.goldCollected);
                 if(winner.profileId === 1) this.walletP1 += reward;
                 else if(winner.profileId === 2) this.walletP2 += reward;
@@ -4797,23 +4590,17 @@
             if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: iWon ? Math.min(350, myP.goldCollected) : 0, won: iWon });
             this.saveProfile();
         },
-
         backToMenu() {
-            // FIX: sempre limpa qualquer resquício de estado online (peer/conn/isHost/isOnline)
-            // ao voltar pro menu — evita que uma partida online anterior mal encerrada "vaze"
-            // pra próxima partida (local ou online) e trave o Jogador 2.
             OnlineSync.disconnect();
             document.getElementById('gameover-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.remove('hidden');
             this.state = 'MENU'; this.updateMenu();
         },
-
         draw() {
             this.ctx.clearRect(0,0,1280,720);
             this.ctx.save();
             let shakeX = (Math.random()-0.5)*this.cameraShakeIntensity;
             let shakeY = (Math.random()-0.5)*this.cameraShakeIntensity;
-
             if(Hideout.active) {
                 this.ctx.translate(shakeX, shakeY);
                 this.ctx.fillStyle = '#020617';
@@ -4831,11 +4618,9 @@
                 this.players.forEach(p => { if(p && p.lives > 0) p.draw(this.ctx); });
                 this.particles.forEach(pa => pa.draw(this.ctx));
             }
-
             this.ctx.restore();
         }
     };
-
     class Player {
         constructor(id, x, y, archetype, controls, upg, profileId, cosmetics) {
             this.id = id; this.x = x; this.y = y; this.w = 32; this.h = 46; this.vx = 0; this.vy = 0;
@@ -4847,25 +4632,42 @@
             this.atkCd = upg.atkCd || 16;
             this.inventory = { potion: upg.potion, shield: upg.shield };
             this.mp = 100; this.cdAttack = 0; this.cdSpecial = 0; this.shieldTime = 0; this.dashCooldown = 0; this.kills = 0;
-            // Item (c): cor/visual customizados têm prioridade sobre a cor padrão do arquétipo
+            this._hpBoostActive = false;
             let archColor = archetype === 'hero' ? '#22c55e' : (archetype === 'vilan' ? '#ef4444' : '#38bdf8');
             this.color = (cosmetics && cosmetics.color) ? cosmetics.color : archColor;
             this.skin = (cosmetics && cosmetics.skin) ? cosmetics.skin : 'default';
         }
-
+        // NOVO: velocidade "de verdade" usada no movimento — soma o boost de velocidade comprado
+        // (só vale pro Jogador 1, dono da conta/loja) e SEMPRE aplica um teto máximo, pra impedir
+        // que empilhar upgrades permanentes de velocidade + boost deixe alguém rápido demais.
+        getEffectiveSpeed() {
+            let spd = this.baseSpd;
+            if(this.id === 1) {
+                let boosts = Engine.persistentUpgradesP1.boosts;
+                if(boosts && boosts.speed > 0) spd += Engine.BOOST_SPEED_BONUS;
+            }
+            return Math.min(spd, Engine.MAX_PLAYER_SPEED);
+        }
         update(dt, inHideout) {
-            // Guest em modo online: física é controlada pelo host; apenas sincroniza HUD
             if(OnlineSync.isOnline && !OnlineSync.isHost) { this.syncHUD(); return; }
-
             if(this.cdAttack > 0) this.cdAttack -= dt * 60;
             if(this.cdSpecial > 0) this.cdSpecial -= dt * 60;
             if(this.shieldTime > 0) this.shieldTime -= dt * 60;
             if(this.dashCooldown > 0) this.dashCooldown -= dt * 60;
             if(this.mp < 100) this.mp += dt * 15;
-
-            // FIX (f): generalizado pra até 4 jogadores. Só o meu próprio personagem (id===1 quando
-            // sou host/solo) lê o teclado local; os demais (id 2/3/4) são convidados remotos e usam
-            // o "intent" normalizado que cada um envia pela rede.
+            // NOVO: Boost de HP Extra — só vale pro Jogador 1 (dono da loja). Sempre que o boost
+            // muda de ativo pra inativo (ou vice-versa), ajusta o HP máximo (e o HP atual) uma
+            // única vez nessa transição, em vez de somar/subtrair todo frame.
+            if(this.id === 1) {
+                let boosts = Engine.persistentUpgradesP1.boosts || { speed:0, hp:0 };
+                let hpBoostActive = (boosts.hp || 0) > 0;
+                if(hpBoostActive !== this._hpBoostActive) {
+                    this._hpBoostActive = hpBoostActive;
+                    if(hpBoostActive) { this.maxHp += Engine.BOOST_HP_BONUS; this.hp += Engine.BOOST_HP_BONUS; }
+                    else { this.maxHp = Math.max(1, this.maxHp - Engine.BOOST_HP_BONUS); this.hp = Math.min(this.hp, this.maxHp); }
+                    this.syncHUD();
+                }
+            }
             let keys;
             if(this.id === 1) {
                 let k = Engine.inputKeys;
@@ -4873,10 +4675,10 @@
             } else {
                 keys = OnlineSync.guestKeysBySlot[this.id] || {};
             }
-
+            let spd = this.getEffectiveSpeed();
             if(!inHideout) {
-                if(keys.left) { this.vx = -this.baseSpd; this.facing = -1; }
-                else if(keys.right) { this.vx = this.baseSpd; this.facing = 1; }
+                if(keys.left) { this.vx = -spd; this.facing = -1; }
+                else if(keys.right) { this.vx = spd; this.facing = 1; }
                 else { this.vx *= Math.pow(0.7, dt * 60); }
                 if(keys.up && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); }
                 this.vy += 0.68 * dt * 60; if(this.vy > 16) this.vy = 16;
@@ -4884,24 +4686,21 @@
                 if(!Engine.isOpenWorld) {
                     if(this.x < 0) this.x = 0; if(this.x + this.w > Engine.arenaWidth) this.x = Engine.arenaWidth - this.w;
                 } else {
-                    // FIX: Queda infinita com escudo — remove escudo antes do dano para garantir morte
                     if(this.y > 750) { this.shieldTime = 0; this.takeDamage(100, null); }
                 }
                 if(keys.attack && this.cdAttack <= 0) this.castAttack();
                 if(keys.special && this.cdSpecial <= 0 && this.mp >= 40) this.castSpecial();
                 this.checkChestProximity();
             } else {
-                if(keys.left) { this.vx = -this.baseSpd; this.facing = -1; }
-                else if(keys.right) { this.vx = this.baseSpd; this.facing = 1; }
+                if(keys.left) { this.vx = -spd; this.facing = -1; }
+                else if(keys.right) { this.vx = spd; this.facing = 1; }
                 else { this.vx *= Math.pow(0.7, dt * 60); }
                 if(keys.up && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); }
                 this.vy += 0.68 * dt * 60; if(this.vy > 16) this.vy = 16;
                 this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
             }
-
             this.syncHUD();
         }
-
         checkChestProximity() {
             if(this.id !== Engine.mySlot) return;
             let near = false;
@@ -4912,14 +4711,12 @@
             });
             if(!Hideout.active) document.getElementById('chest-alert').style.display = near ? 'block' : 'none';
         }
-
         castAttack() {
             this.cdAttack = this.atkCd;
             let px = this.facing === 1 ? this.x + this.w : this.x - 12;
             if(!Hideout.active) Engine.projectiles.push(new Projectile(px, this.y+14, this.facing * this.projSpd, 0, this.color, 12*this.dmgMod, this));
             AudioFX.play('hit');
         }
-
         castSpecial() {
             this.mp -= 40; this.cdSpecial = 110;
             if(this.archetype === 'hero') {
@@ -4936,16 +4733,13 @@
                 if(!Hideout.active) for(let i=0; i<3; i++) setTimeout(() => { if(this.lives>0) Engine.projectiles.push(new Projectile(this.x, this.y+12, this.facing*17, 0, '#38bdf8', 8*this.dmgMod, this)); }, i*80);
             }
         }
-
         takeDamage(amount, source) {
             if(this.shieldTime > 0 || this.lives <= 0) return;
             this.hp -= amount; AudioFX.play('hit');
             if(this.hp <= 0) { this.lives--; if(this.lives > 0) { this.hp = this.maxHp; this.y = 100; this.vy = 0; } }
             this.syncHUD();
         }
-
         syncHUD() {
-            // FIX (f): generalizado de "p1"/"p2" fixo para "p"+id, suportando até 4 jogadores
             let pfx = 'p' + this.id;
             let fillHp = document.getElementById(`bar-${pfx}-hp`); if(fillHp) fillHp.style.width = `${Math.max(0,(this.hp/this.maxHp)*100)}%`;
             let fillMp = document.getElementById(`bar-${pfx}-mp`); if(fillMp) fillMp.style.width = `${this.mp}%`;
@@ -4959,14 +4753,23 @@
                 if(slots[0]){ slots[0].className = `hud-slot ${this.inventory.potion<=0?'empty':''}`; slots[0].innerHTML = this.inventory.potion>0?`P<span class="count">${this.inventory.potion}</span>`:''; }
                 if(slots[1]){ slots[1].className = `hud-slot ${this.inventory.shield<=0?'empty':''}`; slots[1].innerHTML = this.inventory.shield>0?`E<span class="count">${this.inventory.shield}</span>`:''; }
             }
+            // NOVO: mostra os boosts ativos (velocidade/HP) e o tempo restante de cada, só no HUD do P1.
+            if(this.id === 1) {
+                let boostEl = document.getElementById('hud-p1-boosts');
+                if(boostEl) {
+                    let boosts = Engine.persistentUpgradesP1.boosts || {};
+                    let parts = [];
+                    if(boosts.speed > 0) parts.push(`⚡ ${Engine.formatBoostTime(boosts.speed)}`);
+                    if(boosts.hp > 0) parts.push(`❤+ ${Engine.formatBoostTime(boosts.hp)}`);
+                    boostEl.textContent = parts.join('   ');
+                    boostEl.style.display = parts.length ? 'block' : 'none';
+                }
+            }
         }
-
         draw(ctx) {
             ctx.save(); ctx.fillStyle = this.color;
             ctx.shadowBlur = (this.shieldTime > 0 ? 15 : 4) + (this.skin === 'glow' ? 10 : 0); ctx.shadowColor = this.color;
             ctx.fillRect(this.x, this.y, this.w, this.h);
-
-            // Item (c): flourish visual conforme o "skin" escolhido nas configurações
             if(this.skin === 'stripes') {
                 ctx.save(); ctx.beginPath(); ctx.rect(this.x, this.y, this.w, this.h); ctx.clip();
                 ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 4;
@@ -4988,12 +4791,10 @@
                 ctx.beginPath(); ctx.moveTo(this.x+this.w-15, this.y+this.h); ctx.lineTo(this.x+this.w-9, this.y+this.h+11); ctx.lineTo(this.x+this.w-3, this.y+this.h); ctx.fill();
                 ctx.restore();
             }
-
             ctx.fillStyle = '#000'; ctx.fillRect(this.facing===1?this.x+20:this.x+6, this.y+10, 6, 6);
             ctx.restore();
         }
     }
-
     class Platform {
         constructor(x, y, w, h) { this.x = x; this.y = y; this.w = w; this.h = h; }
         draw(ctx) {
@@ -5001,7 +4802,6 @@
             ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h); ctx.restore();
         }
     }
-
     class Enemy {
         constructor(x, y, type, bossLevel) {
             this.x = x; this.y = y; this.type = type; this.vx = 0; this.vy = 0;
@@ -5024,8 +4824,6 @@
             if(tgs.length > 0) {
                 let tgt = tgs[0];
                 this.vx = (tgt.x + tgt.w/2) > (this.x + this.w/2) ? this.speed : -this.speed;
-                // FIX: monstro só pula se existir uma plataforma alcançável de fato acima dele
-                // (evita pulos infinitos quando não há onde subir).
                 if(this.isGrounded && this.jumpCd <= 0 && (tgt.y + tgt.h) < (this.y - 30) && Math.abs((tgt.x + tgt.w/2) - (this.x + this.w/2)) < 260 && this._canReachHigherPlatform()) {
                     this.vy = -15; this.isGrounded = false; this.jumpCd = 50;
                 }
@@ -5041,25 +4839,19 @@
             }
             this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
         }
-        // Verifica se existe uma plataforma que o monstro pode de fato alcançar pulando:
-        // precisa estar acima da posição atual (mas dentro do alcance vertical do salto),
-        // e sobreposta horizontalmente com o alcance do salto do monstro na direção que ele está andando.
         _canReachHigherPlatform() {
             const jumpVy = 15, gravity = 0.6;
-            const maxJumpRise = (jumpVy * jumpVy) / (2 * gravity); // altura máxima aproximada do salto
-            const jumpHorizontalRange = 90; // alcance horizontal aproximado durante a subida do salto
+            const maxJumpRise = (jumpVy * jumpVy) / (2 * gravity);
+            const jumpHorizontalRange = 90;
             const dir = this.vx > 0 ? 1 : -1;
             const footY = this.y + this.h;
             for(let p of Engine.platforms) {
                 const platformTop = p.y;
                 const riseNeeded = footY - platformTop;
-                // A plataforma precisa estar acima do chão atual e dentro do alcance máximo do salto,
-                // mas não ser a própria plataforma em que o monstro já está.
                 if(riseNeeded <= 5 || riseNeeded > maxJumpRise) continue;
                 const platformLeft = p.x, platformRight = p.x + p.w;
                 const reachLeft = this.x - jumpHorizontalRange;
                 const reachRight = this.x + this.w + jumpHorizontalRange;
-                // Se a plataforma está na direção em que o monstro está se movendo (ou logo acima dele) e dentro do alcance
                 const overlapsReach = platformRight > reachLeft && platformLeft < reachRight;
                 const inMovementDirection = dir > 0 ? platformRight > this.x : platformLeft < this.x + this.w;
                 if(overlapsReach && inMovementDirection) return true;
@@ -5089,7 +4881,6 @@
             ctx.restore();
         }
     }
-
     class Projectile {
         constructor(x, y, vx, vy, color, dmg, owner) {
             this.x = x; this.y = y; this.vx = vx; this.vy = vy; this.color = color; this.damage = dmg; this.owner = owner;
@@ -5101,7 +4892,6 @@
         }
         draw(ctx) { ctx.save(); ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.w, this.h); ctx.restore(); }
     }
-
     class Item {
         constructor(x, y, type) { this.x = x; this.y = y; this.type = type; this.w = type==='chest'?36:18; this.h = type==='chest'?28:18; this.destroyed = false; }
         draw(ctx) {
@@ -5126,19 +4916,16 @@
             ctx.restore();
         }
     }
-
     class Particle {
         constructor(x, y, color, vx, vy, life) { this.x = x; this.y = y; this.color = color; this.vx = vx; this.vy = vy; this.life = life; }
         update(dt) { this.x += this.vx; this.y += this.vy; this.life -= dt*60; }
         draw(ctx) { ctx.save(); ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, 3, 3); ctx.restore(); }
     }
-
     function createFXBurst(x, y, color, qty) {
         for(let i=0; i<qty; i++) {
             Engine.particles.push(new Particle(x, y, color, (Math.random()-0.5)*6, (Math.random()-0.5)*6, 22));
         }
     }
-
     const Physics = {
         resolveAll(dt) {
             let playersAlive = Engine.players.filter(p=>p && p.lives>0);
@@ -5152,20 +4939,13 @@
                     }
                 });
             });
-            // FIX: colisão sólida entre atores — jogadores e monstros não podem mais "atravessar"
-            // uns aos outros. Cada par de atores sobrepostos é separado pelo eixo de menor
-            // penetração: se a sobreposição vertical for menor, um fica em pé sobre o outro
-            // (como se fosse uma plataforma); se a sobreposição horizontal for menor, eles são
-            // empurrados para os lados, metade cada.
             for(let i = 0; i < actors.length; i++) {
                 for(let j = i + 1; j < actors.length; j++) {
                     const a = actors[i], b = actors[j];
                     const overlapX = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x);
                     const overlapY = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y);
                     if(overlapX <= 0 || overlapY <= 0) continue;
-
                     if(overlapY < overlapX) {
-                        // Resolve verticalmente: quem está mais acima fica em pé sobre o outro.
                         if(a.y < b.y) {
                             a.y -= overlapY;
                             if(a.vy > 0) a.vy = 0;
@@ -5176,14 +4956,12 @@
                             b.isGrounded = true;
                         }
                     } else {
-                        // Resolve horizontalmente: empurra cada um pra fora, metade cada.
                         const push = overlapX / 2;
                         if(a.x < b.x) { a.x -= push; b.x += push; }
                         else { a.x += push; b.x -= push; }
                     }
                 }
             }
-
             Engine.enemies.forEach(e => {
                 playersAlive.forEach(p => {
                     if(e.x < p.x+p.w && e.x+e.w > p.x && e.y < p.y+p.h && e.y+e.h > p.y) {
@@ -5195,9 +4973,8 @@
                     }
                 });
             });
-            // FIX: Projétil não atinge múltiplos alvos — guard early-return + !pr.destroyed em cada check
             Engine.projectiles.forEach(pr => {
-                if(pr.destroyed) return; // descarta projétil já destruído neste frame
+                if(pr.destroyed) return;
                 if(pr.owner instanceof Player) {
                     Engine.enemies.forEach(e => {
                         if(!pr.destroyed && pr.x < e.x+e.w && pr.x+pr.w > e.x && pr.y < e.y+e.h && pr.y+pr.h > e.y) {
@@ -5219,7 +4996,6 @@
                     });
                 }
             });
-            // FIX: moeda não pode ser coletada por dois jogadores no mesmo frame
             Engine.items.forEach(it => {
                 if(it.type === 'coin' && !it.destroyed) {
                     Engine.players.forEach(p => {
@@ -5231,32 +5007,19 @@
             });
         }
     };
-
     window.addEventListener('contextmenu', e => e.preventDefault());
-
     function fitGameContainer() {
         const el = document.getElementById('game-container');
         if (!el) return;
         let scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720, 1);
-        // FIX: se a janela reportar um tamanho absurdamente pequeno no momento do cálculo (ex:
-        // layout ainda não estabilizou durante o boot, DevTools abrindo/fechando, orientação de
-        // tela mudando), a escala calculada ficava minúscula e o jogo travava encolhido num
-        // cantinho da tela pra sempre — sem nenhum erro, o jogo tava rodando normal por trás,
-        // só visualmente do tamanho de um selo. Como essa função só roda de novo em 'resize',
-        // sem recálculo automático o jogo nunca se recuperava sozinho. Um piso mínimo evita o
-        // pior caso, e o recálculo automático abaixo cobre os outros gatilhos.
         if (!isFinite(scale) || scale < 0.15) scale = 1;
         el.style.transform = `scale(${scale})`;
     }
     window.addEventListener('resize', fitGameContainer);
     fitGameContainer();
-    // FIX: recalcula a escala de novo pouco depois do boot inicial e a cada troca de tela
-    // (login → menu, etc), casos em que o layout muda sem disparar o evento 'resize' do
-    // navegador, mas onde o tamanho real disponível pra o jogo pode ter mudado.
     setTimeout(fitGameContainer, 300);
     setTimeout(fitGameContainer, 1500);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) fitGameContainer(); });
-
     function startMusicOnFirstInteraction() {
         MusicFX.start();
         window.removeEventListener('pointerdown', startMusicOnFirstInteraction);
@@ -5264,12 +5027,6 @@
     }
     window.addEventListener('pointerdown', startMusicOnFirstInteraction);
     window.addEventListener('keydown', startMusicOnFirstInteraction);
-
-    // FIX: checagem explícita de que os scripts externos (PeerJS e Supabase, carregados via
-    // CDN unpkg.com) realmente terminaram de carregar antes de inicializar o jogo. Se o CDN
-    // estiver lento/fora do ar nesse momento, essas variáveis global (Peer, supabase) ficam
-    // undefined e qualquer código que tentar usá-las quebra o boot inteiro sem explicação —
-    // agora mostramos a tela de erro nesse caso, em vez de travar silenciosamente.
     if (typeof Peer === 'undefined' || typeof supabase === 'undefined') {
         console.error('Bibliotecas externas (PeerJS/Supabase) não carregaram a tempo.');
         showBootError();
