@@ -83,8 +83,8 @@
         .achievement-card .ach-bar-fill { height:100%; background:linear-gradient(to right,#38bdf8,#818cf8); }
         .achievement-card.completed .ach-bar-fill { background:linear-gradient(to right,#eab308,#fbbf24); }
         .achievement-card .ach-progress-text { font-size:0.68rem; color:#64748b; margin-top:3px; text-align:right; }
-        #toast-stack { position:absolute; top:20px; left:50%; transform:translateX(-50%); z-index:60; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; }
-        .game-toast { background:rgba(15,23,42,0.95); border:1px solid #b45309; color:#fcd34d; padding:10px 18px; border-radius:10px; font-weight:700; font-size:0.85rem; box-shadow:0 4px 15px rgba(0,0,0,0.4); animation: toast-in-out 3.2s ease forwards; }
+        #toast-stack { position:absolute; top:calc(20px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:60; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(94%, 1180px); box-sizing:border-box; }
+        .game-toast { background:rgba(15,23,42,0.95); border:1px solid #b45309; color:#fcd34d; padding:10px 18px; border-radius:10px; font-weight:700; font-size:0.85rem; box-shadow:0 4px 15px rgba(0,0,0,0.4); animation: toast-in-out 3.2s ease forwards; max-width:100%; box-sizing:border-box; white-space:normal; word-break:break-word; text-align:center; }
         @keyframes toast-in-out { 0%{opacity:0; transform:translateY(-12px);} 10%{opacity:1; transform:translateY(0);} 85%{opacity:1;} 100%{opacity:0; transform:translateY(-8px);} }
         .hud-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; font-weight: bold; }
         .bar-container { background: #334155; height: 10px; border-radius: 4px; overflow: hidden; margin-bottom: 6px; border: 1px solid #1e293b; }
@@ -195,6 +195,10 @@
         #tc-jump { right: calc(108px + env(safe-area-inset-right)); bottom: calc(158px + env(safe-area-inset-bottom)); width: 58px; height: 58px; font-size: 1.05rem; }
         #tc-special { right: calc(112px + env(safe-area-inset-right)); bottom: calc(76px + env(safe-area-inset-bottom)); width: 54px; height: 54px; font-size: 0.95rem; }
         #tc-dash { right: calc(20px + env(safe-area-inset-right)); bottom: calc(166px + env(safe-area-inset-bottom)); width: 46px; height: 46px; font-size: 0.65rem; }
+        #tc-chest { left: calc(16px + env(safe-area-inset-left)); bottom: calc(222px + env(safe-area-inset-bottom)); width: 44px; height: 44px; font-size: 1.1rem; display:none; }
+        #tc-chest.show { display:flex; }
+        #tc-hideout { left: calc(70px + env(safe-area-inset-left)); bottom: calc(222px + env(safe-area-inset-bottom)); width: 44px; height: 44px; font-size: 1.1rem; display:none; }
+        #tc-hideout.show { display:flex; }
         .auth-box, .lobby-box { background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:30px; display:flex; flex-direction:column; gap:14px; }
         .auth-box { width:400px; } .lobby-box { width:470px; }
         .auth-title { font-size:2.2rem; font-weight:900; background:linear-gradient(to right,#38bdf8,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; }
@@ -218,7 +222,7 @@
         .chat-menu-item { display:block; width:100%; text-align:left; padding:11px 14px; background:transparent; border:none; border-bottom:1px solid #1e293b; color:#e2e8f0; font-size:0.83rem; cursor:pointer; border-radius:0; }
         .chat-menu-item:last-child { border-bottom:none; }
         .chat-menu-item:hover { background:#1e293b; }
-        .chat-msg-delete-btn { cursor:pointer; opacity:0.6; margin-right:6px; font-size:0.7rem; }
+        .chat-msg-delete-btn { cursor:pointer; opacity:0.6; margin-right:4px; font-size:0.7rem; display:inline-flex; align-items:center; justify-content:center; padding:6px; margin:-6px 0 -6px -6px; touch-action:manipulation; }
         .chat-msg-delete-btn:hover { opacity:1; }
         .boost-option-btn { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; width:100%; }
     </style>
@@ -649,7 +653,7 @@
             </div>
             <div id="chat-blocked-notice" class="hidden" style="padding:9px 16px; font-size:0.76rem; color:#f87171; text-align:center; border-top:1px solid #1e293b;"></div>
             <div class="chat-input-row" id="chat-input-row">
-                <input type="text" id="chat-input" placeholder="Digite uma mensagem..." data-i18n-placeholder="chatInputPlaceholder" maxlength="500" onkeydown="if(event.key==='Enter')Chat.sendMessage()">
+                <input type="text" id="chat-input" placeholder="Digite uma mensagem..." data-i18n-placeholder="chatInputPlaceholder" maxlength="500" enterkeyhint="send" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();Chat.sendMessage();}">
                 <button class="chat-send-btn" onclick="Chat.sendMessage()">➤</button>
             </div>
         </div>
@@ -705,6 +709,8 @@
     <button class="tc-btn" id="tc-jump" onpointerdown="Engine.touchKey('w',true,event)" onpointerup="Engine.touchKey('w',false,event)" onpointercancel="Engine.touchKey('w',false,event)" onpointerleave="Engine.touchKey('w',false,event)">⤒</button>
     <button class="tc-btn" id="tc-special" onpointerdown="Engine.touchKey('g',true,event)" onpointerup="Engine.touchKey('g',false,event)" onpointercancel="Engine.touchKey('g',false,event)" onpointerleave="Engine.touchKey('g',false,event)">✦</button>
     <button class="tc-btn" id="tc-attack" onpointerdown="Engine.touchKey('f',true,event)" onpointerup="Engine.touchKey('f',false,event)" onpointercancel="Engine.touchKey('f',false,event)" onpointerleave="Engine.touchKey('f',false,event)">⚔</button>
+    <button class="tc-btn" id="tc-chest" onpointerdown="Engine.tryOpenChest()">📦</button>
+    <button class="tc-btn" id="tc-hideout" onpointerdown="Engine.handleHideoutTap()">🚪</button>
 </div>
 <div id="rotate-hint">
     <div style="font-size:3rem;">🔄</div>
@@ -2767,6 +2773,7 @@
         _unreadTotal: 0,
         _isBlocked: false,
         _blockedByPeer: false,
+        _convVersion: 0,
         _withTimeout(builder, ms = 9000) {
             return Promise.race([
                 builder,
@@ -2795,6 +2802,7 @@
         async openChat(playerId, name, isOnline) {
             if (!Accounts.current) return;
             this._initVisibilityRecovery();
+            this._convVersion++;
             this._peerId = playerId;
             this._peerName = name;
             this._isBlocked = false;
@@ -2892,24 +2900,48 @@
             if (!this._peerId || !Accounts.current) return;
             this.closeOptionsMenu();
             if (!window.confirm(t('chatClearConfirmMsg'))) return;
+            // NOVO: invalida qualquer carregamento/polling que já estava em andamento (ex: um poll
+            // disparado enquanto o confirm() estava aberto) para que ele não "reponha" as mensagens
+            // recém apagadas quando a resposta dele chegar depois desse DELETE.
+            this._convVersion++;
+            this._stopPolling();
             try {
                 const myId = Accounts.current.uid, peerId = this._peerId;
                 const or = `and(from_id.eq.${myId},to_id.eq.${peerId}),and(from_id.eq.${peerId},to_id.eq.${myId})`;
-                await restDirect(`messages?or=(${encodeURIComponent(or).replace(/%2C/g, ',')})`, { method: 'DELETE' });
+                const deleted = await restDirect(`messages?or=(${encodeURIComponent(or).replace(/%2C/g, ',')})`, {
+                    method: 'DELETE',
+                    headers: { 'Prefer': 'return=representation' }
+                });
                 document.getElementById('chat-messages').innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
+                if (!deleted || deleted.length === 0) {
+                    console.warn('Nenhuma mensagem foi apagada no servidor ao limpar a conversa — confira a policy de DELETE da tabela "messages" no Supabase.');
+                }
                 Engine.showToast(t('chatClearedToast'));
             } catch (err) { console.warn('Erro ao limpar conversa:', err); }
+            finally { if (this._peerId) this._startPolling(); }
         },
         // NOVO: apaga uma mensagem específica (só as que eu mesmo enviei)
         async deleteMessage(msgId) {
             if (!window.confirm(t('chatDeleteMsgConfirmMsg'))) return;
+            // NOVO: invalida qualquer poll/carregamento em andamento (ex: um poll disparado enquanto
+            // o confirm() estava aberto) e pausa o polling por um instante, pra essa mensagem apagada
+            // não "voltar" pro final da conversa quando uma resposta antiga chegar depois.
+            this._convVersion++;
+            this._stopPolling();
             try {
-                await restDirect(`messages?id=eq.${msgId}&from_id=eq.${Accounts.current.uid}`, { method: 'DELETE' });
+                const deleted = await restDirect(`messages?id=eq.${msgId}&from_id=eq.${Accounts.current.uid}`, {
+                    method: 'DELETE',
+                    headers: { 'Prefer': 'return=representation' }
+                });
+                if (!deleted || deleted.length === 0) {
+                    console.warn('A mensagem não foi apagada no servidor — confira a policy de DELETE da tabela "messages" no Supabase.');
+                }
                 let row = document.querySelector(`#chat-messages [data-msg-id="${msgId}"]`);
                 if (row) row.remove();
                 let container = document.getElementById('chat-messages');
                 if (!container.querySelector('.chat-bubble-row')) container.innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
             } catch (err) { console.warn('Erro ao apagar mensagem:', err); }
+            finally { if (this._peerId) this._startPolling(); }
         },
         // NOVO: denúncia — abre a tela de motivo para o jogador desta conversa
         openReport() {
@@ -2959,6 +2991,10 @@
         },
         async _loadMessages(silent) {
             let container = document.getElementById('chat-messages');
+            // NOVO: guarda a versão da conversa no início do pedido. Se algo mudar essa versão
+            // (trocar de conversa, apagar mensagem, limpar conversa) antes da resposta chegar,
+            // descartamos o resultado — é o que evita mensagens apagadas "voltarem" na tela.
+            const ver = this._convVersion;
             try {
                 const myId = Accounts.current.uid;
                 const peerId = this._peerId;
@@ -2966,6 +3002,7 @@
                 const data = await restDirect(
                     `messages?select=*&or=(${encodeURIComponent(or).replace(/%2C/g, ',')})&order=created_at.asc&limit=200`
                 );
+                if (ver !== this._convVersion) return;
                 if (silent) {
                     (data || []).forEach(m => this._appendIfNew(m));
                     let hasAnyUnread = (data || []).some(m => m.from_id === this._peerId && !m.read);
@@ -3548,7 +3585,7 @@
                 let ei = data.ei || { type:'elim', winnerId:null };
                 let myP = Engine.players.find(p=>p && p.id===Engine.mySlot);
                 let iWon = ei.type==='time' || (ei.type==='elim' && ei.winnerId===Engine.mySlot);
-                let earned = (iWon && myP) ? Math.min(350, myP.goldCollected||0) : 0;
+                let earned = (iWon && myP) ? Math.min(1000, myP.goldCollected||0) : 0;
                 if(earned > 0) { Engine.walletP1 += earned; Engine.saveProfile(); }
                 let myName = Engine.getProfileName(Engine.mySlot);
                 let title = ei.type==='time' ? t('timeVictoryTitle') : (iWon ? t('genericWinsTitle').replace('{name}', myName.toUpperCase()) : t('deathTitle'));
@@ -3664,10 +3701,6 @@
         // duração tem um preço diferente. O efeito fica sempre ativo automaticamente enquanto
         // sobrar tempo comprado, e esse tempo só é descontado durante partidas (ver Engine.update).
         shopCatalog: [
-            { id: 'stat_hp', price: 100, type: 'stat', statKey: 'maxHp', value: 25 },
-            { id: 'stat_hp2', price: 170, type: 'stat', statKey: 'maxHp', value: 40 },
-            { id: 'stat_spd', price: 120, type: 'stat', statKey: 'baseSpd', value: 0.5 },
-            { id: 'stat_spd2', price: 160, type: 'stat', statKey: 'baseSpd', value: 0.8 },
             { id: 'wpn_pistol', price: 90, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.9, weaponAtkCd: 8 },
             { id: 'wpn_laser', price: 200, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
             { id: 'wpn_plasma', price: 250, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
@@ -4422,6 +4455,16 @@
             if(dt > 0.1) dt = 0.1;
             this.lastTime = timestamp;
             document.getElementById('touch-controls').classList.toggle('active', this.device !== 'pc' && this.state === 'IN_GAME');
+            // NOVO: mantém os botões de toque de baú e esconderijo sincronizados com os avisos de
+            // tela (chest-alert / hideout-alert / hideout-hud) — assim eles só aparecem quando faz
+            // sentido interagir, igual acontece no PC com as teclas [B] e [E].
+            let tcChestBtn = document.getElementById('tc-chest');
+            if(tcChestBtn) tcChestBtn.classList.toggle('show', document.getElementById('chest-alert').style.display === 'block');
+            let tcHideoutBtn = document.getElementById('tc-hideout');
+            if(tcHideoutBtn) {
+                let hOn = document.getElementById('hideout-alert').style.display === 'block' || document.getElementById('hideout-hud').style.display === 'block';
+                tcHideoutBtn.classList.toggle('show', hOn);
+            }
             if(this.state === 'IN_GAME') {
                 if(OnlineSync.isOnline) {
                     if(OnlineSync.isHost) { this.update(dt); this.draw(); OnlineSync.sendState(); }
@@ -4553,7 +4596,7 @@
             let goldLines = [];
             this.players.forEach(p => {
                 if(!p) return;
-                let reward = Math.min(350, p.goldCollected);
+                let reward = Math.min(1000, p.goldCollected);
                 if(p.profileId === 1) this.walletP1 += reward;
                 else if(p.profileId === 2) this.walletP2 += reward;
                 goldLines.push(`${this.getProfileName(p.profileId)}: +$${reward}`);
@@ -4565,7 +4608,7 @@
             document.getElementById('lbl-gameover-stats').innerHTML =
                 `${desc}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: ${goldLines.join(' | ')}</span>`;
             let myP = this.players.find(p => p && p.id === this.mySlot);
-            if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: Math.min(350, myP.goldCollected), won: true });
+            if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: Math.min(1000, myP.goldCollected), won: true });
             this.saveProfile();
         },
         triggerMatchEnd(winner, titleMsg, descMsg) {
@@ -4579,7 +4622,7 @@
             let myP = this.players.find(p => p && p.id === this.mySlot);
             let iWon = !!(winner && winner.id === this.mySlot);
             if(winner) {
-                let reward = Math.min(350, winner.goldCollected);
+                let reward = Math.min(1000, winner.goldCollected);
                 if(winner.profileId === 1) this.walletP1 += reward;
                 else if(winner.profileId === 2) this.walletP2 += reward;
                 document.getElementById('lbl-gameover-stats').innerHTML = `${descMsg}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${reward}</span>`;
@@ -4587,7 +4630,7 @@
                 let record = this.ranking.find(r => r.name === nameLabel);
                 if(record) record.wins++; else this.ranking.push({ name: nameLabel, wins: 1 });
             } else { document.getElementById('lbl-gameover-stats').innerText = descMsg; }
-            if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: iWon ? Math.min(350, myP.goldCollected) : 0, won: iWon });
+            if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: iWon ? Math.min(1000, myP.goldCollected) : 0, won: iWon });
             this.saveProfile();
         },
         backToMenu() {
@@ -5011,6 +5054,12 @@
     function fitGameContainer() {
         const el = document.getElementById('game-container');
         if (!el) return;
+        // NOVO: no celular, quando o teclado virtual abre/fecha (ex: digitando no chat), o navegador
+        // dispara 'resize' porque a altura visível muda — sem essa checagem, o jogo inteiro (incluindo
+        // a tela de chat) reescalava de forma abrupta enquanto a pessoa estava digitando. Evitamos
+        // recalcular o zoom nesse caso específico (campo de texto focado).
+        let active = document.activeElement;
+        if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
         let scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720, 1);
         if (!isFinite(scale) || scale < 0.15) scale = 1;
         el.style.transform = `scale(${scale})`;
