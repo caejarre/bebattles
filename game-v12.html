@@ -16,7 +16,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        body { background: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; height: 100dvh; }
         
         #game-container { position: relative; width: 1280px; height: 720px; background: #090d16; border: 4px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); border-radius: 12px; overflow: hidden; transform-origin: center center; }
         canvas { display: block; width: 100%; height: 100%; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
@@ -2774,6 +2774,37 @@
         _isBlocked: false,
         _blockedByPeer: false,
         _convVersion: 0,
+        // NOVO: "túmulo" local de mensagens apagadas / conversas limpas, salvo no localStorage.
+        // Isso garante que uma mensagem apagada (ou uma conversa limpa) NUNCA mais reapareça nesse
+        // aparelho, mesmo se o DELETE no Supabase não tiver efeito nenhuma linha (o que acontece,
+        // por exemplo, se a tabela "messages" tiver RLS ativado mas sem uma policy de DELETE — nesse
+        // caso o Supabase responde como se tivesse dado certo, mas não apaga nada de verdade no banco).
+        _tombstoneKey() { return `bb_chat_deleted_${(Accounts.current && Accounts.current.uid) || 'anon'}`; },
+        _getDeletedIds() {
+            try { return new Set(JSON.parse(localStorage.getItem(this._tombstoneKey()) || '[]')); }
+            catch (e) { return new Set(); }
+        },
+        _markDeletedId(id) {
+            try {
+                let ids = Array.from(this._getDeletedIds());
+                ids.push(id);
+                if (ids.length > 1000) ids = ids.slice(ids.length - 1000);
+                localStorage.setItem(this._tombstoneKey(), JSON.stringify(ids));
+            } catch (e) {}
+        },
+        _clearedKey(peerId) { return `bb_chat_cleared_${(Accounts.current && Accounts.current.uid) || 'anon'}_${peerId}`; },
+        _getClearedBefore(peerId) {
+            try { return localStorage.getItem(this._clearedKey(peerId)); } catch (e) { return null; }
+        },
+        _markClearedBefore(peerId, isoTimestamp) {
+            try { localStorage.setItem(this._clearedKey(peerId), isoTimestamp); } catch (e) {}
+        },
+        _isHiddenLocally(m) {
+            if (this._getDeletedIds().has(m.id)) return true;
+            let cutoff = this._getClearedBefore(this._peerId);
+            if (cutoff && m.created_at && new Date(m.created_at) <= new Date(cutoff)) return true;
+            return false;
+        },
         _withTimeout(builder, ms = 9000) {
             return Promise.race([
                 builder,
@@ -2905,17 +2936,26 @@
             // recém apagadas quando a resposta dele chegar depois desse DELETE.
             this._convVersion++;
             this._stopPolling();
+            const peerId = this._peerId;
             try {
-                const myId = Accounts.current.uid, peerId = this._peerId;
+                const myId = Accounts.current.uid;
                 const or = `and(from_id.eq.${myId},to_id.eq.${peerId}),and(from_id.eq.${peerId},to_id.eq.${myId})`;
                 const deleted = await restDirect(`messages?or=(${encodeURIComponent(or).replace(/%2C/g, ',')})`, {
                     method: 'DELETE',
                     headers: { 'Prefer': 'return=representation' }
                 });
-                document.getElementById('chat-messages').innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
-                if (!deleted || deleted.length === 0) {
-                    console.warn('Nenhuma mensagem foi apagada no servidor ao limpar a conversa — confira a policy de DELETE da tabela "messages" no Supabase.');
+                // NOVO: guarda localmente até onde a conversa foi limpa. Se o servidor confirmar quais
+                // linhas apagou, usamos o horário exato da última delas; senão (ex: RLS bloqueando o
+                // DELETE sem dar erro), usamos o horário atual — isso garante que a conversa continue
+                // "limpa" na tela mesmo se o apagamento no banco não tiver funcionado de verdade.
+                let cutoff = new Date().toISOString();
+                if (deleted && deleted.length) {
+                    cutoff = deleted.reduce((max, r) => (r.created_at > max ? r.created_at : max), deleted[0].created_at);
+                } else {
+                    console.warn('Nenhuma mensagem foi apagada no servidor ao limpar a conversa — confira a policy de DELETE da tabela "messages" no Supabase. A conversa foi ocultada localmente mesmo assim.');
                 }
+                this._markClearedBefore(peerId, cutoff);
+                document.getElementById('chat-messages').innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
                 Engine.showToast(t('chatClearedToast'));
             } catch (err) { console.warn('Erro ao limpar conversa:', err); }
             finally { if (this._peerId) this._startPolling(); }
@@ -2928,13 +2968,17 @@
             // não "voltar" pro final da conversa quando uma resposta antiga chegar depois.
             this._convVersion++;
             this._stopPolling();
+            // NOVO: marca a mensagem como apagada localmente ANTES mesmo do pedido ao servidor
+            // terminar — assim ela nunca mais reaparece nesse aparelho, mesmo que o DELETE no
+            // Supabase não tenha efeito nenhuma linha (RLS sem policy de DELETE, por exemplo).
+            this._markDeletedId(msgId);
             try {
                 const deleted = await restDirect(`messages?id=eq.${msgId}&from_id=eq.${Accounts.current.uid}`, {
                     method: 'DELETE',
                     headers: { 'Prefer': 'return=representation' }
                 });
                 if (!deleted || deleted.length === 0) {
-                    console.warn('A mensagem não foi apagada no servidor — confira a policy de DELETE da tabela "messages" no Supabase.');
+                    console.warn('A mensagem não foi apagada no servidor — confira a policy de DELETE da tabela "messages" no Supabase. Ela foi ocultada localmente mesmo assim.');
                 }
                 let row = document.querySelector(`#chat-messages [data-msg-id="${msgId}"]`);
                 if (row) row.remove();
@@ -3003,18 +3047,22 @@
                     `messages?select=*&or=(${encodeURIComponent(or).replace(/%2C/g, ',')})&order=created_at.asc&limit=200`
                 );
                 if (ver !== this._convVersion) return;
+                // NOVO: filtra mensagens apagadas/limpas localmente ANTES de renderizar — assim,
+                // mesmo que o servidor ainda tenha essas linhas (ex: DELETE bloqueado por RLS), elas
+                // não voltam a aparecer na tela.
+                const filtered = (data || []).filter(m => !this._isHiddenLocally(m));
                 if (silent) {
-                    (data || []).forEach(m => this._appendIfNew(m));
-                    let hasAnyUnread = (data || []).some(m => m.from_id === this._peerId && !m.read);
+                    filtered.forEach(m => this._appendIfNew(m));
+                    let hasAnyUnread = filtered.some(m => m.from_id === this._peerId && !m.read);
                     if (hasAnyUnread) this._markConversationRead();
                     return;
                 }
                 container.innerHTML = '';
-                if (!data || data.length === 0) {
+                if (filtered.length === 0) {
                     container.innerHTML = `<div class="chat-empty-hint">${t('chatEmptyHint')}</div>`;
                     return;
                 }
-                data.forEach(m => this._appendBubble(m));
+                filtered.forEach(m => this._appendBubble(m));
                 container.scrollTop = container.scrollHeight;
             } catch (err) {
                 if (!silent) container.innerHTML = `<div class="chat-empty-hint">${t('chatLoadError')}</div>`;
@@ -3046,6 +3094,7 @@
                     let isThisConvo = (m.from_id === this._peerId && m.to_id === Accounts.current.uid) ||
                                        (m.from_id === Accounts.current.uid && m.to_id === this._peerId);
                     if (!isThisConvo) return;
+                    if (this._isHiddenLocally(m)) return;
                     this._appendIfNew(m);
                     if (m.from_id === this._peerId) this._markConversationRead();
                 })
@@ -5060,11 +5109,19 @@
         // recalcular o zoom nesse caso específico (campo de texto focado).
         let active = document.activeElement;
         if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) return;
-        let scale = Math.min(window.innerWidth / 1280, window.innerHeight / 720, 1);
+        // NOVO: usa window.visualViewport quando disponível — ele reflete a área REALMENTE visível
+        // na tela do celular (descontando barra de endereço do navegador etc.), diferente de
+        // window.innerHeight, que em vários navegadores mobile fica "maior" do que o que de fato
+        // aparece na tela. Isso é o que fazia o topo do jogo (onde ficam as notificações) ser cortado.
+        let vv = window.visualViewport;
+        let vw = (vv && vv.width) || window.innerWidth;
+        let vh = (vv && vv.height) || window.innerHeight;
+        let scale = Math.min(vw / 1280, vh / 720, 1);
         if (!isFinite(scale) || scale < 0.15) scale = 1;
         el.style.transform = `scale(${scale})`;
     }
     window.addEventListener('resize', fitGameContainer);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', fitGameContainer);
     fitGameContainer();
     setTimeout(fitGameContainer, 300);
     setTimeout(fitGameContainer, 1500);
