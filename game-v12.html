@@ -30,14 +30,18 @@
         .section-title { font-size: 0.9rem; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
         
-        button { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; }
-        button:hover:not(:disabled) { background: #334155; border-color: #475569; color: #fff; transform: translateY(-1px); }
+        button { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        @media (hover: hover) and (pointer: fine) {
+            button:hover:not(:disabled) { background: #334155; border-color: #475569; color: #fff; transform: translateY(-1px); }
+        }
         button:active:not(:disabled) { transform: translateY(1px); }
         button.active { background: #38bdf8 !important; border-color: #0ea5e9 !important; color: #0f172a !important; box-shadow: 0 0 15px rgba(56,189,248,0.4); }
         button.disabled { opacity: 0.4; pointer-events: none; }
         .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .char-card { background: #1e293b; border: 2px solid transparent; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
-        .char-card:hover { background: #334155; transform: scale(1.03); }
+        .char-card { background: #1e293b; border: 2px solid transparent; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; -webkit-tap-highlight-color: transparent; }
+        @media (hover: hover) and (pointer: fine) {
+            .char-card:hover { background: #334155; transform: scale(1.03); }
+        }
         .char-card.selected { border-color: #38bdf8; background: #0f172a; box-shadow: 0 0 15px rgba(56,189,248,0.2); }
         .char-card h4 { font-size: 1.1rem; margin-bottom: 4px; }
         .char-card span.char-meta { font-size: 0.8rem; color: #94a3b8; }
@@ -52,7 +56,9 @@
         .shop-item .item-info h4 { font-size: 0.95rem; color: #f1f5f9; }
         .shop-item .item-info p { font-size: 0.8rem; color: #94a3b8; }
         .btn-buy { background: #15803d; border-color: #166534; padding: 6px 12px; font-size: 0.85rem; color: white; }
-        .btn-buy:hover:not(:disabled) { background: #166534; }
+        @media (hover: hover) and (pointer: fine) {
+            .btn-buy:hover:not(:disabled) { background: #166534; }
+        }
         .btn-buy:disabled { background: #334155; border-color: transparent; color: #64748b; cursor: not-allowed; }
         
         button.active-p1 { background: #22c55e !important; color: white !important; }
@@ -115,8 +121,10 @@
         .social-box { background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:24px; width:480px; max-height:640px; display:flex; flex-direction:column; gap:14px; }
         .social-search-row { display:flex; gap:8px; }
         .social-results { display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height:340px; }
-        .social-result-item { display:flex; align-items:center; justify-content:space-between; background:#1e293b; border:1px solid #334155; padding:10px 12px; border-radius:8px; cursor:pointer; transition:all 0.15s; }
-        .social-result-item:hover { background:#334155; }
+        .social-result-item { display:flex; align-items:center; justify-content:space-between; background:#1e293b; border:1px solid #334155; padding:10px 12px; border-radius:8px; cursor:pointer; transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
+        @media (hover: hover) and (pointer: fine) {
+            .social-result-item:hover { background:#334155; }
+        }
         .social-result-name { display:flex; align-items:center; gap:8px; font-weight:600; }
         .online-dot { width:9px; height:9px; border-radius:50%; background:#475569; flex-shrink:0; }
         .online-dot.on { background:#22c55e; box-shadow:0 0 6px #22c55e; }
@@ -134,7 +142,7 @@
         #invite-bell { position:relative; }
         #invite-badge { position:absolute; top:-6px; right:-6px; background:#ef4444; color:white; font-size:0.65rem; font-weight:800; border-radius:50%; width:16px; height:16px; display:none; align-items:center; justify-content:center; }
         #invite-badge.show { display:flex; }
-        #invite-panel { position:absolute; top:60px; right:20px; background:#0f172a; border:1px solid #334155; border-radius:10px; width:300px; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:50; overflow:hidden; }
+        #invite-panel { position:absolute; top:60px; right:20px; background:#0f172a; border:1px solid #334155; border-radius:10px; width:300px; max-width:calc(100vw - 24px); box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:50; overflow:hidden; }
         #invite-panel.hidden { display:none; }
         .invite-panel-title { padding:12px 14px; font-size:0.8rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #1e293b; }
         .invite-item { padding:12px 14px; border-bottom:1px solid #1e293b; display:flex; flex-direction:column; gap:8px; }
@@ -145,8 +153,10 @@
         .btn-accept-invite { background:#15803d; border-color:#166534; color:white; }
         .btn-decline-invite { background:#7f1d1d; border-color:#991b1b; color:#fecaca; }
         /* ═══════════ CHAT (aba Conversas) ═══════════ */
-        .chat-list-item { display:flex; align-items:center; gap:10px; background:#1e293b; border:1px solid #334155; padding:10px 12px; border-radius:8px; cursor:pointer; transition:all 0.15s; }
-        .chat-list-item:hover { background:#334155; }
+        .chat-list-item { display:flex; align-items:center; gap:10px; background:#1e293b; border:1px solid #334155; padding:10px 12px; border-radius:8px; cursor:pointer; transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
+        @media (hover: hover) and (pointer: fine) {
+            .chat-list-item:hover { background:#334155; }
+        }
         .chat-list-avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,#38bdf8,#818cf8); display:flex; align-items:center; justify-content:center; font-weight:900; color:#0f172a; flex-shrink:0; position:relative; }
         .chat-list-avatar .online-dot { position:absolute; bottom:-1px; right:-1px; border:2px solid #1e293b; }
         .chat-list-info { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
@@ -175,8 +185,10 @@
         .chat-input-row { display:flex; gap:8px; padding:12px 14px; border-top:1px solid #1e293b; flex-shrink:0; }
         .chat-input-row input { flex:1; background:#1e293b; border:1px solid #334155; border-radius:20px; padding:10px 16px; color:#e2e8f0; font-size:0.86rem; outline:none; }
         .chat-input-row input:focus { border-color:#38bdf8; }
-        .chat-send-btn { width:40px; height:40px; border-radius:50%; background:#2563eb; border:none; color:white; font-size:1.1rem; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
-        .chat-send-btn:hover { background:#1d4ed8; }
+        .chat-send-btn { width:40px; height:40px; border-radius:50%; background:#2563eb; border:none; color:white; font-size:1.1rem; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; -webkit-tap-highlight-color:transparent; }
+        @media (hover: hover) and (pointer: fine) {
+            .chat-send-btn:hover { background:#1d4ed8; }
+        }
         .chat-empty-hint { text-align:center; color:#64748b; font-size:0.85rem; margin:auto; padding:20px; }
         #delete-account-confirm-box { background:#1e0a0a; border:2px solid #7f1d1d; }
         #touch-controls { position: fixed; inset: 0; z-index: 40; pointer-events: none; display: none; }
@@ -209,8 +221,10 @@
         .auth-input:focus { border-color:#38bdf8; }
         .auth-error { color:#ef4444; font-size:0.82rem; text-align:center; padding:6px 8px; background:rgba(127,29,29,0.2); border-radius:4px; }
         .auth-info { color:#475569; font-size:0.77rem; text-align:center; }
-        .lobby-code-box { background:#1e293b; border:2px dashed #38bdf8; border-radius:8px; padding:16px; text-align:center; cursor:pointer; transition:background 0.2s; }
-        .lobby-code-box:hover { background:#263352; }
+        .lobby-code-box { background:#1e293b; border:2px dashed #38bdf8; border-radius:8px; padding:16px; text-align:center; cursor:pointer; transition:background 0.2s; -webkit-tap-highlight-color:transparent; }
+        @media (hover: hover) and (pointer: fine) {
+            .lobby-code-box:hover { background:#263352; }
+        }
         .lobby-code { font-size:1.05rem; font-weight:800; color:#38bdf8; letter-spacing:0.5px; font-family:monospace; word-break:break-all; line-height:1.4; }
         .lobby-status { text-align:center; font-size:0.87rem; color:#94a3b8; padding:3px 0; }
         .lobby-status.ok { color:#22c55e; } .lobby-status.err { color:#ef4444; }
@@ -219,11 +233,13 @@
         .user-bar { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
         #lbl-logged-in-user { font-size:0.8rem; color:#64748b; }
         /* NOVO: menu de opções do chat, botão de sair de partida e tela de denúncia/boost */
-        .chat-menu-item { display:block; width:100%; text-align:left; padding:11px 14px; background:transparent; border:none; border-bottom:1px solid #1e293b; color:#e2e8f0; font-size:0.83rem; cursor:pointer; border-radius:0; }
+        .chat-menu-item { display:block; width:100%; text-align:left; padding:11px 14px; background:transparent; border:none; border-bottom:1px solid #1e293b; color:#e2e8f0; font-size:0.83rem; cursor:pointer; border-radius:0; -webkit-tap-highlight-color:transparent; }
         .chat-menu-item:last-child { border-bottom:none; }
-        .chat-menu-item:hover { background:#1e293b; }
-        .chat-msg-delete-btn { cursor:pointer; opacity:0.6; margin-right:4px; font-size:0.7rem; display:inline-flex; align-items:center; justify-content:center; padding:6px; margin:-6px 0 -6px -6px; touch-action:manipulation; }
-        .chat-msg-delete-btn:hover { opacity:1; }
+        .chat-msg-delete-btn { cursor:pointer; opacity:0.6; margin-right:4px; font-size:0.7rem; display:inline-flex; align-items:center; justify-content:center; padding:6px; margin:-6px 0 -6px -6px; touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+        @media (hover: hover) and (pointer: fine) {
+            .chat-menu-item:hover { background:#1e293b; }
+            .chat-msg-delete-btn:hover { opacity:1; }
+        }
         .boost-option-btn { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; width:100%; }
     </style>
 </head>
@@ -791,6 +807,7 @@
             earningsLabel: "Ganhos", weaponLabel: "Arma",
             weaponName_default: "Padrão", weaponName_pistol: "Pistola Veloz", weaponName_laser: "Laser Bolt",
             weaponName_plasma: "Plasma Blaster", weaponName_cannon: "Cano Devastador", weaponName_plasmaHunter: "Plasma Caçador",
+            weaponName_smg: "Submetralhadora Fúria", weaponName_sniper: "Rifle Sniper Órbita", weaponName_railgun: "Railgun Singularidade",
             hudLegendP1: "[1] Cura um pouco de vida\u00A0•\u00A0[2] Escudo (fica invulnerável)",
             hudLegendP2: "[8] Cura um pouco de vida\u00A0•\u00A0[9] Escudo (fica invulnerável)",
             chestAlert: "Pressione [B] para Abrir o Baú", chestOpenedPrefix: "Baú aberto",
@@ -867,6 +884,9 @@
                 wpn_laser: { name: "Canhão Laser Bolt", desc: "Disparos mais velozes e dano x1.3." },
                 wpn_plasma: { name: "Blaster de Plasma", desc: "Disparos lentos com dano devastador x1.6." },
                 wpn_cannon: { name: "Cano Devastador", desc: "Disparos muito lentos com dano brutal x2.0." },
+                wpn_smg: { name: "Submetralhadora Fúria", desc: "Disparos extremamente rápidos com dano x0.6." },
+                wpn_sniper: { name: "Rifle Sniper Órbita", desc: "Disparos muito lentos e precisos com dano x2.8." },
+                wpn_railgun: { name: "Railgun Singularidade", desc: "Disparos raríssimos com dano devastador x3.4." },
                 itm_pot: { name: "Nanocápsula de Cura", desc: "Usa em jogo para recuperar 50 de vida." },
                 itm_pot3: { name: "Pacote de Cura (x3)", desc: "Usa em jogo: 3 Nanocápsulas de uma vez, +50 de vida cada." },
                 itm_shd: { name: "Bateria de Escudo", desc: "Usa em jogo para ficar invulnerável por 2s." },
@@ -963,6 +983,7 @@
             earningsLabel: "Earnings", weaponLabel: "Weapon",
             weaponName_default: "Standard", weaponName_pistol: "Swift Pistol", weaponName_laser: "Laser Bolt",
             weaponName_plasma: "Plasma Blaster", weaponName_cannon: "Devastator Cannon", weaponName_plasmaHunter: "Plasma Hunter",
+            weaponName_smg: "Fury SMG", weaponName_sniper: "Orbit Sniper Rifle", weaponName_railgun: "Singularity Railgun",
             hudLegendP1: "[1] Heals some HP\u00A0•\u00A0[2] Shield (become invulnerable)",
             hudLegendP2: "[8] Heals some HP\u00A0•\u00A0[9] Shield (become invulnerable)",
             chestAlert: "Press [B] to Open the Chest", chestOpenedPrefix: "Chest opened",
@@ -1038,6 +1059,9 @@
                 wpn_laser: { name: "Laser Bolt Cannon", desc: "Faster shots with x1.3 damage." },
                 wpn_plasma: { name: "Plasma Blaster", desc: "Slow shots with devastating x1.6 damage." },
                 wpn_cannon: { name: "Devastator Cannon", desc: "Very slow shots with brutal x2.0 damage." },
+                wpn_smg: { name: "Fury SMG", desc: "Extremely fast shots with x0.6 damage." },
+                wpn_sniper: { name: "Orbit Sniper Rifle", desc: "Very slow, precise shots with x2.8 damage." },
+                wpn_railgun: { name: "Singularity Railgun", desc: "Very rare shots with devastating x3.4 damage." },
                 itm_pot: { name: "Healing Nanocapsule", desc: "Use in-game to restore 50 HP." },
                 itm_pot3: { name: "Healing Pack (x3)", desc: "Use in-game: 3 Nanocapsules at once, +50 HP each." },
                 itm_shd: { name: "Shield Battery", desc: "Use in-game to become invulnerable for 2s." },
@@ -1134,6 +1158,7 @@
             earningsLabel: "Einnahmen", weaponLabel: "Waffe",
             weaponName_default: "Standard", weaponName_pistol: "Schnelle Pistole", weaponName_laser: "Laser-Bolzen",
             weaponName_plasma: "Plasma-Blaster", weaponName_cannon: "Verwüster-Kanone", weaponName_plasmaHunter: "Plasma-Jäger",
+            weaponName_smg: "Fury-MP", weaponName_sniper: "Orbit-Scharfschützengewehr", weaponName_railgun: "Singularitäts-Railgun",
             hudLegendP1: "[1] Heilt etwas Leben\u00A0•\u00A0[2] Schild (macht unverwundbar)",
             hudLegendP2: "[8] Heilt etwas Leben\u00A0•\u00A0[9] Schild (macht unverwundbar)",
             chestAlert: "[B] drücken, um die Truhe zu öffnen", chestOpenedPrefix: "Truhe geöffnet",
@@ -1209,6 +1234,9 @@
                 wpn_laser: { name: "Laser-Bolzen-Kanone", desc: "Schnellere Schüsse mit x1.3 Schaden." },
                 wpn_plasma: { name: "Plasma-Blaster", desc: "Langsame Schüsse mit x1.6 Schaden." },
                 wpn_cannon: { name: "Verwüster-Kanone", desc: "Sehr langsame Schüsse mit x2.0 Schaden." },
+                wpn_smg: { name: "Fury-MP", desc: "Extrem schnelle Schüsse mit x0.6 Schaden." },
+                wpn_sniper: { name: "Orbit-Scharfschützengewehr", desc: "Sehr langsame, präzise Schüsse mit x2.8 Schaden." },
+                wpn_railgun: { name: "Singularitäts-Railgun", desc: "Sehr seltene Schüsse mit verheerendem x3.4 Schaden." },
                 itm_pot: { name: "Heil-Nanokapsel", desc: "Im Spiel verwenden, 50 Leben wiederherstellen." },
                 itm_pot3: { name: "Heilpaket (x3)", desc: "3 Nanokapseln auf einmal, je +50 Leben." },
                 itm_shd: { name: "Schildbatterie", desc: "2s unverwundbar werden." },
@@ -1305,6 +1333,7 @@
             earningsLabel: "Ganancias", weaponLabel: "Arma",
             weaponName_default: "Estándar", weaponName_pistol: "Pistola Veloz", weaponName_laser: "Rayo Láser",
             weaponName_plasma: "Blaster de Plasma", weaponName_cannon: "Cañón Devastador", weaponName_plasmaHunter: "Cazador de Plasma",
+            weaponName_smg: "Subfusil Furia", weaponName_sniper: "Rifle Francotirador Órbita", weaponName_railgun: "Railgun Singularidad",
             hudLegendP1: "[1] Cura algo de vida\u00A0•\u00A0[2] Escudo (invulnerable)",
             hudLegendP2: "[8] Cura algo de vida\u00A0•\u00A0[9] Escudo (invulnerable)",
             chestAlert: "Pulsa [B] para Abrir el Cofre", chestOpenedPrefix: "Cofre abierto",
@@ -1380,6 +1409,9 @@
                 wpn_laser: { name: "Cañón Láser", desc: "Disparos rápidos x1.3 daño." },
                 wpn_plasma: { name: "Blaster de Plasma", desc: "Disparos lentos x1.6 daño." },
                 wpn_cannon: { name: "Cañón Devastador", desc: "Disparos muy lentos x2.0 daño." },
+                wpn_smg: { name: "Subfusil Furia", desc: "Disparos extremadamente rápidos x0.6 daño." },
+                wpn_sniper: { name: "Rifle Francotirador Órbita", desc: "Disparos muy lentos y precisos x2.8 daño." },
+                wpn_railgun: { name: "Railgun Singularidad", desc: "Disparos rarísimos con daño devastador x3.4." },
                 itm_pot: { name: "Nanocápsula de Curación", desc: "+50 de vida en juego." },
                 itm_pot3: { name: "Paquete de Curación (x3)", desc: "3 Nanocápsulas, +50 cada una." },
                 itm_shd: { name: "Batería de Escudo", desc: "2s invulnerable." },
@@ -1476,6 +1508,7 @@
             earningsLabel: "Guadagni", weaponLabel: "Arma",
             weaponName_default: "Standard", weaponName_pistol: "Pistola Veloce", weaponName_laser: "Raggio Laser",
             weaponName_plasma: "Blaster al Plasma", weaponName_cannon: "Cannone Devastatore", weaponName_plasmaHunter: "Cacciatore di Plasma",
+            weaponName_smg: "Mitragliatrice Furia", weaponName_sniper: "Fucile da Cecchino Orbita", weaponName_railgun: "Railgun Singolarità",
             hudLegendP1: "[1] Cura un po' di vita\u00A0•\u00A0[2] Scudo (invulnerabile)",
             hudLegendP2: "[8] Cura un po' di vita\u00A0•\u00A0[9] Scudo (invulnerabile)",
             chestAlert: "Premi [B] per Aprire il Baule", chestOpenedPrefix: "Baule aperto",
@@ -1551,6 +1584,9 @@
                 wpn_laser: { name: "Cannone Laser", desc: "Colpi veloci x1.3 danno." },
                 wpn_plasma: { name: "Blaster al Plasma", desc: "Colpi lenti x1.6 danno." },
                 wpn_cannon: { name: "Cannone Devastatore", desc: "Colpi molto lenti x2.0 danno." },
+                wpn_smg: { name: "Mitragliatrice Furia", desc: "Colpi estremamente rapidi x0.6 danno." },
+                wpn_sniper: { name: "Fucile da Cecchino Orbita", desc: "Colpi molto lenti e precisi x2.8 danno." },
+                wpn_railgun: { name: "Railgun Singolarità", desc: "Colpi rarissimi con danno devastante x3.4." },
                 itm_pot: { name: "Nanocapsula Curativa", desc: "+50 vita in gioco." },
                 itm_pot3: { name: "Pacchetto Curativo (x3)", desc: "3 Nanocapsule, +50 ciascuna." },
                 itm_shd: { name: "Batteria Scudo", desc: "2s invulnerabile." },
@@ -1647,6 +1683,7 @@
             earningsLabel: "Gains", weaponLabel: "Arme",
             weaponName_default: "Standard", weaponName_pistol: "Pistolet Rapide", weaponName_laser: "Rayon Laser",
             weaponName_plasma: "Blaster à Plasma", weaponName_cannon: "Canon Dévastateur", weaponName_plasmaHunter: "Chasseur de Plasma",
+            weaponName_smg: "Mitraillette Fureur", weaponName_sniper: "Fusil de Sniper Orbite", weaponName_railgun: "Railgun Singularité",
             hudLegendP1: "[1] Soigne un peu\u00A0•\u00A0[2] Bouclier (invulnérable)",
             hudLegendP2: "[8] Soigne un peu\u00A0•\u00A0[9] Bouclier (invulnérable)",
             chestAlert: "Appuyez sur [B] pour Ouvrir le Coffre", chestOpenedPrefix: "Coffre ouvert",
@@ -1722,6 +1759,9 @@
                 wpn_laser: { name: "Canon Laser", desc: "Tirs rapides x1.3 dégâts." },
                 wpn_plasma: { name: "Blaster à Plasma", desc: "Tirs lents x1.6 dégâts." },
                 wpn_cannon: { name: "Canon Dévastateur", desc: "Tirs très lents x2.0 dégâts." },
+                wpn_smg: { name: "Mitraillette Fureur", desc: "Tirs extrêmement rapides x0.6 dégâts." },
+                wpn_sniper: { name: "Fusil de Sniper Orbite", desc: "Tirs très lents et précis x2.8 dégâts." },
+                wpn_railgun: { name: "Railgun Singularité", desc: "Tirs très rares avec des dégâts dévastateurs x3.4." },
                 itm_pot: { name: "Nanocapsule de Soin", desc: "+50 de vie en jeu." },
                 itm_pot3: { name: "Pack de Soin (x3)", desc: "3 Nanocapsules, +50 chacune." },
                 itm_shd: { name: "Batterie de Bouclier", desc: "2s invulnérable." },
@@ -2189,10 +2229,38 @@
             if (/network|fetch/i.test(msg)) return t('errNetwork');
             return t('errUnknown').replace('{msg}', msg || '?');
         },
+        // Conta de testes local — não usa Supabase, entra direto com atributos "infinitos"
+        // (vida, dano e ouro) pra fins de teste/depuração. Nunca é salva na nuvem.
+        _TEST_USER: 'testesdev',
+        _TEST_PASS: 'testesB@ttlesdev!',
+        _testAccountProfile() {
+            return {
+                uid: 'LOCAL-TEST-ACCOUNT',
+                name: 'TesteDev',
+                wallet: 999999999,
+                upg: {
+                    maxHp: 999999, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 60, weaponDmg: 9999, atkCd: 2,
+                    potion: 99, shield: 99,
+                    cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] },
+                    progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] },
+                    boosts: { speed: 999999999, hp: 999999999 }
+                },
+                ranking: [], lang: Settings.language || 'pt-BR', vol: 0.7, sfx: true, mus: true,
+                isTestAccount: true
+            };
+        },
+        _enterTestAccount() {
+            this._err(''); this._setBusy(false);
+            this.current = this._testAccountProfile();
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('recovery-screen').classList.add('hidden');
+            Engine.bootWithAccount(this.current);
+        },
         async doLogin() {
             if(this._busy) return;
             let email=(document.getElementById('auth-email').value||'').trim();
             let p=document.getElementById('auth-password').value||'';
+            if(email === this._TEST_USER && p === this._TEST_PASS) { this._enterTestAccount(); return; }
             if(!email||!p){this._err(t('errFillAllFields'));return;}
             if(!this._validEmail(email)){this._err(t('errValidEmail'));return;}
             this._err(''); this._setBusy(true);
@@ -2403,11 +2471,12 @@
                 sfx: Settings.sfxEnabled, mus: Settings.musicEnabled
             };
             Object.assign(this.current, data);
+            if(this.current.isTestAccount) return; // conta de testes é 100% local, nunca vai pra nuvem
             sb.from('players').update(data).eq('id', this.current.uid).then(({error}) => {
                 if(error) console.warn('Falha ao salvar na nuvem:', error);
             });
         },
-        logout() { let was=this.current; this.current=null; this._inRecovery=false; sb.auth.signOut().catch(e=>console.warn(e)); },
+        logout() { let was=this.current; this.current=null; this._inRecovery=false; if(was && was.isTestAccount) return; sb.auth.signOut().catch(e=>console.warn(e)); },
         async deleteAccountForever() {
             if (!this.current) throw new Error('Você precisa estar logado.');
             const { data: sessionData } = await sb.auth.getSession();
@@ -2676,7 +2745,37 @@
                 });
         },
         toggleInvitePanel() {
-            document.getElementById('invite-panel').classList.toggle('hidden');
+            let panel = document.getElementById('invite-panel');
+            let willShow = panel.classList.contains('hidden');
+            panel.classList.toggle('hidden');
+            if(willShow) this._positionInvitePanel();
+        },
+        // FIX: o painel de convites era posicionado com "right:20px" relativo à própria caixinha
+        // do sino — que é minúscula e, quando a fileira de botões quebra linha (comum no celular,
+        // com telas estreitas), sobra pouco espaço à esquerda do sino dentro da área do jogo.
+        // Isso fazia o painel "estourar" pra fora da borda esquerda e ser cortado pelo
+        // overflow:hidden do #game-container. Agora calculamos a posição de verdade a partir da
+        // geometria real do sino e do container, e prendemos (clamp) o painel pra sempre caber
+        // inteiro dentro da tela do jogo, não importa onde o sino tenha parado.
+        _positionInvitePanel() {
+            let panel = document.getElementById('invite-panel');
+            let bell = document.getElementById('invite-bell');
+            let container = document.getElementById('game-container');
+            if(!panel || !bell || !container) return;
+            let refEl = panel.offsetParent || container;
+            let containerRect = container.getBoundingClientRect();
+            let refRect = refEl.getBoundingClientRect();
+            let bellRect = bell.getBoundingClientRect();
+            let scale = containerRect.width / 1280 || 1;
+            let panelWidth = Math.min(300, (containerRect.width / scale) - 24);
+            let left = (bellRect.left - refRect.left) / scale;
+            let top = (bellRect.bottom - refRect.top) / scale + 10;
+            let maxLeft = ((containerRect.width / scale) - (refRect.left - containerRect.left) / scale) - panelWidth - 12;
+            left = Math.max(12, Math.min(left, maxLeft));
+            panel.style.width = panelWidth + 'px';
+            panel.style.left = left + 'px';
+            panel.style.right = 'auto';
+            panel.style.top = top + 'px';
         },
         _renderInvitePanel() {
             let badge = document.getElementById('invite-badge');
@@ -3754,6 +3853,9 @@
             { id: 'wpn_laser', price: 200, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
             { id: 'wpn_plasma', price: 250, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
             { id: 'wpn_cannon', price: 320, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 2.0, weaponAtkCd: 34 },
+            { id: 'wpn_smg', price: 130, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.6, weaponAtkCd: 5 },
+            { id: 'wpn_sniper', price: 400, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 2.8, weaponAtkCd: 46 },
+            { id: 'wpn_railgun', price: 520, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 3.4, weaponAtkCd: 58 },
             { id: 'itm_pot', price: 60, type: 'item', itemKey: 'potion' },
             { id: 'itm_pot3', price: 150, type: 'item', itemKey: 'potion', qty: 3 },
             { id: 'itm_shd', price: 80, type: 'item', itemKey: 'shield' },
@@ -4826,6 +4928,7 @@
             }
         }
         takeDamage(amount, source) {
+            if(this.profileId === 1 && Accounts.current && Accounts.current.isTestAccount) return; // conta de testes: vida infinita
             if(this.shieldTime > 0 || this.lives <= 0) return;
             this.hp -= amount; AudioFX.play('hit');
             if(this.hp <= 0) { this.lives--; if(this.lives > 0) { this.hp = this.maxHp; this.y = 100; this.vy = 0; } }
@@ -5119,6 +5222,10 @@
         let scale = Math.min(vw / 1280, vh / 720, 1);
         if (!isFinite(scale) || scale < 0.15) scale = 1;
         el.style.transform = `scale(${scale})`;
+        let invitePanel = document.getElementById('invite-panel');
+        if (invitePanel && !invitePanel.classList.contains('hidden') && typeof Social !== 'undefined') {
+            Social._positionInvitePanel();
+        }
     }
     window.addEventListener('resize', fitGameContainer);
     if (window.visualViewport) window.visualViewport.addEventListener('resize', fitGameContainer);
