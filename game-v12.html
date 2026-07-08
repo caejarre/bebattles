@@ -3130,7 +3130,7 @@
         // NOVO: sentinela usada para marcar uma mensagem como apagada. Em vez de remover a linha
         // do banco (o que fazia a mensagem simplesmente sumir de um lado sem explicação pro outro),
         // sobrescrevemos o conteúdo com esse marcador — daí os dois lados renderizam "Mensagem apagada".
-        DELETED_SENTINEL: '\u0000__BB_MSG_DELETED__\u0000',
+        DELETED_SENTINEL: '⟦BB_DELETED_MESSAGE_7f3a9c⟧',
         // NOVO: apaga uma mensagem específica (só as que eu mesmo enviei) — vira um placeholder
         // "Mensagem apagada" visível pros dois lados da conversa, em vez de só desaparecer.
         async deleteMessage(msgId) {
