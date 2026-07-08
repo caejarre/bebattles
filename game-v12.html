@@ -343,7 +343,7 @@
     <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
     <div id="auth-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
-            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 3.0</span></div>
+            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 5.0</span></div>
             <div class="auth-sub" data-i18n="authSubtitle">Horizon Survival Tournament 2026</div>
             <div class="auth-tabs" id="auth-tabs">
                 <button id="tab-login" class="active" onclick="Accounts.showTab('login')" data-i18n="authTabLogin">🔑 Entrar</button>
@@ -391,7 +391,7 @@
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 3.0</span></h1>
+                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 5.0</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button id="btn-social-players" onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
                         <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
@@ -520,6 +520,17 @@
         <h2 id="lbl-gameover-title" data-i18n="gameoverTitleDefault">SIMULAÇÃO ENCERRADA</h2>
         <p id="lbl-gameover-stats" data-i18n="gameoverStatsDefault">Estatísticas finais carregando...</p>
         <button onclick="Engine.backToMenu()" style="padding:15px 40px; font-size:1.1rem; background:#3b82f6; border-color:#2563eb; color:white; margin-top:20px;" data-i18n="backToMenuBtn">RETORNAR AO MENU CENTRAL</button>
+    </div>
+    <div id="continue-screen" class="screen hidden" style="justify-content:center; align-items:center; text-align:center; gap:20px; background:rgba(2,6,23,0.98);">
+        <h2 style="font-size:3rem; font-weight:900; color:#ef4444; text-shadow:0 0 30px rgba(239,68,68,0.4);" data-i18n="continueDeathTitle">VOCÊ MORREU</h2>
+        <p style="font-size:1.1rem; color:#94a3b8; max-width:520px;" data-i18n="continueDeathDesc">Você pode voltar ao menu ou continuar jogando pagando um resgate em ouro.</p>
+        <div style="display:flex; gap:16px; margin-top:10px;">
+            <button id="btn-continue-pay" onclick="Engine.continueMatch()" style="padding:15px 30px; font-size:1.05rem; background:#eab308; border-color:#ca8a04; color:#1c1917; font-weight:800;">
+                <span data-i18n="continuePayBtn">💰 Continuar (-1000 Ouro)</span>
+            </button>
+            <button onclick="Engine.declineContinue()" style="padding:15px 30px; font-size:1.05rem; background:#3b82f6; border-color:#2563eb; color:white;" data-i18n="continueMenuBtn">RETORNAR AO MENU</button>
+        </div>
+        <p id="lbl-continue-nogold" class="hidden" style="color:#f87171; font-size:0.9rem;" data-i18n="continueNoGoldHint">Ouro insuficiente para continuar.</p>
     </div>
     <div id="settings-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div style="background:#0f172a; border:1px solid #1e293b; border-radius:10px; padding:30px; width:420px; max-height:100%; overflow-y:auto; display:flex; flex-direction:column; gap:18px;">
@@ -835,6 +846,7 @@
             rewardSpeed: "Boost: +0.8 de Velocidade", rewardHp: "Boost: +25 de HP Máximo", rewardWeapon: "Nova Arma: Plasma Caçador",
             timeVictoryTitle: "VITÓRIA POR TEMPO!", timeVictoryDesc: "Vocês resistiram bravamente aos {mins} minutos de invasão cósmica!",
             deathTitle: "SISTEMA APAGADO", deathDesc: "Você pereceu perante os monstros.",
+            continueDeathTitle: "VOCÊ MORREU", continueDeathDesc: "Você pode voltar ao menu ou continuar jogando pagando um resgate em ouro.", continuePayBtn: "💰 Continuar (-1000 Ouro)", continueMenuBtn: "RETORNAR AO MENU", continueNoGoldHint: "Ouro insuficiente para continuar.",
             p2WinsTitle: "JOGADOR 2 VENCEU!", p2WinsDesc: "O Jogador 2 destruiu seu rival em combate.",
             p1WinsTitle: "JOGADOR 1 VENCEU!", p1WinsDesc: "O Jogador 1 destruiu seu rival em combate.",
             genericWinsTitle: "{name} VENCEU!", genericWinsDesc: "{name} destruiu os rivais em combate.",
@@ -1014,6 +1026,7 @@
             rewardSpeed: "Boost: +0.8 Speed", rewardHp: "Boost: +25 Max HP", rewardWeapon: "New Weapon: Plasma Hunter",
             timeVictoryTitle: "VICTORY BY TIME!", timeVictoryDesc: "You both bravely survived {mins} minutes of cosmic invasion!",
             deathTitle: "SYSTEM OFFLINE", deathDesc: "You perished before the monsters.",
+            continueDeathTitle: "YOU DIED", continueDeathDesc: "You can return to the menu or keep playing by paying a gold ransom.", continuePayBtn: "💰 Continue (-1000 Gold)", continueMenuBtn: "RETURN TO MENU", continueNoGoldHint: "Not enough gold to continue.",
             p2WinsTitle: "PLAYER 2 WINS!", p2WinsDesc: "Player 2 destroyed their rival in combat.",
             p1WinsTitle: "PLAYER 1 WINS!", p1WinsDesc: "Player 1 destroyed their rival in combat.",
             genericWinsTitle: "{name} WINS!", genericWinsDesc: "{name} destroyed the rivals in combat.",
@@ -1192,6 +1205,7 @@
             rewardSpeed: "Boost: +0.8 Geschwindigkeit", rewardHp: "Boost: +25 max. HP", rewardWeapon: "Neue Waffe: Plasma-Jäger",
             timeVictoryTitle: "SIEG NACH ZEIT!", timeVictoryDesc: "Ihr habt {mins} Minuten tapfer überstanden!",
             deathTitle: "SYSTEM AUSGEFALLEN", deathDesc: "Du bist den Monstern unterlegen.",
+            continueDeathTitle: "DU BIST GESTORBEN", continueDeathDesc: "Du kannst zum Menü zurückkehren oder gegen ein Lösegeld in Gold weiterspielen.", continuePayBtn: "💰 Weiter (-1000 Gold)", continueMenuBtn: "ZURÜCK ZUM MENÜ", continueNoGoldHint: "Nicht genug Gold zum Weiterspielen.",
             p2WinsTitle: "SPIELER 2 GEWINNT!", p2WinsDesc: "Spieler 2 hat seinen Rivalen vernichtet.",
             p1WinsTitle: "SPIELER 1 GEWINNT!", p1WinsDesc: "Spieler 1 hat seinen Rivalen vernichtet.",
             genericWinsTitle: "{name} GEWINNT!", genericWinsDesc: "{name} hat die Rivalen im Kampf vernichtet.",
@@ -1370,6 +1384,7 @@
             rewardSpeed: "Mejora: +0.8 de Velocidad", rewardHp: "Mejora: +25 de HP Máximo", rewardWeapon: "Nueva Arma: Cazador de Plasma",
             timeVictoryTitle: "¡VICTORIA POR TIEMPO!", timeVictoryDesc: "¡Ambos sobrevivieron {mins} minutos de invasión cósmica!",
             deathTitle: "SISTEMA APAGADO", deathDesc: "Pereciste ante los monstruos.",
+            continueDeathTitle: "HAS MUERTO", continueDeathDesc: "Puedes volver al menú o seguir jugando pagando un rescate en oro.", continuePayBtn: "💰 Continuar (-1000 Oro)", continueMenuBtn: "VOLVER AL MENÚ", continueNoGoldHint: "No tienes suficiente oro para continuar.",
             p2WinsTitle: "¡EL JUGADOR 2 GANÓ!", p2WinsDesc: "El Jugador 2 destruyó a su rival.",
             p1WinsTitle: "¡EL JUGADOR 1 GANÓ!", p1WinsDesc: "El Jugador 1 destruyó a su rival.",
             genericWinsTitle: "¡{name} GANÓ!", genericWinsDesc: "{name} destruyó a los rivales en combate.",
@@ -1548,6 +1563,7 @@
             rewardSpeed: "Boost: +0.8 di Velocità", rewardHp: "Boost: +25 HP Massimi", rewardWeapon: "Nuova Arma: Cacciatore di Plasma",
             timeVictoryTitle: "VITTORIA PER TEMPO!", timeVictoryDesc: "Entrambi avete resistito {mins} minuti di invasione cosmica!",
             deathTitle: "SISTEMA SPENTO", deathDesc: "Sei perito davanti ai mostri.",
+            continueDeathTitle: "SEI MORTO", continueDeathDesc: "Puoi tornare al menu o continuare a giocare pagando un riscatto in oro.", continuePayBtn: "💰 Continua (-1000 Oro)", continueMenuBtn: "TORNA AL MENU", continueNoGoldHint: "Oro insufficiente per continuare.",
             p2WinsTitle: "IL GIOCATORE 2 VINCE!", p2WinsDesc: "Il Giocatore 2 ha distrutto il suo rivale.",
             p1WinsTitle: "IL GIOCATORE 1 VINCE!", p1WinsDesc: "Il Giocatore 1 ha distrutto il suo rivale.",
             genericWinsTitle: "{name} VINCE!", genericWinsDesc: "{name} ha distrutto i rivali in combattimento.",
@@ -1726,6 +1742,7 @@
             rewardSpeed: "Boost : +0.8 de Vitesse", rewardHp: "Boost : +25 PV Max", rewardWeapon: "Nouvelle Arme : Chasseur de Plasma",
             timeVictoryTitle: "VICTOIRE PAR LE TEMPS !", timeVictoryDesc: "Vous avez tous les deux survécu {mins} minutes d'invasion cosmique !",
             deathTitle: "SYSTÈME HORS LIGNE", deathDesc: "Vous avez péri face aux monstres.",
+            continueDeathTitle: "VOUS ÊTES MORT", continueDeathDesc: "Vous pouvez revenir au menu ou continuer à jouer en payant une rançon en or.", continuePayBtn: "💰 Continuer (-1000 Or)", continueMenuBtn: "RETOUR AU MENU", continueNoGoldHint: "Pas assez d'or pour continuer.",
             p2WinsTitle: "LE JOUEUR 2 GAGNE !", p2WinsDesc: "Le Joueur 2 a détruit son rival.",
             p1WinsTitle: "LE JOUEUR 1 GAGNE !", p1WinsDesc: "Le Joueur 1 a détruit son rival.",
             genericWinsTitle: "{name} GAGNE !", genericWinsDesc: "{name} a détruit les rivaux au combat.",
@@ -3173,6 +3190,27 @@
             if (!Accounts.current || !this._peerId) return;
             let btn = document.getElementById('btn-submit-report'); btn.disabled = true;
             try {
+                // NOVO: busca as últimas 20 mensagens (ou menos, se a conversa tiver menos que isso)
+                // trocadas com o jogador denunciado, pra mandar junto com a denúncia como contexto.
+                let recentMessages = [];
+                try {
+                    const myId = Accounts.current.uid;
+                    const peerId = this._peerId;
+                    const or = `and(from_id.eq.${myId},to_id.eq.${peerId}),and(from_id.eq.${peerId},to_id.eq.${myId})`;
+                    const recent = await restDirect(
+                        `messages?select=*&or=(${encodeURIComponent(or).replace(/%2C/g, ',')})&order=created_at.desc&limit=20`
+                    );
+                    recentMessages = (recent || [])
+                        .filter(m => !this._isHiddenLocally(m))
+                        .reverse()
+                        .map(m => ({
+                            from: m.from_id === myId ? (Accounts.current.name || 'Eu') : (this._peerName || 'Jogador'),
+                            content: m.content,
+                            sent_at: m.created_at
+                        }));
+                } catch (e) {
+                    console.warn('Não foi possível carregar as últimas mensagens para anexar à denúncia:', e);
+                }
                 const { data: sessionData } = await sb.auth.getSession();
                 const token = sessionData && sessionData.session ? sessionData.session.access_token : null;
                 const { error } = await sb.functions.invoke('report-user', {
@@ -3183,6 +3221,7 @@
                         reported_id: this._peerId,
                         reported_name: this._peerName,
                         reason: reason,
+                        recent_messages: recentMessages,
                         sent_to: 'jaron.n.ackermann@gmail.com'
                     }
                 });
@@ -3943,7 +3982,7 @@
             let menuScreenEl = document.getElementById('menu-screen');
             let chatSidebarEl = document.getElementById('chat-sidebar');
             if(menuScreenEl && chatSidebarEl) {
-                let syncSidebar = () => { chatSidebarEl.classList.toggle('hidden', menuScreenEl.classList.contains('hidden')); };
+                let syncSidebar = () => { let isGuest = Accounts.current && Accounts.current.isGuest; chatSidebarEl.classList.toggle('hidden', menuScreenEl.classList.contains('hidden') || !!isGuest); };
                 syncSidebar();
                 new MutationObserver(syncSidebar).observe(menuScreenEl, { attributes:true, attributeFilter:['class'] });
             }
@@ -4548,6 +4587,7 @@
             this.enemies = []; this.projectiles = []; this.particles = []; this.items = []; this.platforms = [];
             this.chunksLoaded = {}; this.cameraX = 0; this.secretZones = []; this.pendingSpawns = []; this.openWorldSpawnCd = 0;
             this.timeLeftSeconds = (this.gameMode === 'BOSS') ? 600 : 300; this.timerTicker = 0; this.activeMatch = false;
+            this.continueUsedThisMatch = false;
             Hideout.active = false;
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
@@ -4868,7 +4908,7 @@
             this.updateHideoutAlert();
             if(this.activeMatch) {
                 if(this.players.length === 1) {
-                    if(this.players[0].lives <= 0) this.triggerMatchEnd(null, t('deathTitle'), t('deathDesc'));
+                    if(this.players[0].lives <= 0) this.offerContinueOrEnd();
                 } else {
                     let alive = this.players.filter(p => p && p.lives > 0);
                     if(alive.length <= 1) {
@@ -4929,9 +4969,34 @@
             if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: iWon ? Math.min(1000, myP.goldCollected) : 0, won: iWon });
             this.saveProfile();
         },
+        offerContinueOrEnd() {
+            let canPay = !this.continueUsedThisMatch && this.walletP1 >= 1000;
+            if(!canPay) { this.triggerMatchEnd(null, t('deathTitle'), t('deathDesc')); return; }
+            this.activeMatch = false;
+            document.getElementById('continue-screen').classList.remove('hidden');
+            let payBtn = document.getElementById('btn-continue-pay');
+            let noGoldHint = document.getElementById('lbl-continue-nogold');
+            if(payBtn) payBtn.disabled = false;
+            if(noGoldHint) noGoldHint.classList.add('hidden');
+        },
+        continueMatch() {
+            if(this.continueUsedThisMatch || this.walletP1 < 1000) return;
+            this.walletP1 -= 1000;
+            this.continueUsedThisMatch = true;
+            this.saveProfile();
+            let p = this.players[0];
+            if(p) { p.lives = 1; p.hp = p.maxHp; p.syncHUD(); }
+            document.getElementById('continue-screen').classList.add('hidden');
+            this.activeMatch = true;
+        },
+        declineContinue() {
+            document.getElementById('continue-screen').classList.add('hidden');
+            this.triggerMatchEnd(null, t('deathTitle'), t('deathDesc'));
+        },
         backToMenu() {
             OnlineSync.disconnect();
             document.getElementById('gameover-screen').classList.add('hidden');
+            document.getElementById('continue-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.remove('hidden');
             this.state = 'MENU'; this.updateMenu();
         },
@@ -4994,6 +5059,12 @@
             if(this.shieldTime > 0) this.shieldTime -= dt * 60;
             if(this.dashCooldown > 0) this.dashCooldown -= dt * 60;
             if(this.mp < 100) this.mp += dt * 15;
+            // NOVO: regeneração lenta e passiva de vida ao longo da partida — só recupera o HP
+            // dentro da vida (coração) atual, nunca recupera uma vida/coração perdido.
+            if(this.lives > 0 && this.hp > 0 && this.hp < this.maxHp) {
+                this.hp = Math.min(this.maxHp, this.hp + dt * (this.maxHp * 0.02));
+                this.syncHUD();
+            }
             // NOVO: Boost de HP Extra — só vale pro Jogador 1 (dono da loja). Sempre que o boost
             // muda de ativo pra inativo (ou vice-versa), ajusta o HP máximo (e o HP atual) uma
             // única vez nessa transição, em vez de somar/subtrair todo frame.
