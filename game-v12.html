@@ -369,9 +369,12 @@
                 <a href="#" onclick="Accounts.showTab('login'); return false;" style="color:#64748b; font-size:0.8rem; text-align:center; text-decoration:none;" data-i18n="backToLoginLink">&larr; Voltar para o login</a>
             </div>
             <div id="auth-error" class="auth-error hidden"></div>
+            <button id="btn-guest-login" onclick="Accounts.enterAsGuest()" style="background:transparent; border:1px solid #334155; color:#94a3b8; padding:11px; font-size:0.85rem; font-weight:600; border-radius:6px; cursor:pointer; margin-top:2px;" data-i18n="guestLoginBtn">👤 Continuar como Visitante</button>
+            <div class="auth-info" style="color:#64798e;" data-i18n="guestWarning">⚠️ No modo visitante seu progresso não é salvo.</div>
             <div class="auth-info" data-i18n="authCloudInfo">☁️ Sua conta funciona em qualquer dispositivo.</div>
         </div>
     </div>
+
     <div id="recovery-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
             <div class="auth-title" data-i18n="recoveryTitle">Nova Senha</div>
@@ -557,6 +560,10 @@
                     <button class="lang-btn" data-lang="fr" onclick="Engine.setLanguage('fr')" style="font-size:0.78rem; flex:1; padding:8px 4px;">Français</button>
                 </div>
             </div>
+            <div class="config-section">
+                <div class="section-title" data-i18n="bugReportSectionTitle">Encontrou um Erro?</div>
+                <button onclick="Engine.openBugReport()" style="width:100%; background:#78350f; border-color:#92400e; color:#fde68a;" data-i18n="bugReportBtn">🐞 REPORTAR UM ERRO</button>
+            </div>
             <div class="config-section" id="delete-account-confirm-box" style="border-color:#7f1d1d;">
                 <div class="section-title" style="color:#fca5a5;" data-i18n="dangerZoneTitle">Zona de Perigo</div>
                 <div id="delete-account-step1">
@@ -704,6 +711,19 @@
             <button onclick="Chat.submitReport()" id="btn-submit-report" style="background:linear-gradient(to right,#dc2626,#b91c1c); color:white; border:none; padding:13px; font-weight:800; border-radius:6px; cursor:pointer;" data-i18n="reportSendBtn">ENVIAR DENÚNCIA</button>
         </div>
     </div>
+    <!-- NOVO: tela de reportar erro (mesmo sistema da denúncia, mas manda e-mail avisando que é um relatório de erro, não uma denúncia) -->
+    <div id="bug-report-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="social-box" style="width:440px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 style="font-size:1.2rem; color:#f59e0b; margin:0;" data-i18n="bugReportTitle">🐞 Reportar um Erro</h2>
+                <button onclick="Engine.closeBugReport()" data-i18n="socialBackBtn">✕ Voltar</button>
+            </div>
+            <textarea id="bug-report-reason-input" rows="5" maxlength="1000" placeholder="Descreva o erro que você encontrou..." data-i18n-placeholder="bugReportDescPlaceholder" style="width:100%; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:10px; color:#f8fafc; font-size:0.9rem; resize:vertical; font-family:inherit;"></textarea>
+            <div id="bug-report-error" class="auth-error hidden"></div>
+            <div id="bug-report-success" class="auth-error hidden" style="color:#10b981; background:rgba(16,185,129,0.15);"></div>
+            <button onclick="Engine.submitBugReport()" id="btn-submit-bug-report" style="background:linear-gradient(to right,#d97706,#b45309); color:white; border:none; padding:13px; font-weight:800; border-radius:6px; cursor:pointer;" data-i18n="bugReportSendBtn">ENVIAR RELATÓRIO</button>
+        </div>
+    </div>
     <!-- NOVO: tela de opções de duração do Boost (velocidade / HP extra) -->
     <div id="boost-options-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="lobby-box" style="max-width:380px;">
@@ -843,6 +863,8 @@
             chatDeleteMsgConfirmMsg: "Apagar essa mensagem?",
             reportTitle: "🚩 Denunciar Jogador", reportAgainstLabel: "Denunciando", reportReasonPlaceholder: "Descreva o motivo da denúncia...", reportReasonRequired: "Escreva o motivo da denúncia.",
             reportSendBtn: "ENVIAR DENÚNCIA", reportSentMsg: "Denúncia enviada. Obrigado por ajudar a manter o jogo seguro!", reportSendErrorMsg: "Erro ao enviar denúncia. Tente de novo.",
+            bugReportSectionTitle: "Encontrou um Erro?", bugReportBtn: "🐞 REPORTAR UM ERRO", bugReportTitle: "🐞 Reportar um Erro", bugReportDescPlaceholder: "Descreva o erro que você encontrou...", bugReportDescRequired: "Descreva o erro antes de enviar.",
+            bugReportSendBtn: "ENVIAR RELATÓRIO", bugReportSentMsg: "Relatório de erro enviado. Obrigado por ajudar a melhorar o jogo!", bugReportSendErrorMsg: "Erro ao enviar o relatório. Tente de novo.",
             boostOptionsBtn: "Opções", boostRemainingLabel: "Restante", boostNoneActiveLabel: "Nenhum boost ativo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Jogadores",
             socialSearchTitle: "🔎 Jogadores", socialBackBtn: "✕ Voltar",
@@ -912,6 +934,7 @@
             authTabLogin: "🔑 Entrar", authTabRegister: "➕ Criar Conta",
             emailPlaceholder: "E-mail", passwordPlaceholder: "Senha",
             loginBtn: "ENTRAR", forgotPasswordLink: "Esqueci minha senha",
+            guestLoginBtn: "👤 Continuar como Visitante", guestWarning: "⚠️ No modo visitante seu progresso não é salvo.", guestDisplayName: "Visitante",
             displayNamePlaceholder: "Nome de exibição (letras, números, _)",
             regPasswordPlaceholder: "Senha (mínimo 6 chars)", confirmPasswordPlaceholder: "Confirmar senha",
             registerBtn: "CRIAR CONTA",
@@ -1019,6 +1042,8 @@
             chatDeleteMsgConfirmMsg: "Delete this message?",
             reportTitle: "🚩 Report Player", reportAgainstLabel: "Reporting", reportReasonPlaceholder: "Describe the reason for the report...", reportReasonRequired: "Write the reason for the report.",
             reportSendBtn: "SEND REPORT", reportSentMsg: "Report sent. Thanks for helping keep the game safe!", reportSendErrorMsg: "Error sending report. Try again.",
+            bugReportSectionTitle: "Found a Bug?", bugReportBtn: "🐞 REPORT A BUG", bugReportTitle: "🐞 Report a Bug", bugReportDescPlaceholder: "Describe the bug you found...", bugReportDescRequired: "Describe the bug before sending.",
+            bugReportSendBtn: "SEND REPORT", bugReportSentMsg: "Bug report sent. Thanks for helping improve the game!", bugReportSendErrorMsg: "Error sending the report. Try again.",
             boostOptionsBtn: "Options", boostRemainingLabel: "Remaining", boostNoneActiveLabel: "No active boost", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Players",
             socialSearchTitle: "🔎 Players", socialBackBtn: "✕ Back",
@@ -1087,6 +1112,7 @@
             authTabLogin: "🔑 Log In", authTabRegister: "➕ Create Account",
             emailPlaceholder: "Email", passwordPlaceholder: "Password",
             loginBtn: "LOG IN", forgotPasswordLink: "Forgot my password",
+            guestLoginBtn: "👤 Continue as Guest", guestWarning: "⚠️ In guest mode your progress isn't saved.", guestDisplayName: "Guest",
             displayNamePlaceholder: "Display name (letters, numbers, _)",
             regPasswordPlaceholder: "Password (min. 6 chars)", confirmPasswordPlaceholder: "Confirm password",
             registerBtn: "CREATE ACCOUNT",
@@ -1194,6 +1220,8 @@
             chatDeleteMsgConfirmMsg: "Diese Nachricht löschen?",
             reportTitle: "🚩 Spieler melden", reportAgainstLabel: "Meldung gegen", reportReasonPlaceholder: "Beschreibe den Grund der Meldung...", reportReasonRequired: "Gib den Grund der Meldung ein.",
             reportSendBtn: "MELDUNG SENDEN", reportSentMsg: "Meldung gesendet. Danke, dass du hilfst, das Spiel sicher zu halten!", reportSendErrorMsg: "Fehler beim Senden der Meldung. Versuch es erneut.",
+            bugReportSectionTitle: "Einen Fehler gefunden?", bugReportBtn: "🐞 FEHLER MELDEN", bugReportTitle: "🐞 Fehler melden", bugReportDescPlaceholder: "Beschreibe den gefundenen Fehler...", bugReportDescRequired: "Beschreibe den Fehler, bevor du sendest.",
+            bugReportSendBtn: "BERICHT SENDEN", bugReportSentMsg: "Fehlerbericht gesendet. Danke, dass du hilfst, das Spiel zu verbessern!", bugReportSendErrorMsg: "Fehler beim Senden des Berichts. Versuch es erneut.",
             boostOptionsBtn: "Optionen", boostRemainingLabel: "Verbleibend", boostNoneActiveLabel: "Kein aktiver Boost", boostMinutesLabel: "Min",
             socialPlayersBtn: "🔎 Spieler",
             socialSearchTitle: "🔎 Spieler", socialBackBtn: "✕ Zurück",
@@ -1262,6 +1290,7 @@
             authTabLogin: "🔑 Anmelden", authTabRegister: "➕ Konto Erstellen",
             emailPlaceholder: "E-Mail", passwordPlaceholder: "Passwort",
             loginBtn: "ANMELDEN", forgotPasswordLink: "Passwort vergessen",
+            guestLoginBtn: "👤 Als Gast fortfahren", guestWarning: "⚠️ Im Gastmodus wird dein Fortschritt nicht gespeichert.", guestDisplayName: "Gast",
             displayNamePlaceholder: "Anzeigename (Buchstaben, Zahlen, _)",
             regPasswordPlaceholder: "Passwort (mind. 6 Zeichen)", confirmPasswordPlaceholder: "Passwort bestätigen",
             registerBtn: "KONTO ERSTELLEN",
@@ -1369,6 +1398,8 @@
             chatDeleteMsgConfirmMsg: "¿Borrar este mensaje?",
             reportTitle: "🚩 Denunciar Jugador", reportAgainstLabel: "Denunciando a", reportReasonPlaceholder: "Describe el motivo de la denuncia...", reportReasonRequired: "Escribe el motivo de la denuncia.",
             reportSendBtn: "ENVIAR DENUNCIA", reportSentMsg: "Denuncia enviada. ¡Gracias por ayudar a mantener el juego seguro!", reportSendErrorMsg: "Error al enviar la denuncia. Intenta de nuevo.",
+            bugReportSectionTitle: "¿Encontraste un Error?", bugReportBtn: "🐞 REPORTAR UN ERROR", bugReportTitle: "🐞 Reportar un Error", bugReportDescPlaceholder: "Describe el error que encontraste...", bugReportDescRequired: "Describe el error antes de enviar.",
+            bugReportSendBtn: "ENVIAR REPORTE", bugReportSentMsg: "Reporte de error enviado. ¡Gracias por ayudar a mejorar el juego!", bugReportSendErrorMsg: "Error al enviar el reporte. Intenta de nuevo.",
             boostOptionsBtn: "Opciones", boostRemainingLabel: "Restante", boostNoneActiveLabel: "Ningún boost activo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Jugadores",
             socialSearchTitle: "🔎 Jugadores", socialBackBtn: "✕ Volver",
@@ -1437,6 +1468,7 @@
             authTabLogin: "🔑 Entrar", authTabRegister: "➕ Crear Cuenta",
             emailPlaceholder: "Correo electrónico", passwordPlaceholder: "Contraseña",
             loginBtn: "ENTRAR", forgotPasswordLink: "Olvidé mi contraseña",
+            guestLoginBtn: "👤 Continuar como Invitado", guestWarning: "⚠️ En modo invitado tu progreso no se guarda.", guestDisplayName: "Invitado",
             displayNamePlaceholder: "Nombre visible (letras, números, _)",
             regPasswordPlaceholder: "Contraseña (mínimo 6 caracteres)", confirmPasswordPlaceholder: "Confirmar contraseña",
             registerBtn: "CREAR CUENTA",
@@ -1544,6 +1576,8 @@
             chatDeleteMsgConfirmMsg: "Eliminare questo messaggio?",
             reportTitle: "🚩 Segnala Giocatore", reportAgainstLabel: "Stai segnalando", reportReasonPlaceholder: "Descrivi il motivo della segnalazione...", reportReasonRequired: "Scrivi il motivo della segnalazione.",
             reportSendBtn: "INVIA SEGNALAZIONE", reportSentMsg: "Segnalazione inviata. Grazie per aiutare a mantenere il gioco sicuro!", reportSendErrorMsg: "Errore nell'invio della segnalazione. Riprova.",
+            bugReportSectionTitle: "Hai Trovato un Errore?", bugReportBtn: "🐞 SEGNALA UN ERRORE", bugReportTitle: "🐞 Segnala un Errore", bugReportDescPlaceholder: "Descrivi l'errore che hai trovato...", bugReportDescRequired: "Descrivi l'errore prima di inviare.",
+            bugReportSendBtn: "INVIA SEGNALAZIONE", bugReportSentMsg: "Segnalazione di errore inviata. Grazie per aiutare a migliorare il gioco!", bugReportSendErrorMsg: "Errore nell'invio della segnalazione. Riprova.",
             boostOptionsBtn: "Opzioni", boostRemainingLabel: "Rimanente", boostNoneActiveLabel: "Nessun boost attivo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Giocatori",
             socialSearchTitle: "🔎 Giocatori", socialBackBtn: "✕ Indietro",
@@ -1612,6 +1646,7 @@
             authTabLogin: "🔑 Accedi", authTabRegister: "➕ Crea Account",
             emailPlaceholder: "Email", passwordPlaceholder: "Password",
             loginBtn: "ACCEDI", forgotPasswordLink: "Ho dimenticato la password",
+            guestLoginBtn: "👤 Continua come Ospite", guestWarning: "⚠️ In modalità ospite i tuoi progressi non vengono salvati.", guestDisplayName: "Ospite",
             displayNamePlaceholder: "Nome visualizzato (lettere, numeri, _)",
             regPasswordPlaceholder: "Password (minimo 6 caratteri)", confirmPasswordPlaceholder: "Conferma password",
             registerBtn: "CREA ACCOUNT",
@@ -1719,6 +1754,8 @@
             chatDeleteMsgConfirmMsg: "Supprimer ce message ?",
             reportTitle: "🚩 Signaler un Joueur", reportAgainstLabel: "Signalement de", reportReasonPlaceholder: "Décrivez le motif du signalement...", reportReasonRequired: "Écrivez le motif du signalement.",
             reportSendBtn: "ENVOYER LE SIGNALEMENT", reportSentMsg: "Signalement envoyé. Merci de nous aider à garder le jeu sûr !", reportSendErrorMsg: "Erreur lors de l'envoi du signalement. Réessayez.",
+            bugReportSectionTitle: "Trouvé un Bug ?", bugReportBtn: "🐞 SIGNALER UN BUG", bugReportTitle: "🐞 Signaler un Bug", bugReportDescPlaceholder: "Décrivez le bug que vous avez trouvé...", bugReportDescRequired: "Décrivez le bug avant d'envoyer.",
+            bugReportSendBtn: "ENVOYER LE RAPPORT", bugReportSentMsg: "Rapport de bug envoyé. Merci de nous aider à améliorer le jeu !", bugReportSendErrorMsg: "Erreur lors de l'envoi du rapport. Réessayez.",
             boostOptionsBtn: "Options", boostRemainingLabel: "Restant", boostNoneActiveLabel: "Aucun boost actif", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Joueurs",
             socialSearchTitle: "🔎 Joueurs", socialBackBtn: "✕ Retour",
@@ -1787,6 +1824,7 @@
             authTabLogin: "🔑 Connexion", authTabRegister: "➕ Créer un Compte",
             emailPlaceholder: "E-mail", passwordPlaceholder: "Mot de passe",
             loginBtn: "CONNEXION", forgotPasswordLink: "Mot de passe oublié",
+            guestLoginBtn: "👤 Continuer en tant qu'Invité", guestWarning: "⚠️ En mode invité, votre progression n'est pas sauvegardée.", guestDisplayName: "Invité",
             displayNamePlaceholder: "Nom d'affichage (lettres, chiffres, _)",
             regPasswordPlaceholder: "Mot de passe (min. 6 caractères)", confirmPasswordPlaceholder: "Confirmer le mot de passe",
             registerBtn: "CRÉER UN COMPTE",
@@ -2204,6 +2242,7 @@
             document.getElementById('auth-form-register').classList.toggle('hidden', tab!=='register');
             document.getElementById('auth-form-forgot').classList.toggle('hidden', tab!=='forgot');
             document.getElementById('auth-tabs').classList.toggle('hidden', tab==='forgot');
+            document.getElementById('btn-guest-login').classList.toggle('hidden', tab==='forgot');
             document.getElementById('tab-login').classList.toggle('active', tab==='login');
             document.getElementById('tab-register').classList.toggle('active', tab==='register');
             this._err('');
@@ -2248,6 +2287,19 @@
                 ranking: [], lang: Settings.language || 'pt-BR', vol: 0.7, sfx: true, mus: true,
                 isTestAccount: true
             };
+        },
+        // Modo visitante: perfil local com os atributos padrão de uma conta nova (nada de infinito
+        // aqui, é só pra jogar sem precisar criar conta). Nunca é salvo na nuvem — quando a aba/janela
+        // fecha, o progresso é perdido, exatamente como um "modo convidado" de qualquer outro jogo.
+        enterAsGuest() {
+            this._err(''); this._setBusy(false);
+            let data = this._defaultProfile(t('guestDisplayName'));
+            data.uid = 'LOCAL-GUEST-' + Date.now();
+            data.isGuest = true;
+            this.current = data;
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('recovery-screen').classList.add('hidden');
+            Engine.bootWithAccount(this.current);
         },
         _enterTestAccount() {
             this._err(''); this._setBusy(false);
@@ -2471,12 +2523,12 @@
                 sfx: Settings.sfxEnabled, mus: Settings.musicEnabled
             };
             Object.assign(this.current, data);
-            if(this.current.isTestAccount) return; // conta de testes é 100% local, nunca vai pra nuvem
+            if(this.current.isTestAccount || this.current.isGuest) return; // conta de testes/visitante é 100% local, nunca vai pra nuvem
             sb.from('players').update(data).eq('id', this.current.uid).then(({error}) => {
                 if(error) console.warn('Falha ao salvar na nuvem:', error);
             });
         },
-        logout() { let was=this.current; this.current=null; this._inRecovery=false; if(was && was.isTestAccount) return; sb.auth.signOut().catch(e=>console.warn(e)); },
+        logout() { let was=this.current; this.current=null; this._inRecovery=false; if(was && (was.isTestAccount || was.isGuest)) return; sb.auth.signOut().catch(e=>console.warn(e)); },
         async deleteAccountForever() {
             if (!this.current) throw new Error('Você precisa estar logado.');
             const { data: sessionData } = await sb.auth.getSession();
@@ -4104,6 +4156,46 @@
         },
         openSettings() { document.getElementById('settings-screen').classList.remove('hidden'); },
         closeSettings() { document.getElementById('settings-screen').classList.add('hidden'); },
+        // NOVO: reportar erro — reaproveita o mesmo sistema/edge function da denúncia de jogador
+        // ('report-user'), mas manda um campo is_bug:true para a Edge Function identificar que
+        // deve enviar o e-mail avisando que é um RELATÓRIO DE ERRO, e não uma denúncia.
+        openBugReport() {
+            document.getElementById('bug-report-reason-input').value = '';
+            document.getElementById('bug-report-error').classList.add('hidden');
+            document.getElementById('bug-report-success').classList.add('hidden');
+            document.getElementById('bug-report-screen').classList.remove('hidden');
+        },
+        closeBugReport() { document.getElementById('bug-report-screen').classList.add('hidden'); },
+        async submitBugReport() {
+            let desc = (document.getElementById('bug-report-reason-input').value || '').trim();
+            let errEl = document.getElementById('bug-report-error'), okEl = document.getElementById('bug-report-success');
+            errEl.classList.add('hidden'); okEl.classList.add('hidden');
+            if (!desc) { errEl.textContent = t('bugReportDescRequired'); errEl.classList.remove('hidden'); return; }
+            let btn = document.getElementById('btn-submit-bug-report'); btn.disabled = true;
+            try {
+                const { data: sessionData } = await sb.auth.getSession();
+                const token = sessionData && sessionData.session ? sessionData.session.access_token : null;
+                const { error } = await sb.functions.invoke('report-user', {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    body: {
+                        is_bug: true,
+                        reporter_id: Accounts.current ? Accounts.current.uid : null,
+                        reporter_name: Accounts.current ? Accounts.current.name : 'Anônimo',
+                        reason: desc,
+                        sent_to: 'jaron.n.ackermann@gmail.com'
+                    }
+                });
+                if (error) throw error;
+                okEl.textContent = t('bugReportSentMsg'); okEl.classList.remove('hidden');
+                setTimeout(() => this.closeBugReport(), 1800);
+            } catch (err) {
+                errEl.textContent = t('bugReportSendErrorMsg');
+                errEl.classList.remove('hidden');
+                console.warn('Erro ao enviar relatório de erro (a Edge Function "report-user" trata o campo is_bug?):', err);
+            } finally {
+                btn.disabled = false;
+            }
+        },
         // NOVO: botão de sair da partida (canto superior esquerdo do HUD), com confirmação.
         confirmExitMatch() {
             if(this.state !== 'IN_GAME') return;
