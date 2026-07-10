@@ -214,6 +214,7 @@
         #rotate-hint { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(2,6,23,0.97); color: #f8fafc; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; gap: 14px; }
         @media (pointer: coarse) and (orientation: portrait) {
             #rotate-hint { display: flex; }
+            #tutorial-overlay { display: none !important; }
         }
         .tc-btn { position: absolute; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; border-radius: 50%; background: rgba(30,41,59,0.55); border: 2px solid rgba(148,163,184,0.45); color: #f1f5f9; font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; outline: none; }
         .tc-btn * { pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
@@ -568,6 +569,10 @@
             <div class="config-section">
                 <div class="section-title" data-i18n="musicSectionTitle">Música de Fundo</div>
                 <button id="btn-toggle-music" class="active" onclick="Engine.toggleMusic()" style="width:100%;">Música: ATIVADA</button>
+            </div>
+            <div class="config-section">
+                <div class="section-title" data-i18n="tutorialSectionTitle">Tutorial</div>
+                <button onclick="Tutorial.open()" style="width:100%; background:#0c4a6e; border-color:#0369a1; color:#bae6fd;" data-i18n="openTutorialBtn">📖 COMO JOGAR</button>
             </div>
             <div class="config-section">
                 <div class="section-title" data-i18n="resetDataTitle">Dados Salvos</div>
@@ -1022,7 +1027,30 @@
             errSessionExpired: "Sua sessão expirou. Faça login novamente para trocar a senha.",
             errPasswordChangeUnconfirmed: "Não foi possível confirmar a alteração da senha. Tente novamente.",
             msgPasswordChanged: "Senha alterada com sucesso!",
-            errRecoveryLinkExpired: "O link de redefinição expirou. Solicite um novo e-mail de redefinição."
+            errRecoveryLinkExpired: "O link de redefinição expirou. Solicite um novo e-mail de redefinição.",
+
+            tutorialSectionTitle: "Tutorial", openTutorialBtn: "📖 COMO JOGAR",
+            tutSkip: "PULAR", tutNext: "PRÓXIMO", tutStart: "COMEÇAR A JOGAR",
+            tut1Title: "Bem-vindo!", tut1Body: "Este tutorial rápido mostra tudo que você precisa saber para jogar. Vamos lá!",
+            tut2Title: "Movimento", tut2BodyPc: "Use as setas ou <b>W A S D</b> para andar, e <b>ESPAÇO</b> ou <b>W</b> para pular.", tut2BodyMobile: "Use os botões <b>◀ ▶</b> no canto inferior esquerdo da tela para andar.",
+            tut3Title: "Atirar", tut3BodyPc: "Clique com o <b>botão esquerdo do mouse</b> (P1) para atirar na direção do cursor.", tut3BodyMobile: "Toque no botão <b>⚔</b> para atacar e no <b>✦</b> para usar a habilidade especial do seu personagem.",
+            tut4Title: "Vida e Habilidades", tut4Body: "Sua barra de vida fica no topo da tela. Use <b>[1]</b> para curar um pouco de vida e <b>[2]</b> para ativar um escudo temporário (no celular, toque nos botões <b>🧪</b> e <b>🛡</b> na tela).",
+            tut5Title: "Baús e Ouro", tut5Body: "Explore o mapa e derrote inimigos para conseguir <b>ouro</b>. Baús secretos aparecem no mapa — abra-os para ganhar recompensas como cura, escudo, velocidade ou até armas novas!",
+            tut6Title: "Loja de Upgrades", tut6Body: "No menu principal, acesse o <b>Arsenal de Upgrades</b> para gastar seu ouro em armas mais fortes, vida extra e velocidade. Fique mais poderoso a cada partida!",
+            tut7Title: "Nível e Conquistas", tut7Body: "Você ganha <b>experiência (XP)</b> jogando partidas. Suba de nível e desbloqueie <b>conquistas</b> no botão 🏆 do menu principal.",
+            tut8Title: "Aparência", tut8Body: "Personalize seu personagem na aba de <b>Cosméticos</b>: escolha cores e visuais diferentes usando o ouro que você ganhar.",
+            tut9Title: "Multiplayer Online", tut9Body: "Clique em <b>🌐 Online</b> para criar ou entrar em uma sala com até 4 jogadores! Convide amigos e jogue partidas em tempo real pela internet.",
+            tut10Title: "Amigos e Chat", tut10Body: "Use <b>🔎 Jogadores</b> para buscar e adicionar amigos. Converse pelo <b>chat lateral</b>, crie grupos e combine partidas com sua turma.",
+            tut11Title: "Configurações", tut11Body: "No botão <b>⚙</b> você ajusta volume, som, música, idioma e pode <b>reabrir este tutorial</b> a qualquer momento. Bom jogo!",
+
+            tut12Title: "Escolha seu Herói", tut12Body: "Antes de começar, escolha um <b>arquétipo</b>: Hero (balanceado), Vilan (tiro triplo em leque) ou Killer (veloz e letal). Cada um joga de um jeito diferente!",
+            tut13Title: "Modos de Jogo", tut13Body: "Escolha entre <b>Horda Solo</b>, <b>Caça ao Ouro</b>, <b>Modo Titã</b> (inimigo super forte) ou <b>Modo Chefe</b> (boss). Também dá pra jogar <b>Duelo 1v1 Local</b>, com dois jogadores no mesmo teclado (P1 e P2). Você também pode ativar o <b>Mundo Aberto</b> para jogar em um mapa infinito no modo solo.",
+            tut14Title: "Pular", tut14BodyMobile: "Toque no botão <b>⤒</b> para pular. Também há um botão <b>DASH</b> para uma esquiva rápida.",
+            tut15Title: "Grupos e Convites", tut15Body: "Crie <b>grupos de chat</b> com vários amigos de uma vez, e envie <b>convites de partida</b> direto pelo chat para chamar alguém pra jogar com você.",
+
+            tut16Title: "Esconderijo Secreto", tut16Body: "Encontre o esconderijo escondido no mapa e pressione <b>E</b> para entrar (no celular, toque no botão <b>🚪</b>). É um bom lugar pra se proteger dos inimigos.",
+            tut17Title: "Seguir Jogadores", tut17Body: "Além de conversar, você pode <b>seguir</b> outros jogadores na aba <b>⭐ Seguindo</b> da busca de jogadores, pra acompanhar quem você mais gosta de jogar junto.",
+            tut18Title: "Reportar um Erro", tut18Body: "Encontrou algum bug? Vá em Configurações e use o botão <b>🐞 REPORTAR UM ERRO</b> para nos avisar. Isso ajuda a melhorar o jogo!"
         },
         'en': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -1206,7 +1234,30 @@
             errSessionExpired: "Your session expired. Log in again to change your password.",
             errPasswordChangeUnconfirmed: "Could not confirm the password change. Please try again.",
             msgPasswordChanged: "Password changed successfully!",
-            errRecoveryLinkExpired: "The reset link expired. Request a new reset email."
+            errRecoveryLinkExpired: "The reset link expired. Request a new reset email.",
+
+            tutorialSectionTitle: "Tutorial", openTutorialBtn: "📖 HOW TO PLAY",
+            tutSkip: "SKIP", tutNext: "NEXT", tutStart: "START PLAYING",
+            tut1Title: "Welcome!", tut1Body: "This quick tutorial shows everything you need to know to play. Let's go!",
+            tut2Title: "Movement", tut2BodyPc: "Use the arrow keys or <b>W A S D</b> to move, and <b>SPACE</b> or <b>W</b> to jump.", tut2BodyMobile: "Use the <b>◀ ▶</b> buttons in the bottom-left corner of the screen to move.",
+            tut3Title: "Shooting", tut3BodyPc: "Click the <b>left mouse button</b> (P1) to shoot toward your cursor.", tut3BodyMobile: "Tap the <b>⚔</b> button to attack and <b>✦</b> to use your character's special ability.",
+            tut4Title: "Health and Abilities", tut4Body: "Your health bar is at the top of the screen. Press <b>[1]</b> to heal a bit and <b>[2]</b> to activate a temporary shield (on mobile, tap the <b>🧪</b> and <b>🛡</b> buttons on screen).",
+            tut5Title: "Chests and Gold", tut5Body: "Explore the map and defeat enemies to earn <b>gold</b>. Secret chests appear on the map — open them for rewards like healing, shields, speed, or even new weapons!",
+            tut6Title: "Upgrade Shop", tut6Body: "From the main menu, open the <b>Upgrade Arsenal</b> to spend your gold on stronger weapons, extra health, and speed. Get more powerful every match!",
+            tut7Title: "Level and Achievements", tut7Body: "You earn <b>experience (XP)</b> by playing matches. Level up and unlock <b>achievements</b> from the 🏆 button on the main menu.",
+            tut8Title: "Appearance", tut8Body: "Customize your character in the <b>Cosmetics</b> tab: choose different colors and looks using the gold you've earned.",
+            tut9Title: "Online Multiplayer", tut9Body: "Click <b>🌐 Online</b> to create or join a room with up to 4 players! Invite friends and play real-time matches over the internet.",
+            tut10Title: "Friends and Chat", tut10Body: "Use <b>🔎 Players</b> to search for and add friends. Chat via the <b>side chat panel</b>, create groups, and set up matches with your crew.",
+            tut11Title: "Settings", tut11Body: "In the <b>⚙</b> button you can adjust volume, sound, music, language, and <b>reopen this tutorial</b> anytime. Have fun!",
+
+            tut12Title: "Choose Your Hero", tut12Body: "Before starting, pick an <b>archetype</b>: Hero (balanced), Vilan (triple spread shot) or Killer (fast and lethal). Each one plays differently!",
+            tut13Title: "Game Modes", tut13Body: "Choose between <b>Solo Horde</b>, <b>Gold Rush</b>, <b>Titan Mode</b> (super strong enemy) or <b>Boss Mode</b>. You can also play <b>Local 1v1 Duel</b>, with two players on the same keyboard (P1 and P2). You can also enable <b>Open World</b> to play on an infinite map in solo mode.",
+            tut14Title: "Jumping", tut14BodyMobile: "Tap the <b>⤒</b> button to jump. There's also a <b>DASH</b> button for a quick dodge.",
+            tut15Title: "Groups and Invites", tut15Body: "Create <b>chat groups</b> with several friends at once, and send <b>match invites</b> right from the chat to call someone to play with you.",
+
+            tut16Title: "Secret Hideout", tut16Body: "Find the hidden hideout on the map and press <b>E</b> to enter it (on mobile, tap the <b>🚪</b> button). It's a good spot to take cover from enemies.",
+            tut17Title: "Following Players", tut17Body: "Besides chatting, you can <b>follow</b> other players from the <b>⭐ Following</b> tab in player search, to keep track of who you like playing with.",
+            tut18Title: "Report a Bug", tut18Body: "Found a bug? Go to Settings and use the <b>🐞 REPORT A BUG</b> button to let us know. It helps improve the game!"
         },
         'de': {
             tagline: "Horizon Survival Turnier — Cosmic Engine 2026",
@@ -1385,7 +1436,30 @@
             errSessionExpired: "Deine Sitzung ist abgelaufen. Melde dich erneut an, um das Passwort zu ändern.",
             errPasswordChangeUnconfirmed: "Die Passwortänderung konnte nicht bestätigt werden. Bitte versuche es erneut.",
             msgPasswordChanged: "Passwort erfolgreich geändert!",
-            errRecoveryLinkExpired: "Der Link zum Zurücksetzen ist abgelaufen. Fordere eine neue E-Mail an."
+            errRecoveryLinkExpired: "Der Link zum Zurücksetzen ist abgelaufen. Fordere eine neue E-Mail an.",
+
+            tutorialSectionTitle: "Tutorial", openTutorialBtn: "📖 SPIELANLEITUNG",
+            tutSkip: "ÜBERSPRINGEN", tutNext: "WEITER", tutStart: "SPIEL STARTEN",
+            tut1Title: "Willkommen!", tut1Body: "Diese kurze Anleitung zeigt dir alles, was du zum Spielen wissen musst. Los geht's!",
+            tut2Title: "Bewegung", tut2BodyPc: "Benutze die Pfeiltasten oder <b>W A S D</b> zum Laufen und <b>LEERTASTE</b> oder <b>W</b> zum Springen.", tut2BodyMobile: "Benutze die <b>◀ ▶</b>-Tasten unten links auf dem Bildschirm zum Bewegen.",
+            tut3Title: "Schießen", tut3BodyPc: "Klicke mit der <b>linken Maustaste</b> (P1), um in Richtung des Cursors zu schießen.", tut3BodyMobile: "Tippe auf <b>⚔</b>, um anzugreifen, und auf <b>✦</b>, um die Spezialfähigkeit deines Charakters zu nutzen.",
+            tut4Title: "Leben und Fähigkeiten", tut4Body: "Deine Lebensleiste ist oben am Bildschirm. Drücke <b>[1]</b>, um ein wenig zu heilen, und <b>[2]</b>, um ein temporäres Schild zu aktivieren (auf dem Handy die Schaltflächen <b>🧪</b> und <b>🛡</b> auf dem Bildschirm antippen).",
+            tut5Title: "Truhen und Gold", tut5Body: "Erkunde die Karte und besiege Gegner, um <b>Gold</b> zu verdienen. Geheime Truhen erscheinen auf der Karte — öffne sie für Belohnungen wie Heilung, Schild, Geschwindigkeit oder sogar neue Waffen!",
+            tut6Title: "Upgrade-Shop", tut6Body: "Öffne im Hauptmenü das <b>Upgrade-Arsenal</b>, um dein Gold für stärkere Waffen, zusätzliches Leben und Geschwindigkeit auszugeben. Werde mit jedem Match stärker!",
+            tut7Title: "Level und Erfolge", tut7Body: "Du verdienst <b>Erfahrung (XP)</b>, indem du Matches spielst. Steige im Level auf und schalte <b>Erfolge</b> über die 🏆-Schaltfläche im Hauptmenü frei.",
+            tut8Title: "Aussehen", tut8Body: "Passe deinen Charakter im Tab <b>Kosmetik</b> an: wähle verschiedene Farben und Looks mit dem verdienten Gold.",
+            tut9Title: "Online-Multiplayer", tut9Body: "Klicke auf <b>🌐 Online</b>, um einen Raum mit bis zu 4 Spielern zu erstellen oder ihm beizutreten! Lade Freunde ein und spiele Echtzeit-Matches übers Internet.",
+            tut10Title: "Freunde und Chat", tut10Body: "Benutze <b>🔎 Spieler</b>, um Freunde zu suchen und hinzuzufügen. Chatte über die <b>Seitenleiste</b>, erstelle Gruppen und verabrede Matches mit deiner Gruppe.",
+            tut11Title: "Einstellungen", tut11Body: "Über die Schaltfläche <b>⚙</b> kannst du Lautstärke, Sound, Musik, Sprache anpassen und <b>dieses Tutorial jederzeit erneut öffnen</b>. Viel Spaß!",
+
+            tut12Title: "Wähle deinen Helden", tut12Body: "Bevor du startest, wähle einen <b>Archetyp</b>: Hero (ausgewogen), Vilan (dreifacher Streuschuss) oder Killer (schnell und tödlich). Jeder spielt sich anders!",
+            tut13Title: "Spielmodi", tut13Body: "Wähle zwischen <b>Solo-Horde</b>, <b>Goldrausch</b>, <b>Titan-Modus</b> (super starker Gegner) oder <b>Boss-Modus</b>. Du kannst auch <b>Lokales 1v1-Duell</b> spielen, mit zwei Spielern an derselben Tastatur (P1 und P2). Du kannst auch die <b>Offene Welt</b> aktivieren, um im Solo-Modus auf einer unendlichen Karte zu spielen.",
+            tut14Title: "Springen", tut14BodyMobile: "Tippe auf <b>⤒</b>, um zu springen. Es gibt auch eine <b>DASH</b>-Schaltfläche für ein schnelles Ausweichen.",
+            tut15Title: "Gruppen und Einladungen", tut15Body: "Erstelle <b>Chat-Gruppen</b> mit mehreren Freunden gleichzeitig und sende <b>Spieleinladungen</b> direkt aus dem Chat, um jemanden zum Mitspielen einzuladen.",
+
+            tut16Title: "Geheimes Versteck", tut16Body: "Finde das versteckte Versteck auf der Karte und drücke <b>E</b>, um es zu betreten (auf dem Handy die Schaltfläche <b>🚪</b> antippen). Ein guter Ort, um sich vor Gegnern zu schützen.",
+            tut17Title: "Spielern folgen", tut17Body: "Neben dem Chatten kannst du anderen Spielern über den Tab <b>⭐ Folge ich</b> in der Spielersuche <b>folgen</b>, um im Blick zu behalten, mit wem du gerne spielst.",
+            tut18Title: "Fehler melden", tut18Body: "Einen Fehler gefunden? Gehe zu den Einstellungen und nutze die Schaltfläche <b>🐞 FEHLER MELDEN</b>, um uns Bescheid zu geben. Das hilft, das Spiel zu verbessern!"
         },
         'es': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -1564,7 +1638,30 @@
             errSessionExpired: "Tu sesión ha expirado. Inicia sesión de nuevo para cambiar la contraseña.",
             errPasswordChangeUnconfirmed: "No se pudo confirmar el cambio de contraseña. Inténtalo de nuevo.",
             msgPasswordChanged: "¡Contraseña cambiada con éxito!",
-            errRecoveryLinkExpired: "El enlace de restablecimiento ha expirado. Solicita un nuevo correo."
+            errRecoveryLinkExpired: "El enlace de restablecimiento ha expirado. Solicita un nuevo correo.",
+
+            tutorialSectionTitle: "Tutorial", openTutorialBtn: "📖 CÓMO JUGAR",
+            tutSkip: "OMITIR", tutNext: "SIGUIENTE", tutStart: "EMPEZAR A JUGAR",
+            tut1Title: "¡Bienvenido!", tut1Body: "Este tutorial rápido muestra todo lo que necesitas saber para jugar. ¡Vamos!",
+            tut2Title: "Movimiento", tut2BodyPc: "Usa las flechas o <b>W A S D</b> para caminar, y <b>ESPACIO</b> o <b>W</b> para saltar.", tut2BodyMobile: "Usa los botones <b>◀ ▶</b> en la esquina inferior izquierda de la pantalla para moverte.",
+            tut3Title: "Disparar", tut3BodyPc: "Haz clic con el <b>botón izquierdo del mouse</b> (P1) para disparar hacia el cursor.", tut3BodyMobile: "Toca el botón <b>⚔</b> para atacar y <b>✦</b> para usar la habilidad especial de tu personaje.",
+            tut4Title: "Vida y Habilidades", tut4Body: "Tu barra de vida está en la parte superior de la pantalla. Presiona <b>[1]</b> para curarte un poco y <b>[2]</b> para activar un escudo temporal (en móvil, toca los botones <b>🧪</b> y <b>🛡</b> en pantalla).",
+            tut5Title: "Cofres y Oro", tut5Body: "Explora el mapa y derrota enemigos para ganar <b>oro</b>. Aparecen cofres secretos en el mapa — ¡ábrelos para conseguir recompensas como curación, escudo, velocidad o incluso armas nuevas!",
+            tut6Title: "Tienda de Mejoras", tut6Body: "Desde el menú principal, abre el <b>Arsenal de Mejoras</b> para gastar tu oro en armas más fuertes, vida extra y velocidad. ¡Vuélvete más poderoso en cada partida!",
+            tut7Title: "Nivel y Logros", tut7Body: "Ganas <b>experiencia (XP)</b> jugando partidas. Sube de nivel y desbloquea <b>logros</b> desde el botón 🏆 del menú principal.",
+            tut8Title: "Apariencia", tut8Body: "Personaliza tu personaje en la pestaña de <b>Cosméticos</b>: elige colores y estilos diferentes usando el oro que ganes.",
+            tut9Title: "Multijugador en Línea", tut9Body: "Haz clic en <b>🌐 Online</b> para crear o unirte a una sala con hasta 4 jugadores. ¡Invita amigos y juega partidas en tiempo real por internet!",
+            tut10Title: "Amigos y Chat", tut10Body: "Usa <b>🔎 Jugadores</b> para buscar y agregar amigos. Chatea por el <b>panel lateral</b>, crea grupos y organiza partidas con tu grupo.",
+            tut11Title: "Configuración", tut11Body: "En el botón <b>⚙</b> puedes ajustar volumen, sonido, música, idioma, y <b>reabrir este tutorial</b> cuando quieras. ¡Buen juego!",
+
+            tut12Title: "Elige tu Héroe", tut12Body: "Antes de empezar, elige un <b>arquetipo</b>: Hero (equilibrado), Vilan (disparo triple en abanico) o Killer (veloz y letal). ¡Cada uno se juega de forma distinta!",
+            tut13Title: "Modos de Juego", tut13Body: "Elige entre <b>Horda Solo</b>, <b>Caza del Oro</b>, <b>Modo Titán</b> (enemigo súper fuerte) o <b>Modo Jefe</b>. También puedes jugar <b>Duelo 1v1 Local</b>, con dos jugadores en el mismo teclado (P1 y P2). También puedes activar el <b>Mundo Abierto</b> para jugar en un mapa infinito en modo solo.",
+            tut14Title: "Saltar", tut14BodyMobile: "Toca el botón <b>⤒</b> para saltar. También hay un botón <b>DASH</b> para una esquiva rápida.",
+            tut15Title: "Grupos e Invitaciones", tut15Body: "Crea <b>grupos de chat</b> con varios amigos a la vez, y envía <b>invitaciones de partida</b> directamente desde el chat para invitar a alguien a jugar contigo.",
+
+            tut16Title: "Escondite Secreto", tut16Body: "Encuentra el escondite oculto en el mapa y presiona <b>E</b> para entrar (en móvil, toca el botón <b>🚪</b>). Es un buen lugar para protegerte de los enemigos.",
+            tut17Title: "Seguir Jugadores", tut17Body: "Además de chatear, puedes <b>seguir</b> a otros jugadores desde la pestaña <b>⭐ Siguiendo</b> en la búsqueda de jugadores, para llevar registro de con quién te gusta jugar.",
+            tut18Title: "Reportar un Error", tut18Body: "¿Encontraste un error? Ve a Configuración y usa el botón <b>🐞 REPORTAR UN ERROR</b> para avisarnos. ¡Esto ayuda a mejorar el juego!"
         },
         'it': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -1743,7 +1840,30 @@
             errSessionExpired: "La tua sessione è scaduta. Accedi di nuovo per cambiare la password.",
             errPasswordChangeUnconfirmed: "Impossibile confermare la modifica della password. Riprova.",
             msgPasswordChanged: "Password cambiata con successo!",
-            errRecoveryLinkExpired: "Il link di reimpostazione è scaduto. Richiedi una nuova email."
+            errRecoveryLinkExpired: "Il link di reimpostazione è scaduto. Richiedi una nuova email.",
+
+            tutorialSectionTitle: "Tutorial", openTutorialBtn: "📖 COME GIOCARE",
+            tutSkip: "SALTA", tutNext: "AVANTI", tutStart: "INIZIA A GIOCARE",
+            tut1Title: "Benvenuto!", tut1Body: "Questo tutorial rapido mostra tutto ciò che devi sapere per giocare. Iniziamo!",
+            tut2Title: "Movimento", tut2BodyPc: "Usa le frecce o <b>W A S D</b> per muoverti, e <b>SPAZIO</b> o <b>W</b> per saltare.", tut2BodyMobile: "Usa i pulsanti <b>◀ ▶</b> nell'angolo in basso a sinistra dello schermo per muoverti.",
+            tut3Title: "Sparare", tut3BodyPc: "Clicca con il <b>tasto sinistro del mouse</b> (P1) per sparare verso il cursore.", tut3BodyMobile: "Tocca il pulsante <b>⚔</b> per attaccare e <b>✦</b> per usare l'abilità speciale del tuo personaggio.",
+            tut4Title: "Vita e Abilità", tut4Body: "La barra della vita è in alto sullo schermo. Premi <b>[1]</b> per curarti un po' e <b>[2]</b> per attivare uno scudo temporaneo (su mobile, tocca i pulsanti <b>🧪</b> e <b>🛡</b> a schermo).",
+            tut5Title: "Forzieri e Oro", tut5Body: "Esplora la mappa e sconfiggi nemici per guadagnare <b>oro</b>. Forzieri segreti appaiono sulla mappa — aprili per ottenere ricompense come cura, scudo, velocità o persino nuove armi!",
+            tut6Title: "Negozio Potenziamenti", tut6Body: "Dal menu principale, apri l'<b>Arsenale Potenziamenti</b> per spendere il tuo oro in armi più forti, vita extra e velocità. Diventa più potente ad ogni partita!",
+            tut7Title: "Livello e Obiettivi", tut7Body: "Guadagni <b>esperienza (XP)</b> giocando partite. Sali di livello e sblocca <b>obiettivi</b> dal pulsante 🏆 nel menu principale.",
+            tut8Title: "Aspetto", tut8Body: "Personalizza il tuo personaggio nella scheda <b>Cosmetici</b>: scegli colori e stili diversi usando l'oro guadagnato.",
+            tut9Title: "Multiplayer Online", tut9Body: "Clicca su <b>🌐 Online</b> per creare o unirti a una stanza con fino a 4 giocatori! Invita amici e gioca partite in tempo reale su internet.",
+            tut10Title: "Amici e Chat", tut10Body: "Usa <b>🔎 Giocatori</b> per cercare e aggiungere amici. Chatta tramite il <b>pannello laterale</b>, crea gruppi e organizza partite con la tua squadra.",
+            tut11Title: "Impostazioni", tut11Body: "Nel pulsante <b>⚙</b> puoi regolare volume, suono, musica, lingua e <b>riaprire questo tutorial</b> in qualsiasi momento. Buon divertimento!",
+
+            tut12Title: "Scegli il tuo Eroe", tut12Body: "Prima di iniziare, scegli un <b>archetipo</b>: Hero (bilanciato), Vilan (tripla raffica a ventaglio) o Killer (veloce e letale). Ognuno si gioca in modo diverso!",
+            tut13Title: "Modalità di Gioco", tut13Body: "Scegli tra <b>Orda Solo</b>, <b>Caccia all'Oro</b>, <b>Modalità Titano</b> (nemico super forte) o <b>Modalità Boss</b>. Puoi anche giocare <b>Duello 1v1 Locale</b>, con due giocatori sulla stessa tastiera (P1 e P2). Puoi anche attivare il <b>Mondo Aperto</b> per giocare su una mappa infinita in modalità solo.",
+            tut14Title: "Saltare", tut14BodyMobile: "Tocca il pulsante <b>⤒</b> per saltare. C'è anche un pulsante <b>DASH</b> per una schivata rapida.",
+            tut15Title: "Gruppi e Inviti", tut15Body: "Crea <b>gruppi di chat</b> con più amici contemporaneamente e invia <b>inviti di partita</b> direttamente dalla chat per chiamare qualcuno a giocare con te.",
+
+            tut16Title: "Nascondiglio Segreto", tut16Body: "Trova il nascondiglio segreto sulla mappa e premi <b>E</b> per entrare (su mobile, tocca il pulsante <b>🚪</b>). È un buon posto per ripararsi dai nemici.",
+            tut17Title: "Seguire i Giocatori", tut17Body: "Oltre a chattare, puoi <b>seguire</b> altri giocatori dalla scheda <b>⭐ Seguiti</b> nella ricerca giocatori, per tenere traccia di con chi ti piace giocare.",
+            tut18Title: "Segnala un Errore", tut18Body: "Hai trovato un errore? Vai su Impostazioni e usa il pulsante <b>🐞 SEGNALA UN ERRORE</b> per avvisarci. Questo aiuta a migliorare il gioco!"
         },
         'fr': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -1922,7 +2042,30 @@
             errSessionExpired: "Votre session a expiré. Reconnectez-vous pour changer le mot de passe.",
             errPasswordChangeUnconfirmed: "Impossible de confirmer le changement de mot de passe. Réessayez.",
             msgPasswordChanged: "Mot de passe changé avec succès !",
-            errRecoveryLinkExpired: "Le lien de réinitialisation a expiré. Demandez un nouvel e-mail."
+            errRecoveryLinkExpired: "Le lien de réinitialisation a expiré. Demandez un nouvel e-mail.",
+
+            tutorialSectionTitle: "Tutoriel", openTutorialBtn: "📖 COMMENT JOUER",
+            tutSkip: "PASSER", tutNext: "SUIVANT", tutStart: "COMMENCER À JOUER",
+            tut1Title: "Bienvenue !", tut1Body: "Ce tutoriel rapide vous montre tout ce qu'il faut savoir pour jouer. C'est parti !",
+            tut2Title: "Déplacement", tut2BodyPc: "Utilisez les flèches ou <b>W A S D</b> pour vous déplacer, et <b>ESPACE</b> ou <b>W</b> pour sauter.", tut2BodyMobile: "Utilisez les boutons <b>◀ ▶</b> en bas à gauche de l'écran pour vous déplacer.",
+            tut3Title: "Tirer", tut3BodyPc: "Cliquez avec le <b>bouton gauche de la souris</b> (P1) pour tirer vers le curseur.", tut3BodyMobile: "Appuyez sur <b>⚔</b> pour attaquer et sur <b>✦</b> pour utiliser la capacité spéciale de votre personnage.",
+            tut4Title: "Vie et Capacités", tut4Body: "Votre barre de vie se trouve en haut de l'écran. Appuyez sur <b>[1]</b> pour vous soigner un peu et <b>[2]</b> pour activer un bouclier temporaire (sur mobile, appuyez sur les boutons <b>🧪</b> et <b>🛡</b> à l'écran).",
+            tut5Title: "Coffres et Or", tut5Body: "Explorez la carte et vainquez des ennemis pour gagner de l'<b>or</b>. Des coffres secrets apparaissent sur la carte — ouvrez-les pour obtenir des récompenses comme soin, bouclier, vitesse ou même de nouvelles armes !",
+            tut6Title: "Boutique d'Améliorations", tut6Body: "Depuis le menu principal, ouvrez l'<b>Arsenal d'Améliorations</b> pour dépenser votre or en armes plus puissantes, vie supplémentaire et vitesse. Devenez plus fort à chaque partie !",
+            tut7Title: "Niveau et Succès", tut7Body: "Vous gagnez de l'<b>expérience (XP)</b> en jouant des parties. Montez de niveau et débloquez des <b>succès</b> depuis le bouton 🏆 du menu principal.",
+            tut8Title: "Apparence", tut8Body: "Personnalisez votre personnage dans l'onglet <b>Cosmétiques</b> : choisissez des couleurs et des styles différents avec l'or que vous avez gagné.",
+            tut9Title: "Multijoueur en Ligne", tut9Body: "Cliquez sur <b>🌐 Online</b> pour créer ou rejoindre une salle avec jusqu'à 4 joueurs ! Invitez des amis et jouez des parties en temps réel sur internet.",
+            tut10Title: "Amis et Chat", tut10Body: "Utilisez <b>🔎 Joueurs</b> pour rechercher et ajouter des amis. Discutez via le <b>panneau latéral</b>, créez des groupes et organisez des parties avec votre équipe.",
+            tut11Title: "Paramètres", tut11Body: "Dans le bouton <b>⚙</b>, vous pouvez régler le volume, le son, la musique, la langue, et <b>rouvrir ce tutoriel</b> à tout moment. Bon jeu !",
+
+            tut12Title: "Choisissez votre héros", tut12Body: "Avant de commencer, choisissez un <b>archétype</b> : Hero (équilibré), Vilan (tir triple en éventail) ou Killer (rapide et létal). Chacun se joue différemment !",
+            tut13Title: "Modes de Jeu", tut13Body: "Choisissez entre <b>Horde Solo</b>, <b>Ruée vers l'Or</b>, <b>Mode Titan</b> (ennemi super fort) ou <b>Mode Boss</b>. Vous pouvez aussi jouer en <b>Duel 1v1 Local</b>, avec deux joueurs sur le même clavier (P1 et P2). Vous pouvez aussi activer le <b>Monde Ouvert</b> pour jouer sur une carte infinie en mode solo.",
+            tut14Title: "Sauter", tut14BodyMobile: "Appuyez sur le bouton <b>⤒</b> pour sauter. Il y a aussi un bouton <b>DASH</b> pour esquiver rapidement.",
+            tut15Title: "Groupes et Invitations", tut15Body: "Créez des <b>groupes de discussion</b> avec plusieurs amis à la fois, et envoyez des <b>invitations de partie</b> directement depuis le chat pour inviter quelqu'un à jouer avec vous.",
+
+            tut16Title: "Cachette Secrète", tut16Body: "Trouvez la cachette secrète sur la carte et appuyez sur <b>E</b> pour y entrer (sur mobile, appuyez sur le bouton <b>🚪</b>). C'est un bon endroit pour se protéger des ennemis.",
+            tut17Title: "Suivre des Joueurs", tut17Body: "En plus de discuter, vous pouvez <b>suivre</b> d'autres joueurs depuis l'onglet <b>⭐ Abonnements</b> dans la recherche de joueurs, pour garder une trace de ceux avec qui vous aimez jouer.",
+            tut18Title: "Signaler un Bug", tut18Body: "Vous avez trouvé un bug ? Allez dans Paramètres et utilisez le bouton <b>🐞 SIGNALER UN BUG</b> pour nous le faire savoir. Cela aide à améliorer le jeu !"
         }
     };
     function t(key) {
@@ -1935,6 +2078,90 @@
         let dict = (I18N[lang] && I18N[lang].shop && I18N[lang].shop[id]) ? I18N[lang].shop : I18N['pt-BR'].shop;
         return dict[id][field];
     }
+    const Tutorial = {
+        step: 0,
+        _cachedSteps: null,
+        _seenKey: 'bb-tutorial-seen',
+        buildSteps() {
+            let isMobile = (typeof Engine !== 'undefined' && Engine.device && Engine.device !== 'pc');
+            let list = [
+                { icon: '👋', title: t('tut1Title'), body: t('tut1Body') },
+                { icon: '🦸', title: t('tut12Title'), body: t('tut12Body') },
+                { icon: '🏆', title: t('tut13Title'), body: t('tut13Body') },
+                { icon: '🕹️', title: t('tut2Title'), body: isMobile ? t('tut2BodyMobile') : t('tut2BodyPc') }
+            ];
+            if (isMobile) list.push({ icon: '⬆️', title: t('tut14Title'), body: t('tut14BodyMobile') });
+            list.push(
+                { icon: '⚔️', title: t('tut3Title'), body: isMobile ? t('tut3BodyMobile') : t('tut3BodyPc') },
+                { icon: '❤️', title: t('tut4Title'), body: t('tut4Body') },
+                { icon: '🎁', title: t('tut5Title'), body: t('tut5Body') },
+                { icon: '🚪', title: t('tut16Title'), body: t('tut16Body') },
+                { icon: '🛒', title: t('tut6Title'), body: t('tut6Body') },
+                { icon: '⭐', title: t('tut7Title'), body: t('tut7Body') },
+                { icon: '🎨', title: t('tut8Title'), body: t('tut8Body') },
+                { icon: '🌐', title: t('tut9Title'), body: t('tut9Body') },
+                { icon: '💬', title: t('tut10Title'), body: t('tut10Body') },
+                { icon: '👥', title: t('tut15Title'), body: t('tut15Body') },
+                { icon: '➕', title: t('tut17Title'), body: t('tut17Body') },
+                { icon: '🐞', title: t('tut18Title'), body: t('tut18Body') },
+                { icon: '⚙️', title: t('tut11Title'), body: t('tut11Body') }
+            );
+            return list;
+        },
+        get steps() {
+            if (!this._cachedSteps) this._cachedSteps = this.buildSteps();
+            return this._cachedSteps;
+        },
+        open() {
+            this.step = 0;
+            this._cachedSteps = this.buildSteps();
+            document.getElementById('tutorial-overlay').classList.remove('hidden');
+            this.render();
+        },
+        close() {
+            document.getElementById('tutorial-overlay').classList.add('hidden');
+            this._cachedSteps = null;
+            try { localStorage.setItem(this._seenKey, '1'); } catch(e) {}
+        },
+        openIfFirstTime() {
+            let seen = true;
+            try { seen = localStorage.getItem(this._seenKey) === '1'; } catch(e) {}
+            if (!seen) this.open();
+        },
+        next() {
+            let steps = this.steps;
+            if (this.step >= steps.length - 1) { this.close(); return; }
+            this.step++;
+            this.render();
+        },
+        prev() {
+            if (this.step <= 0) return;
+            this.step--;
+            this.render();
+        },
+        render() {
+            let steps = this.steps;
+            let s = steps[this.step];
+            let total = steps.length;
+            document.getElementById('tutorial-step-counter').textContent = (this.step + 1) + ' / ' + total;
+            let dots = document.getElementById('tutorial-progress-dots');
+            dots.innerHTML = steps.map((_, i) => `<div style="flex:1; height:4px; border-radius:2px; background:${i <= this.step ? '#3b82f6' : '#1e293b'};"></div>`).join('');
+            let content = document.getElementById('tutorial-content');
+            content.innerHTML = `
+                <div style="font-size:3rem; line-height:1;">${s.icon}</div>
+                <h3 style="font-size:1.25rem; color:#38bdf8; margin:0; max-width:100%;">${s.title}</h3>
+                <div style="font-size:0.92rem; color:#cbd5e1; line-height:1.5; max-width:100%; padding:0 4px;">${s.body}</div>
+            `;
+            document.getElementById('tutorial-btn-prev').style.visibility = (this.step === 0) ? 'hidden' : 'visible';
+            let nextBtn = document.getElementById('tutorial-btn-next');
+            nextBtn.textContent = (this.step >= total - 1) ? t('tutStart') : t('tutNext');
+            let skipBtn = document.getElementById('tutorial-btn-skip');
+            if (skipBtn) {
+                skipBtn.textContent = t('tutSkip');
+                skipBtn.style.visibility = (this.step >= total - 1) ? 'hidden' : 'visible';
+            }
+        }
+    };
     const AudioFX = {
         ctx: null,
         init() { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -4626,6 +4853,7 @@
             try { Social.subscribeToIncomingInvites(); } catch(err) { console.error('Erro em subscribeToIncomingInvites:', err); }
             try { Social.startPresenceHeartbeat(); } catch(err) { console.error('Erro em startPresenceHeartbeat:', err); }
             if (typeof fitGameContainer === 'function') fitGameContainer();
+            try { Tutorial.openIfFirstTime(); } catch(err) { console.error('Erro ao abrir tutorial:', err); }
         },
         logoutAccount() {
             this.saveProfile();
@@ -5968,5 +6196,21 @@
         }
     }
 </script>
+
+<div id="tutorial-overlay" class="hidden" style="position:fixed; inset:0; z-index:9999; background:rgba(2,6,23,0.92); display:flex; align-items:center; justify-content:center; padding:16px; box-sizing:border-box;">
+    <div id="tutorial-box" style="background:#0f172a; border:1px solid #1e293b; border-radius:12px; width:min(560px,100%); max-height:92vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.5); box-sizing:border-box;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 18px 0 18px; gap:10px;">
+            <div id="tutorial-step-counter" style="font-size:0.78rem; color:#64748b; font-weight:700; letter-spacing:0.03em; flex-shrink:0;">1 / 10</div>
+            <button onclick="Tutorial.close()" style="background:transparent; border:none; color:#64748b; font-size:1.3rem; cursor:pointer; line-height:1; padding:2px 6px; flex-shrink:0;">✕</button>
+        </div>
+        <div style="display:flex; gap:3px; padding:10px 18px 0 18px;" id="tutorial-progress-dots"></div>
+        <div id="tutorial-content" style="padding:18px; overflow-y:auto; flex:1 1 auto; min-height:0; display:flex; flex-direction:column; gap:12px; align-items:center; justify-content:center; text-align:center; box-sizing:border-box; word-break:break-word;"></div>
+        <div style="display:flex; gap:10px; padding:16px 18px; border-top:1px solid #1e293b; box-sizing:border-box; align-items:center;">
+            <button id="tutorial-btn-skip" onclick="Tutorial.close()" style="background:transparent; border:none; color:#64748b; font-size:0.78rem; font-weight:700; cursor:pointer; padding:11px 2px; text-decoration:underline; flex-shrink:0; white-space:nowrap;"></button>
+            <button id="tutorial-btn-prev" onclick="Tutorial.prev()" style="flex:1; background:transparent; border:1px solid #334155; color:#94a3b8; padding:11px; border-radius:6px; font-weight:700; cursor:pointer;">◀</button>
+            <button id="tutorial-btn-next" onclick="Tutorial.next()" style="flex:2; background:linear-gradient(to right,#3b82f6,#6366f1); border:none; color:white; padding:11px; border-radius:6px; font-weight:700; cursor:pointer;">▶</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
