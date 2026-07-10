@@ -365,7 +365,7 @@
     <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
     <div id="auth-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
-            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 5.0</span></div>
+            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 7.0</span></div>
             <div class="auth-sub" data-i18n="authSubtitle">Horizon Survival Tournament 2026</div>
             <div class="auth-tabs" id="auth-tabs">
                 <button id="tab-login" class="active" onclick="Accounts.showTab('login')" data-i18n="authTabLogin">🔑 Entrar</button>
@@ -413,7 +413,7 @@
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 5.0</span></h1>
+                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 7.0</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button id="btn-social-players" onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
                         <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
@@ -432,7 +432,6 @@
                         </div>
                     </div>
                 </div>
-                <p data-i18n="tagline">Horizon Survival Tournament — Cosmic Engine 2026</p>
                 <div class="user-bar" style="flex-wrap:wrap; row-gap:8px;">
                     <span id="lbl-logged-in-user"></span>
                     <div id="level-badge" onclick="Engine.openAchievements()" style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-left:10px;">
@@ -448,6 +447,19 @@
             <div class="config-section">
                 <div class="section-title" data-i18n="arenaStructureTitle">Estrutura de Arena</div>
                 <button id="btn-world-type" onclick="Engine.toggleOpenWorld()" style="width:100%; margin-bottom:12px; background:#0ea5e9; color:#020617; font-weight:800;">Mundo Aberto: DESATIVADO</button>
+                <button id="btn-vs-ai" onclick="Engine.toggleAIPanel()" style="width:100%; margin-bottom:12px; background:#7c3aed; color:#fff; font-weight:800;" data-i18n="vsAiBtn">🤖 Jogar Contra Inteligência Artificial</button>
+                <div id="ai-diff-panel" class="hidden" style="margin-bottom:12px; background:#0f172a; border:1px solid #7c3aed; border-radius:8px; padding:12px;">
+                    <div style="font-size:0.82rem; color:#c4b5fd; margin-bottom:8px; font-weight:700;" data-i18n="vsAiChooseDiff">Escolha a Dificuldade da IA:</div>
+                    <div class="btn-group" style="margin-bottom:8px;">
+                        <button id="btn-ai-easy" onclick="Engine.selectAIDifficulty('easy')" style="background:#166534; border-color:#22c55e;" data-i18n="vsAiEasy">Fácil (recompensa baixa)</button>
+                        <button id="btn-ai-medium" onclick="Engine.selectAIDifficulty('medium')" style="background:#854d0e; border-color:#eab308;" data-i18n="vsAiMedium">Médio (recompensa média)</button>
+                    </div>
+                    <div class="btn-group" style="margin-bottom:10px;">
+                        <button id="btn-ai-hard" onclick="Engine.selectAIDifficulty('hard')" style="background:#9a3412; border-color:#f97316;" data-i18n="vsAiHard">Difícil (recompensa alta)</button>
+                        <button id="btn-ai-brutal" onclick="Engine.selectAIDifficulty('brutal')" style="background:#7f1d1d; border-color:#ef4444;" data-i18n="vsAiBrutal">Brutal (recompensa máxima)</button>
+                    </div>
+                    <button onclick="Engine.startVsAI()" style="width:100%; background:linear-gradient(to right,#7c3aed,#a855f7); color:#fff; font-weight:800; padding:10px;" data-i18n="vsAiStartBtn">INICIAR DUELO CONTRA IA</button>
+                </div>
                 
                 <div class="section-title" data-i18n="combatModeTitle">Modo de Combate</div>
                 <div class="btn-group">
@@ -484,6 +496,11 @@
                     </div>
                 </div>
                 <div id="lbl-arch-desc" style="margin-top:12px; font-size:0.85rem; color:#94a3b8; min-height:40px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px;"></div>
+            </div>
+            <div class="config-section">
+                <div class="section-title" data-i18n="weaponSelectTitle">Arma Equipada</div>
+                <div id="weapon-select-grid" class="char-grid" style="grid-template-columns: repeat(4, 1fr);"></div>
+                <div id="lbl-weapon-desc" style="margin-top:12px; font-size:0.85rem; color:#94a3b8; min-height:20px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px;"></div>
             </div>
             <button onclick="Engine.startMatch()" style="background:linear-gradient(to right, #10b981, #059669); color:white; font-size:1.3rem; padding:16px; border:none; border-radius:8px; box-shadow:0 4px 15px rgba(16,185,129,0.3); margin-top:10px;" data-i18n="startBtn">INICIAR SIMULAÇÃO</button>
         </div>
@@ -843,7 +860,6 @@
     };
     const I18N = {
         'pt-BR': {
-            tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
             rotateDeviceHint: "Gire seu aparelho para jogar na horizontal",
             settingsBtn: "⚙",
             arenaStructureTitle: "Estrutura de Arena",
@@ -881,7 +897,7 @@
             namePlayer1Title: "Nome do Jogador 1", namePlayer2Title: "Nome do Jogador 2",
             nameEntryConfirmBtn: "CONFIRMAR E CONTINUAR",
             p1Label: "P1 (HERÓI)", p2Label: "P2 (RIVAL)",
-            earningsLabel: "Ganhos", weaponLabel: "Arma",
+            earningsLabel: "Ganhos", weaponLabel: "Arma", weaponSelectTitle: "Arma Equipada", weaponEquippedLabel: "✓ Equipada", weaponSelectBtn: "Selecionar", weaponLockedLabel: "🔒 Compre na loja", weaponSelectHint: "Escolha qual arma comprada você vai usar na partida.", ownedLabel: "✓ Possuída",
             weaponName_default: "Padrão", weaponName_pistol: "Pistola Veloz", weaponName_laser: "Laser Bolt",
             weaponName_plasma: "Plasma Blaster", weaponName_cannon: "Cano Devastador", weaponName_plasmaHunter: "Plasma Caçador",
             weaponName_smg: "Submetralhadora Fúria", weaponName_sniper: "Rifle Sniper Órbita", weaponName_railgun: "Railgun Singularidade",
@@ -1045,15 +1061,25 @@
 
             tut12Title: "Escolha seu Herói", tut12Body: "Antes de começar, escolha um <b>arquétipo</b>: Hero (balanceado), Vilan (tiro triplo em leque) ou Killer (veloz e letal). Cada um joga de um jeito diferente!",
             tut13Title: "Modos de Jogo", tut13Body: "Escolha entre <b>Horda Solo</b>, <b>Caça ao Ouro</b>, <b>Modo Titã</b> (inimigo super forte) ou <b>Modo Chefe</b> (boss). Também dá pra jogar <b>Duelo 1v1 Local</b>, com dois jogadores no mesmo teclado (P1 e P2). Você também pode ativar o <b>Mundo Aberto</b> para jogar em um mapa infinito no modo solo.",
+            tut20Title: "Contra Inteligência Artificial", tut20Body: "No menu, use o botão <b>🤖 Jogar Contra Inteligência Artificial</b> para enfrentar um bot em um duelo 1v1. Escolha a dificuldade (Fácil, Médio, Difícil ou Brutal): quanto mais difícil, mais esperto, rápido e preciso o bot fica, e maior a recompensa se você vencer. A partida acaba quando um dos dois for derrotado, e a recompensa final depende só do resultado (vitória ou derrota), não do ouro coletado na partida.",
+            aiOpponentLabel: "IA",
+            vsAiBtn: "🤖 Jogar Contra Inteligência Artificial", vsAiChooseDiff: "Escolha a Dificuldade da IA:",
+            vsAiEasy: "Fácil (recompensa baixa)", vsAiMedium: "Médio (recompensa média)",
+            vsAiHard: "Difícil (recompensa alta)", vsAiBrutal: "Brutal (recompensa máxima)",
+            vsAiStartBtn: "INICIAR DUELO CONTRA IA",
+            vsAiDiffNameEasy: "Fácil", vsAiDiffNameMedium: "Médio", vsAiDiffNameHard: "Difícil", vsAiDiffNameBrutal: "Brutal",
+            vsAiResultWin: "VITÓRIA", vsAiResultLoss: "DERROTA", vsAiDuelLabel: "Duelo IA",
+            vsAiPlayerWinsTitle: "VOCÊ VENCEU A IA!", vsAiPlayerWinsDesc: "Você derrotou o oponente controlado por Inteligência Artificial.",
+            vsAiAiWinsTitle: "A IA VENCEU!", vsAiAiWinsDesc: "O oponente de Inteligência Artificial derrotou você em combate.",
             tut14Title: "Pular", tut14BodyMobile: "Toque no botão <b>⤒</b> para pular. Também há um botão <b>DASH</b> para uma esquiva rápida.",
             tut15Title: "Grupos e Convites", tut15Body: "Crie <b>grupos de chat</b> com vários amigos de uma vez, e envie <b>convites de partida</b> direto pelo chat para chamar alguém pra jogar com você.",
 
             tut16Title: "Esconderijo Secreto", tut16Body: "Encontre o esconderijo escondido no mapa e pressione <b>E</b> para entrar (no celular, toque no botão <b>🚪</b>). É um bom lugar pra se proteger dos inimigos.",
             tut17Title: "Seguir Jogadores", tut17Body: "Além de conversar, você pode <b>seguir</b> outros jogadores na aba <b>⭐ Seguindo</b> da busca de jogadores, pra acompanhar quem você mais gosta de jogar junto.",
-            tut18Title: "Reportar um Erro", tut18Body: "Encontrou algum bug? Vá em Configurações e use o botão <b>🐞 REPORTAR UM ERRO</b> para nos avisar. Isso ajuda a melhorar o jogo!"
+            tut18Title: "Reportar um Erro", tut18Body: "Encontrou algum bug? Vá em Configurações e use o botão <b>🐞 REPORTAR UM ERRO</b> para nos avisar. Isso ajuda a melhorar o jogo!",
+            tut19Title: "Comprando e Equipando Armas", tut19Body: "Compre armas na loja com seu ouro — quanto mais forte, mais cara! Depois de comprar, vá em <b>Arma Equipada</b> na tela inicial e selecione qual arma comprada você quer usar na partida."
         },
         'en': {
-            tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
             rotateDeviceHint: "Rotate your device to play in landscape",
             settingsBtn: "⚙", arenaStructureTitle: "Arena Structure",
             worldLabel: "Open World", worldOff: "DISABLED", worldOn: "INFINITE (SOLO)",
@@ -1089,7 +1115,7 @@
             namePlayer1Title: "Player 1 Name", namePlayer2Title: "Player 2 Name",
             nameEntryConfirmBtn: "CONFIRM AND CONTINUE",
             p1Label: "P1 (HERO)", p2Label: "P2 (RIVAL)",
-            earningsLabel: "Earnings", weaponLabel: "Weapon",
+            earningsLabel: "Earnings", weaponLabel: "Weapon", weaponSelectTitle: "Equipped Weapon", weaponEquippedLabel: "✓ Equipped", weaponSelectBtn: "Select", weaponLockedLabel: "🔒 Buy in the shop", weaponSelectHint: "Choose which purchased weapon you'll use in the match.", ownedLabel: "✓ Owned",
             weaponName_default: "Standard", weaponName_pistol: "Swift Pistol", weaponName_laser: "Laser Bolt",
             weaponName_plasma: "Plasma Blaster", weaponName_cannon: "Devastator Cannon", weaponName_plasmaHunter: "Plasma Hunter",
             weaponName_smg: "Fury SMG", weaponName_sniper: "Orbit Sniper Rifle", weaponName_railgun: "Singularity Railgun",
@@ -1252,15 +1278,25 @@
 
             tut12Title: "Choose Your Hero", tut12Body: "Before starting, pick an <b>archetype</b>: Hero (balanced), Vilan (triple spread shot) or Killer (fast and lethal). Each one plays differently!",
             tut13Title: "Game Modes", tut13Body: "Choose between <b>Solo Horde</b>, <b>Gold Rush</b>, <b>Titan Mode</b> (super strong enemy) or <b>Boss Mode</b>. You can also play <b>Local 1v1 Duel</b>, with two players on the same keyboard (P1 and P2). You can also enable <b>Open World</b> to play on an infinite map in solo mode.",
+            tut20Title: "Vs Artificial Intelligence", tut20Body: "In the menu, use the <b>🤖 Play Against Artificial Intelligence</b> button to face a bot in a 1v1 duel. Pick the difficulty (Easy, Medium, Hard or Brutal): the harder it is, the smarter, faster and more accurate the bot gets, and the bigger the reward if you win. The match ends when one of you is defeated, and the final reward depends only on the result (win or loss), not on the gold collected during the match.",
+            aiOpponentLabel: "AI",
+            vsAiBtn: "🤖 Play Against Artificial Intelligence", vsAiChooseDiff: "Choose the AI Difficulty:",
+            vsAiEasy: "Easy (low reward)", vsAiMedium: "Medium (medium reward)",
+            vsAiHard: "Hard (high reward)", vsAiBrutal: "Brutal (max reward)",
+            vsAiStartBtn: "START AI DUEL",
+            vsAiDiffNameEasy: "Easy", vsAiDiffNameMedium: "Medium", vsAiDiffNameHard: "Hard", vsAiDiffNameBrutal: "Brutal",
+            vsAiResultWin: "VICTORY", vsAiResultLoss: "DEFEAT", vsAiDuelLabel: "AI Duel",
+            vsAiPlayerWinsTitle: "YOU DEFEATED THE AI!", vsAiPlayerWinsDesc: "You defeated the Artificial Intelligence opponent.",
+            vsAiAiWinsTitle: "THE AI WINS!", vsAiAiWinsDesc: "The Artificial Intelligence opponent defeated you in combat.",
             tut14Title: "Jumping", tut14BodyMobile: "Tap the <b>⤒</b> button to jump. There's also a <b>DASH</b> button for a quick dodge.",
             tut15Title: "Groups and Invites", tut15Body: "Create <b>chat groups</b> with several friends at once, and send <b>match invites</b> right from the chat to call someone to play with you.",
 
             tut16Title: "Secret Hideout", tut16Body: "Find the hidden hideout on the map and press <b>E</b> to enter it (on mobile, tap the <b>🚪</b> button). It's a good spot to take cover from enemies.",
             tut17Title: "Following Players", tut17Body: "Besides chatting, you can <b>follow</b> other players from the <b>⭐ Following</b> tab in player search, to keep track of who you like playing with.",
-            tut18Title: "Report a Bug", tut18Body: "Found a bug? Go to Settings and use the <b>🐞 REPORT A BUG</b> button to let us know. It helps improve the game!"
+            tut18Title: "Report a Bug", tut18Body: "Found a bug? Go to Settings and use the <b>🐞 REPORT A BUG</b> button to let us know. It helps improve the game!",
+            tut19Title: "Buying and Equipping Weapons", tut19Body: "Buy weapons in the shop with your gold — the stronger, the pricier! After buying, go to <b>Equipped Weapon</b> on the main screen and select which purchased weapon you want to use in the match."
         },
         'de': {
-            tagline: "Horizon Survival Turnier — Cosmic Engine 2026",
             rotateDeviceHint: "Drehen Sie Ihr Gerät, um im Querformat zu spielen",
             settingsBtn: "⚙", arenaStructureTitle: "Arena-Struktur",
             worldLabel: "Offene Welt", worldOff: "DEAKTIVIERT", worldOn: "UNENDLICH (SOLO)",
@@ -1296,7 +1332,7 @@
             namePlayer1Title: "Name von Spieler 1", namePlayer2Title: "Name von Spieler 2",
             nameEntryConfirmBtn: "BESTÄTIGEN UND FORTFAHREN",
             p1Label: "P1 (HELD)", p2Label: "P2 (RIVALE)",
-            earningsLabel: "Einnahmen", weaponLabel: "Waffe",
+            earningsLabel: "Einnahmen", weaponLabel: "Waffe", weaponSelectTitle: "Ausgerüstete Waffe", weaponEquippedLabel: "✓ Ausgerüstet", weaponSelectBtn: "Auswählen", weaponLockedLabel: "🔒 Im Laden kaufen", weaponSelectHint: "Wähle, welche gekaufte Waffe du im Match benutzt.", ownedLabel: "✓ Besessen",
             weaponName_default: "Standard", weaponName_pistol: "Schnelle Pistole", weaponName_laser: "Laser-Bolzen",
             weaponName_plasma: "Plasma-Blaster", weaponName_cannon: "Verwüster-Kanone", weaponName_plasmaHunter: "Plasma-Jäger",
             weaponName_smg: "Fury-MP", weaponName_sniper: "Orbit-Scharfschützengewehr", weaponName_railgun: "Singularitäts-Railgun",
@@ -1454,15 +1490,25 @@
 
             tut12Title: "Wähle deinen Helden", tut12Body: "Bevor du startest, wähle einen <b>Archetyp</b>: Hero (ausgewogen), Vilan (dreifacher Streuschuss) oder Killer (schnell und tödlich). Jeder spielt sich anders!",
             tut13Title: "Spielmodi", tut13Body: "Wähle zwischen <b>Solo-Horde</b>, <b>Goldrausch</b>, <b>Titan-Modus</b> (super starker Gegner) oder <b>Boss-Modus</b>. Du kannst auch <b>Lokales 1v1-Duell</b> spielen, mit zwei Spielern an derselben Tastatur (P1 und P2). Du kannst auch die <b>Offene Welt</b> aktivieren, um im Solo-Modus auf einer unendlichen Karte zu spielen.",
+            tut20Title: "Gegen Künstliche Intelligenz", tut20Body: "Nutze im Menü die Schaltfläche <b>🤖 Gegen Künstliche Intelligenz Spielen</b>, um in einem 1v1-Duell gegen einen Bot anzutreten. Wähle die Schwierigkeit (Leicht, Mittel, Schwer oder Brutal): Je schwerer, desto klüger, schneller und präziser wird der Bot, und desto größer die Belohnung bei einem Sieg. Das Match endet, wenn einer von euch besiegt wird, und die Endbelohnung hängt nur vom Ergebnis (Sieg oder Niederlage) ab, nicht vom gesammelten Gold während des Matches.",
+            aiOpponentLabel: "KI",
+            vsAiBtn: "🤖 Gegen Künstliche Intelligenz Spielen", vsAiChooseDiff: "Wähle die KI-Schwierigkeit:",
+            vsAiEasy: "Leicht (niedrige Belohnung)", vsAiMedium: "Mittel (mittlere Belohnung)",
+            vsAiHard: "Schwer (hohe Belohnung)", vsAiBrutal: "Brutal (maximale Belohnung)",
+            vsAiStartBtn: "KI-DUELL STARTEN",
+            vsAiDiffNameEasy: "Leicht", vsAiDiffNameMedium: "Mittel", vsAiDiffNameHard: "Schwer", vsAiDiffNameBrutal: "Brutal",
+            vsAiResultWin: "SIEG", vsAiResultLoss: "NIEDERLAGE", vsAiDuelLabel: "KI-Duell",
+            vsAiPlayerWinsTitle: "DU HAST DIE KI BESIEGT!", vsAiPlayerWinsDesc: "Du hast den von Künstlicher Intelligenz gesteuerten Gegner besiegt.",
+            vsAiAiWinsTitle: "DIE KI GEWINNT!", vsAiAiWinsDesc: "Der Gegner mit Künstlicher Intelligenz hat dich im Kampf besiegt.",
             tut14Title: "Springen", tut14BodyMobile: "Tippe auf <b>⤒</b>, um zu springen. Es gibt auch eine <b>DASH</b>-Schaltfläche für ein schnelles Ausweichen.",
             tut15Title: "Gruppen und Einladungen", tut15Body: "Erstelle <b>Chat-Gruppen</b> mit mehreren Freunden gleichzeitig und sende <b>Spieleinladungen</b> direkt aus dem Chat, um jemanden zum Mitspielen einzuladen.",
 
             tut16Title: "Geheimes Versteck", tut16Body: "Finde das versteckte Versteck auf der Karte und drücke <b>E</b>, um es zu betreten (auf dem Handy die Schaltfläche <b>🚪</b> antippen). Ein guter Ort, um sich vor Gegnern zu schützen.",
             tut17Title: "Spielern folgen", tut17Body: "Neben dem Chatten kannst du anderen Spielern über den Tab <b>⭐ Folge ich</b> in der Spielersuche <b>folgen</b>, um im Blick zu behalten, mit wem du gerne spielst.",
-            tut18Title: "Fehler melden", tut18Body: "Einen Fehler gefunden? Gehe zu den Einstellungen und nutze die Schaltfläche <b>🐞 FEHLER MELDEN</b>, um uns Bescheid zu geben. Das hilft, das Spiel zu verbessern!"
+            tut18Title: "Fehler melden", tut18Body: "Einen Fehler gefunden? Gehe zu den Einstellungen und nutze die Schaltfläche <b>🐞 FEHLER MELDEN</b>, um uns Bescheid zu geben. Das hilft, das Spiel zu verbessern!",
+            tut19Title: "Waffen kaufen und ausrüsten", tut19Body: "Kaufe Waffen im Laden mit deinem Gold — je stärker, desto teurer! Wähle nach dem Kauf unter <b>Ausgerüstete Waffe</b> auf dem Hauptbildschirm, welche gekaufte Waffe du im Match nutzen möchtest."
         },
         'es': {
-            tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
             rotateDeviceHint: "Gira tu dispositivo para jugar en horizontal",
             settingsBtn: "⚙", arenaStructureTitle: "Estructura de Arena",
             worldLabel: "Mundo Abierto", worldOff: "DESACTIVADO", worldOn: "INFINITO (SOLO)",
@@ -1498,7 +1544,7 @@
             namePlayer1Title: "Nombre del Jugador 1", namePlayer2Title: "Nombre del Jugador 2",
             nameEntryConfirmBtn: "CONFIRMAR Y CONTINUAR",
             p1Label: "P1 (HÉROE)", p2Label: "P2 (RIVAL)",
-            earningsLabel: "Ganancias", weaponLabel: "Arma",
+            earningsLabel: "Ganancias", weaponLabel: "Arma", weaponSelectTitle: "Arma Equipada", weaponEquippedLabel: "✓ Equipada", weaponSelectBtn: "Seleccionar", weaponLockedLabel: "🔒 Compra en la tienda", weaponSelectHint: "Elige qué arma comprada usarás en la partida.", ownedLabel: "✓ Poseída",
             weaponName_default: "Estándar", weaponName_pistol: "Pistola Veloz", weaponName_laser: "Rayo Láser",
             weaponName_plasma: "Blaster de Plasma", weaponName_cannon: "Cañón Devastador", weaponName_plasmaHunter: "Cazador de Plasma",
             weaponName_smg: "Subfusil Furia", weaponName_sniper: "Rifle Francotirador Órbita", weaponName_railgun: "Railgun Singularidad",
@@ -1656,15 +1702,25 @@
 
             tut12Title: "Elige tu Héroe", tut12Body: "Antes de empezar, elige un <b>arquetipo</b>: Hero (equilibrado), Vilan (disparo triple en abanico) o Killer (veloz y letal). ¡Cada uno se juega de forma distinta!",
             tut13Title: "Modos de Juego", tut13Body: "Elige entre <b>Horda Solo</b>, <b>Caza del Oro</b>, <b>Modo Titán</b> (enemigo súper fuerte) o <b>Modo Jefe</b>. También puedes jugar <b>Duelo 1v1 Local</b>, con dos jugadores en el mismo teclado (P1 y P2). También puedes activar el <b>Mundo Abierto</b> para jugar en un mapa infinito en modo solo.",
+            tut20Title: "Contra Inteligencia Artificial", tut20Body: "En el menú, usa el botón <b>🤖 Jugar Contra Inteligencia Artificial</b> para enfrentar a un bot en un duelo 1v1. Elige la dificultad (Fácil, Medio, Difícil o Brutal): cuanto más difícil, más inteligente, rápido y preciso será el bot, y mayor será la recompensa si ganas. La partida termina cuando uno de los dos es derrotado, y la recompensa final depende solo del resultado (victoria o derrota), no del oro recogido durante la partida.",
+            aiOpponentLabel: "IA",
+            vsAiBtn: "🤖 Jugar Contra Inteligencia Artificial", vsAiChooseDiff: "Elige la Dificultad de la IA:",
+            vsAiEasy: "Fácil (recompensa baja)", vsAiMedium: "Medio (recompensa media)",
+            vsAiHard: "Difícil (recompensa alta)", vsAiBrutal: "Brutal (recompensa máxima)",
+            vsAiStartBtn: "INICIAR DUELO CONTRA IA",
+            vsAiDiffNameEasy: "Fácil", vsAiDiffNameMedium: "Medio", vsAiDiffNameHard: "Difícil", vsAiDiffNameBrutal: "Brutal",
+            vsAiResultWin: "VICTORIA", vsAiResultLoss: "DERROTA", vsAiDuelLabel: "Duelo IA",
+            vsAiPlayerWinsTitle: "¡VENCISTE A LA IA!", vsAiPlayerWinsDesc: "Derrotaste al oponente controlado por Inteligencia Artificial.",
+            vsAiAiWinsTitle: "¡LA IA GANÓ!", vsAiAiWinsDesc: "El oponente de Inteligencia Artificial te derrotó en combate.",
             tut14Title: "Saltar", tut14BodyMobile: "Toca el botón <b>⤒</b> para saltar. También hay un botón <b>DASH</b> para una esquiva rápida.",
             tut15Title: "Grupos e Invitaciones", tut15Body: "Crea <b>grupos de chat</b> con varios amigos a la vez, y envía <b>invitaciones de partida</b> directamente desde el chat para invitar a alguien a jugar contigo.",
 
             tut16Title: "Escondite Secreto", tut16Body: "Encuentra el escondite oculto en el mapa y presiona <b>E</b> para entrar (en móvil, toca el botón <b>🚪</b>). Es un buen lugar para protegerte de los enemigos.",
             tut17Title: "Seguir Jugadores", tut17Body: "Además de chatear, puedes <b>seguir</b> a otros jugadores desde la pestaña <b>⭐ Siguiendo</b> en la búsqueda de jugadores, para llevar registro de con quién te gusta jugar.",
-            tut18Title: "Reportar un Error", tut18Body: "¿Encontraste un error? Ve a Configuración y usa el botón <b>🐞 REPORTAR UN ERROR</b> para avisarnos. ¡Esto ayuda a mejorar el juego!"
+            tut18Title: "Reportar un Error", tut18Body: "¿Encontraste un error? Ve a Configuración y usa el botón <b>🐞 REPORTAR UN ERROR</b> para avisarnos. ¡Esto ayuda a mejorar el juego!",
+            tut19Title: "Comprar y Equipar Armas", tut19Body: "Compra armas en la tienda con tu oro — ¡cuanto más fuerte, más cara! Después de comprar, ve a <b>Arma Equipada</b> en la pantalla principal y selecciona qué arma comprada quieres usar en la partida."
         },
         'it': {
-            tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
             rotateDeviceHint: "Ruota il tuo dispositivo per giocare in orizzontale",
             settingsBtn: "⚙", arenaStructureTitle: "Struttura dell'Arena",
             worldLabel: "Mondo Aperto", worldOff: "DISATTIVATO", worldOn: "INFINITO (SOLO)",
@@ -1700,7 +1756,7 @@
             namePlayer1Title: "Nome del Giocatore 1", namePlayer2Title: "Nome del Giocatore 2",
             nameEntryConfirmBtn: "CONFERMA E CONTINUA",
             p1Label: "P1 (EROE)", p2Label: "P2 (RIVALE)",
-            earningsLabel: "Guadagni", weaponLabel: "Arma",
+            earningsLabel: "Guadagni", weaponLabel: "Arma", weaponSelectTitle: "Arma Equipaggiata", weaponEquippedLabel: "✓ Equipaggiata", weaponSelectBtn: "Seleziona", weaponLockedLabel: "🔒 Compra nel negozio", weaponSelectHint: "Scegli quale arma acquistata userai nella partita.", ownedLabel: "✓ Posseduta",
             weaponName_default: "Standard", weaponName_pistol: "Pistola Veloce", weaponName_laser: "Raggio Laser",
             weaponName_plasma: "Blaster al Plasma", weaponName_cannon: "Cannone Devastatore", weaponName_plasmaHunter: "Cacciatore di Plasma",
             weaponName_smg: "Mitragliatrice Furia", weaponName_sniper: "Fucile da Cecchino Orbita", weaponName_railgun: "Railgun Singolarità",
@@ -1858,15 +1914,25 @@
 
             tut12Title: "Scegli il tuo Eroe", tut12Body: "Prima di iniziare, scegli un <b>archetipo</b>: Hero (bilanciato), Vilan (tripla raffica a ventaglio) o Killer (veloce e letale). Ognuno si gioca in modo diverso!",
             tut13Title: "Modalità di Gioco", tut13Body: "Scegli tra <b>Orda Solo</b>, <b>Caccia all'Oro</b>, <b>Modalità Titano</b> (nemico super forte) o <b>Modalità Boss</b>. Puoi anche giocare <b>Duello 1v1 Locale</b>, con due giocatori sulla stessa tastiera (P1 e P2). Puoi anche attivare il <b>Mondo Aperto</b> per giocare su una mappa infinita in modalità solo.",
+            tut20Title: "Contro l'Intelligenza Artificiale", tut20Body: "Nel menu, usa il pulsante <b>🤖 Gioca Contro l'Intelligenza Artificiale</b> per affrontare un bot in un duello 1v1. Scegli la difficoltà (Facile, Medio, Difficile o Brutale): più è difficile, più il bot diventa intelligente, veloce e preciso, e maggiore sarà la ricompensa se vinci. La partita finisce quando uno dei due viene sconfitto, e la ricompensa finale dipende solo dal risultato (vittoria o sconfitta), non dall'oro raccolto durante la partita.",
+            aiOpponentLabel: "IA",
+            vsAiBtn: "🤖 Gioca Contro l'Intelligenza Artificiale", vsAiChooseDiff: "Scegli la Difficoltà dell'IA:",
+            vsAiEasy: "Facile (ricompensa bassa)", vsAiMedium: "Medio (ricompensa media)",
+            vsAiHard: "Difficile (ricompensa alta)", vsAiBrutal: "Brutale (ricompensa massima)",
+            vsAiStartBtn: "INIZIA DUELLO CONTRO IA",
+            vsAiDiffNameEasy: "Facile", vsAiDiffNameMedium: "Medio", vsAiDiffNameHard: "Difficile", vsAiDiffNameBrutal: "Brutale",
+            vsAiResultWin: "VITTORIA", vsAiResultLoss: "SCONFITTA", vsAiDuelLabel: "Duello IA",
+            vsAiPlayerWinsTitle: "HAI SCONFITTO L'IA!", vsAiPlayerWinsDesc: "Hai sconfitto l'avversario controllato dall'Intelligenza Artificiale.",
+            vsAiAiWinsTitle: "L'IA VINCE!", vsAiAiWinsDesc: "L'avversario controllato dall'Intelligenza Artificiale ti ha sconfitto in combattimento.",
             tut14Title: "Saltare", tut14BodyMobile: "Tocca il pulsante <b>⤒</b> per saltare. C'è anche un pulsante <b>DASH</b> per una schivata rapida.",
             tut15Title: "Gruppi e Inviti", tut15Body: "Crea <b>gruppi di chat</b> con più amici contemporaneamente e invia <b>inviti di partita</b> direttamente dalla chat per chiamare qualcuno a giocare con te.",
 
             tut16Title: "Nascondiglio Segreto", tut16Body: "Trova il nascondiglio segreto sulla mappa e premi <b>E</b> per entrare (su mobile, tocca il pulsante <b>🚪</b>). È un buon posto per ripararsi dai nemici.",
             tut17Title: "Seguire i Giocatori", tut17Body: "Oltre a chattare, puoi <b>seguire</b> altri giocatori dalla scheda <b>⭐ Seguiti</b> nella ricerca giocatori, per tenere traccia di con chi ti piace giocare.",
-            tut18Title: "Segnala un Errore", tut18Body: "Hai trovato un errore? Vai su Impostazioni e usa il pulsante <b>🐞 SEGNALA UN ERRORE</b> per avvisarci. Questo aiuta a migliorare il gioco!"
+            tut18Title: "Segnala un Errore", tut18Body: "Hai trovato un errore? Vai su Impostazioni e usa il pulsante <b>🐞 SEGNALA UN ERRORE</b> per avvisarci. Questo aiuta a migliorare il gioco!",
+            tut19Title: "Acquistare ed Equipaggiare Armi", tut19Body: "Compra armi nel negozio con il tuo oro — più sono forti, più costano! Dopo l'acquisto, vai su <b>Arma Equipaggiata</b> nella schermata principale e seleziona quale arma acquistata vuoi usare nella partita."
         },
         'fr': {
-            tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
             rotateDeviceHint: "Tournez votre appareil pour jouer en mode paysage",
             settingsBtn: "⚙", arenaStructureTitle: "Structure de l'Arène",
             worldLabel: "Monde Ouvert", worldOff: "DÉSACTIVÉ", worldOn: "INFINI (SOLO)",
@@ -1902,7 +1968,7 @@
             namePlayer1Title: "Nom du Joueur 1", namePlayer2Title: "Nom du Joueur 2",
             nameEntryConfirmBtn: "CONFIRMER ET CONTINUER",
             p1Label: "P1 (HÉROS)", p2Label: "P2 (RIVAL)",
-            earningsLabel: "Gains", weaponLabel: "Arme",
+            earningsLabel: "Gains", weaponLabel: "Arme", weaponSelectTitle: "Arme Équipée", weaponEquippedLabel: "✓ Équipée", weaponSelectBtn: "Sélectionner", weaponLockedLabel: "🔒 Achetez dans la boutique", weaponSelectHint: "Choisissez quelle arme achetée vous utiliserez en match.", ownedLabel: "✓ Possédée",
             weaponName_default: "Standard", weaponName_pistol: "Pistolet Rapide", weaponName_laser: "Rayon Laser",
             weaponName_plasma: "Blaster à Plasma", weaponName_cannon: "Canon Dévastateur", weaponName_plasmaHunter: "Chasseur de Plasma",
             weaponName_smg: "Mitraillette Fureur", weaponName_sniper: "Fusil de Sniper Orbite", weaponName_railgun: "Railgun Singularité",
@@ -2060,12 +2126,23 @@
 
             tut12Title: "Choisissez votre héros", tut12Body: "Avant de commencer, choisissez un <b>archétype</b> : Hero (équilibré), Vilan (tir triple en éventail) ou Killer (rapide et létal). Chacun se joue différemment !",
             tut13Title: "Modes de Jeu", tut13Body: "Choisissez entre <b>Horde Solo</b>, <b>Ruée vers l'Or</b>, <b>Mode Titan</b> (ennemi super fort) ou <b>Mode Boss</b>. Vous pouvez aussi jouer en <b>Duel 1v1 Local</b>, avec deux joueurs sur le même clavier (P1 et P2). Vous pouvez aussi activer le <b>Monde Ouvert</b> pour jouer sur une carte infinie en mode solo.",
+            tut20Title: "Contre l'Intelligence Artificielle", tut20Body: "Dans le menu, utilisez le bouton <b>🤖 Jouer Contre l'Intelligence Artificielle</b> pour affronter un bot dans un duel 1v1. Choisissez la difficulté (Facile, Moyen, Difficile ou Brutal) : plus c'est difficile, plus le bot devient intelligent, rapide et précis, et plus la récompense est grande si vous gagnez. Le match se termine quand l'un de vous est vaincu, et la récompense finale dépend uniquement du résultat (victoire ou défaite), pas de l'or collecté pendant le match.",
+            aiOpponentLabel: "IA",
+            vsAiBtn: "🤖 Jouer Contre l'Intelligence Artificielle", vsAiChooseDiff: "Choisissez la Difficulté de l'IA :",
+            vsAiEasy: "Facile (récompense faible)", vsAiMedium: "Moyen (récompense moyenne)",
+            vsAiHard: "Difficile (récompense élevée)", vsAiBrutal: "Brutal (récompense maximale)",
+            vsAiStartBtn: "DÉMARRER LE DUEL CONTRE L'IA",
+            vsAiDiffNameEasy: "Facile", vsAiDiffNameMedium: "Moyen", vsAiDiffNameHard: "Difficile", vsAiDiffNameBrutal: "Brutal",
+            vsAiResultWin: "VICTOIRE", vsAiResultLoss: "DÉFAITE", vsAiDuelLabel: "Duel IA",
+            vsAiPlayerWinsTitle: "VOUS AVEZ BATTU L'IA !", vsAiPlayerWinsDesc: "Vous avez vaincu l'adversaire contrôlé par l'Intelligence Artificielle.",
+            vsAiAiWinsTitle: "L'IA GAGNE !", vsAiAiWinsDesc: "L'adversaire d'Intelligence Artificielle vous a vaincu au combat.",
             tut14Title: "Sauter", tut14BodyMobile: "Appuyez sur le bouton <b>⤒</b> pour sauter. Il y a aussi un bouton <b>DASH</b> pour esquiver rapidement.",
             tut15Title: "Groupes et Invitations", tut15Body: "Créez des <b>groupes de discussion</b> avec plusieurs amis à la fois, et envoyez des <b>invitations de partie</b> directement depuis le chat pour inviter quelqu'un à jouer avec vous.",
 
             tut16Title: "Cachette Secrète", tut16Body: "Trouvez la cachette secrète sur la carte et appuyez sur <b>E</b> pour y entrer (sur mobile, appuyez sur le bouton <b>🚪</b>). C'est un bon endroit pour se protéger des ennemis.",
             tut17Title: "Suivre des Joueurs", tut17Body: "En plus de discuter, vous pouvez <b>suivre</b> d'autres joueurs depuis l'onglet <b>⭐ Abonnements</b> dans la recherche de joueurs, pour garder une trace de ceux avec qui vous aimez jouer.",
-            tut18Title: "Signaler un Bug", tut18Body: "Vous avez trouvé un bug ? Allez dans Paramètres et utilisez le bouton <b>🐞 SIGNALER UN BUG</b> pour nous le faire savoir. Cela aide à améliorer le jeu !"
+            tut18Title: "Signaler un Bug", tut18Body: "Vous avez trouvé un bug ? Allez dans Paramètres et utilisez le bouton <b>🐞 SIGNALER UN BUG</b> pour nous le faire savoir. Cela aide à améliorer le jeu !",
+            tut19Title: "Acheter et Équiper des Armes", tut19Body: "Achetez des armes dans la boutique avec votre or — plus elles sont puissantes, plus elles coûtent cher ! Après l'achat, allez dans <b>Arme Équipée</b> sur l'écran principal et choisissez quelle arme achetée utiliser en match."
         }
     };
     function t(key) {
@@ -2082,21 +2159,109 @@
         step: 0,
         _cachedSteps: null,
         _seenKey: 'bb-tutorial-seen',
+        // NOVO: pequenos diagramas em SVG (leves, sem depender de imagens externas) pros passos
+        // mais "visuais" do tutorial — controles, combate, vidas, baús, esconderijo e duelo
+        // contra IA. Isso ajuda bastante quem só de ler o texto não visualiza bem a mecânica.
+        svgWrap(inner) { return `<svg viewBox="0 0 220 110" width="220" height="110" style="max-width:100%;">${inner}</svg>`; },
+        visualControlsPc() {
+            return this.svgWrap(`
+                <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
+                <g font-family="inherit" font-weight="800" text-anchor="middle">
+                    <rect x="14" y="18" width="30" height="30" rx="6" fill="#1e293b" stroke="#38bdf8"/>
+                    <text x="29" y="39" fill="#38bdf8" font-size="15">A</text>
+                    <rect x="48" y="18" width="30" height="30" rx="6" fill="#1e293b" stroke="#38bdf8"/>
+                    <text x="63" y="39" fill="#38bdf8" font-size="15">D</text>
+                    <text x="20" y="66" fill="#94a3b8" font-size="9">mover</text>
+                    <rect x="14" y="72" width="64" height="26" rx="6" fill="#1e293b" stroke="#38bdf8"/>
+                    <text x="46" y="90" fill="#38bdf8" font-size="14">W</text>
+                    <text x="46" y="107" fill="#94a3b8" font-size="9">pular</text>
+                    <rect x="120" y="18" width="30" height="30" rx="6" fill="#1e293b" stroke="#f43f5e"/>
+                    <text x="135" y="39" fill="#f43f5e" font-size="15">F</text>
+                    <text x="135" y="63" fill="#94a3b8" font-size="9">atacar</text>
+                    <rect x="160" y="18" width="30" height="30" rx="6" fill="#1e293b" stroke="#a855f7"/>
+                    <text x="175" y="39" fill="#a855f7" font-size="15">G</text>
+                    <text x="175" y="63" fill="#94a3b8" font-size="9">especial</text>
+                </g>
+            `);
+        },
+        visualControlsMobile() {
+            return this.svgWrap(`
+                <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
+                <circle cx="30" cy="55" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="30" y="61" text-anchor="middle" fill="#38bdf8" font-size="16">◀</text>
+                <circle cx="80" cy="55" r="22" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+                <text x="80" y="61" text-anchor="middle" fill="#38bdf8" font-size="16">▶</text>
+                <text x="55" y="92" text-anchor="middle" fill="#94a3b8" font-size="9">arraste o dedo pra mover / segure pra pular</text>
+                <circle cx="165" cy="35" r="17" fill="#1e293b" stroke="#f43f5e" stroke-width="2"/>
+                <text x="165" y="41" text-anchor="middle" fill="#f43f5e" font-size="14">⚔</text>
+                <circle cx="195" cy="60" r="17" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
+                <text x="195" y="66" text-anchor="middle" fill="#a855f7" font-size="14">✦</text>
+                <text x="180" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">atacar / especial</text>
+            `);
+        },
+        visualCombat() {
+            return this.svgWrap(`
+                <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
+                <rect x="24" y="55" width="24" height="34" rx="4" fill="#22c55e"/>
+                <rect x="170" y="55" width="24" height="34" rx="4" fill="#f43f5e"/>
+                <line x1="50" y1="65" x2="165" y2="65" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6 5"/>
+                <circle cx="150" cy="65" r="4" fill="#38bdf8"/>
+                <text x="182" y="45" text-anchor="middle" fill="#fbbf24" font-size="16">💥</text>
+                <text x="110" y="100" text-anchor="middle" fill="#94a3b8" font-size="9">ataque acerta quem estiver na frente</text>
+            `);
+        },
+        visualLives() {
+            return this.svgWrap(`
+                <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
+                <text x="55" y="60" text-anchor="middle" font-size="30">❤</text>
+                <text x="110" y="60" text-anchor="middle" font-size="30">❤</text>
+                <text x="165" y="60" text-anchor="middle" font-size="30" opacity="0.25">🖤</text>
+                <text x="110" y="90" text-anchor="middle" fill="#94a3b8" font-size="9">HP zerou = perde uma vida (coração)</text>
+            `);
+        },
+        visualChest() {
+            return this.svgWrap(`
+                <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
+                <circle cx="110" cy="55" r="42" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="5 4"/>
+                <text x="145" y="63" text-anchor="middle" font-size="26">📦</text>
+                <rect x="70" y="46" width="20" height="28" rx="4" fill="#22c55e"/>
+                <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">chegue perto e abra (B ou botão de baú)</text>
+            `);
+        },
+        visualHideout() {
+            return this.svgWrap(`
+                <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
+                <text x="110" y="60" text-anchor="middle" font-size="30">🚪</text>
+                <text x="110" y="90" text-anchor="middle" fill="#94a3b8" font-size="9">entre e fique protegido por um tempo (E)</text>
+            `);
+        },
+        visualVsAI() {
+            return this.svgWrap(`
+                <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
+                <rect x="24" y="40" width="26" height="36" rx="4" fill="#22c55e"/>
+                <text x="110" y="63" text-anchor="middle" fill="#f8fafc" font-weight="800" font-size="14">VS</text>
+                <rect x="168" y="40" width="26" height="36" rx="4" fill="#a855f7"/>
+                <text x="181" y="34" text-anchor="middle" font-size="16">🤖</text>
+                <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">escolha a dificuldade antes de duelar</text>
+            `);
+        },
         buildSteps() {
             let isMobile = (typeof Engine !== 'undefined' && Engine.device && Engine.device !== 'pc');
             let list = [
                 { icon: '👋', title: t('tut1Title'), body: t('tut1Body') },
                 { icon: '🦸', title: t('tut12Title'), body: t('tut12Body') },
                 { icon: '🏆', title: t('tut13Title'), body: t('tut13Body') },
-                { icon: '🕹️', title: t('tut2Title'), body: isMobile ? t('tut2BodyMobile') : t('tut2BodyPc') }
+                { icon: '🤖', title: t('tut20Title'), body: t('tut20Body'), visual: this.visualVsAI() },
+                { icon: '🕹️', title: t('tut2Title'), body: isMobile ? t('tut2BodyMobile') : t('tut2BodyPc'), visual: isMobile ? this.visualControlsMobile() : this.visualControlsPc() }
             ];
             if (isMobile) list.push({ icon: '⬆️', title: t('tut14Title'), body: t('tut14BodyMobile') });
             list.push(
-                { icon: '⚔️', title: t('tut3Title'), body: isMobile ? t('tut3BodyMobile') : t('tut3BodyPc') },
-                { icon: '❤️', title: t('tut4Title'), body: t('tut4Body') },
-                { icon: '🎁', title: t('tut5Title'), body: t('tut5Body') },
-                { icon: '🚪', title: t('tut16Title'), body: t('tut16Body') },
+                { icon: '⚔️', title: t('tut3Title'), body: isMobile ? t('tut3BodyMobile') : t('tut3BodyPc'), visual: this.visualCombat() },
+                { icon: '❤️', title: t('tut4Title'), body: t('tut4Body'), visual: this.visualLives() },
+                { icon: '🎁', title: t('tut5Title'), body: t('tut5Body'), visual: this.visualChest() },
+                { icon: '🚪', title: t('tut16Title'), body: t('tut16Body'), visual: this.visualHideout() },
                 { icon: '🛒', title: t('tut6Title'), body: t('tut6Body') },
+                { icon: '🔫', title: t('tut19Title'), body: t('tut19Body') },
                 { icon: '⭐', title: t('tut7Title'), body: t('tut7Body') },
                 { icon: '🎨', title: t('tut8Title'), body: t('tut8Body') },
                 { icon: '🌐', title: t('tut9Title'), body: t('tut9Body') },
@@ -2148,7 +2313,7 @@
             dots.innerHTML = steps.map((_, i) => `<div style="flex:1; height:4px; border-radius:2px; background:${i <= this.step ? '#3b82f6' : '#1e293b'};"></div>`).join('');
             let content = document.getElementById('tutorial-content');
             content.innerHTML = `
-                <div style="font-size:3rem; line-height:1;">${s.icon}</div>
+                ${s.visual ? s.visual : `<div style="font-size:3rem; line-height:1;">${s.icon}</div>`}
                 <h3 style="font-size:1.25rem; color:#38bdf8; margin:0; max-width:100%;">${s.title}</h3>
                 <div style="font-size:0.92rem; color:#cbd5e1; line-height:1.5; max-width:100%; padding:0 4px;">${s.body}</div>
             `;
@@ -4556,24 +4721,31 @@
         cameraX: 0, cameraShakeIntensity: 0, timeLeftSeconds: 300, timerTicker: 0, activeMatch: false,
         arenaWidth: 1920, MAX_PLAYER_SPEED: 9, BOOST_SPEED_BONUS: 1.4, BOOST_HP_BONUS: 50,
         modeSolo: false, soloActivePlayer: 1, device: 'pc',
+        vsAI: false, aiDifficulty: 'medium',
+        aiDiffConfig: {
+            easy:   { hpMult: 0.75, spdMult: 0.80, reaction: 40, accuracy: 0.45, aggressiveness: 0.35, atkCdMult: 1.6, rewardWin: 150,  rewardLoss: 20 },
+            medium: { hpMult: 1.0,  spdMult: 1.0,  reaction: 22, accuracy: 0.65, aggressiveness: 0.55, atkCdMult: 1.15, rewardWin: 350,  rewardLoss: 40 },
+            hard:   { hpMult: 1.3,  spdMult: 1.15, reaction: 10, accuracy: 0.82, aggressiveness: 0.75, atkCdMult: 0.85, rewardWin: 700,  rewardLoss: 60 },
+            brutal: { hpMult: 1.7,  spdMult: 1.3,  reaction: 4,  accuracy: 0.95, aggressiveness: 0.92, atkCdMult: 0.6,  rewardWin: 1400, rewardLoss: 80 }
+        },
         players: [], enemies: [], projectiles: [], particles: [], items: [], platforms: [], chunksLoaded: {},
         secretZones: [], inputKeys: {}, pendingSpawns: [], openWorldSpawnCd: 0,
         mySlot: 1, myAccountName: '', rosterNames: {},
         cosmeticColors: [
             { id:'default', hex:null, price:0 },
-            { id:'gold',    hex:'#eab308', price:150 },
-            { id:'purple',  hex:'#a855f7', price:150 },
-            { id:'cyan',    hex:'#06b6d4', price:200 },
-            { id:'pink',    hex:'#ec4899', price:200 },
-            { id:'white',   hex:'#f8fafc', price:250 },
-            { id:'obsidian',hex:'#1e293b', price:250 }
+            { id:'gold',    hex:'#eab308', price:700 },
+            { id:'purple',  hex:'#a855f7', price:700 },
+            { id:'cyan',    hex:'#06b6d4', price:950 },
+            { id:'pink',    hex:'#ec4899', price:950 },
+            { id:'white',   hex:'#f8fafc', price:1300 },
+            { id:'obsidian',hex:'#1e293b', price:1300 }
         ],
         cosmeticSkins: [
             { id:'default', price:0 },
-            { id:'stripes', price:150 },
-            { id:'glow',    price:200 },
-            { id:'stars',   price:250 },
-            { id:'flame',   price:300 }
+            { id:'stripes', price:800 },
+            { id:'glow',    price:1100 },
+            { id:'stars',   price:1500 },
+            { id:'flame',   price:2000 }
         ],
         defaultCosmetics() { return { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }; },
         defaultProgress() { return { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }; },
@@ -4658,13 +4830,13 @@
         // duração tem um preço diferente. O efeito fica sempre ativo automaticamente enquanto
         // sobrar tempo comprado, e esse tempo só é descontado durante partidas (ver Engine.update).
         shopCatalog: [
-            { id: 'wpn_pistol', price: 90, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.9, weaponAtkCd: 8 },
-            { id: 'wpn_laser', price: 200, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
-            { id: 'wpn_plasma', price: 250, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
-            { id: 'wpn_cannon', price: 320, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 2.0, weaponAtkCd: 34 },
-            { id: 'wpn_smg', price: 130, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.6, weaponAtkCd: 5 },
-            { id: 'wpn_sniper', price: 400, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 2.8, weaponAtkCd: 46 },
-            { id: 'wpn_railgun', price: 520, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 3.4, weaponAtkCd: 58 },
+            { id: 'wpn_pistol', price: 300, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.9, weaponAtkCd: 8 },
+            { id: 'wpn_smg', price: 550, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.6, weaponAtkCd: 5 },
+            { id: 'wpn_laser', price: 900, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
+            { id: 'wpn_plasma', price: 1400, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
+            { id: 'wpn_cannon', price: 2100, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 2.0, weaponAtkCd: 34 },
+            { id: 'wpn_sniper', price: 3200, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 2.8, weaponAtkCd: 46 },
+            { id: 'wpn_railgun', price: 4800, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 3.4, weaponAtkCd: 58 },
             { id: 'itm_pot', price: 60, type: 'item', itemKey: 'potion' },
             { id: 'itm_pot3', price: 150, type: 'item', itemKey: 'potion', qty: 3 },
             { id: 'itm_shd', price: 80, type: 'item', itemKey: 'shield' },
@@ -4672,8 +4844,8 @@
             { id: 'boost_speed', type: 'boost', statKey: 'speed', options: [ {minutes:10, price:60}, {minutes:30, price:150}, {minutes:60, price:260} ] },
             { id: 'boost_hp', type: 'boost', statKey: 'hp', options: [ {minutes:10, price:70}, {minutes:30, price:170}, {minutes:60, price:290} ] }
         ],
-        persistentUpgradesP1: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }, boosts: { speed:0, hp:0 } },
-        persistentUpgradesP2: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }, boosts: { speed:0, hp:0 } },
+        persistentUpgradesP1: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }, ownedWeapons:['default'], selectedWeaponKey:'default', boosts: { speed:0, hp:0 } },
+        persistentUpgradesP2: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }, ownedWeapons:['default'], selectedWeaponKey:'default', boosts: { speed:0, hp:0 } },
         ranking: [], playerNames: { p1: '', p2: '' },
         formatBoostTime(seconds) {
             seconds = Math.max(0, Math.floor(seconds));
@@ -4752,7 +4924,18 @@
         touchKey(key, isDown, ev) {
             if(ev) {
                 ev.preventDefault();
-                if(ev.currentTarget) ev.currentTarget.classList.toggle('tc-pressed', isDown);
+                if(ev.currentTarget) {
+                    ev.currentTarget.classList.toggle('tc-pressed', isDown);
+                    // FIX: captura o ponteiro assim que o dedo toca o botão. Sem isso, um dedo que
+                    // escorrega só um pouco pra fora da área redonda do botão (muito fácil em telas
+                    // pequenas) disparava pointerleave/pointerout e soltava o botão sozinho — ou,
+                    // pior, "vazava" o toque pra um botão vizinho. Com a captura, todos os eventos
+                    // desse dedo continuam voltando pro mesmo botão até o dedo realmente soltar.
+                    try {
+                        if(isDown && ev.pointerId !== undefined) ev.currentTarget.setPointerCapture(ev.pointerId);
+                        else if(!isDown && ev.pointerId !== undefined && ev.currentTarget.hasPointerCapture && ev.currentTarget.hasPointerCapture(ev.pointerId)) ev.currentTarget.releasePointerCapture(ev.pointerId);
+                    } catch(e) {}
+                }
             }
             this.inputKeys[key] = isDown;
         },
@@ -4765,11 +4948,13 @@
             if(!ev || !ev.currentTarget) return;
             ev.preventDefault();
             ev.currentTarget.classList.add('tc-pressed');
+            try { if(ev.pointerId !== undefined) ev.currentTarget.setPointerCapture(ev.pointerId); } catch(e) {}
         },
         releaseButton(ev) {
             if(!ev || !ev.currentTarget) return;
             ev.preventDefault();
             ev.currentTarget.classList.remove('tc-pressed');
+            try { if(ev.pointerId !== undefined && ev.currentTarget.hasPointerCapture && ev.currentTarget.hasPointerCapture(ev.pointerId)) ev.currentTarget.releasePointerCapture(ev.pointerId); } catch(e) {}
         },
         async saveProfile() {
             Accounts.saveProgress();
@@ -4863,7 +5048,7 @@
             OnlineSync.disconnect();
             this.walletP1 = 100; this.walletP2 = 100;
             this.ranking = []; this.playerNames = { p1: '', p2: 'Convidado' };
-            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, boosts:{speed:0,hp:0} };
+            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, ownedWeapons:['default'], selectedWeaponKey:'default', boosts:{speed:0,hp:0} };
             document.getElementById('menu-screen').classList.add('hidden');
             document.getElementById('recovery-screen').classList.add('hidden');
             document.getElementById('auth-screen').classList.remove('hidden');
@@ -4930,8 +5115,8 @@
         },
         async resetSavedData() {
             this.walletP1 = 100; this.walletP2 = 100;
-            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress(), boosts: { speed:0, hp:0 } };
-            this.persistentUpgradesP2 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress(), boosts: { speed:0, hp:0 } };
+            this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress(), ownedWeapons:['default'], selectedWeaponKey:'default', boosts: { speed:0, hp:0 } };
+            this.persistentUpgradesP2 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress(), ownedWeapons:['default'], selectedWeaponKey:'default', boosts: { speed:0, hp:0 } };
             this.ranking = []; this.soloActivePlayer = 1;
             Settings.language = 'pt-BR'; Settings.volume = 0.7; Settings.sfxEnabled = true; Settings.musicEnabled = true;
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-lang') === 'pt-BR'));
@@ -5067,6 +5252,125 @@
             this.modeSolo = true;
             this.updateMenu();
         },
+        getAILabel() {
+            return t('aiOpponentLabel');
+        },
+        toggleAIPanel() {
+            let panel = document.getElementById('ai-diff-panel');
+            let opening = panel.classList.contains('hidden');
+            panel.classList.toggle('hidden');
+            if(opening) this.selectAIDifficulty(this.aiDifficulty);
+        },
+        selectAIDifficulty(diff) {
+            this.aiDifficulty = diff;
+            ['easy','medium','hard','brutal'].forEach(d => {
+                let btn = document.getElementById('btn-ai-' + d);
+                if(btn) btn.classList.toggle('active', d === diff);
+            });
+        },
+        startVsAI() {
+            this.vsAI = true;
+            this.gameMode = 'HORDA';
+            this.isOpenWorld = false;
+            OnlineSync.disconnect();
+            document.getElementById('ai-diff-panel').classList.add('hidden');
+            this.startMatch();
+        },
+        // Bot com "inteligência de verdade": decide alvo, distância ideal de combate, quando
+        // recuar/avançar, quando pular, quando atacar (com mira preditiva) e quando usar
+        // itens/dash taticamente — sem "ler" o teclado do jogador, só reagindo ao estado do jogo.
+        updateAIBot(bot, dt) {
+            let target = this.players.find(p => p && p.id !== bot.id && p.lives > 0);
+            let keys = { left:false, right:false, up:false, attack:false, special:false };
+            if(!target || bot.lives <= 0) { OnlineSync.guestKeysBySlot[bot.id] = keys; return; }
+            let cfg = this.aiDiffConfig[this.aiDifficulty] || this.aiDiffConfig.medium;
+            bot._aiReactCd = (bot._aiReactCd || 0) - 1;
+            let dx = (target.x + target.w/2) - (bot.x + bot.w/2);
+            let dy = (target.y + target.h/2) - (bot.y + bot.h/2);
+            let dist = Math.abs(dx);
+            let dirToTarget = dx > 0 ? 1 : -1;
+
+            // --- Esquiva de projéteis: se um tiro inimigo estiver vindo em direção ao bot e
+            // perto o suficiente, tenta pular ou se afastar da linha de tiro. Dificuldades
+            // altas percebem isso quase de imediato; fáceis quase não reagem.
+            let incoming = this.projectiles.find(pr => {
+                if(!pr || pr.owner === bot) return false;
+                let sameLevel = Math.abs((pr.y) - (bot.y + bot.h/2)) < 40;
+                let approaching = (pr.vx > 0 && pr.x < bot.x) || (pr.vx < 0 && pr.x > bot.x + bot.w);
+                let closeEnough = Math.abs(pr.x - bot.x) < 260;
+                return sameLevel && approaching && closeEnough;
+            });
+            let dodgeChance = cfg.accuracy; // reaproveita o parâmetro de "precisão/reflexos" pra esquiva também
+            let wantDodgeJump = !!incoming && bot.isGrounded && Math.random() < dodgeChance;
+
+            // --- Reavalia posicionamento tático a cada N frames (tempo de reação por dificuldade)
+            if(bot._aiReactCd <= 0) {
+                bot._aiReactCd = cfg.reaction;
+                let idealMin = 170, idealMax = 320;
+                let lowHp = bot.hp < bot.maxHp * 0.35;
+                if(lowHp && Math.random() < cfg.aggressiveness * 0.7) {
+                    // Baixa vida: joga mais na defensiva, tenta manter distância pra kitar
+                    bot._aiMove = -dirToTarget;
+                } else if(dist < idealMin) {
+                    bot._aiMove = (Math.random() < cfg.aggressiveness * 0.65) ? -dirToTarget : 0;
+                } else if(dist > idealMax) {
+                    bot._aiMove = dirToTarget;
+                } else {
+                    bot._aiMove = (Math.random() < cfg.aggressiveness) ? dirToTarget : 0;
+                }
+                // Pula pra alcançar plataformas mais altas, perseguir no ar, ou ocasionalmente driblar
+                bot._aiWantJump = (target.y < bot.y - 40) || Math.random() < 0.015 * cfg.aggressiveness;
+            }
+            if(wantDodgeJump) { bot._aiWantJump = true; }
+
+            if(bot._aiMove === 1) { keys.right = true; }
+            else if(bot._aiMove === -1) { keys.left = true; }
+            keys.up = !!bot._aiWantJump && bot.isGrounded;
+            // FIX: sem isso, _aiWantJump continuava "true" por vários frames (até a próxima
+            // reavaliação tática) e o bot ficava pulando repetidamente/quicando no chão assim que
+            // aterrissava, em vez de dar um pulo só e continuar se movendo normalmente.
+            if(keys.up) bot._aiWantJump = false;
+            bot.facing = dirToTarget;
+
+            // --- Mira preditiva: em vez de só olhar a posição atual do alvo, a IA estima onde o
+            // alvo vai estar quando o projétil chegar (baseado na velocidade horizontal dele) e
+            // só atira quando essa previsão indica que vai acertar. Isso é o que torna o bot
+            // MUITO mais difícil nas dificuldades altas: ele "antecipa" o movimento do jogador
+            // em vez de simplesmente atirar reto.
+            let timeToHit = dist / Math.max(1, bot.projSpd * 60);
+            let predictedTargetX = (target.x + target.w/2) + (target.vx || 0) * 60 * timeToHit * cfg.accuracy;
+            let predictedDx = predictedTargetX - (bot.x + bot.w/2);
+            let predictedDir = predictedDx >= 0 ? 1 : -1;
+            let aimIsGood = (predictedDir === dirToTarget) || Math.abs(predictedDx) < 40;
+            let verticalOk = Math.abs(dy) < 55; // arma é horizontal; só faz sentido atirar se estiver quase no mesmo nível
+            let proximityBonus = Math.max(0, 1 - dist / 700) * 0.3;
+            let effectiveAccuracy = Math.min(0.98, cfg.accuracy + proximityBonus);
+            if(bot.cdAttack <= 0 && dist < 620 && verticalOk && aimIsGood && Math.random() < effectiveAccuracy) {
+                keys.attack = true;
+            }
+            // Special: usado com mais frequência quando o alvo está perto e a dificuldade é alta,
+            // e quase nunca à toa (economiza mana pra quando realmente compensa)
+            if(bot.cdSpecial <= 0 && bot.mp >= 40 && dist < 420 && verticalOk && Math.random() < cfg.aggressiveness * 0.2) {
+                keys.special = true;
+            }
+            // --- Dash tático de fuga: se muito perto e com pouca vida, tenta se abrir espaço
+            if(bot.hp < bot.maxHp * 0.3 && dist < 120 && bot.dashCooldown <= 0 && Math.random() < cfg.aggressiveness * 0.5) {
+                bot.vx = -dirToTarget * (bot.baseSpd * 2.5);
+                bot.shieldTime = Math.max(bot.shieldTime, 10);
+                bot.dashCooldown = 40;
+                createFXBurst(bot.x+bot.w/2, bot.y+bot.h/2, '#ffffff', 5);
+            }
+            // --- Uso inteligente de itens: cura quando a vida está baixa, escudo quando o
+            // jogador está perto e prestes a engajar
+            if(bot.hp < bot.maxHp * 0.4 && bot.inventory.potion > 0 && Math.random() < 0.05) {
+                bot.inventory.potion--; bot.hp = Math.min(bot.maxHp, bot.hp + 50);
+                createFXBurst(bot.x+bot.w/2, bot.y+bot.h/2, '#22c55e', 12); bot.syncHUD();
+            } else if(bot.shieldTime <= 0 && bot.inventory.shield > 0 && dist < 200 && Math.random() < 0.03 * cfg.aggressiveness) {
+                bot.inventory.shield--; bot.shieldTime = 120;
+                createFXBurst(bot.x+bot.w/2, bot.y+bot.h/2, '#38bdf8', 12); bot.syncHUD();
+            }
+            OnlineSync.guestKeysBySlot[bot.id] = keys;
+        },
         toggleOpenWorld() {
             this.isOpenWorld = !this.isOpenWorld; this.refreshWorldButton();
             this.setGameMode(this.gameMode);
@@ -5116,7 +5420,7 @@
                 if(showP2Desc) desc.innerHTML += `<div style="margin-top:3px;">${t('archDesc_' + this.selectedArchP2)}</div>`;
             }
             this.refreshArchSelectionDisplay();
-            this.renderShop(); this.renderRanking(); this.refreshSoloPlayerSelector();
+            this.renderShop(); this.renderWeaponSelect(); this.renderRanking(); this.refreshSoloPlayerSelector();
         },
         renderShop() {
             let activeWallet = this.walletP1;
@@ -5133,6 +5437,11 @@
                         ? `<p style="color:#38bdf8; font-weight:700;">⚡ ${t('boostRemainingLabel')}: ${this.formatBoostTime(remaining)}</p>`
                         : '';
                     div.innerHTML = `<div class="item-info"><h4>${tShop(item.id,'name')}</h4><p>${tShop(item.id,'desc')}</p>${remainingHtml}</div><button class="btn-buy" style="background:#1e3a8a; border-color:#1d4ed8;" onclick="Engine.openBoostOptions('${item.id}')">${t('boostOptionsBtn')}</button>`;
+                } else if(item.type === 'weapon') {
+                    let owned = (this.persistentUpgradesP1.ownedWeapons || ['default']).includes(item.id);
+                    div.innerHTML = owned
+                        ? `<div class="item-info"><h4>${tShop(item.id,'name')}</h4><p>${tShop(item.id,'desc')}</p></div><button class="btn-buy" disabled style="background:#166534; border-color:#15803d;">${t('ownedLabel')}</button>`
+                        : `<div class="item-info"><h4>${tShop(item.id,'name')}</h4><p>${tShop(item.id,'desc')}</p></div><button class="btn-buy" ${activeWallet < item.price ? 'disabled' : ''} onclick="Engine.buyItemMenu('${item.id}')">$${item.price}</button>`;
                 } else {
                     div.innerHTML = `<div class="item-info"><h4>${tShop(item.id,'name')}</h4><p>${tShop(item.id,'desc')}</p></div><button class="btn-buy" ${activeWallet < item.price ? 'disabled' : ''} onclick="Engine.buyItemMenu('${item.id}')">$${item.price}</button>`;
                 }
@@ -5242,10 +5551,55 @@
         buyItemMenu(itemId) {
             let item = this.shopCatalog.find(i => i.id === itemId); if(!item || item.type === 'boost') return;
             if(this.walletP1 < item.price) return; this.walletP1 -= item.price; this.applyUpgradeData(this.persistentUpgradesP1, item);
-            AudioFX.play('coin'); this.renderShop(); this.saveProfile();
+            AudioFX.play('coin'); this.renderShop(); this.renderWeaponSelect(); this.saveProfile();
+        },
+        weaponStatsFor(key) {
+            if(key === 'default') return { weaponSpd:13, weaponDmg:1.0, atkCd:16 };
+            let item = this.shopCatalog.find(i => i.id === key && i.type === 'weapon');
+            return item ? { weaponSpd:item.weaponSpd, weaponDmg:item.weaponDmg, atkCd:item.weaponAtkCd } : { weaponSpd:13, weaponDmg:1.0, atkCd:16 };
+        },
+        selectWeapon(profile, weaponId) {
+            let owned = profile.ownedWeapons || ['default'];
+            if(!owned.includes(weaponId)) return;
+            profile.selectedWeaponKey = weaponId;
+            let stats = this.weaponStatsFor(weaponId);
+            profile.weaponKey = weaponId === 'default' ? 'default' : this.shopCatalog.find(i=>i.id===weaponId).weaponKey;
+            profile.weaponSpd = stats.weaponSpd; profile.weaponDmg = stats.weaponDmg; profile.atkCd = stats.atkCd;
+            this.renderWeaponSelect(); this.saveProfile();
+        },
+        renderWeaponSelect() {
+            let grid = document.getElementById('weapon-select-grid'); if(!grid) return;
+            let profile = this.persistentUpgradesP1;
+            if(!profile.ownedWeapons) {
+                // Migração: contas antigas podiam ter uma arma equipada sem o sistema de posse novo.
+                let ownedFromLegacy = this.shopCatalog.find(i => i.type === 'weapon' && i.weaponKey === profile.weaponKey);
+                profile.ownedWeapons = ownedFromLegacy ? ['default', ownedFromLegacy.id] : ['default'];
+                profile.selectedWeaponKey = ownedFromLegacy ? ownedFromLegacy.id : 'default';
+            }
+            if(!profile.selectedWeaponKey) profile.selectedWeaponKey = 'default';
+            grid.innerHTML = '';
+            let entries = [{ id:'default', name:t('weaponName_default') }].concat(
+                this.shopCatalog.filter(i => i.type === 'weapon').map(i => ({ id:i.id, name:tShop(i.id,'name') }))
+            );
+            entries.forEach(entry => {
+                let owned = profile.ownedWeapons.includes(entry.id);
+                let selected = profile.selectedWeaponKey === entry.id;
+                let card = document.createElement('div');
+                card.className = 'char-card' + (selected ? ' selected' : '') + (owned ? '' : ' locked-weapon');
+                card.style.opacity = owned ? '1' : '0.45';
+                card.style.cursor = owned ? 'pointer' : 'not-allowed';
+                card.innerHTML = `<h4>${entry.name}</h4><span class="char-meta">${owned ? (selected ? t('weaponEquippedLabel') : t('weaponSelectBtn')) : t('weaponLockedLabel')}</span>`;
+                if(owned) card.onclick = () => this.selectWeapon(profile, entry.id);
+                grid.appendChild(card);
+            });
+            let desc = document.getElementById('lbl-weapon-desc');
+            if(desc) desc.textContent = t('weaponSelectHint');
         },
         applyUpgradeData(profile, item) {
-            if(item.type === 'weapon') { profile.weaponKey = item.weaponKey; profile.weaponSpd = item.weaponSpd; profile.weaponDmg = item.weaponDmg; profile.atkCd = item.weaponAtkCd; }
+            if(item.type === 'weapon') {
+                if(!profile.ownedWeapons) profile.ownedWeapons = ['default'];
+                if(!profile.ownedWeapons.includes(item.id)) profile.ownedWeapons.push(item.id);
+            }
             else if(item.type === 'stat') { profile[item.statKey] += item.value; }
             else if(item.type === 'item') { profile[item.itemKey] += (item.qty || 1); }
         },
@@ -5312,8 +5666,25 @@
                 this.platforms.push(new Platform(1620, 350, 260, 20));
             }
             this.mySlot = 1; this.rosterNames = {};
-            let soloMatch = this.isSoloMatch();
-            if(soloMatch) {
+            let soloMatch = this.isSoloMatch() && !this.vsAI;
+            if(this.vsAI) {
+                let cfg = this.aiDiffConfig[this.aiDifficulty] || this.aiDiffConfig.medium;
+                let profileNum = this.soloActivePlayer;
+                let archChoice = profileNum === 1 ? this.selectedArchP1 : this.selectedArchP2;
+                let upgData = profileNum === 1 ? this.persistentUpgradesP1 : this.persistentUpgradesP2;
+                this.players = [new Player(1, 300, 400, archChoice, { left: 'a', right: 'd', up: 'w', attack: 'f', special: 'g' }, upgData, profileNum, upgData.cosmetics)];
+                let botArch = ['hero','vilan','killer'].filter(a => a !== archChoice)[Math.floor(Math.random()*2)] || 'vilan';
+                let botUpg = { maxHp: 100, baseSpd: 3.2, weaponKey: 'default', weaponDmg: 1, weaponSpd: 9, atkCd: 16, potion: 1, shield: 1, cosmetics: { color: '#f43f5e', skin: 'default' } };
+                let bot = new Player(2, 900, 400, botArch, null, botUpg, 2, botUpg.cosmetics);
+                bot.maxHp = Math.round(bot.maxHp * cfg.hpMult); bot.hp = bot.maxHp;
+                bot.baseSpd = bot.baseSpd * cfg.spdMult;
+                bot.atkCd = Math.max(6, Math.round(bot.atkCd * cfg.atkCdMult));
+                bot.isAI = true;
+                this.players.push(bot);
+                this.rosterNames = this.rosterNames || {};
+                this.rosterNames[2] = this.getAILabel();
+                document.getElementById('hud-p2').classList.remove('hidden');
+            } else if(soloMatch) {
                 let profileNum = this.soloActivePlayer;
                 let archChoice = profileNum === 1 ? this.selectedArchP1 : this.selectedArchP2;
                 let upgData = profileNum === 1 ? this.persistentUpgradesP1 : this.persistentUpgradesP2;
@@ -5367,12 +5738,11 @@
                         it.destroyed = true; AudioFX.play('coin');
                         createFXBurst(it.x+18, it.y+14, '#eab308', 25);
                         let rng = Math.random(), rewardText = '';
-                        if(rng < 0.25) { p.goldCollected += 150; rewardText = t('rewardGold'); }
-                        else if(rng < 0.45) { p.inventory.potion++; rewardText = t('rewardPotion'); }
-                        else if(rng < 0.60) { p.inventory.shield++; rewardText = t('rewardShield'); }
-                        else if(rng < 0.75) { p.baseSpd += 0.8; rewardText = t('rewardSpeed'); }
-                        else if(rng < 0.90) { p.maxHp += 25; p.hp += 25; rewardText = t('rewardHp'); }
-                        else { p.weaponKey = "plasmaHunter"; p.dmgMod += 0.4; p.projSpd = 14; p.atkCd = 10; rewardText = t('rewardWeapon'); }
+                        if(rng < 0.30) { p.goldCollected += 150; rewardText = t('rewardGold'); }
+                        else if(rng < 0.53) { p.inventory.potion++; rewardText = t('rewardPotion'); }
+                        else if(rng < 0.71) { p.inventory.shield++; rewardText = t('rewardShield'); }
+                        else if(rng < 0.87) { p.baseSpd += 0.8; rewardText = t('rewardSpeed'); }
+                        else { p.maxHp += 25; p.hp += 25; rewardText = t('rewardHp'); }
                         p.syncHUD(); this.showChestReward(rewardText);
                     }
                 }
@@ -5580,6 +5950,9 @@
                     let spawnCooldown = Math.max(30, (140 - this.round * 8) / diffMult);
                     if(this.gameMode === 'TITAN') { targetKills = Math.round(targetKills * 2); maxEnemiesOnScreen = Math.round(maxEnemiesOnScreen * 2.5); spawnCooldown = Math.max(25, spawnCooldown * 0.45); }
                     else if(this.gameMode !== 'HORDA') { spawnCooldown += 40; }
+                    // Modo Contra IA: bem poucos inimigos comuns, só pra dar clima de arena —
+                    // o duelo real é contra o bot.
+                    if(this.vsAI) { maxEnemiesOnScreen = 2; targetKills = 999; spawnCooldown = 260; }
                     if(this.killsCounter < targetKills && this.enemies.length < maxEnemiesOnScreen) {
                         if(this.spawnTimer >= spawnCooldown) {
                             this.spawnTimer = 0;
@@ -5602,6 +5975,10 @@
                     }
                 }
             }
+            if(this.vsAI) {
+                let bot = this.players.find(p => p && p.isAI);
+                if(bot && bot.lives > 0) this.updateAIBot(bot, dt);
+            }
             if(Hideout.active && this.players[0]) Hideout.update(dt, this.players[0]);
             this.players.forEach(p => { if(p && p.lives > 0) p.update(dt, Hideout.active && p === this.players[0]); });
             if(!Hideout.active) {
@@ -5623,7 +6000,13 @@
                     let alive = this.players.filter(p => p && p.lives > 0);
                     if(alive.length <= 1) {
                         let winner = alive[0] || null;
-                        if(winner && winner.id === 1) this.triggerMatchEnd(winner, t('p1WinsTitle'), t('p1WinsDesc'));
+                        if(this.vsAI) {
+                            let humanWon = winner && winner.id === this.mySlot;
+                            let title = humanWon ? t('vsAiPlayerWinsTitle') : t('vsAiAiWinsTitle');
+                            let desc = humanWon ? t('vsAiPlayerWinsDesc') : t('vsAiAiWinsDesc');
+                            this.triggerMatchEnd(winner, title, desc);
+                        }
+                        else if(winner && winner.id === 1) this.triggerMatchEnd(winner, t('p1WinsTitle'), t('p1WinsDesc'));
                         else if(winner && winner.id === 2 && this.players.length === 2) this.triggerMatchEnd(winner, t('p2WinsTitle'), t('p2WinsDesc'));
                         else if(winner) this.triggerMatchEnd(winner, t('genericWinsTitle').replace('{name}', this.getProfileName(winner.profileId).toUpperCase()), t('genericWinsDesc').replace('{name}', this.getProfileName(winner.profileId)));
                         else this.triggerMatchEnd(null, t('deathTitle'), t('deathDesc'));
@@ -5667,6 +6050,23 @@
             this._lastEndInfo = { type: 'elim', winnerId: winner ? winner.id : null };
             let myP = this.players.find(p => p && p.id === this.mySlot);
             let iWon = !!(winner && winner.id === this.mySlot);
+            if(this.vsAI) {
+                // Recompensa do modo Contra IA: NÃO depende do ouro coletado na partida, e sim
+                // se você venceu ou perdeu o duelo contra o bot — e quanto, depende da
+                // dificuldade escolhida (mais difícil = mais recompensa se vencer).
+                let cfg = this.aiDiffConfig[this.aiDifficulty] || this.aiDiffConfig.medium;
+                let reward = iWon ? cfg.rewardWin : cfg.rewardLoss;
+                this.walletP1 += reward;
+                let diffLabelMap = { easy: t('vsAiDiffNameEasy'), medium: t('vsAiDiffNameMedium'), hard: t('vsAiDiffNameHard'), brutal: t('vsAiDiffNameBrutal') };
+                let resultLabel = iWon ? t('vsAiResultWin') : t('vsAiResultLoss');
+                document.getElementById('lbl-gameover-stats').innerHTML =
+                    `${descMsg}<br><span style="color:#a855f7; font-weight:bold;">🤖 ${t('vsAiDuelLabel')} (${diffLabelMap[this.aiDifficulty]}) — ${resultLabel}</span>` +
+                    `<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${reward}</span>`;
+                if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: reward, won: iWon });
+                this.saveProfile();
+                this.vsAI = false;
+                return;
+            }
             if(winner) {
                 let reward = Math.min(1000, winner.goldCollected);
                 if(winner.profileId === 1) this.walletP1 += reward;
@@ -5705,6 +6105,7 @@
         },
         backToMenu() {
             OnlineSync.disconnect();
+            this.vsAI = false;
             document.getElementById('gameover-screen').classList.add('hidden');
             document.getElementById('continue-screen').classList.add('hidden');
             document.getElementById('menu-screen').classList.remove('hidden');
@@ -6106,7 +6507,7 @@
                             e.takeDamage(pr.damage, pr.owner); pr.destroyed = true;
                         }
                     });
-                    if(!Engine.isOpenWorld && Engine.gameMode !== 'HORDA') {
+                    if(!Engine.isOpenWorld && (Engine.gameMode !== 'HORDA' || Engine.vsAI)) {
                         Engine.players.forEach(p => {
                             if(p && !pr.destroyed && p !== pr.owner && p.lives > 0 && pr.x < p.x+p.w && pr.x+pr.w > p.x && pr.y < p.y+p.h && pr.y+pr.h > p.y) {
                                 p.takeDamage(pr.damage, pr.owner); pr.destroyed = true;
