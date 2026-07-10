@@ -554,6 +554,25 @@
         </div>
         <p id="lbl-continue-nogold" class="hidden" style="color:#f87171; font-size:0.9rem;" data-i18n="continueNoGoldHint">Ouro insuficiente para continuar.</p>
     </div>
+    <div id="tutorial-screen" class="screen hidden" style="justify-content:center; align-items:center; background:rgba(2,6,23,0.92);">
+        <div style="background:#0f172a; border:2px solid #38bdf8; border-radius:14px; padding:28px; width:min(560px, 92%); max-height:92%; overflow-y:auto; display:flex; flex-direction:column; gap:14px; box-shadow:0 20px 60px -10px rgba(56,189,248,0.35);">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                <div style="font-size:0.78rem; color:#64748b; font-weight:700; letter-spacing:1px; text-transform:uppercase;" id="tut-step-label">Passo 1 de 1</div>
+                <button id="tut-close" onclick="Tutorial.close()" style="background:transparent; border:1px solid #334155; color:#94a3b8; padding:5px 10px; font-size:0.75rem; border-radius:6px; cursor:pointer;" data-i18n="tutorialClose">Fechar ✕</button>
+            </div>
+            <div style="font-size:5rem; text-align:center; line-height:1;" id="tut-icon">🎮</div>
+            <h2 id="tut-title" style="font-size:1.55rem; color:#38bdf8; text-align:center; margin:0;">—</h2>
+            <p id="tut-text" style="color:#cbd5e1; font-size:0.98rem; line-height:1.55; text-align:center; margin:0;">—</p>
+            <div style="height:6px; background:#1e293b; border-radius:999px; overflow:hidden; margin-top:6px;">
+                <div id="tut-progress-bar" style="height:100%; background:linear-gradient(to right, #38bdf8, #818cf8); width:0%; transition:width 0.25s ease;"></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:8px;">
+                <button id="tut-prev" onclick="Tutorial.prev()" style="flex:1; background:#1e293b; border:1px solid #334155; color:#94a3b8; padding:12px; font-size:0.9rem; font-weight:700; border-radius:8px; cursor:pointer;" data-i18n="tutorialPrev">◀ Anterior</button>
+                <button id="tut-skip" onclick="Tutorial.close()" style="flex:1; background:transparent; border:1px solid #334155; color:#64748b; padding:12px; font-size:0.9rem; font-weight:700; border-radius:8px; cursor:pointer;" data-i18n="tutorialSkip">Pular</button>
+                <button id="tut-next" onclick="Tutorial.next()" style="flex:1; background:linear-gradient(to right,#3b82f6,#6366f1); border:none; color:white; padding:12px; font-size:0.9rem; font-weight:800; border-radius:8px; cursor:pointer;" data-i18n="tutorialNext">Próximo ▶</button>
+            </div>
+        </div>
+    </div>
     <div id="settings-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div style="background:#0f172a; border:1px solid #1e293b; border-radius:10px; padding:30px; width:420px; max-height:100%; overflow-y:auto; display:flex; flex-direction:column; gap:18px;">
             <h2 style="font-size:1.6rem; color:#38bdf8;" data-i18n="settingsTitle">Configurações</h2>
@@ -592,6 +611,10 @@
                     <button class="lang-btn" data-lang="it" onclick="Engine.setLanguage('it')" style="font-size:0.78rem; flex:1; padding:8px 4px;">Italiano</button>
                     <button class="lang-btn" data-lang="fr" onclick="Engine.setLanguage('fr')" style="font-size:0.78rem; flex:1; padding:8px 4px;">Français</button>
                 </div>
+            </div>
+            <div class="config-section">
+                <div class="section-title" data-i18n="tutorialSectionTitle">Tutorial</div>
+                <button onclick="Tutorial.open(true)" style="width:100%; background:#0e7490; border-color:#0891b2; color:#a5f3fc;" data-i18n="tutorialBtn">📖 Ver Tutorial</button>
             </div>
             <div class="config-section" id="config-bugreport-section">
                 <div class="section-title" data-i18n="bugReportSectionTitle">Encontrou um Erro?</div>
@@ -1023,6 +1046,55 @@
             errPasswordChangeUnconfirmed: "Não foi possível confirmar a alteração da senha. Tente novamente.",
             msgPasswordChanged: "Senha alterada com sucesso!",
             errRecoveryLinkExpired: "O link de redefinição expirou. Solicite um novo e-mail de redefinição."
+        
+            // Tutorial
+            tutorialBtn: '📖 Ver Tutorial',
+            tutorialSectionTitle: 'Tutorial',
+            tutorialNext: 'Próximo ▶',
+            tutorialPrev: '◀ Anterior',
+            tutorialSkip: 'Pular',
+            tutorialClose: 'Fechar ✕',
+            tutorialStepLabel: 'Passo {a} de {b}',
+            tut_welcome_t: 'Bem-vindo ao Be Battles!',
+            tut_welcome_x: 'Este é um tutorial rápido pra você conhecer tudo do jogo. Você pode reabrir isto a qualquer momento nas Configurações.',
+            tut_level_t: 'Seu Nível',
+            tut_level_x: 'Acima do seu nome aparece seu nível e uma barra de progresso. Você ganha XP jogando partidas, matando inimigos e completando conquistas. Subir de nível libera cosméticos e status.',
+            tut_move_pc_t: 'Como Andar (Teclado)',
+            tut_move_pc_x: 'Use W A S D para mover o Jogador 1. Setas ↑ ← ↓ → movem o Jogador 2 no modo local. Segurar a tecla move continuamente.',
+            tut_move_mob_t: 'Como Andar (Toque)',
+            tut_move_mob_x: 'Use o joystick/D-pad no canto esquerdo da tela pra andar. Toque e segure a direção que você quer.',
+            tut_shoot_pc_t: 'Como Atirar (Teclado/Mouse)',
+            tut_shoot_pc_x: 'Clique com o botão ESQUERDO do mouse pra atirar. No teclado, [1] cura um pouco e [2] ativa o Escudo (invulnerabilidade curta).',
+            tut_shoot_mob_t: 'Como Atirar (Toque)',
+            tut_shoot_mob_x: 'Use o botão ATIRAR no canto direito da tela. Os botões [1] e [2] ao lado servem pra Cura e Escudo.',
+            tut_special_pc_t: 'Habilidade Especial',
+            tut_special_pc_x: 'Cada arquétipo tem uma habilidade especial (onda de choque, míssil, etc). Ela carrega com o tempo e pode ser ativada quando o ícone ficar aceso.',
+            tut_special_mob_t: 'Habilidade Especial',
+            tut_special_mob_x: 'O botão de ESPECIAL fica no canto direito da tela. Ele libera a habilidade única do seu arquétipo quando estiver carregado.',
+            tut_hud_t: 'Interface (HUD)',
+            tut_hud_x: 'No topo você vê sua VIDA, ESCUDO, munição, ouro atual e o cronômetro/onda. Fique de olho na vida vermelha — ela avisa perigo.',
+            tut_chest_pc_t: 'Baús',
+            tut_chest_pc_x: 'Encostou num baú? Pressione [B] pra abrir. Baús dão ouro, poções ou upgrades temporários.',
+            tut_chest_mob_t: 'Baús',
+            tut_chest_mob_x: 'Encostou num baú? Aparece um botão ABRIR na tela — toque nele pra pegar o prêmio.',
+            tut_shop_t: 'Loja',
+            tut_shop_x: 'Na loja você gasta OURO ganho em partidas pra comprar armas melhores, poções, escudos, boosts de velocidade/vida e cosméticos. Abra pelo menu principal.',
+            tut_upgrades_t: 'Melhorias Permanentes',
+            tut_upgrades_x: 'Os itens comprados na loja ficam salvos na sua conta e valem em toda partida. Boosts sobem o teto de vida/velocidade.',
+            tut_chats_t: 'Chat',
+            tut_chats_x: 'No menu tem uma barra lateral de chat. Ali você conversa com amigos, grupos ou o chat global. Toque em ◀ pra abrir/fechar.',
+            tut_friends_t: 'Amigos',
+            tut_friends_x: 'Clique em 🔎 Jogadores pra procurar alguém pelo nome. Você pode seguir, ver perfil, convidar pra partida ou reportar.',
+            tut_groups_t: 'Grupos',
+            tut_groups_x: 'Grupos permitem juntar vários amigos num chat só. Crie um grupo no painel de chat e chame quem quiser.',
+            tut_online_t: 'Jogar Online',
+            tut_online_x: 'Clique em 🌐 Online pra criar uma sala ou entrar com um código. Dá pra jogar 2, 3 ou 4 jogadores pela internet.',
+            tut_achievements_t: 'Conquistas',
+            tut_achievements_x: 'O botão 🏆 mostra desafios que dão XP e ouro extra. Cumpra pra subir de nível mais rápido.',
+            tut_settings_t: 'Configurações',
+            tut_settings_x: 'No ⚙ você muda volume, música, idioma, senha e pode ver esse tutorial de novo, reportar bug ou apagar a conta.',
+            tut_end_t: 'Pronto pra jogar!',
+            tut_end_x: 'É isso! Divirta-se, mande bem nas partidas e boa sorte no Horizon Survival Tournament!',
         },
         'en': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -1207,6 +1279,55 @@
             errPasswordChangeUnconfirmed: "Could not confirm the password change. Please try again.",
             msgPasswordChanged: "Password changed successfully!",
             errRecoveryLinkExpired: "The reset link expired. Request a new reset email."
+        
+            // Tutorial
+            tutorialBtn: '📖 View Tutorial',
+            tutorialSectionTitle: 'Tutorial',
+            tutorialNext: 'Next ▶',
+            tutorialPrev: '◀ Back',
+            tutorialSkip: 'Skip',
+            tutorialClose: 'Close ✕',
+            tutorialStepLabel: 'Step {a} of {b}',
+            tut_welcome_t: 'Welcome to Be Battles!',
+            tut_welcome_x: 'This is a quick tutorial to walk you through the game. You can reopen it anytime from Settings.',
+            tut_level_t: 'Your Level',
+            tut_level_x: 'Above your name you can see your level and an XP bar. You gain XP from matches, kills and achievements. Leveling up unlocks cosmetics and perks.',
+            tut_move_pc_t: 'How to Move (Keyboard)',
+            tut_move_pc_x: 'Use W A S D to move Player 1. Arrow keys ↑ ← ↓ → move Player 2 in local play. Hold a key to keep walking.',
+            tut_move_mob_t: 'How to Move (Touch)',
+            tut_move_mob_x: 'Use the joystick/D-pad on the left side of the screen to move. Touch and hold the direction you want.',
+            tut_shoot_pc_t: 'How to Shoot (Keyboard/Mouse)',
+            tut_shoot_pc_x: 'LEFT-CLICK to shoot. On the keyboard, [1] heals a little and [2] triggers Shield (short invulnerability).',
+            tut_shoot_mob_t: 'How to Shoot (Touch)',
+            tut_shoot_mob_x: 'Use the SHOOT button on the right side of the screen. The [1] and [2] buttons next to it are Heal and Shield.',
+            tut_special_pc_t: 'Special Ability',
+            tut_special_pc_x: 'Each archetype has a special ability (shockwave, missile, etc). It charges over time and fires when the icon lights up.',
+            tut_special_mob_t: 'Special Ability',
+            tut_special_mob_x: 'The SPECIAL button lives on the right side. It fires your archetype’s unique ability once fully charged.',
+            tut_hud_t: 'HUD',
+            tut_hud_x: 'At the top you see HP, Shield, ammo, current gold and the timer/wave. Watch your HP — red flashes mean danger.',
+            tut_chest_pc_t: 'Chests',
+            tut_chest_pc_x: 'Standing on a chest? Press [B] to open it. Chests give gold, potions or temporary upgrades.',
+            tut_chest_mob_t: 'Chests',
+            tut_chest_mob_x: 'Standing on a chest? An OPEN button appears — tap it to claim your reward.',
+            tut_shop_t: 'Shop',
+            tut_shop_x: 'Spend GOLD earned in matches on better weapons, potions, shields, speed/HP boosts and cosmetics. Open it from the main menu.',
+            tut_upgrades_t: 'Permanent Upgrades',
+            tut_upgrades_x: 'Everything you buy is saved on your account and applies to every match. Boosts raise your HP/speed cap.',
+            tut_chats_t: 'Chat',
+            tut_chats_x: 'The menu has a chat sidebar for friends, groups and the global chat. Tap ◀ to open/close it.',
+            tut_friends_t: 'Friends',
+            tut_friends_x: 'Click 🔎 Players to search by name. You can follow, view profile, invite to a match or report.',
+            tut_groups_t: 'Groups',
+            tut_groups_x: 'Groups bundle several friends into one chat. Create a group from the chat panel and invite whoever you want.',
+            tut_online_t: 'Play Online',
+            tut_online_x: 'Click 🌐 Online to create a room or join with a code. You can play 2, 3 or 4 players online.',
+            tut_achievements_t: 'Achievements',
+            tut_achievements_x: 'The 🏆 button shows challenges that grant extra XP and gold. Complete them to level up faster.',
+            tut_settings_t: 'Settings',
+            tut_settings_x: 'In ⚙ you change volume, music, language, password and can replay this tutorial, report a bug or delete your account.',
+            tut_end_t: 'You’re ready!',
+            tut_end_x: 'That’s it! Have fun, play well and good luck in the Horizon Survival Tournament!',
         },
         'de': {
             tagline: "Horizon Survival Turnier — Cosmic Engine 2026",
@@ -1386,6 +1507,55 @@
             errPasswordChangeUnconfirmed: "Die Passwortänderung konnte nicht bestätigt werden. Bitte versuche es erneut.",
             msgPasswordChanged: "Passwort erfolgreich geändert!",
             errRecoveryLinkExpired: "Der Link zum Zurücksetzen ist abgelaufen. Fordere eine neue E-Mail an."
+        
+            // Tutorial
+            tutorialBtn: '📖 Tutorial anzeigen',
+            tutorialSectionTitle: 'Tutorial',
+            tutorialNext: 'Weiter ▶',
+            tutorialPrev: '◀ Zurück',
+            tutorialSkip: 'Überspringen',
+            tutorialClose: 'Schließen ✕',
+            tutorialStepLabel: 'Schritt {a} von {b}',
+            tut_welcome_t: 'Willkommen bei Be Battles!',
+            tut_welcome_x: 'Ein kurzes Tutorial, das dir alles zeigt. Du kannst es jederzeit über die Einstellungen erneut öffnen.',
+            tut_level_t: 'Dein Level',
+            tut_level_x: 'Über deinem Namen siehst du dein Level und eine XP-Leiste. Du bekommst XP für Matches, Kills und Erfolge. Levelaufstiege schalten Kosmetik und Perks frei.',
+            tut_move_pc_t: 'Bewegen (Tastatur)',
+            tut_move_pc_x: 'W A S D bewegen Spieler 1. Pfeiltasten ↑ ← ↓ → bewegen Spieler 2 im lokalen Spiel. Halte die Taste zum Laufen.',
+            tut_move_mob_t: 'Bewegen (Touch)',
+            tut_move_mob_x: 'Nutze den Joystick/das D-Pad links auf dem Bildschirm. Halte die gewünschte Richtung gedrückt.',
+            tut_shoot_pc_t: 'Schießen (Tastatur/Maus)',
+            tut_shoot_pc_x: 'LINKSKLICK zum Schießen. Auf der Tastatur heilt [1] etwas und [2] aktiviert den Schild (kurze Unverwundbarkeit).',
+            tut_shoot_mob_t: 'Schießen (Touch)',
+            tut_shoot_mob_x: 'Nutze den SCHIEßEN-Button rechts. Die Buttons [1] und [2] daneben sind Heilung und Schild.',
+            tut_special_pc_t: 'Spezialfähigkeit',
+            tut_special_pc_x: 'Jeder Archetyp hat eine Spezialfähigkeit (Schockwelle, Rakete usw.). Sie lädt sich mit der Zeit auf und feuert, wenn das Symbol leuchtet.',
+            tut_special_mob_t: 'Spezialfähigkeit',
+            tut_special_mob_x: 'Der SPEZIAL-Button ist rechts auf dem Bildschirm. Er löst die einzigartige Fähigkeit deines Archetyps aus.',
+            tut_hud_t: 'HUD',
+            tut_hud_x: 'Oben siehst du HP, Schild, Munition, aktuelles Gold und Timer/Welle. Achte auf HP – rotes Blinken bedeutet Gefahr.',
+            tut_chest_pc_t: 'Truhen',
+            tut_chest_pc_x: 'Stehst du auf einer Truhe? Drücke [B] zum Öffnen. Truhen geben Gold, Tränke oder temporäre Upgrades.',
+            tut_chest_mob_t: 'Truhen',
+            tut_chest_mob_x: 'Stehst du auf einer Truhe? Ein ÖFFNEN-Button erscheint – tippe drauf, um die Belohnung zu holen.',
+            tut_shop_t: 'Shop',
+            tut_shop_x: 'Gib GOLD aus Matches für bessere Waffen, Tränke, Schilde, Geschwindigkeits-/HP-Boosts und Kosmetik aus. Öffnen im Hauptmenü.',
+            tut_upgrades_t: 'Permanente Upgrades',
+            tut_upgrades_x: 'Alles, was du kaufst, wird auf deinem Konto gespeichert und gilt in jedem Match. Boosts erhöhen dein HP/Speed-Limit.',
+            tut_chats_t: 'Chat',
+            tut_chats_x: 'Das Menü hat eine Chat-Seitenleiste für Freunde, Gruppen und den globalen Chat. Tippe ◀ zum Öffnen/Schließen.',
+            tut_friends_t: 'Freunde',
+            tut_friends_x: 'Klicke auf 🔎 Spieler, um nach Namen zu suchen. Du kannst folgen, Profil ansehen, einladen oder melden.',
+            tut_groups_t: 'Gruppen',
+            tut_groups_x: 'Gruppen fassen mehrere Freunde in einem Chat zusammen. Erstelle eine Gruppe im Chat-Panel und lade ein, wen du willst.',
+            tut_online_t: 'Online spielen',
+            tut_online_x: 'Klicke auf 🌐 Online, um einen Raum zu erstellen oder mit Code beizutreten. 2, 3 oder 4 Spieler online.',
+            tut_achievements_t: 'Erfolge',
+            tut_achievements_x: 'Der 🏆-Button zeigt Herausforderungen, die extra XP und Gold geben. Erledige sie für schnelleren Levelaufstieg.',
+            tut_settings_t: 'Einstellungen',
+            tut_settings_x: 'Unter ⚙ änderst du Lautstärke, Musik, Sprache, Passwort und kannst dieses Tutorial erneut ansehen, Bugs melden oder Konto löschen.',
+            tut_end_t: 'Bereit zum Spielen!',
+            tut_end_x: 'Das war’s! Viel Spaß und viel Glück beim Horizon Survival Tournament!',
         },
         'es': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -1565,6 +1735,55 @@
             errPasswordChangeUnconfirmed: "No se pudo confirmar el cambio de contraseña. Inténtalo de nuevo.",
             msgPasswordChanged: "¡Contraseña cambiada con éxito!",
             errRecoveryLinkExpired: "El enlace de restablecimiento ha expirado. Solicita un nuevo correo."
+        
+            // Tutorial
+            tutorialBtn: '📖 Ver Tutorial',
+            tutorialSectionTitle: 'Tutorial',
+            tutorialNext: 'Siguiente ▶',
+            tutorialPrev: '◀ Atrás',
+            tutorialSkip: 'Saltar',
+            tutorialClose: 'Cerrar ✕',
+            tutorialStepLabel: 'Paso {a} de {b}',
+            tut_welcome_t: '¡Bienvenido a Be Battles!',
+            tut_welcome_x: 'Un tutorial rápido para conocer el juego. Puedes reabrirlo cuando quieras desde Ajustes.',
+            tut_level_t: 'Tu nivel',
+            tut_level_x: 'Encima de tu nombre ves tu nivel y una barra de XP. Ganas XP con partidas, muertes y logros. Subir de nivel desbloquea cosméticos y ventajas.',
+            tut_move_pc_t: 'Cómo moverse (Teclado)',
+            tut_move_pc_x: 'Usa W A S D para mover al Jugador 1. Flechas ↑ ← ↓ → mueven al Jugador 2 en local. Mantén pulsada la tecla para caminar.',
+            tut_move_mob_t: 'Cómo moverse (Táctil)',
+            tut_move_mob_x: 'Usa el joystick/D-pad en el lado izquierdo. Mantén pulsada la dirección que quieras.',
+            tut_shoot_pc_t: 'Cómo disparar (Teclado/Ratón)',
+            tut_shoot_pc_x: 'CLIC IZQUIERDO para disparar. En el teclado, [1] cura un poco y [2] activa el Escudo (invulnerabilidad corta).',
+            tut_shoot_mob_t: 'Cómo disparar (Táctil)',
+            tut_shoot_mob_x: 'Usa el botón DISPARAR a la derecha. Los botones [1] y [2] al lado son Curación y Escudo.',
+            tut_special_pc_t: 'Habilidad especial',
+            tut_special_pc_x: 'Cada arquetipo tiene una habilidad especial (onda de choque, misil, etc). Se carga con el tiempo y se activa cuando el icono se ilumina.',
+            tut_special_mob_t: 'Habilidad especial',
+            tut_special_mob_x: 'El botón ESPECIAL está a la derecha. Lanza la habilidad única de tu arquetipo cuando está cargado.',
+            tut_hud_t: 'HUD',
+            tut_hud_x: 'Arriba ves HP, Escudo, munición, oro y el temporizador/oleada. Cuidado con el HP: el rojo indica peligro.',
+            tut_chest_pc_t: 'Cofres',
+            tut_chest_pc_x: '¿Estás sobre un cofre? Pulsa [B] para abrirlo. Los cofres dan oro, pociones o mejoras temporales.',
+            tut_chest_mob_t: 'Cofres',
+            tut_chest_mob_x: '¿Estás sobre un cofre? Aparece un botón ABRIR — tócalo para llevarte el premio.',
+            tut_shop_t: 'Tienda',
+            tut_shop_x: 'Gasta el ORO ganado en armas mejores, pociones, escudos, boosts de velocidad/HP y cosméticos. Ábrela desde el menú principal.',
+            tut_upgrades_t: 'Mejoras permanentes',
+            tut_upgrades_x: 'Todo lo que compras se guarda en tu cuenta y se aplica en cada partida. Los boosts suben el tope de HP/velocidad.',
+            tut_chats_t: 'Chat',
+            tut_chats_x: 'El menú tiene una barra lateral de chat para amigos, grupos y el chat global. Toca ◀ para abrir/cerrar.',
+            tut_friends_t: 'Amigos',
+            tut_friends_x: 'Pulsa 🔎 Jugadores para buscar por nombre. Puedes seguir, ver perfil, invitar o reportar.',
+            tut_groups_t: 'Grupos',
+            tut_groups_x: 'Los grupos juntan a varios amigos en un chat. Crea uno desde el panel de chat e invita a quien quieras.',
+            tut_online_t: 'Jugar Online',
+            tut_online_x: 'Pulsa 🌐 Online para crear una sala o entrar con un código. Juega de 2, 3 o 4 jugadores online.',
+            tut_achievements_t: 'Logros',
+            tut_achievements_x: 'El botón 🏆 muestra retos que dan XP y oro extra. Complétalos para subir de nivel más rápido.',
+            tut_settings_t: 'Ajustes',
+            tut_settings_x: 'En ⚙ cambias volumen, música, idioma, contraseña y puedes ver este tutorial de nuevo, reportar bugs o borrar cuenta.',
+            tut_end_t: '¡Listo para jugar!',
+            tut_end_x: '¡Eso es todo! Diviértete y suerte en el Horizon Survival Tournament!',
         },
         'it': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -1744,6 +1963,55 @@
             errPasswordChangeUnconfirmed: "Impossibile confermare la modifica della password. Riprova.",
             msgPasswordChanged: "Password cambiata con successo!",
             errRecoveryLinkExpired: "Il link di reimpostazione è scaduto. Richiedi una nuova email."
+        
+            // Tutorial
+            tutorialBtn: '📖 Vedi Tutorial',
+            tutorialSectionTitle: 'Tutorial',
+            tutorialNext: 'Avanti ▶',
+            tutorialPrev: '◀ Indietro',
+            tutorialSkip: 'Salta',
+            tutorialClose: 'Chiudi ✕',
+            tutorialStepLabel: 'Passo {a} di {b}',
+            tut_welcome_t: 'Benvenuto in Be Battles!',
+            tut_welcome_x: 'Un tutorial rapido per conoscere il gioco. Puoi riaprirlo dalle Impostazioni quando vuoi.',
+            tut_level_t: 'Il tuo livello',
+            tut_level_x: 'Sopra il tuo nome vedi il livello e la barra XP. Guadagni XP con partite, uccisioni e obiettivi. Salire di livello sblocca cosmetici e bonus.',
+            tut_move_pc_t: 'Come muoversi (Tastiera)',
+            tut_move_pc_x: 'Usa W A S D per il Giocatore 1. Frecce ↑ ← ↓ → per il Giocatore 2 in locale. Tieni premuto per camminare.',
+            tut_move_mob_t: 'Come muoversi (Touch)',
+            tut_move_mob_x: 'Usa il joystick/D-pad a sinistra dello schermo. Tieni premuta la direzione desiderata.',
+            tut_shoot_pc_t: 'Come sparare (Tastiera/Mouse)',
+            tut_shoot_pc_x: 'CLIC SINISTRO per sparare. Sulla tastiera, [1] cura un po’ e [2] attiva lo Scudo (breve invulnerabilità).',
+            tut_shoot_mob_t: 'Come sparare (Touch)',
+            tut_shoot_mob_x: 'Usa il pulsante SPARA a destra. I pulsanti [1] e [2] accanto sono Cura e Scudo.',
+            tut_special_pc_t: 'Abilità speciale',
+            tut_special_pc_x: 'Ogni archetipo ha un’abilità speciale (onda d’urto, missile, ecc.). Si carica col tempo e parte quando l’icona si illumina.',
+            tut_special_mob_t: 'Abilità speciale',
+            tut_special_mob_x: 'Il pulsante SPECIALE è a destra. Lancia l’abilità unica del tuo archetipo quando è carico.',
+            tut_hud_t: 'HUD',
+            tut_hud_x: 'In alto vedi HP, Scudo, munizioni, oro e timer/ondata. Attento all’HP: il rosso indica pericolo.',
+            tut_chest_pc_t: 'Casse',
+            tut_chest_pc_x: 'Sei su una cassa? Premi [B] per aprirla. Le casse danno oro, pozioni o potenziamenti temporanei.',
+            tut_chest_mob_t: 'Casse',
+            tut_chest_mob_x: 'Sei su una cassa? Appare il pulsante APRI — toccalo per prendere il premio.',
+            tut_shop_t: 'Negozio',
+            tut_shop_x: 'Spendi l’ORO delle partite in armi migliori, pozioni, scudi, boost velocità/HP e cosmetici. Aprilo dal menu principale.',
+            tut_upgrades_t: 'Potenziamenti permanenti',
+            tut_upgrades_x: 'Tutto ciò che compri viene salvato sul tuo account e vale in ogni partita. I boost alzano il limite di HP/velocità.',
+            tut_chats_t: 'Chat',
+            tut_chats_x: 'Il menu ha una barra chat per amici, gruppi e chat globale. Tocca ◀ per aprire/chiudere.',
+            tut_friends_t: 'Amici',
+            tut_friends_x: 'Clicca 🔎 Giocatori per cercare per nome. Puoi seguire, vedere profilo, invitare o segnalare.',
+            tut_groups_t: 'Gruppi',
+            tut_groups_x: 'I gruppi uniscono più amici in una chat. Crea un gruppo dal pannello chat e invita chi vuoi.',
+            tut_online_t: 'Gioca Online',
+            tut_online_x: 'Clicca 🌐 Online per creare una stanza o entrare con un codice. Fino a 2, 3 o 4 giocatori online.',
+            tut_achievements_t: 'Obiettivi',
+            tut_achievements_x: 'Il pulsante 🏆 mostra sfide che danno XP e oro extra. Completale per salire di livello più in fretta.',
+            tut_settings_t: 'Impostazioni',
+            tut_settings_x: 'In ⚙ cambi volume, musica, lingua, password e puoi rivedere questo tutorial, segnalare bug o cancellare l’account.',
+            tut_end_t: 'Pronto a giocare!',
+            tut_end_x: 'È tutto! Divertiti e buona fortuna all’Horizon Survival Tournament!',
         },
         'fr': {
             tagline: "Horizon Survival Tournament — Cosmic Engine 2026",
@@ -1923,6 +2191,55 @@
             errPasswordChangeUnconfirmed: "Impossible de confirmer le changement de mot de passe. Réessayez.",
             msgPasswordChanged: "Mot de passe changé avec succès !",
             errRecoveryLinkExpired: "Le lien de réinitialisation a expiré. Demandez un nouvel e-mail."
+        
+            // Tutorial
+            tutorialBtn: '📖 Voir le tutoriel',
+            tutorialSectionTitle: 'Tutoriel',
+            tutorialNext: 'Suivant ▶',
+            tutorialPrev: '◀ Retour',
+            tutorialSkip: 'Passer',
+            tutorialClose: 'Fermer ✕',
+            tutorialStepLabel: 'Étape {a} sur {b}',
+            tut_welcome_t: 'Bienvenue dans Be Battles !',
+            tut_welcome_x: 'Un tutoriel rapide pour découvrir le jeu. Tu peux le rouvrir depuis les Paramètres à tout moment.',
+            tut_level_t: 'Ton niveau',
+            tut_level_x: 'Au-dessus de ton pseudo, tu vois ton niveau et une barre d’XP. Tu gagnes de l’XP en jouant, en tuant et via les succès. Monter de niveau débloque des cosmétiques et des bonus.',
+            tut_move_pc_t: 'Se déplacer (Clavier)',
+            tut_move_pc_x: 'Utilise W A S D pour le Joueur 1. Les flèches ↑ ← ↓ → déplacent le Joueur 2 en local. Maintiens la touche pour marcher.',
+            tut_move_mob_t: 'Se déplacer (Tactile)',
+            tut_move_mob_x: 'Utilise le joystick/D-pad à gauche de l’écran. Maintiens la direction voulue.',
+            tut_shoot_pc_t: 'Tirer (Clavier/Souris)',
+            tut_shoot_pc_x: 'CLIC GAUCHE pour tirer. Au clavier, [1] soigne un peu et [2] active le Bouclier (invulnérabilité brève).',
+            tut_shoot_mob_t: 'Tirer (Tactile)',
+            tut_shoot_mob_x: 'Utilise le bouton TIRER à droite. Les boutons [1] et [2] à côté servent au Soin et au Bouclier.',
+            tut_special_pc_t: 'Capacité spéciale',
+            tut_special_pc_x: 'Chaque archétype a une capacité spéciale (onde de choc, missile, etc.). Elle se recharge avec le temps et se déclenche quand l’icône s’allume.',
+            tut_special_mob_t: 'Capacité spéciale',
+            tut_special_mob_x: 'Le bouton SPÉCIAL est à droite. Il lance la capacité unique de ton archétype une fois chargé.',
+            tut_hud_t: 'HUD',
+            tut_hud_x: 'En haut, tu vois PV, Bouclier, munitions, or et minuteur/vague. Attention aux PV : le rouge signale le danger.',
+            tut_chest_pc_t: 'Coffres',
+            tut_chest_pc_x: 'Debout sur un coffre ? Appuie sur [B] pour l’ouvrir. Les coffres donnent or, potions ou améliorations temporaires.',
+            tut_chest_mob_t: 'Coffres',
+            tut_chest_mob_x: 'Debout sur un coffre ? Un bouton OUVRIR apparaît — touche-le pour récupérer la récompense.',
+            tut_shop_t: 'Boutique',
+            tut_shop_x: 'Dépense l’OR gagné en meilleures armes, potions, boucliers, boosts vitesse/PV et cosmétiques. Ouvre-la depuis le menu.',
+            tut_upgrades_t: 'Améliorations permanentes',
+            tut_upgrades_x: 'Tout ce que tu achètes est sauvegardé sur ton compte et s’applique à chaque partie. Les boosts augmentent le plafond de PV/vitesse.',
+            tut_chats_t: 'Chat',
+            tut_chats_x: 'Le menu a une barre latérale de chat pour amis, groupes et chat global. Touche ◀ pour l’ouvrir/fermer.',
+            tut_friends_t: 'Amis',
+            tut_friends_x: 'Clique sur 🔎 Joueurs pour chercher par nom. Tu peux suivre, voir profil, inviter ou signaler.',
+            tut_groups_t: 'Groupes',
+            tut_groups_x: 'Les groupes réunissent plusieurs amis dans un même chat. Crée un groupe depuis le panneau de chat et invite qui tu veux.',
+            tut_online_t: 'Jouer en ligne',
+            tut_online_x: 'Clique sur 🌐 Online pour créer une salle ou rejoindre avec un code. Jusqu’à 2, 3 ou 4 joueurs en ligne.',
+            tut_achievements_t: 'Succès',
+            tut_achievements_x: 'Le bouton 🏆 affiche des défis qui donnent XP et or bonus. Complète-les pour monter de niveau plus vite.',
+            tut_settings_t: 'Paramètres',
+            tut_settings_x: 'Dans ⚙ tu changes volume, musique, langue, mot de passe et peux revoir ce tutoriel, signaler un bug ou supprimer le compte.',
+            tut_end_t: 'Prêt à jouer !',
+            tut_end_x: 'C’est tout ! Amuse-toi bien et bonne chance au Horizon Survival Tournament !',
         }
     };
     function t(key) {
@@ -4591,6 +4908,7 @@
                 this.applyLanguage();
                 let lblUser = document.getElementById('lbl-logged-in-user');
                 if(lblUser) lblUser.textContent = '👤 ' + acc.name;
+                setTimeout(() => { try { Tutorial.maybeAutoOpen(); } catch(e) { console.warn(e); } }, 400);
                 // NOVO: modo visitante não tem conta real na nuvem, então não faz sentido buscar
                 // jogadores nem mostrar conversas — e mais importante, isso evita que sobrem na tela
                 // conversas de uma conta que estava logada antes nesse mesmo navegador.
@@ -5955,6 +6273,81 @@
     }
     window.addEventListener('pointerdown', startMusicOnFirstInteraction);
     window.addEventListener('keydown', startMusicOnFirstInteraction);
+    
+    const Tutorial = {
+        _steps: [],
+        _idx: 0,
+        _isMobile() {
+            try { return (Engine && typeof Engine.detectDevice === 'function') ? (Engine.detectDevice() === 'mobile') : false; }
+            catch(e) { return false; }
+        },
+        _buildSteps() {
+            const mob = this._isMobile();
+            return [
+                { icon:'👋', tKey:'tut_welcome_t', xKey:'tut_welcome_x' },
+                { icon:'⭐', tKey:'tut_level_t',   xKey:'tut_level_x' },
+                { icon: mob ? '🕹️' : '⌨️', tKey: mob?'tut_move_mob_t':'tut_move_pc_t', xKey: mob?'tut_move_mob_x':'tut_move_pc_x' },
+                { icon: mob ? '👆' : '🖱️', tKey: mob?'tut_shoot_mob_t':'tut_shoot_pc_t', xKey: mob?'tut_shoot_mob_x':'tut_shoot_pc_x' },
+                { icon:'💥', tKey: mob?'tut_special_mob_t':'tut_special_pc_t', xKey: mob?'tut_special_mob_x':'tut_special_pc_x' },
+                { icon:'🖥️', tKey:'tut_hud_t', xKey:'tut_hud_x' },
+                { icon:'📦', tKey: mob?'tut_chest_mob_t':'tut_chest_pc_t', xKey: mob?'tut_chest_mob_x':'tut_chest_pc_x' },
+                { icon:'🛒', tKey:'tut_shop_t', xKey:'tut_shop_x' },
+                { icon:'⚙️', tKey:'tut_upgrades_t', xKey:'tut_upgrades_x' },
+                { icon:'💬', tKey:'tut_chats_t', xKey:'tut_chats_x' },
+                { icon:'🧑\u200d🤝\u200d🧑', tKey:'tut_friends_t', xKey:'tut_friends_x' },
+                { icon:'👥', tKey:'tut_groups_t', xKey:'tut_groups_x' },
+                { icon:'🌐', tKey:'tut_online_t', xKey:'tut_online_x' },
+                { icon:'🏆', tKey:'tut_achievements_t', xKey:'tut_achievements_x' },
+                { icon:'⚙', tKey:'tut_settings_t', xKey:'tut_settings_x' },
+                { icon:'🎉', tKey:'tut_end_t', xKey:'tut_end_x' },
+            ];
+        },
+        maybeAutoOpen() {
+            try {
+                if (localStorage.getItem('bb_tut_seen') === '1') return;
+            } catch(e) {}
+            this.open(false);
+        },
+        open(replay) {
+            this._steps = this._buildSteps();
+            this._idx = 0;
+            let scr = document.getElementById('tutorial-screen');
+            if (!scr) return;
+            let settings = document.getElementById('settings-screen');
+            if (settings) settings.classList.add('hidden');
+            scr.classList.remove('hidden');
+            this._render();
+        },
+        _render() {
+            let s = this._steps[this._idx];
+            if (!s) { this.close(); return; }
+            document.getElementById('tut-icon').textContent = s.icon;
+            document.getElementById('tut-title').textContent = t(s.tKey);
+            document.getElementById('tut-text').textContent = t(s.xKey);
+            let label = t('tutorialStepLabel').replace('{a}', this._idx+1).replace('{b}', this._steps.length);
+            document.getElementById('tut-step-label').textContent = label;
+            let pct = ((this._idx+1) / this._steps.length) * 100;
+            document.getElementById('tut-progress-bar').style.width = pct + '%';
+            let prev = document.getElementById('tut-prev');
+            prev.style.visibility = (this._idx === 0) ? 'hidden' : 'visible';
+            let next = document.getElementById('tut-next');
+            next.textContent = (this._idx === this._steps.length - 1) ? t('tutorialClose') : t('tutorialNext');
+        },
+        next() {
+            if (this._idx >= this._steps.length - 1) { this.close(); return; }
+            this._idx++; this._render();
+        },
+        prev() {
+            if (this._idx === 0) return;
+            this._idx--; this._render();
+        },
+        close() {
+            try { localStorage.setItem('bb_tut_seen', '1'); } catch(e) {}
+            let scr = document.getElementById('tutorial-screen');
+            if (scr) scr.classList.add('hidden');
+        }
+    };
+
     if (typeof Peer === 'undefined' || typeof supabase === 'undefined') {
         console.error('Bibliotecas externas (PeerJS/Supabase) não carregaram a tempo.');
         showBootError();
