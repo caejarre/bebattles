@@ -423,7 +423,7 @@
     <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
     <div id="auth-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
-            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 7.0</span></div>
+            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.0</span></div>
             <div class="auth-sub" data-i18n="authSubtitle">Horizon Survival Tournament 2026</div>
             <div class="auth-tabs" id="auth-tabs">
                 <button id="tab-login" class="active" onclick="Accounts.showTab('login')" data-i18n="authTabLogin">🔑 Entrar</button>
@@ -471,7 +471,7 @@
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px;">V: 7.0</span></h1>
+                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.0</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button id="btn-social-players" onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
                         <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
@@ -5142,10 +5142,13 @@
             // tentativas) pra uma chance real de esquiva de mais de 95%, mesmo no fácil. Agora
             // existe um "dodgeChance" separado, testado UMA ÚNICA VEZ por projétil (ver
             // updateAIBot), então esses números refletem a chance real de esquiva/acerto.
-            easy:   { hpMult: 0.65, spdMult: 0.80, reaction: 46, accuracy: 0.34, aggressiveness: 0.32, atkCdMult: 1.7,  dodgeChance: 0.18, prediction: 0.35, rewardWin: 150,  rewardLoss: 25 },
+            // AJUSTE 2: usuário pediu mais contraste entre pontas — Fácil precisa ser bem
+            // fácil (novato ganha com folga) e Brutal precisa ser muito, muito difícil (só
+            // jogador muito bom vence). Antes as curvas estavam próximas demais no meio.
+            easy:   { hpMult: 0.55, spdMult: 0.70, reaction: 62, accuracy: 0.20, aggressiveness: 0.18, atkCdMult: 2.3,  dodgeChance: 0.08, prediction: 0.15, rewardWin: 150,  rewardLoss: 25 },
             medium: { hpMult: 0.95, spdMult: 0.98, reaction: 22, accuracy: 0.56, aggressiveness: 0.54, atkCdMult: 1.1,  dodgeChance: 0.40, prediction: 0.60, rewardWin: 350,  rewardLoss: 45 },
-            hard:   { hpMult: 1.25, spdMult: 1.14, reaction: 11, accuracy: 0.76, aggressiveness: 0.74, atkCdMult: 0.85, dodgeChance: 0.60, prediction: 0.85, rewardWin: 700,  rewardLoss: 65 },
-            brutal: { hpMult: 1.6,  spdMult: 1.30, reaction: 5,  accuracy: 0.90, aggressiveness: 0.90, atkCdMult: 0.6,  dodgeChance: 0.78, prediction: 1.0,  rewardWin: 1400, rewardLoss: 90 }
+            hard:   { hpMult: 1.35, spdMult: 1.18, reaction: 9,  accuracy: 0.80, aggressiveness: 0.80, atkCdMult: 0.75, dodgeChance: 0.65, prediction: 0.92, rewardWin: 700,  rewardLoss: 65 },
+            brutal: { hpMult: 1.85, spdMult: 1.42, reaction: 2,  accuracy: 0.97, aggressiveness: 0.97, atkCdMult: 0.42, dodgeChance: 0.88, prediction: 1.0,  rewardWin: 1400, rewardLoss: 90 }
         },
         players: [], enemies: [], projectiles: [], particles: [], items: [], platforms: [], chunksLoaded: {},
         secretZones: [], inputKeys: {}, pendingSpawns: [], openWorldSpawnCd: 0,
@@ -5834,21 +5837,32 @@
                 } else {
                     bot._aiMove = (Math.random() < cfg.aggressiveness) ? dirToTarget : 0;
                 }
-                // Pula pra alcançar plataformas mais altas, perseguir no ar, ou ocasionalmente driblar
-                bot._aiWantJump = (target.y < bot.y - 40) || Math.random() < 0.015 * cfg.aggressiveness;
+                bot._aiWantJump = Math.random() < 0.015 * cfg.aggressiveness;
             }
+            // --- Perseguição vertical (escalar): checado TODO FRAME, não só na reavaliação
+            // tática acima — um jogador real martela o pulo até subir quando o alvo está mais
+            // alto, não espera um "cooldown de decisão" pra tentar de novo. Antes isso só era
+            // reavaliado a cada `reaction` frames (até quase 1s no fácil), então o bot passava
+            // boa parte do tempo simplesmente parado embaixo de plataformas sem subir — essa
+            // era a principal causa do "não sobe/não persegue bem" relatado. Reavaliar isso a
+            // cada frame resolve sem custar nada (é só uma comparação).
+            if(bot.isGrounded && target.y < bot.y - 30) { bot._aiWantJump = true; }
             if(wantDodgeJump) { bot._aiWantJump = true; }
 
             // --- Detecção de "preso": se o bot está tentando andar mas mal se move (bateu numa
             // parede, borda de plataforma ou buraco), ele pula pra tentar destravar. Antes disso
             // não existia, então o bot ficava "tremendo" no lugar contra obstáculos em vez de
-            // perseguir de verdade — um dos comportamentos "esquisitos" mais visíveis.
+            // perseguir de verdade — um dos comportamentos "esquisitos" mais visíveis. O limite
+            // de frames escala com a dificuldade: no Brutal ele percebe que está preso quase
+            // instantaneamente (jogador bom não fica "burro" contra uma parede), no Fácil demora
+            // mais (comportamento mais humano/hesitante, de propósito).
             bot._stuckCheckX = bot._stuckCheckX ?? bot.x;
             bot._stuckFrames = bot._stuckFrames || 0;
             let tryingToMove = (bot._aiMove === 1 || bot._aiMove === -1);
+            let stuckLimit = Math.round(24 - cfg.aggressiveness * 16);
             if(tryingToMove && Math.abs(bot.x - bot._stuckCheckX) < 1.2) {
                 bot._stuckFrames++;
-                if(bot._stuckFrames > 18 && bot.isGrounded) { bot._aiWantJump = true; bot._stuckFrames = 0; }
+                if(bot._stuckFrames > stuckLimit && bot.isGrounded) { bot._aiWantJump = true; bot._stuckFrames = 0; }
             } else {
                 bot._stuckFrames = 0;
             }
