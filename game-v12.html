@@ -200,7 +200,18 @@
         #invite-bell { position:relative; }
         #invite-badge { position:absolute; top:-6px; right:-6px; background:#ef4444; color:white; font-size:0.65rem; font-weight:800; border-radius:50%; width:16px; height:16px; display:none; align-items:center; justify-content:center; }
         #invite-badge.show { display:flex; }
-        #invite-panel { position:absolute; top:60px; right:20px; background:#0f172a; border:1px solid #334155; border-radius:10px; width:300px; max-width:calc(100vw - 24px); box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:50; overflow:hidden; }
+        /* FIX CORTE MOBILE: o painel era position:absolute dentro do #invite-bell, que por sua vez
+           mora dentro do #game-container (overflow:hidden, tamanho fixo 1280x720 escalado via
+           transform) e do .menu-main-panel (overflow-y:auto). Um elemento absoluto sempre é
+           recortado pela caixa de QUALQUER ancestral com overflow:hidden/auto, então em telas de
+           celular — onde a fileira de botões quebra linha e o sino acaba mais perto do rodapé
+           visível — o painel estourava para fora dessas caixas e tinha o final cortado. Agora ele
+           usa position:fixed E é reanexado como filho direto do <body> em tempo de execução
+           (ver Social._positionInvitePanel), o que o tira de dentro de qualquer container com
+           overflow e o ancora nas coordenadas reais da tela (viewport), não nas coordenadas
+           internas escaladas do jogo. max-height + overflow-y:auto garantem que, mesmo se a lista
+           de convites for grande, o próprio painel role em vez de vazar da tela. */
+        #invite-panel { position:fixed; top:60px; right:20px; background:#0f172a; border:1px solid #334155; border-radius:10px; width:300px; max-width:calc(100vw - 24px); max-height:min(420px, calc(100vh - 84px - env(safe-area-inset-bottom))); overflow-y:auto; box-shadow:0 10px 30px rgba(0,0,0,0.5); z-index:9999; }
         #invite-panel.hidden { display:none; }
         .invite-panel-title { padding:12px 14px; font-size:0.8rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; border-bottom:1px solid #1e293b; }
         .invite-item { padding:12px 14px; border-bottom:1px solid #1e293b; display:flex; flex-direction:column; gap:8px; }
@@ -3558,31 +3569,60 @@
             let panel = document.getElementById('invite-panel');
             let willShow = panel.classList.contains('hidden');
             panel.classList.toggle('hidden');
-            if(willShow) this._positionInvitePanel();
+            if (willShow) {
+                this._positionInvitePanel();
+                // Fecha ao tocar/clicar fora do painel e fora do próprio sino, com um pequeno atraso
+                // pra não capturar o clique/toque que acabou de abrir o painel.
+                setTimeout(() => document.addEventListener('pointerdown', Social._onOutsideInvitePointer, true), 0);
+            } else {
+                document.removeEventListener('pointerdown', Social._onOutsideInvitePointer, true);
+            }
         },
-        // FIX: o painel de convites era posicionado com "right:20px" relativo à própria caixinha
-        // do sino — que é minúscula e, quando a fileira de botões quebra linha (comum no celular,
-        // com telas estreitas), sobra pouco espaço à esquerda do sino dentro da área do jogo.
-        // Isso fazia o painel "estourar" pra fora da borda esquerda e ser cortado pelo
-        // overflow:hidden do #game-container. Agora calculamos a posição de verdade a partir da
-        // geometria real do sino e do container, e prendemos (clamp) o painel pra sempre caber
-        // inteiro dentro da tela do jogo, não importa onde o sino tenha parado.
+        _onOutsideInvitePointer(e) {
+            let panel = document.getElementById('invite-panel');
+            let bell = document.getElementById('invite-bell');
+            if (!panel || panel.classList.contains('hidden')) return;
+            if (panel.contains(e.target) || (bell && bell.contains(e.target))) return;
+            panel.classList.add('hidden');
+            document.removeEventListener('pointerdown', Social._onOutsideInvitePointer, true);
+        },
+        // FIX CORTE MOBILE: antes o painel era posicionado com position:absolute e matemática manual
+        // de escala, mas continuava DENTRO do #game-container (overflow:hidden, escalado via
+        // transform) e do .menu-main-panel (overflow-y:auto) — qualquer ancestral com overflow
+        // recorta elementos absolutamente posicionados que estourem sua caixa, então no celular
+        // (fileira de botões quebrando linha, sino perto do rodapé visível) o final do painel
+        // sumia cortado. A correção real é reanexar o painel como filho direto do <body> — assim
+        // ele escapa de QUALQUER overflow:hidden/auto ancestral — e usar position:fixed com
+        // coordenadas tiradas de getBoundingClientRect(), que já vêm em pixels reais de tela e
+        // levam em conta automaticamente o transform:scale() do jogo, sem precisar recalcular
+        // escala manualmente. No fim, sempre prendemos (clamp) o painel dentro da viewport visível
+        // (usando visualViewport quando existe, que desconta barra de endereço do navegador etc.).
         _positionInvitePanel() {
             let panel = document.getElementById('invite-panel');
             let bell = document.getElementById('invite-bell');
-            let container = document.getElementById('game-container');
-            if(!panel || !bell || !container) return;
-            let refEl = panel.offsetParent || container;
-            let containerRect = container.getBoundingClientRect();
-            let refRect = refEl.getBoundingClientRect();
+            if (!panel || !bell) return;
+            if (panel.parentElement !== document.body) document.body.appendChild(panel);
+            let vv = window.visualViewport;
+            let vw = (vv && vv.width) || window.innerWidth;
+            let vh = (vv && vv.height) || window.innerHeight;
+            let vOffsetLeft = (vv && vv.offsetLeft) || 0;
+            let vOffsetTop = (vv && vv.offsetTop) || 0;
+            let margin = 12;
             let bellRect = bell.getBoundingClientRect();
-            let scale = containerRect.width / 1280 || 1;
-            let panelWidth = Math.min(300, (containerRect.width / scale) - 24);
-            let left = (bellRect.left - refRect.left) / scale;
-            let top = (bellRect.bottom - refRect.top) / scale + 10;
-            let maxLeft = ((containerRect.width / scale) - (refRect.left - containerRect.left) / scale) - panelWidth - 12;
-            left = Math.max(12, Math.min(left, maxLeft));
+            let panelWidth = Math.min(300, vw - margin * 2);
             panel.style.width = panelWidth + 'px';
+            // Mede a altura real do painel (já visível nesse ponto) pra decidir se cabe embaixo do
+            // sino ou se precisa abrir pra cima, evitando cortar embaixo em telas curtas.
+            let panelRect = panel.getBoundingClientRect();
+            let panelHeight = panelRect.height || 200;
+            let left = bellRect.right - panelWidth - vOffsetLeft;
+            left = Math.max(margin, Math.min(left, vw - panelWidth - margin));
+            let top = bellRect.bottom - vOffsetTop + 10;
+            let spaceBelow = (vh - vOffsetTop) - (bellRect.bottom - vOffsetTop);
+            if (spaceBelow < panelHeight + margin) {
+                // não cabe embaixo do sino: abre pra cima dele em vez de deixar cortado
+                top = Math.max(margin, (bellRect.top - vOffsetTop) - panelHeight - 10);
+            }
             panel.style.left = left + 'px';
             panel.style.right = 'auto';
             panel.style.top = top + 'px';
@@ -3615,6 +3655,7 @@
             this._pendingInvites = this._pendingInvites.filter(i => i.id !== inviteId);
             this._renderInvitePanel();
             document.getElementById('invite-panel').classList.add('hidden');
+            document.removeEventListener('pointerdown', Social._onOutsideInvitePointer, true);
             Engine.openOnlineLobby();
             OnlineSync.createRoom();
             const waitForCode = setInterval(async () => {
@@ -5125,6 +5166,136 @@
         };
         // ==================== fim AIBrain ====================
 
+        // ==================== AITacticsDB ====================
+        // NOVO (v2, expandida): "banco de dados" posicional da IA. Tem duas camadas:
+        //
+        // CAMADA 1 — MATRIZ DE POSIÇÃO: 9 faixas de distância horizontal (dx, de "colado" até
+        // "extremamente longe") × 5 faixas de diferença de altura (dy, de "muito acima" até
+        // "muito abaixo") = 45 combinações de posição relativa cobertas. Cada combinação aponta
+        // pra um PERFIL DE PESOS (ex.: "allin", "climbNow", "watchDrop") que descreve o quanto
+        // cada ação (atacar, avançar, recuar, pular, especial, buscar baú, segurar posição) faz
+        // sentido tático NAQUELA posição exata entre bot e alvo. Testamos programaticamente e a
+        // matriz cobre 100% de qualquer posição possível dentro do tamanho real da arena — não
+        // existe "buraco" onde a IA fica sem saber o que fazer.
+        //
+        // CAMADA 2 — MODIFICADORES SITUACIONAIS: depois de olhar só a posição, a IA também
+        // considera o ESTADO da luta — vida dela e do alvo (pra saber quando ir pro all-in de
+        // finalização ou quando recuar pra sobreviver), mana disponível (não adianta pesar
+        // "especial" se não tem mana pra usar), proximidade da borda do mapa (pra não se
+        // encurralar recuando pra fora da arena) e se o alvo está fechando ou abrindo distância
+        // rapidamente (pra não avançar demais e passar direto por ele, ou vice-versa). Isso é o
+        // que faz a IA jogar como alguém que "lê a partida inteira", não só a posição no instante.
+        const AITacticsDB = {
+            DX_BINS: ['pointblank','veryClose','close','midClose','mid','midFar','far','veryFar','extreme'],
+            DX_RANGES: [[0,45],[45,90],[90,150],[150,230],[230,320],[320,440],[440,600],[600,850],[850,999999]],
+            DY_BINS: ['farAbove','above','level','below','farBelow'],
+            DY_RANGES: [[-999999,-180],[-180,-40],[-40,40],[40,180],[180,999999]],
+            // Perfis de peso reutilizáveis — cada um representa "o que fazer" numa família de
+            // situações táticas parecidas. Ações possíveis: advance, retreat, hold, jump,
+            // pressAttack, pressSpecial, chaseChest.
+            PROFILES: {
+                allin:            { pressAttack:65, pressSpecial:20, hold:10, retreat:5 },   // colado, mesmo nível: tudo em cima
+                pressure:         { pressAttack:45, advance:30, pressSpecial:12, hold:13 },  // bem perto, mesmo nível: entrar batendo
+                closeIn:          { advance:55, pressAttack:15, hold:20, pressSpecial:10 },  // média distância: fechar
+                approach:         { advance:70, hold:20, retreat:10 },                       // longe: avançar
+                sprint:           { advance:82, chaseChest:18 },                             // muito/extremamente longe: correr
+                climbNow:         { jump:65, pressAttack:15, hold:20 },                       // colado e alvo acima: subir já
+                climbSoon:        { jump:40, advance:40, hold:20 },                           // meia distância e alvo acima
+                closeThenClimb:   { advance:65, jump:20, hold:15 },                            // longe e alvo acima: aproximar antes
+                holdGround:       { pressAttack:35, hold:35, retreat:20, jump:10 },            // colado e alvo abaixo: manter altura
+                watchDrop:        { advance:40, hold:30, jump:25, retreat:5 },                 // média distância e alvo abaixo
+                approachBelow:    { advance:75, hold:25 },                                     // longe e alvo abaixo
+                desperateClimb:   { jump:75, hold:25 },                                        // colado e alvo MUITO acima
+                chaseFarAbove:    { advance:60, jump:25, hold:15 },                             // longe e alvo MUITO acima
+                holdHigh:         { hold:45, pressAttack:25, retreat:20, jump:10 },             // colado e alvo MUITO abaixo
+                approachFarBelow: { advance:70, hold:30 }                                       // longe e alvo MUITO abaixo
+            },
+            // A matriz de verdade: pra cada uma das 5 faixas de altura, qual perfil usar em cada
+            // uma das 9 faixas de distância (na mesma ordem de DX_BINS). 5 × 9 = 45 células.
+            MATRIX: {
+                farAbove: ['desperateClimb','desperateClimb','chaseFarAbove','chaseFarAbove','chaseFarAbove','chaseFarAbove','chaseFarAbove','chaseFarAbove','chaseFarAbove'],
+                above:    ['climbNow','climbNow','climbSoon','climbSoon','closeThenClimb','closeThenClimb','closeThenClimb','closeThenClimb','closeThenClimb'],
+                level:    ['allin','pressure','pressure','closeIn','closeIn','approach','approach','sprint','sprint'],
+                below:    ['holdGround','holdGround','watchDrop','watchDrop','watchDrop','approachBelow','approachBelow','approachBelow','approachBelow'],
+                farBelow: ['holdHigh','holdHigh','approachFarBelow','approachFarBelow','approachFarBelow','approachFarBelow','approachFarBelow','approachFarBelow','approachFarBelow']
+            },
+            _binIndex(ranges, v) {
+                for (let i = 0; i < ranges.length; i++) if (v >= ranges[i][0] && v <= ranges[i][1]) return i;
+                return -1;
+            },
+            // CAMADA 1: só a posição relativa.
+            baseWeights(dx, dy) {
+                let dxi = this._binIndex(this.DX_RANGES, Math.abs(dx));
+                let dyi = this._binIndex(this.DY_RANGES, dy);
+                if (dxi === -1 || dyi === -1) return { advance: 60, hold: 40 }; // rede de segurança; na prática nunca cai aqui (testado 100% de cobertura)
+                let profileName = this.MATRIX[this.DY_BINS[dyi]][dxi];
+                return Object.assign({}, this.PROFILES[profileName]); // cópia — os modificadores da camada 2 vão alterar isso
+            },
+            // CAMADA 2: aplica o contexto da luta em cima dos pesos posicionais. Recebe um objeto
+            // `ctx` com o estado atual do bot/alvo/arena (ver chamada em updateAIBot).
+            applyModifiers(w, ctx) {
+                // Finalização: alvo com pouca vida -> aumenta MUITO a vontade de atacar, some
+                // com hesitação (a IA "sente o cheiro de sangue" e não deixa o jogador se recuperar).
+                if (ctx.targetHpPct < 20) {
+                    w.pressAttack = (w.pressAttack || 0) * 1.9;
+                    w.pressSpecial = (w.pressSpecial || 0) * 1.6;
+                    w.hold = (w.hold || 0) * 0.5;
+                } else if (ctx.targetHpPct < 40) {
+                    w.pressAttack = (w.pressAttack || 0) * 1.3;
+                }
+                // Sobrevivência: bot com pouca vida -> pesa mais recuar/segurar, menos avançar às
+                // cegas (a decisão de fugir de vez já é tratada fora da tabela, isso é só um
+                // ajuste fino pra quando ainda está lutando).
+                if (ctx.botHpPct < 25) {
+                    w.retreat = (w.retreat || 0) * 1.8 + 10;
+                    w.advance = (w.advance || 0) * 0.5;
+                }
+                // Mana: sem mana suficiente pro especial, não faz sentido nenhum pesar essa ação
+                // — redistribui esse peso pro ataque normal em vez de simplesmente descartar.
+                if (!ctx.hasMana && w.pressSpecial) {
+                    w.pressAttack = (w.pressAttack || 0) + w.pressSpecial;
+                    w.pressSpecial = 0;
+                }
+                // Consciência de borda: se recuar fosse empurrar o bot pra fora/quase fora da
+                // arena, isso é burrice tática (se encurralar sozinho) — zera o peso de recuo e
+                // manda esse peso pra "segurar posição" (planta e briga em vez de se acuar).
+                if (ctx.wouldRetreatIntoEdge && w.retreat) {
+                    w.hold = (w.hold || 0) + w.retreat;
+                    w.retreat = 0;
+                }
+                // Leitura de aproximação: alvo fechando distância rápido -> não faz sentido
+                // continuar "avançando" (ia passar reto por ele); planta e prepara pra interceptar.
+                // Alvo abrindo distância rápido (fugindo) -> reforça avançar pra não perder o ritmo.
+                if (ctx.targetClosingFast && w.advance) {
+                    w.hold = (w.hold || 0) + w.advance * 0.6;
+                    w.pressAttack = (w.pressAttack || 0) + w.advance * 0.4;
+                    w.advance = 0;
+                } else if (ctx.targetFleeingFast && w.advance) {
+                    w.advance = w.advance * 1.4;
+                }
+                return w;
+            },
+            // Sorteio ponderado: cada ação tem chance proporcional ao seu peso final.
+            pickWeighted(weights) {
+                let total = 0;
+                for (const k in weights) total += weights[k];
+                if (total <= 0) return 'hold';
+                let roll = Math.random() * total;
+                for (const k in weights) {
+                    roll -= weights[k];
+                    if (roll <= 0) return k;
+                }
+                return Object.keys(weights)[0];
+            },
+            // Ponto de entrada usado pelo updateAIBot: dx/dy relativos + contexto da luta -> ação.
+            decide(dx, dy, ctx) {
+                let w = this.baseWeights(dx, dy);
+                w = this.applyModifiers(w, ctx || {});
+                return this.pickWeighted(w);
+            }
+        };
+        // ==================== fim AITacticsDB ====================
+
     const Engine = {
         canvas: null, ctx: null, state: 'MENU', lastTime: 0,
         isOpenWorld: false, gameMode: 'HORDA',
@@ -5148,7 +5319,14 @@
             easy:   { hpMult: 0.55, spdMult: 0.70, reaction: 62, accuracy: 0.20, aggressiveness: 0.18, atkCdMult: 2.3,  dodgeChance: 0.08, prediction: 0.15, rewardWin: 150,  rewardLoss: 25 },
             medium: { hpMult: 0.95, spdMult: 0.98, reaction: 22, accuracy: 0.56, aggressiveness: 0.54, atkCdMult: 1.1,  dodgeChance: 0.40, prediction: 0.60, rewardWin: 350,  rewardLoss: 45 },
             hard:   { hpMult: 1.35, spdMult: 1.18, reaction: 9,  accuracy: 0.80, aggressiveness: 0.80, atkCdMult: 0.75, dodgeChance: 0.65, prediction: 0.92, rewardWin: 700,  rewardLoss: 65 },
-            brutal: { hpMult: 1.85, spdMult: 1.42, reaction: 2,  accuracy: 0.97, aggressiveness: 0.97, atkCdMult: 0.42, dodgeChance: 0.88, prediction: 1.0,  rewardWin: 1400, rewardLoss: 90 }
+            // BRUTAL REFORÇADO: além dos números mais altos (quase reação instantânea, acerto e
+            // esquiva no teto), o Brutal agora também é o que mais se beneficia do AITacticsDB
+            // (tabela posicional) e da leitura de janela de recuperação do alvo — ou seja, ele
+            // não é só "mais forte nos números", ele joga tático de verdade: cobre a posição
+            // certa pra cada distância/altura e pune abertura depois de ataque quase sem falhar.
+            // Isso foi pedido explicitamente pra ser um adversário que um jogador humano comum
+            // dificilmente vence — só alguém muito bom, jogando com cuidado, tem chance real.
+            brutal: { hpMult: 2.1, spdMult: 1.5, reaction: 1,  accuracy: 0.99, aggressiveness: 1.0, atkCdMult: 0.34, dodgeChance: 0.95, prediction: 1.0,  rewardWin: 1600, rewardLoss: 100 }
         },
         players: [], enemies: [], projectiles: [], particles: [], items: [], platforms: [], chunksLoaded: {},
         secretZones: [], inputKeys: {}, pendingSpawns: [], openWorldSpawnCd: 0,
@@ -5818,26 +5996,85 @@
             // A estratégia vinda do AIBrain (quando disponível e "escolhida" pro peso da
             // dificuldade) ajusta a distância ideal de combate e a chance de avançar/recuar;
             // fora isso o comportamento é o heurístico local de sempre.
+            // --- Janela de recuperação: um jogador (humano ou não) fica alguns quadros "aberto"
+            // logo depois de atacar (cdAttack alto = acabou de gastar o golpe e ainda não pode
+            // atacar de novo). Um jogador bom PERCEBE isso e aproveita pra avançar/bater sem
+            // medo de ser interrompido. Guardamos o cooldown máximo de ataque na primeira vez que
+            // vemos o alvo atacar, pra saber calcular "recém-atacou" proporcionalmente (não crava
+            // um número fixo, porque cada arquétipo tem cooldown de ataque diferente).
+            if(target.cdAttack > 0) bot._targetAtkCdMax = Math.max(bot._targetAtkCdMax || 0, target.cdAttack);
+            let targetJustAttacked = target.cdAttack > (bot._targetAtkCdMax || 0) * 0.6;
+            // Só dificuldades com reação boa o bastante pra "perceber" a abertura exploram isso
+            // (representa a skill do jogador-IA de ler o estado do oponente, não um cheat de
+            // saber o futuro) — escala com prediction/accuracy da dificuldade.
+            let canReadOpenings = cfg.prediction >= 0.5;
+
             if(bot._aiReactCd <= 0) {
                 bot._aiReactCd = cfg.reaction;
-                let idealMin = 170, idealMax = 320;
-                if(strategy === 'aggressive') { idealMin = 90; idealMax = 220; }
-                else if(strategy === 'defensive') { idealMin = 260; idealMax = 460; }
                 let lowHp = bot.hp < bot.maxHp * 0.35;
-                if(strategy === 'chase_chest' && nearestChest && !lowHp && dist > idealMax) {
+                // ── Monta o contexto da luta pra camada 2 do banco de dados (além da posição
+                // pura, isso dá à IA consciência de vida, mana, borda do mapa e se o alvo está
+                // se aproximando ou fugindo rápido).
+                let retreatDir = -dirToTarget;
+                let predictedX = bot.x + retreatDir * 90; // "se eu recuar mais um pouco, onde eu paro?"
+                let ctx = {
+                    targetHpPct: (target.hp / target.maxHp) * 100,
+                    botHpPct: (bot.hp / bot.maxHp) * 100,
+                    hasMana: bot.mp >= 40,
+                    wouldRetreatIntoEdge: predictedX < 10 || predictedX + bot.w > this.arenaWidth - 10,
+                    targetClosingFast: (dirToTarget === 1 && target.vx < -3) || (dirToTarget === -1 && target.vx > 3),
+                    targetFleeingFast: (dirToTarget === 1 && target.vx > 3) || (dirToTarget === -1 && target.vx < -3)
+                };
+                // ── Consulta o banco de dados posicional: dado onde o alvo está em relação ao
+                // bot (dx, dy) MAIS o contexto acima, devolve a ação tática mais adequada pra
+                // essa situação exata, sorteada ponderadamente entre as opções que fazem sentido.
+                let tacticalAction = AITacticsDB.decide(dx, dy, ctx);
+                // Reseta as flags táticas a cada reavaliação — evitam que um bônus de "abriu
+                // espaço pra atacar" de uma reação anterior continue valendo numa situação
+                // totalmente diferente (ex.: o bot ficou com pouca vida e mudou pra fuga).
+                bot._aiPressAdvantage = false;
+                bot._aiTacticalAction = null;
+                if(strategy === 'chase_chest' && nearestChest && !lowHp && dist > 320) {
                     // Prioriza buscar o baú quando não está em perigo imediato e o alvo está longe
                     bot._aiMove = nearestChest.x > bot.x ? 1 : -1;
                 } else if(strategy === 'flee' || (lowHp && Math.random() < cfg.aggressiveness * 0.7)) {
                     // Vida baixa (ou IA online mandou fugir): joga na defensiva, mantém distância pra kitar
                     bot._aiMove = -dirToTarget;
-                } else if(dist < idealMin) {
-                    bot._aiMove = (Math.random() < cfg.aggressiveness * 0.65) ? -dirToTarget : 0;
-                } else if(dist > idealMax) {
+                } else if(canReadOpenings && targetJustAttacked && dist < 260) {
+                    // Alvo acabou de atacar e está vulnerável: pressiona sem hesitar, ignorando
+                    // a leitura "normal" da tabela posicional pra essa reação pontual.
                     bot._aiMove = dirToTarget;
+                    bot._aiPressAdvantage = true;
                 } else {
-                    bot._aiMove = (Math.random() < cfg.aggressiveness) ? dirToTarget : 0;
+                    // Traduz a ação sorteada no banco de dados posicional em movimento real.
+                    // "aggressive"/"defensive" (vindos do AIBrain online) inclinam a leitura da
+                    // tabela pra mais perto ou mais longe do ideal, sem jogar fora a tática.
+                    let biasIn = strategy === 'aggressive' ? 60 : (strategy === 'defensive' ? -60 : 0);
+                    switch(tacticalAction) {
+                        case 'pressAttack':
+                        case 'pressSpecial':
+                            bot._aiMove = (dist > 60 + biasIn) ? dirToTarget : 0;
+                            break;
+                        case 'advance':
+                            bot._aiMove = dirToTarget;
+                            break;
+                        case 'retreat':
+                            bot._aiMove = -dirToTarget;
+                            break;
+                        case 'jump':
+                            bot._aiMove = (dist > 140) ? dirToTarget : 0;
+                            break;
+                        case 'chaseChest':
+                            bot._aiMove = nearestChest ? (nearestChest.x > bot.x ? 1 : -1) : dirToTarget;
+                            break;
+                        case 'hold':
+                        default:
+                            bot._aiMove = (Math.random() < cfg.aggressiveness) ? dirToTarget : 0;
+                    }
+                    bot._aiTacticalAction = tacticalAction;
                 }
                 bot._aiWantJump = Math.random() < 0.015 * cfg.aggressiveness;
+                if(bot._aiTacticalAction === 'jump') bot._aiWantJump = bot._aiWantJump || Math.random() < 0.5;
             }
             // --- Perseguição vertical (escalar): checado TODO FRAME, não só na reavaliação
             // tática acima — um jogador real martela o pulo até subir quando o alvo está mais
@@ -5894,14 +6131,21 @@
             // bônus e o teto agora também escala pela dificuldade, então "fácil" continua errando
             // com frequência perceptível mesmo bem perto — do jeito que um jogador esperaria.
             let proximityBonus = Math.max(0, 1 - dist / 700) * 0.18;
-            let effectiveAccuracy = Math.min(cfg.accuracy + 0.15, cfg.accuracy + proximityBonus);
+            // Bônus tático: a tabela posicional (AITacticsDB) já disse que essa é uma posição boa
+            // pra atacar ("pressAttack"/"pressSpecial"), ou o alvo acabou de atacar e está aberto
+            // — nos dois casos a IA aproveita a janela com bem mais convicção do que o normal.
+            let tacticalAtkBonus = (bot._aiTacticalAction === 'pressAttack' || bot._aiPressAdvantage) ? 0.22 : 0;
+            let effectiveAccuracy = Math.min(cfg.accuracy + 0.15, cfg.accuracy + proximityBonus + tacticalAtkBonus);
             let wantsToFightNow = strategy !== 'flee' && strategy !== 'chase_chest';
             if(wantsToFightNow && bot.cdAttack <= 0 && dist < 620 && verticalOk && aimIsGood && Math.random() < effectiveAccuracy) {
                 keys.attack = true;
             }
             // Special: usado com mais frequência quando o alvo está perto e a dificuldade é alta,
-            // e quase nunca à toa (economiza mana pra quando realmente compensa)
-            if(wantsToFightNow && bot.cdSpecial <= 0 && bot.mp >= 40 && dist < 420 && verticalOk && Math.random() < cfg.aggressiveness * 0.2) {
+            // e quase nunca à toa (economiza mana pra quando realmente compensa). A tabela
+            // posicional pode sinalizar "pressSpecial" como boa opção pra essa posição — nesse
+            // caso a chance sobe bastante em vez de depender só da agressividade genérica.
+            let specialChance = cfg.aggressiveness * 0.2 + (bot._aiTacticalAction === 'pressSpecial' ? 0.35 : 0);
+            if(wantsToFightNow && bot.cdSpecial <= 0 && bot.mp >= 40 && dist < 420 && verticalOk && Math.random() < specialChance) {
                 keys.special = true;
             }
             // --- Dash tático de fuga: se muito perto e com pouca vida, tenta se abrir espaço
