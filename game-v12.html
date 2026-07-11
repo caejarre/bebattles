@@ -12,37 +12,75 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Be Battles - Survival Horizon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
+        :root {
+            /* ═══════ TOKENS DE DESIGN ═══════ Cores centralizadas aqui só pra referência visual
+               rápida — o restante do CSS abaixo continua com os valores diretos de sempre (não
+               troquei nenhum, então nada que já funcionava pode quebrar), apenas usamos essas
+               variáveis nos elementos novos/polidos desta passada. */
+            --accent: #38bdf8; --accent-2: #818cf8; --accent-warm: #f59e0b;
+            --bg-deep: #020617; --bg-panel: #0f172a; --bg-card: #1e293b; --border-soft: #1e293b;
+            --text-dim: #64748b; --radius-lg: 14px; --radius-md: 10px;
+            --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-        body { background: #020617; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; height: 100dvh; }
-        
-        #game-container { position: relative; width: 1280px; height: 720px; background: #090d16; border: 4px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); border-radius: 12px; overflow: hidden; transform-origin: center center; }
+        html { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        body { background: #020617; font-family: 'Manrope', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #f8fafc; overflow: hidden; display: flex; justify-content: center; align-items: center; height: 100vh; height: 100dvh; }
+        /* Fundo ambiente sutil atrás do jogo — dois brilhos radiais bem discretos que dão
+           profundidade sem custar performance (é um gradiente estático de CSS, não anima por
+           frame, então não compete com o canvas por FPS). */
+        body::before {
+            content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background:
+                radial-gradient(circle at 15% 20%, rgba(56,189,248,0.07), transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(129,140,248,0.06), transparent 45%),
+                #020617;
+        }
+        h1, h2, h3, h4, .btn-play-invite, #hud-timer-text { font-family: 'Sora', 'Manrope', sans-serif; }
+
+        #game-container { position: relative; width: 1280px; height: 720px; background: #090d16; border: 4px solid #1e293b; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7), 0 0 0 1px rgba(56,189,248,0.06), 0 0 80px -20px rgba(56,189,248,0.15); border-radius: 16px; overflow: hidden; transform-origin: center center; }
         canvas { display: block; width: 100%; height: 100%; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); }
-        .screen { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.95); display: flex; flex-direction: column; padding: 40px; z-index: 10; transition: opacity 0.3s ease; }
+        .screen { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.95); display: flex; flex-direction: column; padding: 40px; z-index: 10; transition: opacity 0.3s ease; animation: screen-fade-in 0.32s var(--ease-smooth); }
+        @keyframes screen-fade-in { from { opacity: 0; transform: translateY(6px) scale(0.994); } to { opacity: 1; transform: none; } }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
         #menu-screen { display: grid; grid-template-columns: 1fr 340px; gap: 30px; height: 100%; }
         .menu-main-panel { display: flex; flex-direction: column; justify-content: space-between; height: 100%; overflow-y: auto; overflow-x: hidden; padding-right: 6px; }
-        .menu-title-area h1 { font-size: 3.5rem; font-weight: 900; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 12px rgba(56,189,248,0.2); }
+        .menu-title-area h1 { font-size: 3.5rem; font-weight: 800; font-family: 'Sora', sans-serif; letter-spacing: -0.01em; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 12px rgba(56,189,248,0.2); }
         .menu-title-area p { color: #64748b; font-size: 1.1rem; margin-top: 5px; }
-        .config-section { background: #0f172a; border: 1px solid #1e293b; padding: 20px; border-radius: 8px; margin-top: 15px; }
+        .config-section { background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.7)); backdrop-filter: blur(6px); border: 1px solid #1e293b; padding: 20px; border-radius: var(--radius-lg); margin-top: 15px; transition: border-color 0.25s ease; }
+        .config-section:hover { border-color: #263449; }
         .section-title { font-size: 0.9rem; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
         .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
         
-        button { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 12px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        button { background: #1e293b; border: 1px solid #334155; color: #cbd5e1; padding: 12px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.15s var(--ease-smooth), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; font-size: 0.95rem; -webkit-tap-highlight-color: transparent; touch-action: manipulation; font-family: inherit; }
         @media (hover: hover) and (pointer: fine) {
-            button:hover:not(:disabled) { background: #334155; border-color: #475569; color: #fff; transform: translateY(-1px); }
+            button:hover:not(:disabled) { background: #334155; border-color: #475569; color: #fff; transform: translateY(-2px); box-shadow: 0 6px 16px -6px rgba(0,0,0,0.5); }
         }
-        button:active:not(:disabled) { transform: translateY(1px); }
+        button:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
         button.active { background: #38bdf8 !important; border-color: #0ea5e9 !important; color: #0f172a !important; box-shadow: 0 0 15px rgba(56,189,248,0.4); }
         button.disabled { opacity: 0.4; pointer-events: none; }
-        .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .char-card { background: #1e293b; border: 2px solid transparent; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; -webkit-tap-highlight-color: transparent; min-width: 0; overflow: hidden; }
+        /* Botões principais de ação (iniciar partida/duelo) ganham uma respiração de brilho bem
+           sutil — chama o olho pro próximo passo óbvio sem ser irritante ou piscar rápido demais. */
+        [data-i18n="startBtn"], [data-i18n="vsAiStartBtn"], [data-i18n="lobbyStartNowBtn"] { animation: cta-breathe 2.8s ease-in-out infinite; }
+        @keyframes cta-breathe { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.12); } }
         @media (hover: hover) and (pointer: fine) {
-            .char-card:hover { background: #334155; transform: scale(1.03); }
+            [data-i18n="startBtn"]:hover, [data-i18n="vsAiStartBtn"]:hover, [data-i18n="lobbyStartNowBtn"]:hover { animation-play-state: paused; }
         }
-        .char-card.selected { border-color: #38bdf8; background: #0f172a; box-shadow: 0 0 15px rgba(56,189,248,0.2); }
+        .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .char-card { background: #1e293b; border: 2px solid transparent; border-radius: var(--radius-md); padding: 15px; text-align: center; cursor: pointer; transition: transform 0.2s var(--ease-smooth), background 0.2s ease, box-shadow 0.2s ease; position: relative; -webkit-tap-highlight-color: transparent; min-width: 0; overflow: hidden; }
+        @media (hover: hover) and (pointer: fine) {
+            .char-card:hover { background: #263449; transform: translateY(-3px) scale(1.02); box-shadow: 0 10px 24px -10px rgba(0,0,0,0.6); }
+        }
+        .char-card.selected { border-color: #38bdf8; background: #0f172a; box-shadow: 0 0 0 1px rgba(56,189,248,0.3), 0 0 20px rgba(56,189,248,0.25); }
         /* FIX: nomes de armas compridos (principalmente em alemão, ex. "Orbit-Scharfschützengewehr")
            não quebravam linha dentro do card — o texto forçava a coluna do grid (e o grid inteiro)
            a ficar mais larga que o espaço disponível, empurrando a seleção de armas pra fora da
@@ -54,7 +92,7 @@
         .char-card .badge-p2 { right: 8px; background: #ef4444; }
         .char-card.show-p1 .badge-p1 { display: block; }
         .char-card.show-p2 .badge-p2 { display: block; }
-        .menu-side-panel { background: #0f172a; border-left: 2px solid #1e293b; padding: 20px; display: flex; flex-direction: column; gap: 20px; height: 100%; overflow-y: auto; }
+        .menu-side-panel { background: linear-gradient(180deg, rgba(15,23,42,0.95), rgba(15,23,42,0.85)); border-left: 1px solid #1e293b; padding: 20px; display: flex; flex-direction: column; gap: 20px; height: 100%; overflow-y: auto; }
         .shop-catalog { display: flex; flex-direction: column; gap: 10px; }
         .shop-item { background: #1e293b; border: 1px solid #334155; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
         .shop-item .item-info h4 { font-size: 0.95rem; color: #f1f5f9; }
@@ -70,16 +108,24 @@
         .ranking-box { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
         .ranking-item { display: flex; justify-content: space-between; background: #1e293b; padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; }
         .ranking-empty { text-align: center; color: #64748b; font-size: 0.85rem; padding: 10px; }
-        #game-hud { position: absolute; top: 0; inset-x: 0; height: 90px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; z-index: 5; font-family: monospace; }
-        /* OTIMIZAÇÃO MOBILE/TABLET: este HUD fica sempre visível SOBRE o canvas do jogo, que
-           redesenha a 60+ quadros por segundo. "backdrop-filter: blur()" obriga o navegador a
-           recompor esse desfoque a cada quadro — em GPUs mais fracas (comuns em tablets,
-           mesmo os mais caros) isso sozinho já derruba bastante o desempenho. Como o fundo já é
-           bem opaco (0.85), o blur quase não fazia diferença visual — removido. */
-        .hud-player { background: rgba(15,23,42,0.92); border: 1px solid rgba(51,65,85,0.5); padding: 10px 15px; border-radius: 8px; width: 320px; }
+        #game-hud { position: absolute; top: 0; inset-x: 0; height: 90px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; z-index: 5; font-family: 'Manrope', monospace; }
+        /* NOTA DE PERFORMANCE: nenhum backdrop-filter/blur foi adicionado aqui de propósito — o
+           HUD é redesenhado a cada quadro durante o jogo (60+fps), então blur em tempo real
+           pesaria muito em GPUs fracas (ver nota histórica logo acima na versão anterior deste
+           arquivo). Toda a "profundidade" abaixo vem de gradiente/sombra estáticos, que custam
+           bem menos que blur e não têm esse problema. */
+        .hud-player { background: linear-gradient(160deg, rgba(20,28,46,0.94), rgba(12,18,32,0.94)); border: 1px solid rgba(51,65,85,0.6); padding: 10px 15px; border-radius: 12px; width: 320px; box-shadow: 0 6px 18px -8px rgba(0,0,0,0.55); position: relative; overflow: hidden; }
+        .hud-player::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(to right, #22c55e, transparent 70%); opacity: 0.7; }
+        #hud-p2.hud-player::before, #hud-p3.hud-player::before, #hud-p4.hud-player::before { background: linear-gradient(to right, #ef4444, transparent 70%); }
+        .hud-player.hp-critical { animation: hp-critical-pulse 0.9s ease-in-out infinite; }
+        .hud-player.hp-critical .bar-hp { animation: hp-critical-bar 0.9s ease-in-out infinite; }
+        @keyframes hp-critical-pulse { 0%, 100% { box-shadow: 0 6px 18px -8px rgba(0,0,0,0.55); } 50% { box-shadow: 0 6px 18px -8px rgba(0,0,0,0.55), 0 0 18px rgba(239,68,68,0.55); } }
+        @keyframes hp-critical-bar { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.4); } }
         .hud-player-compact { width: 230px; padding: 7px 11px; }
         .hud-player-compact .hud-meta { font-size: 0.75rem; margin-bottom: 3px; }
         .hud-player-compact .hud-row-bottom { font-size: 0.7rem; }
+        /* nota de performance sobre backdrop-filter no HUD: ver comentário acima, junto da
+           definição de .hud-player. */
         .lobby-player-chip { background: rgba(30,41,59,0.7); border: 1px solid #334155; border-radius: 6px; padding: 6px 10px; font-size: 0.82rem; color: #e2e8f0; }
         .lobby-player-chip-empty { color: #475569; font-style: italic; }
         #chat-sidebar-panel.collapsed { width: 0 !important; padding-left: 0 !important; padding-right: 0 !important; border-left: none !important; }
@@ -101,29 +147,32 @@
         #toast-stack { position:absolute; top:calc(20px + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:60; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(94%, 1180px); box-sizing:border-box; }
         .game-toast { background:rgba(15,23,42,0.95); border:1px solid #b45309; color:#fcd34d; padding:10px 18px; border-radius:10px; font-weight:700; font-size:0.85rem; box-shadow:0 4px 15px rgba(0,0,0,0.4); animation: toast-in-out 3.2s ease forwards; max-width:100%; box-sizing:border-box; white-space:normal; word-break:break-word; text-align:center; }
         @keyframes toast-in-out { 0%{opacity:0; transform:translateY(-12px);} 10%{opacity:1; transform:translateY(0);} 85%{opacity:1;} 100%{opacity:0; transform:translateY(-8px);} }
-        .hud-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; font-weight: bold; }
-        .bar-container { background: #334155; height: 10px; border-radius: 4px; overflow: hidden; margin-bottom: 6px; border: 1px solid #1e293b; }
-        .bar-fill { height: 100%; width: 100%; transition: width 0.1s ease; }
+        .hud-meta { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px; font-weight: 800; }
+        .bar-container { background: #1e293b; height: 11px; border-radius: 999px; overflow: hidden; margin-bottom: 6px; border: 1px solid rgba(0,0,0,0.4); box-shadow: inset 0 2px 4px rgba(0,0,0,0.45); position: relative; }
+        .bar-fill { height: 100%; width: 100%; transition: width 0.15s ease; border-radius: 999px; position: relative; }
+        .bar-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(255,255,255,0.25), transparent 55%); }
         .bar-hp { background: linear-gradient(to right, #ef4444, #f43f5e); }
         .bar-mp { background: linear-gradient(to right, #3b82f6, #60a5fa); }
         .hud-row-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #cbd5e1; }
         .hud-item-legend { font-size: 0.65rem; color: #64748b; margin-top: 4px; }
         
         .hud-inventory { display: flex; gap: 6px; }
-        .hud-slot { width: 26px; height: 26px; background: #1e293b; border: 1px solid #475569; border-radius: 4px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; position: relative; color: #f59e0b; }
+        .hud-slot { width: 28px; height: 28px; background: linear-gradient(160deg,#243247,#1a2436); border: 1px solid #475569; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem; position: relative; color: #f59e0b; transition: transform 0.15s ease, border-color 0.15s ease; }
+        .hud-slot:not(.empty):hover { transform: translateY(-2px); border-color: #f59e0b; }
         .hud-slot.empty { opacity: 0.3; border-style: dashed; color: transparent; }
         .hud-slot .count { position: absolute; bottom: 1px; right: 2px; font-size: 0.6rem; background: rgba(0,0,0,0.8); padding: 0 3px; border-radius: 2px; color: #fff; }
         #hud-center { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        #hud-timer-text { background: rgba(15,23,42,0.9); border: 2px solid #334155; padding: 6px 16px; border-radius: 20px; font-size: 1.2rem; font-weight: bold; color: #f1f5f9; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-        #chest-alert { background: #eab308; color: #0f172a; font-weight: bold; padding: 4px 12px; border-radius: 4px; animation: pulse 1s infinite alternate; font-size: 0.85rem; display: none; pointer-events: auto; cursor: pointer; }
+        #hud-timer-text { background: linear-gradient(160deg, rgba(20,28,46,0.95), rgba(12,18,32,0.95)); border: 1px solid #334155; padding: 7px 20px; border-radius: 999px; font-size: 1.2rem; font-weight: 700; letter-spacing: 0.02em; color: #f1f5f9; box-shadow: 0 6px 16px -6px rgba(0,0,0,0.5); }
+        #chest-alert { background: linear-gradient(to right, #eab308, #f59e0b); color: #1c1305; font-weight: 800; padding: 6px 16px; border-radius: 999px; animation: pulse 1s infinite alternate; font-size: 0.85rem; display: none; pointer-events: auto; cursor: pointer; box-shadow: 0 4px 14px -4px rgba(234,179,8,0.5); }
         #chest-reward-popup { position: absolute; top: 100px; left: 50%; transform: translateX(-50%) translateY(-10px); background: rgba(15,23,42,0.95); border: 2px solid #eab308; color: #fde68a; font-weight: bold; padding: 8px 18px; border-radius: 8px; font-size: 0.95rem; z-index: 6; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; pointer-events: none; }
         #chest-reward-popup.show { opacity: 1; transform: translateX(-50%) translateY(0); }
         #hideout-alert { position: absolute; top: 100px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.97); border: 2px solid #818cf8; color: #c7d2fe; font-weight: bold; padding: 10px 22px; border-radius: 8px; font-size: 0.95rem; z-index: 6; pointer-events: auto; cursor: pointer; text-align: center; line-height: 1.6; display: none; }
         #hideout-alert .ht { font-size: 1rem; color: #a5b4fc; }
         #hideout-alert .hs { font-size: 0.85rem; color: #818cf8; margin-top: 2px; }
         #hideout-hud { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(15,23,42,0.95); border: 2px solid #818cf8; color: #c7d2fe; font-weight: bold; padding: 7px 20px; border-radius: 8px; font-size: 0.9rem; z-index: 6; pointer-events: auto; cursor: pointer; text-align: center; display: none; }
-        #gameover-screen { justify-content: center; align-items: center; text-align: center; gap: 20px; background: rgba(2,6,23,0.98); }
-        #lbl-gameover-title { font-size: 4rem; font-weight: 900; color: #ef4444; text-shadow: 0 0 30px rgba(239,68,68,0.4); }
+        #gameover-screen { justify-content: center; align-items: center; text-align: center; gap: 20px; background: radial-gradient(circle at center, rgba(30,10,10,0.5), rgba(2,6,23,0.98) 70%); }
+        #lbl-gameover-title { font-size: 4rem; font-weight: 800; font-family: 'Sora', sans-serif; letter-spacing: -0.02em; color: #ef4444; text-shadow: 0 0 40px rgba(239,68,68,0.5); animation: gameover-pop 0.5s var(--ease-smooth); }
+        @keyframes gameover-pop { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
         #lbl-gameover-stats { font-size: 1.2rem; color: #94a3b8; line-height: 1.6; max-width: 600px; }
         @keyframes pulse { from { transform: scale(1) translateX(-50%); opacity: 0.8; } to { transform: scale(1.05) translateX(-50%); opacity: 1; } }
         /* ═══════════ SOCIAL: busca, perfil, convites ═══════════ */
@@ -2369,14 +2418,30 @@
                 </text>
             `);
         },
+        // FIX (relatado pelo usuário com print do jogo real ao lado): os desenhos abaixo usavam
+        // cores/formas genéricas que não batiam com o jogo de verdade — cantos arredondados demais
+        // (no jogo os personagens são retângulos de canto reto), projétil desenhado como linha
+        // tracejada azul com bolinha (no jogo é um retângulo sólido da COR de quem atirou, sem
+        // tracejado), e o oponente da IA aparecia roxo (cor que nenhum personagem do jogo usa —
+        // os arquétipos reais são verde/vermelho/ciano). Reescrevi todos pra usar exatamente as
+        // mesmas cores, o mesmo "olho" preto de direção e o mesmo estilo de retângulo reto que
+        // aparecem em partida de verdade (ver Player.draw() e Projectile.draw() no código).
         visualCombat() {
             return this.svgWrap(`
                 <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
-                <rect x="24" y="55" width="24" height="34" rx="4" fill="#22c55e"/>
-                <rect x="170" y="55" width="24" height="34" rx="4" fill="#f43f5e"/>
-                <line x1="50" y1="65" x2="165" y2="65" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6 5"/>
-                <circle cx="150" cy="65" r="4" fill="#38bdf8"/>
-                <text x="182" y="45" text-anchor="middle" fill="#fbbf24" font-size="16">💥</text>
+                <line x1="14" y1="94" x2="206" y2="94" stroke="#1e293b" stroke-width="2"/>
+                <rect x="24" y="58" width="24" height="34" fill="#22c55e"/>
+                <rect x="42" y="68" width="6" height="6" fill="#000"/>
+                <rect x="172" y="58" width="24" height="34" fill="#f43f5e"/>
+                <rect x="46" y="73" width="12" height="6" fill="#22c55e"/>
+                <rect x="94" y="73" width="12" height="6" fill="#22c55e"/>
+                <rect x="142" y="73" width="12" height="6" fill="#22c55e"/>
+                <g opacity="0.85">
+                    <rect x="178" y="48" width="4" height="4" fill="#fbbf24"/>
+                    <rect x="188" y="52" width="3" height="3" fill="#fb923c"/>
+                    <rect x="182" y="60" width="3" height="3" fill="#fbbf24"/>
+                    <rect x="192" y="42" width="3" height="3" fill="#fb923c"/>
+                </g>
                 <text x="110" y="100" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgCombatHint')}</text>
             `);
         },
@@ -2392,26 +2457,34 @@
         visualChest() {
             return this.svgWrap(`
                 <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
-                <circle cx="110" cy="55" r="42" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="5 4"/>
-                <text x="145" y="63" text-anchor="middle" font-size="26">📦</text>
-                <rect x="70" y="46" width="20" height="28" rx="4" fill="#22c55e"/>
+                <circle cx="110" cy="52" r="34" fill="#fbbf24" opacity="0.12"/>
+                <rect x="90" y="52" width="40" height="22" fill="#78350f" stroke="#fbbf24" stroke-width="2"/>
+                <rect x="88" y="42" width="44" height="12" fill="#92400e" stroke="#fbbf24" stroke-width="2"/>
+                <rect x="105" y="50" width="10" height="8" fill="#fbbf24"/>
+                <rect x="30" y="58" width="24" height="34" fill="#22c55e"/>
+                <rect x="48" y="68" width="6" height="6" fill="#000"/>
                 <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgChestHint')}</text>
             `);
         },
         visualHideout() {
             return this.svgWrap(`
                 <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
-                <text x="110" y="60" text-anchor="middle" font-size="30">🚪</text>
-                <text x="110" y="90" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgHideoutHint')}</text>
+                <rect x="94" y="30" width="32" height="46" rx="4" fill="#1e1b4b" stroke="#818cf8" stroke-width="2"/>
+                <circle cx="118" cy="53" r="2.5" fill="#c7d2fe"/>
+                <rect x="30" y="58" width="24" height="34" fill="#22c55e"/>
+                <rect x="48" y="68" width="6" height="6" fill="#000"/>
+                <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgHideoutHint')}</text>
             `);
         },
         visualVsAI() {
             return this.svgWrap(`
                 <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
-                <rect x="24" y="40" width="26" height="36" rx="4" fill="#22c55e"/>
+                <rect x="26" y="42" width="26" height="36" fill="#22c55e"/>
+                <rect x="46" y="52" width="6" height="6" fill="#000"/>
                 <text x="110" y="63" text-anchor="middle" fill="#f8fafc" font-weight="800" font-size="14">VS</text>
-                <rect x="168" y="40" width="26" height="36" rx="4" fill="#a855f7"/>
-                <text x="181" y="34" text-anchor="middle" font-size="16">🤖</text>
+                <rect x="168" y="42" width="26" height="36" fill="#f43f5e"/>
+                <rect x="168" y="52" width="6" height="6" fill="#000"/>
+                <text x="181" y="34" text-anchor="middle" font-size="15">🤖</text>
                 <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgVsAiHint')}</text>
             `);
         },
@@ -5069,10 +5142,10 @@
             // tentativas) pra uma chance real de esquiva de mais de 95%, mesmo no fácil. Agora
             // existe um "dodgeChance" separado, testado UMA ÚNICA VEZ por projétil (ver
             // updateAIBot), então esses números refletem a chance real de esquiva/acerto.
-            easy:   { hpMult: 0.65, spdMult: 0.78, reaction: 50, accuracy: 0.32, aggressiveness: 0.28, atkCdMult: 1.8,  dodgeChance: 0.15, rewardWin: 150,  rewardLoss: 25 },
-            medium: { hpMult: 0.9,  spdMult: 0.95, reaction: 26, accuracy: 0.52, aggressiveness: 0.48, atkCdMult: 1.2,  dodgeChance: 0.35, rewardWin: 350,  rewardLoss: 45 },
-            hard:   { hpMult: 1.2,  spdMult: 1.1,  reaction: 14, accuracy: 0.70, aggressiveness: 0.68, atkCdMult: 0.9,  dodgeChance: 0.55, rewardWin: 700,  rewardLoss: 65 },
-            brutal: { hpMult: 1.5,  spdMult: 1.25, reaction: 7,  accuracy: 0.85, aggressiveness: 0.85, atkCdMult: 0.65, dodgeChance: 0.75, rewardWin: 1400, rewardLoss: 90 }
+            easy:   { hpMult: 0.65, spdMult: 0.80, reaction: 46, accuracy: 0.34, aggressiveness: 0.32, atkCdMult: 1.7,  dodgeChance: 0.18, prediction: 0.35, rewardWin: 150,  rewardLoss: 25 },
+            medium: { hpMult: 0.95, spdMult: 0.98, reaction: 22, accuracy: 0.56, aggressiveness: 0.54, atkCdMult: 1.1,  dodgeChance: 0.40, prediction: 0.60, rewardWin: 350,  rewardLoss: 45 },
+            hard:   { hpMult: 1.25, spdMult: 1.14, reaction: 11, accuracy: 0.76, aggressiveness: 0.74, atkCdMult: 0.85, dodgeChance: 0.60, prediction: 0.85, rewardWin: 700,  rewardLoss: 65 },
+            brutal: { hpMult: 1.6,  spdMult: 1.30, reaction: 5,  accuracy: 0.90, aggressiveness: 0.90, atkCdMult: 0.6,  dodgeChance: 0.78, prediction: 1.0,  rewardWin: 1400, rewardLoss: 90 }
         },
         players: [], enemies: [], projectiles: [], particles: [], items: [], platforms: [], chunksLoaded: {},
         secretZones: [], inputKeys: {}, pendingSpawns: [], openWorldSpawnCd: 0,
@@ -5703,6 +5776,17 @@
             let strategy = followAIStrategy ? AIBrain.strategy : 'balanced';
             let nearestChest = this.items.filter(it => it.type === 'chest' && !it.destroyed)
                 .sort((a,b) => Math.abs(a.x-bot.x) - Math.abs(b.x-bot.x))[0];
+            // --- Guarda de sanidade da estratégia online: o serviço externo consultado acima é
+            // lento, gratuito e fora do nosso controle — se ele sugerir algo que não bate com a
+            // realidade da partida (ex.: "fugir" com o bot saudável, ou "buscar baú" sem baú no
+            // mapa), o bot ficava minutos "esquecendo" de te perseguir, que era o bug relatado.
+            // Agora só aceitamos a sugestão da IA online quando ela faz sentido tático real;
+            // caso contrário caímos de volta pro comportamento local (balanced), que sempre
+            // persegue o alvo normalmente — o jogo NUNCA fica refém de um serviço externo.
+            let botIsHealthy = bot.hp > bot.maxHp * 0.4;
+            if(strategy === 'flee' && botIsHealthy) strategy = 'balanced';
+            if(strategy === 'chase_chest' && !nearestChest) strategy = 'balanced';
+            if(strategy === 'defensive' && dist < 90) strategy = 'balanced';
 
             // --- Esquiva de projéteis: se um tiro inimigo estiver vindo em direção ao bot e
             // perto o suficiente, tenta pular ou se afastar da linha de tiro.
@@ -5755,6 +5839,21 @@
             }
             if(wantDodgeJump) { bot._aiWantJump = true; }
 
+            // --- Detecção de "preso": se o bot está tentando andar mas mal se move (bateu numa
+            // parede, borda de plataforma ou buraco), ele pula pra tentar destravar. Antes disso
+            // não existia, então o bot ficava "tremendo" no lugar contra obstáculos em vez de
+            // perseguir de verdade — um dos comportamentos "esquisitos" mais visíveis.
+            bot._stuckCheckX = bot._stuckCheckX ?? bot.x;
+            bot._stuckFrames = bot._stuckFrames || 0;
+            let tryingToMove = (bot._aiMove === 1 || bot._aiMove === -1);
+            if(tryingToMove && Math.abs(bot.x - bot._stuckCheckX) < 1.2) {
+                bot._stuckFrames++;
+                if(bot._stuckFrames > 18 && bot.isGrounded) { bot._aiWantJump = true; bot._stuckFrames = 0; }
+            } else {
+                bot._stuckFrames = 0;
+            }
+            bot._stuckCheckX = bot.x;
+
             if(bot._aiMove === 1) { keys.right = true; }
             else if(bot._aiMove === -1) { keys.left = true; }
             keys.up = !!bot._aiWantJump && bot.isGrounded;
@@ -5770,7 +5869,8 @@
             // MUITO mais difícil nas dificuldades altas: ele "antecipa" o movimento do jogador
             // em vez de simplesmente atirar reto.
             let timeToHit = dist / Math.max(1, bot.projSpd * 60);
-            let predictedTargetX = (target.x + target.w/2) + (target.vx || 0) * 60 * timeToHit * cfg.accuracy;
+            let predictionSkill = cfg.prediction ?? cfg.accuracy;
+            let predictedTargetX = (target.x + target.w/2) + (target.vx || 0) * 60 * timeToHit * predictionSkill;
             let predictedDx = predictedTargetX - (bot.x + bot.w/2);
             let predictedDir = predictedDx >= 0 ? 1 : -1;
             let aimIsGood = (predictedDir === dirToTarget) || Math.abs(predictedDx) < 40;
@@ -6842,13 +6942,19 @@
                     hp: document.getElementById(`bar-${pfx}-hp`), mp: document.getElementById(`bar-${pfx}-mp`),
                     lives: document.getElementById(`lbl-${pfx}-lives`), gold: document.getElementById(`lbl-${pfx}-gold`),
                     weapon: document.getElementById(`lbl-${pfx}-weapon`), name: document.getElementById(`hud-${pfx}-name`),
-                    inv: document.getElementById(`inv-${pfx}`), boosts: this.id === 1 ? document.getElementById('hud-p1-boosts') : null
+                    inv: document.getElementById(`inv-${pfx}`), boosts: this.id === 1 ? document.getElementById('hud-p1-boosts') : null,
+                    container: document.getElementById(`hud-${pfx}`)
                 };
                 this._hudLast = {};
             }
             let h = this._hud, last = this._hudLast;
             let hpPct = Math.max(0, (this.hp / this.maxHp) * 100);
             if (h.hp && last.hpPct !== hpPct) { h.hp.style.width = hpPct + '%'; last.hpPct = hpPct; }
+            // NOVO: aviso visual de vida crítica — só uma troca de classe (super barata, sem
+            // reflow pesado), então continua seguro rodar todo frame junto do resto do HUD.
+            // Dá aquela tensão de "preciso curar AGORA" que jogos viciantes sempre têm.
+            let isCritical = this.lives > 0 && hpPct > 0 && hpPct <= 25;
+            if (h.container && last.critical !== isCritical) { h.container.classList.toggle('hp-critical', isCritical); last.critical = isCritical; }
             if (h.mp && last.mp !== this.mp) { h.mp.style.width = this.mp + '%'; last.mp = this.mp; }
             if (h.lives && last.lives !== this.lives) { h.lives.innerText = "❤".repeat(Math.max(0, this.lives)); last.lives = this.lives; }
             if (h.gold && last.gold !== this.goldCollected) { h.gold.innerText = `${t('earningsLabel')}: $${this.goldCollected}`; last.gold = this.goldCollected; }
