@@ -23,7 +23,7 @@
         .screen { position: absolute; inset: 0; background: rgba(15, 23, 42, 0.95); display: flex; flex-direction: column; padding: 40px; z-index: 10; transition: opacity 0.3s ease; }
         .hidden { display: none !important; opacity: 0; pointer-events: none; }
         #menu-screen { display: grid; grid-template-columns: 1fr 340px; gap: 30px; height: 100%; }
-        .menu-main-panel { display: flex; flex-direction: column; justify-content: space-between; height: 100%; overflow-y: auto; padding-right: 6px; }
+        .menu-main-panel { display: flex; flex-direction: column; justify-content: space-between; height: 100%; overflow-y: auto; overflow-x: hidden; padding-right: 6px; }
         .menu-title-area h1 { font-size: 3.5rem; font-weight: 900; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 4px 12px rgba(56,189,248,0.2); }
         .menu-title-area p { color: #64748b; font-size: 1.1rem; margin-top: 5px; }
         .config-section { background: #0f172a; border: 1px solid #1e293b; padding: 20px; border-radius: 8px; margin-top: 15px; }
@@ -38,13 +38,17 @@
         button.active { background: #38bdf8 !important; border-color: #0ea5e9 !important; color: #0f172a !important; box-shadow: 0 0 15px rgba(56,189,248,0.4); }
         button.disabled { opacity: 0.4; pointer-events: none; }
         .char-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .char-card { background: #1e293b; border: 2px solid transparent; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; -webkit-tap-highlight-color: transparent; }
+        .char-card { background: #1e293b; border: 2px solid transparent; border-radius: 8px; padding: 15px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; -webkit-tap-highlight-color: transparent; min-width: 0; overflow: hidden; }
         @media (hover: hover) and (pointer: fine) {
             .char-card:hover { background: #334155; transform: scale(1.03); }
         }
         .char-card.selected { border-color: #38bdf8; background: #0f172a; box-shadow: 0 0 15px rgba(56,189,248,0.2); }
-        .char-card h4 { font-size: 1.1rem; margin-bottom: 4px; }
-        .char-card span.char-meta { font-size: 0.8rem; color: #94a3b8; }
+        /* FIX: nomes de armas compridos (principalmente em alemão, ex. "Orbit-Scharfschützengewehr")
+           não quebravam linha dentro do card — o texto forçava a coluna do grid (e o grid inteiro)
+           a ficar mais larga que o espaço disponível, empurrando a seleção de armas pra fora da
+           tela no celular. Agora o texto quebra normalmente dentro do card em vez de estourar. */
+        .char-card h4 { font-size: 1.1rem; margin-bottom: 4px; overflow-wrap: break-word; word-break: break-word; hyphens: auto; }
+        .char-card span.char-meta { font-size: 0.8rem; color: #94a3b8; overflow-wrap: break-word; word-break: break-word; }
         .char-card .badge-p1, .char-card .badge-p2 { position: absolute; top: -8px; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: none; color: white; }
         .char-card .badge-p1 { left: 8px; background: #22c55e; }
         .char-card .badge-p2 { right: 8px; background: #ef4444; }
@@ -67,7 +71,12 @@
         .ranking-item { display: flex; justify-content: space-between; background: #1e293b; padding: 8px 12px; border-radius: 4px; font-size: 0.85rem; }
         .ranking-empty { text-align: center; color: #64748b; font-size: 0.85rem; padding: 10px; }
         #game-hud { position: absolute; top: 0; inset-x: 0; height: 90px; padding: 15px 25px; display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none; z-index: 5; font-family: monospace; }
-        .hud-player { background: rgba(15,23,42,0.85); border: 1px solid rgba(51,65,85,0.5); padding: 10px 15px; border-radius: 8px; width: 320px; backdrop-filter: blur(4px); }
+        /* OTIMIZAÇÃO MOBILE/TABLET: este HUD fica sempre visível SOBRE o canvas do jogo, que
+           redesenha a 60+ quadros por segundo. "backdrop-filter: blur()" obriga o navegador a
+           recompor esse desfoque a cada quadro — em GPUs mais fracas (comuns em tablets,
+           mesmo os mais caros) isso sozinho já derruba bastante o desempenho. Como o fundo já é
+           bem opaco (0.85), o blur quase não fazia diferença visual — removido. */
+        .hud-player { background: rgba(15,23,42,0.92); border: 1px solid rgba(51,65,85,0.5); padding: 10px 15px; border-radius: 8px; width: 320px; }
         .hud-player-compact { width: 230px; padding: 7px 11px; }
         .hud-player-compact .hud-meta { font-size: 0.75rem; margin-bottom: 3px; }
         .hud-player-compact .hud-row-bottom { font-size: 0.7rem; }
@@ -441,6 +450,8 @@
                         </div>
                         <span id="lbl-xp-text" style="font-size:0.68rem; color:#64748b;">0/100 XP</span>
                     </div>
+                    <span id="streak-badge" onclick="Engine.openMissions()" style="display:none; align-items:center; gap:4px; cursor:pointer; background:#1e293b; border:1px solid #ea580c; color:#fdba74; font-weight:800; font-size:0.75rem; padding:3px 9px; border-radius:20px; margin-left:8px;">🔥 <span id="lbl-streak-count">0</span></span>
+                    <button onclick="Engine.openMissions()" style="padding:5px 11px; font-size:0.74rem; background:#1e3a8a; border-color:#3b82f6; color:#93c5fd; margin-left:8px;" data-i18n="missionsBtn">🎯 Missões</button>
                     <button onclick="Engine.logoutAccount()" style="padding:3px 10px; font-size:0.74rem; background:transparent; border-color:#334155; color:#64748b; margin-left:auto;" data-i18n="logoutAccountBtn">Sair da Conta</button>
                 </div>
             </div>
@@ -499,10 +510,10 @@
             </div>
             <div class="config-section">
                 <div class="section-title" data-i18n="weaponSelectTitle">Arma Equipada</div>
-                <div id="weapon-select-grid" class="char-grid" style="grid-template-columns: repeat(4, 1fr);"></div>
+                <div id="weapon-select-grid" class="char-grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));"></div>
                 <div id="lbl-weapon-desc" style="margin-top:12px; font-size:0.85rem; color:#94a3b8; min-height:20px; background:rgba(0,0,0,0.2); padding:8px; border-radius:4px;"></div>
             </div>
-            <button onclick="Engine.startMatch()" style="background:linear-gradient(to right, #10b981, #059669); color:white; font-size:1.3rem; padding:16px; border:none; border-radius:8px; box-shadow:0 4px 15px rgba(16,185,129,0.3); margin-top:10px;" data-i18n="startBtn">INICIAR SIMULAÇÃO</button>
+            <button onclick="Engine.startNormalMatch()" style="background:linear-gradient(to right, #10b981, #059669); color:white; font-size:1.3rem; padding:16px; border:none; border-radius:8px; box-shadow:0 4px 15px rgba(16,185,129,0.3); margin-top:10px;" data-i18n="startBtn">INICIAR SIMULAÇÃO</button>
         </div>
         <div class="menu-side-panel">
             <div>
@@ -554,6 +565,42 @@
             </div>
             <p style="font-size:0.78rem; color:#64748b; margin:2px 0 0;" data-i18n="achievementsHint">Ganhe experiência jogando e completando desafios para subir de nível.</p>
             <div id="achievements-list" style="display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; margin-top:4px;"></div>
+        </div>
+    </div>
+    <!-- NOVO: Missões Diárias — 3 objetivos sorteados por dia, dando OURO direto (não só XP),
+         pra dar um motivo concreto de voltar toda vez que o jogo é aberto. -->
+    <div id="missions-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="lobby-box" style="max-width:520px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 style="font-size:1.35rem; color:#93c5fd; margin:0;" data-i18n="missionsTitle">🎯 Missões Diárias</h2>
+                <button onclick="Engine.closeMissions()" style="padding:7px 13px; font-size:0.83rem;" data-i18n="lobbyBackBtn">✕ Voltar</button>
+            </div>
+            <div id="streak-panel" style="display:flex; align-items:center; gap:10px; background:rgba(234,88,12,0.12); border:1px solid rgba(234,88,12,0.35); padding:12px; border-radius:8px;">
+                <span style="font-size:1.6rem;">🔥</span>
+                <div style="flex:1;">
+                    <div style="font-weight:800; color:#fdba74; font-size:0.95rem;"><span id="lbl-streak-panel-count">0</span> <span data-i18n="streakDaysLabel">dias seguidos</span></div>
+                    <div style="font-size:0.72rem; color:#94a3b8;" data-i18n="streakHint">Jogue todo dia pra manter sua sequência acesa!</div>
+                </div>
+            </div>
+            <p style="font-size:0.78rem; color:#64748b; margin:2px 0 0;" data-i18n="missionsHint">As missões renovam à meia-noite. Complete pra ganhar ouro na hora!</p>
+            <div id="missions-list" style="display:flex; flex-direction:column; gap:10px; max-height:320px; overflow-y:auto; margin-top:4px;"></div>
+        </div>
+    </div>
+    <!-- NOVO: modal de "bem-vindo de volta" — mostra ouro ganho offline e a sequência diária
+         assim que o jogador volta a abrir o jogo (só quando há algo relevante pra mostrar). -->
+    <div id="welcome-back-modal" class="screen hidden" style="justify-content:center; align-items:center; z-index:10000;">
+        <div class="lobby-box" style="max-width:420px; text-align:center;">
+            <h2 style="font-size:1.4rem; color:#fbbf24; margin:0 0 4px;" data-i18n="welcomeBackTitle">👋 Bem-vindo de volta!</h2>
+            <div id="welcome-back-streak-row" style="display:none; align-items:center; justify-content:center; gap:8px; background:rgba(234,88,12,0.12); border:1px solid rgba(234,88,12,0.35); padding:10px; border-radius:8px; margin-top:10px;">
+                <span style="font-size:1.4rem;">🔥</span>
+                <span style="font-weight:800; color:#fdba74;" id="welcome-back-streak-text"></span>
+            </div>
+            <div id="welcome-back-offline-row" style="display:none; align-items:center; justify-content:center; gap:8px; background:rgba(234,179,8,0.12); border:1px solid rgba(234,179,8,0.35); padding:10px; border-radius:8px; margin-top:10px;">
+                <span style="font-size:1.4rem;">💰</span>
+                <span style="font-weight:800; color:#fde68a;" id="welcome-back-offline-text"></span>
+            </div>
+            <p style="font-size:0.78rem; color:#64748b; margin-top:12px;" data-i18n="welcomeBackMissionsHint">Não esqueça de conferir suas missões diárias!</p>
+            <button onclick="Engine.closeWelcomeBackModal()" style="width:100%; background:linear-gradient(to right,#eab308,#f59e0b); color:#020617; font-weight:800; padding:12px; margin-top:8px;" data-i18n="welcomeBackCloseBtn">VAMOS JOGAR!</button>
         </div>
     </div>
     <div id="gameover-screen" class="screen hidden">
@@ -925,7 +972,7 @@
             ach_champion_name: "Campeão", ach_champion_desc: "Vença 10 partidas.",
             ach_legend_name: "Lenda", ach_legend_desc: "Alcance o nível 10.",
             cosColor_default: "Padrão do Arquétipo", cosColor_gold: "Dourado", cosColor_purple: "Roxo", cosColor_cyan: "Ciano", cosColor_pink: "Rosa", cosColor_white: "Branco", cosColor_obsidian: "Obsidiana",
-            cosSkin_default: "Padrão", cosSkin_stripes: "Listras", cosSkin_glow: "Brilho", cosSkin_stars: "Estrelado", cosSkin_flame: "Chamas",
+            cosSkin_default: "Padrão", cosSkin_stripes: "Listras", cosSkin_glow: "Brilho", cosSkin_stars: "Estrelado", cosSkin_flame: "Chamas", cosSkin_secret: "✨ Secreta",
             netRewardLabel: "Recompensas", playerLabel: "Jogador",
             modeLabelOpenWorld: "MUNDO ABERTO", modeLabelBoss: "Chefe Nível", modeLabelWave: "Onda",
             hideoutAlertTitle: "Esconderijo Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Sair: E",
@@ -1049,7 +1096,7 @@
             tutSkip: "PULAR", tutNext: "PRÓXIMO", tutStart: "COMEÇAR A JOGAR",
             tut1Title: "Bem-vindo!", tut1Body: "Este tutorial rápido mostra tudo que você precisa saber para jogar. Vamos lá!",
             tut2Title: "Movimento", tut2BodyPc: "Use as setas ou <b>W A S D</b> para andar, e <b>ESPAÇO</b> ou <b>W</b> para pular.", tut2BodyMobile: "Use os botões <b>◀ ▶</b> no canto inferior esquerdo da tela para andar.",
-            tut3Title: "Atirar", tut3BodyPc: "Clique com o <b>botão esquerdo do mouse</b> (P1) para atirar na direção do cursor.", tut3BodyMobile: "Toque no botão <b>⚔</b> para atacar e no <b>✦</b> para usar a habilidade especial do seu personagem.",
+            tut3Title: "Atirar", tut3BodyPc: "Pressione <b>F</b> (P1) para atacar na direção que seu personagem está olhando, e <b>G</b> para a habilidade especial.", tut3BodyMobile: "Toque no botão <b>⚔</b> para atacar e no <b>✦</b> para usar a habilidade especial do seu personagem.",
             tut4Title: "Vida e Habilidades", tut4Body: "Sua barra de vida fica no topo da tela. Use <b>[1]</b> para curar um pouco de vida e <b>[2]</b> para ativar um escudo temporário (no celular, toque nos botões <b>🧪</b> e <b>🛡</b> na tela).",
             tut5Title: "Baús e Ouro", tut5Body: "Explore o mapa e derrote inimigos para conseguir <b>ouro</b>. Baús secretos aparecem no mapa — abra-os para ganhar recompensas como cura, escudo, velocidade ou até armas novas!",
             tut6Title: "Loja de Upgrades", tut6Body: "No menu principal, acesse o <b>Arsenal de Upgrades</b> para gastar seu ouro em armas mais fortes, vida extra e velocidade. Fique mais poderoso a cada partida!",
@@ -1077,7 +1124,25 @@
             tut16Title: "Esconderijo Secreto", tut16Body: "Encontre o esconderijo escondido no mapa e pressione <b>E</b> para entrar (no celular, toque no botão <b>🚪</b>). É um bom lugar pra se proteger dos inimigos.",
             tut17Title: "Seguir Jogadores", tut17Body: "Além de conversar, você pode <b>seguir</b> outros jogadores na aba <b>⭐ Seguindo</b> da busca de jogadores, pra acompanhar quem você mais gosta de jogar junto.",
             tut18Title: "Reportar um Erro", tut18Body: "Encontrou algum bug? Vá em Configurações e use o botão <b>🐞 REPORTAR UM ERRO</b> para nos avisar. Isso ajuda a melhorar o jogo!",
-            tut19Title: "Comprando e Equipando Armas", tut19Body: "Compre armas na loja com seu ouro — quanto mais forte, mais cara! Depois de comprar, vá em <b>Arma Equipada</b> na tela inicial e selecione qual arma comprada você quer usar na partida."
+            tut19Title: "Comprando e Equipando Armas", tut19Body: "Compre armas na loja com seu ouro — quanto mais forte, mais cara! Depois de comprar, vá em <b>Arma Equipada</b> na tela inicial e selecione qual arma comprada você quer usar na partida.",
+            tutSvgMove: "mover", tutSvgJump: "pular", tutSvgAttack: "atacar", tutSvgSpecial: "especial",
+            tutSvgMobileMove1: "arraste o dedo", tutSvgMobileMove2: "pra mover",
+            tutSvgMobileAtk1: "atacar /", tutSvgMobileAtk2: "especial",
+            tutSvgCombatHint: "ataque acerta quem estiver na frente",
+            tutSvgLivesHint: "HP zerou = perde uma vida (coração)",
+            tutSvgChestHint: "chegue perto e abra (B ou botão de baú)",
+            tutSvgHideoutHint: "entre e fique protegido por um tempo (E)",
+            tutSvgVsAiHint: "escolha a dificuldade antes de duelar",
+            missionsBtn: "🎯 Missões", missionsTitle: "🎯 Missões Diárias", missionsHint: "As missões renovam à meia-noite. Complete pra ganhar ouro na hora!",
+            streakDaysLabel: "dias seguidos", streakHint: "Jogue todo dia pra manter sua sequência acesa!",
+            welcomeBackTitle: "👋 Bem-vindo de volta!", welcomeBackMissionsHint: "Não esqueça de conferir suas missões diárias!",
+            welcomeBackCloseBtn: "VAMOS JOGAR!", welcomeBackOfflineLabel: "ganhos enquanto você estava offline",
+            missionCompleteToast: "Missão concluída: {name} (+${gold})",
+            missionPlayMatches: "Jogue {target} partidas", missionWinMatches: "Vença {target} partida",
+            missionKillEnemies: "Derrote {target} inimigos", missionEarnGold: "Ganhe {target} de ouro em partidas",
+            missionOpenChests: "Abra {target} baús", missionWinVsAI: "Vença {target} partida contra a IA",
+            missionKillEnemiesBig: "Derrote {target} inimigos", missionPlayMatchesBig: "Jogue {target} partidas",
+            easterEggFoundToast: "Você encontrou um segredo! Skin exclusiva desbloqueada (+$500)", easterEggAlreadyFound: "Você já desbloqueou esse segredo!"
         },
         'en': {
             rotateDeviceHint: "Rotate your device to play in landscape",
@@ -1143,7 +1208,7 @@
             ach_champion_name: "Champion", ach_champion_desc: "Win 10 matches.",
             ach_legend_name: "Legend", ach_legend_desc: "Reach level 10.",
             cosColor_default: "Archetype Default", cosColor_gold: "Gold", cosColor_purple: "Purple", cosColor_cyan: "Cyan", cosColor_pink: "Pink", cosColor_white: "White", cosColor_obsidian: "Obsidian",
-            cosSkin_default: "Default", cosSkin_stripes: "Stripes", cosSkin_glow: "Glow", cosSkin_stars: "Starry", cosSkin_flame: "Flame",
+            cosSkin_default: "Default", cosSkin_stripes: "Stripes", cosSkin_glow: "Glow", cosSkin_stars: "Starry", cosSkin_flame: "Flame", cosSkin_secret: "✨ Secret",
             netRewardLabel: "Rewards", playerLabel: "Player",
             modeLabelOpenWorld: "OPEN WORLD", modeLabelBoss: "Boss Level", modeLabelWave: "Wave",
             hideoutAlertTitle: "Secret Hideout", hideoutAlertEnter: "Enter: E", hideoutHudExit: "Exit: E",
@@ -1266,7 +1331,7 @@
             tutSkip: "SKIP", tutNext: "NEXT", tutStart: "START PLAYING",
             tut1Title: "Welcome!", tut1Body: "This quick tutorial shows everything you need to know to play. Let's go!",
             tut2Title: "Movement", tut2BodyPc: "Use the arrow keys or <b>W A S D</b> to move, and <b>SPACE</b> or <b>W</b> to jump.", tut2BodyMobile: "Use the <b>◀ ▶</b> buttons in the bottom-left corner of the screen to move.",
-            tut3Title: "Shooting", tut3BodyPc: "Click the <b>left mouse button</b> (P1) to shoot toward your cursor.", tut3BodyMobile: "Tap the <b>⚔</b> button to attack and <b>✦</b> to use your character's special ability.",
+            tut3Title: "Shooting", tut3BodyPc: "Press <b>F</b> (P1) to attack in the direction your character is facing, and <b>G</b> for your special ability.", tut3BodyMobile: "Tap the <b>⚔</b> button to attack and <b>✦</b> to use your character's special ability.",
             tut4Title: "Health and Abilities", tut4Body: "Your health bar is at the top of the screen. Press <b>[1]</b> to heal a bit and <b>[2]</b> to activate a temporary shield (on mobile, tap the <b>🧪</b> and <b>🛡</b> buttons on screen).",
             tut5Title: "Chests and Gold", tut5Body: "Explore the map and defeat enemies to earn <b>gold</b>. Secret chests appear on the map — open them for rewards like healing, shields, speed, or even new weapons!",
             tut6Title: "Upgrade Shop", tut6Body: "From the main menu, open the <b>Upgrade Arsenal</b> to spend your gold on stronger weapons, extra health, and speed. Get more powerful every match!",
@@ -1294,7 +1359,25 @@
             tut16Title: "Secret Hideout", tut16Body: "Find the hidden hideout on the map and press <b>E</b> to enter it (on mobile, tap the <b>🚪</b> button). It's a good spot to take cover from enemies.",
             tut17Title: "Following Players", tut17Body: "Besides chatting, you can <b>follow</b> other players from the <b>⭐ Following</b> tab in player search, to keep track of who you like playing with.",
             tut18Title: "Report a Bug", tut18Body: "Found a bug? Go to Settings and use the <b>🐞 REPORT A BUG</b> button to let us know. It helps improve the game!",
-            tut19Title: "Buying and Equipping Weapons", tut19Body: "Buy weapons in the shop with your gold — the stronger, the pricier! After buying, go to <b>Equipped Weapon</b> on the main screen and select which purchased weapon you want to use in the match."
+            tut19Title: "Buying and Equipping Weapons", tut19Body: "Buy weapons in the shop with your gold — the stronger, the pricier! After buying, go to <b>Equipped Weapon</b> on the main screen and select which purchased weapon you want to use in the match.",
+            tutSvgMove: "move", tutSvgJump: "jump", tutSvgAttack: "attack", tutSvgSpecial: "special",
+            tutSvgMobileMove1: "drag your finger", tutSvgMobileMove2: "to move",
+            tutSvgMobileAtk1: "attack /", tutSvgMobileAtk2: "special",
+            tutSvgCombatHint: "attack hits whoever is in front",
+            tutSvgLivesHint: "HP hits zero = lose a life (heart)",
+            tutSvgChestHint: "get close and open (B or chest button)",
+            tutSvgHideoutHint: "enter and stay protected for a while (E)",
+            tutSvgVsAiHint: "choose the difficulty before dueling",
+            missionsBtn: "🎯 Missions", missionsTitle: "🎯 Daily Missions", missionsHint: "Missions reset at midnight. Complete them to earn gold instantly!",
+            streakDaysLabel: "day streak", streakHint: "Play every day to keep your streak alive!",
+            welcomeBackTitle: "👋 Welcome back!", welcomeBackMissionsHint: "Don't forget to check your daily missions!",
+            welcomeBackCloseBtn: "LET'S PLAY!", welcomeBackOfflineLabel: "earned while you were offline",
+            missionCompleteToast: "Mission complete: {name} (+${gold})",
+            missionPlayMatches: "Play {target} matches", missionWinMatches: "Win {target} match",
+            missionKillEnemies: "Defeat {target} enemies", missionEarnGold: "Earn {target} gold in matches",
+            missionOpenChests: "Open {target} chests", missionWinVsAI: "Win {target} match vs AI",
+            missionKillEnemiesBig: "Defeat {target} enemies", missionPlayMatchesBig: "Play {target} matches",
+            easterEggFoundToast: "You found a secret! Exclusive skin unlocked (+$500)", easterEggAlreadyFound: "You already unlocked this secret!"
         },
         'de': {
             rotateDeviceHint: "Drehen Sie Ihr Gerät, um im Querformat zu spielen",
@@ -1360,7 +1443,7 @@
             ach_champion_name: "Champion", ach_champion_desc: "Gewinne 10 Partien.",
             ach_legend_name: "Legende", ach_legend_desc: "Erreiche Level 10.",
             cosColor_default: "Archetyp-Standard", cosColor_gold: "Gold", cosColor_purple: "Lila", cosColor_cyan: "Türkis", cosColor_pink: "Pink", cosColor_white: "Weiß", cosColor_obsidian: "Obsidian",
-            cosSkin_default: "Standard", cosSkin_stripes: "Streifen", cosSkin_glow: "Leuchten", cosSkin_stars: "Sternenglanz", cosSkin_flame: "Flammen",
+            cosSkin_default: "Standard", cosSkin_stripes: "Streifen", cosSkin_glow: "Leuchten", cosSkin_stars: "Sternenglanz", cosSkin_flame: "Flammen", cosSkin_secret: "✨ Geheim",
             netRewardLabel: "Belohnungen", playerLabel: "Spieler",
             modeLabelOpenWorld: "OFFENE WELT", modeLabelBoss: "Boss-Level", modeLabelWave: "Welle",
             hideoutAlertTitle: "Geheimes Versteck", hideoutAlertEnter: "Eintreten: E", hideoutHudExit: "Verlassen: E",
@@ -1478,7 +1561,7 @@
             tutSkip: "ÜBERSPRINGEN", tutNext: "WEITER", tutStart: "SPIEL STARTEN",
             tut1Title: "Willkommen!", tut1Body: "Diese kurze Anleitung zeigt dir alles, was du zum Spielen wissen musst. Los geht's!",
             tut2Title: "Bewegung", tut2BodyPc: "Benutze die Pfeiltasten oder <b>W A S D</b> zum Laufen und <b>LEERTASTE</b> oder <b>W</b> zum Springen.", tut2BodyMobile: "Benutze die <b>◀ ▶</b>-Tasten unten links auf dem Bildschirm zum Bewegen.",
-            tut3Title: "Schießen", tut3BodyPc: "Klicke mit der <b>linken Maustaste</b> (P1), um in Richtung des Cursors zu schießen.", tut3BodyMobile: "Tippe auf <b>⚔</b>, um anzugreifen, und auf <b>✦</b>, um die Spezialfähigkeit deines Charakters zu nutzen.",
+            tut3Title: "Schießen", tut3BodyPc: "Drücke <b>F</b> (P1), um in die Richtung anzugreifen, in die dein Charakter schaut, und <b>G</b> für die Spezialfähigkeit.", tut3BodyMobile: "Tippe auf <b>⚔</b>, um anzugreifen, und auf <b>✦</b>, um die Spezialfähigkeit deines Charakters zu nutzen.",
             tut4Title: "Leben und Fähigkeiten", tut4Body: "Deine Lebensleiste ist oben am Bildschirm. Drücke <b>[1]</b>, um ein wenig zu heilen, und <b>[2]</b>, um ein temporäres Schild zu aktivieren (auf dem Handy die Schaltflächen <b>🧪</b> und <b>🛡</b> auf dem Bildschirm antippen).",
             tut5Title: "Truhen und Gold", tut5Body: "Erkunde die Karte und besiege Gegner, um <b>Gold</b> zu verdienen. Geheime Truhen erscheinen auf der Karte — öffne sie für Belohnungen wie Heilung, Schild, Geschwindigkeit oder sogar neue Waffen!",
             tut6Title: "Upgrade-Shop", tut6Body: "Öffne im Hauptmenü das <b>Upgrade-Arsenal</b>, um dein Gold für stärkere Waffen, zusätzliches Leben und Geschwindigkeit auszugeben. Werde mit jedem Match stärker!",
@@ -1506,7 +1589,25 @@
             tut16Title: "Geheimes Versteck", tut16Body: "Finde das versteckte Versteck auf der Karte und drücke <b>E</b>, um es zu betreten (auf dem Handy die Schaltfläche <b>🚪</b> antippen). Ein guter Ort, um sich vor Gegnern zu schützen.",
             tut17Title: "Spielern folgen", tut17Body: "Neben dem Chatten kannst du anderen Spielern über den Tab <b>⭐ Folge ich</b> in der Spielersuche <b>folgen</b>, um im Blick zu behalten, mit wem du gerne spielst.",
             tut18Title: "Fehler melden", tut18Body: "Einen Fehler gefunden? Gehe zu den Einstellungen und nutze die Schaltfläche <b>🐞 FEHLER MELDEN</b>, um uns Bescheid zu geben. Das hilft, das Spiel zu verbessern!",
-            tut19Title: "Waffen kaufen und ausrüsten", tut19Body: "Kaufe Waffen im Laden mit deinem Gold — je stärker, desto teurer! Wähle nach dem Kauf unter <b>Ausgerüstete Waffe</b> auf dem Hauptbildschirm, welche gekaufte Waffe du im Match nutzen möchtest."
+            tut19Title: "Waffen kaufen und ausrüsten", tut19Body: "Kaufe Waffen im Laden mit deinem Gold — je stärker, desto teurer! Wähle nach dem Kauf unter <b>Ausgerüstete Waffe</b> auf dem Hauptbildschirm, welche gekaufte Waffe du im Match nutzen möchtest.",
+            tutSvgMove: "bewegen", tutSvgJump: "springen", tutSvgAttack: "angreifen", tutSvgSpecial: "spezial",
+            tutSvgMobileMove1: "Finger ziehen,", tutSvgMobileMove2: "um dich zu bewegen",
+            tutSvgMobileAtk1: "angriff /", tutSvgMobileAtk2: "spezial",
+            tutSvgCombatHint: "Angriff trifft, wer davor steht",
+            tutSvgLivesHint: "HP auf 0 = ein Leben (Herz) verloren",
+            tutSvgChestHint: "nah rangehen und öffnen (B oder Truhen-Taste)",
+            tutSvgHideoutHint: "eintreten und eine Weile geschützt bleiben (E)",
+            tutSvgVsAiHint: "Schwierigkeit vor dem Duell wählen",
+            missionsBtn: "🎯 Missionen", missionsTitle: "🎯 Tägliche Missionen", missionsHint: "Missionen setzen sich um Mitternacht zurück. Erfülle sie, um sofort Gold zu erhalten!",
+            streakDaysLabel: "Tage in Folge", streakHint: "Spiele jeden Tag, um deine Serie am Leben zu halten!",
+            welcomeBackTitle: "👋 Willkommen zurück!", welcomeBackMissionsHint: "Vergiss nicht, deine täglichen Missionen zu checken!",
+            welcomeBackCloseBtn: "LOS GEHT'S!", welcomeBackOfflineLabel: "verdient, während du offline warst",
+            missionCompleteToast: "Mission abgeschlossen: {name} (+${gold})",
+            missionPlayMatches: "Spiele {target} Matches", missionWinMatches: "Gewinne {target} Match",
+            missionKillEnemies: "Besiege {target} Gegner", missionEarnGold: "Verdiene {target} Gold in Matches",
+            missionOpenChests: "Öffne {target} Truhen", missionWinVsAI: "Gewinne {target} Match gegen die KI",
+            missionKillEnemiesBig: "Besiege {target} Gegner", missionPlayMatchesBig: "Spiele {target} Matches",
+            easterEggFoundToast: "Du hast ein Geheimnis gefunden! Exklusive Skin freigeschaltet (+$500)", easterEggAlreadyFound: "Du hast dieses Geheimnis schon freigeschaltet!"
         },
         'es': {
             rotateDeviceHint: "Gira tu dispositivo para jugar en horizontal",
@@ -1572,7 +1673,7 @@
             ach_champion_name: "Campeón", ach_champion_desc: "Gana 10 partidas.",
             ach_legend_name: "Leyenda", ach_legend_desc: "Alcanza el nivel 10.",
             cosColor_default: "Predeterminado del Arquetipo", cosColor_gold: "Dorado", cosColor_purple: "Morado", cosColor_cyan: "Cian", cosColor_pink: "Rosa", cosColor_white: "Blanco", cosColor_obsidian: "Obsidiana",
-            cosSkin_default: "Predeterminado", cosSkin_stripes: "Rayas", cosSkin_glow: "Brillo", cosSkin_stars: "Estrellado", cosSkin_flame: "Llamas",
+            cosSkin_default: "Predeterminado", cosSkin_stripes: "Rayas", cosSkin_glow: "Brillo", cosSkin_stars: "Estrellado", cosSkin_flame: "Llamas", cosSkin_secret: "✨ Secreta",
             netRewardLabel: "Recompensas", playerLabel: "Jugador",
             modeLabelOpenWorld: "MUNDO ABIERTO", modeLabelBoss: "Nivel de Jefe", modeLabelWave: "Oleada",
             hideoutAlertTitle: "Escondite Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Salir: E",
@@ -1690,7 +1791,7 @@
             tutSkip: "OMITIR", tutNext: "SIGUIENTE", tutStart: "EMPEZAR A JUGAR",
             tut1Title: "¡Bienvenido!", tut1Body: "Este tutorial rápido muestra todo lo que necesitas saber para jugar. ¡Vamos!",
             tut2Title: "Movimiento", tut2BodyPc: "Usa las flechas o <b>W A S D</b> para caminar, y <b>ESPACIO</b> o <b>W</b> para saltar.", tut2BodyMobile: "Usa los botones <b>◀ ▶</b> en la esquina inferior izquierda de la pantalla para moverte.",
-            tut3Title: "Disparar", tut3BodyPc: "Haz clic con el <b>botón izquierdo del mouse</b> (P1) para disparar hacia el cursor.", tut3BodyMobile: "Toca el botón <b>⚔</b> para atacar y <b>✦</b> para usar la habilidad especial de tu personaje.",
+            tut3Title: "Disparar", tut3BodyPc: "Presiona <b>F</b> (P1) para atacar hacia donde tu personaje está mirando, y <b>G</b> para la habilidad especial.", tut3BodyMobile: "Toca el botón <b>⚔</b> para atacar y <b>✦</b> para usar la habilidad especial de tu personaje.",
             tut4Title: "Vida y Habilidades", tut4Body: "Tu barra de vida está en la parte superior de la pantalla. Presiona <b>[1]</b> para curarte un poco y <b>[2]</b> para activar un escudo temporal (en móvil, toca los botones <b>🧪</b> y <b>🛡</b> en pantalla).",
             tut5Title: "Cofres y Oro", tut5Body: "Explora el mapa y derrota enemigos para ganar <b>oro</b>. Aparecen cofres secretos en el mapa — ¡ábrelos para conseguir recompensas como curación, escudo, velocidad o incluso armas nuevas!",
             tut6Title: "Tienda de Mejoras", tut6Body: "Desde el menú principal, abre el <b>Arsenal de Mejoras</b> para gastar tu oro en armas más fuertes, vida extra y velocidad. ¡Vuélvete más poderoso en cada partida!",
@@ -1718,7 +1819,25 @@
             tut16Title: "Escondite Secreto", tut16Body: "Encuentra el escondite oculto en el mapa y presiona <b>E</b> para entrar (en móvil, toca el botón <b>🚪</b>). Es un buen lugar para protegerte de los enemigos.",
             tut17Title: "Seguir Jugadores", tut17Body: "Además de chatear, puedes <b>seguir</b> a otros jugadores desde la pestaña <b>⭐ Siguiendo</b> en la búsqueda de jugadores, para llevar registro de con quién te gusta jugar.",
             tut18Title: "Reportar un Error", tut18Body: "¿Encontraste un error? Ve a Configuración y usa el botón <b>🐞 REPORTAR UN ERROR</b> para avisarnos. ¡Esto ayuda a mejorar el juego!",
-            tut19Title: "Comprar y Equipar Armas", tut19Body: "Compra armas en la tienda con tu oro — ¡cuanto más fuerte, más cara! Después de comprar, ve a <b>Arma Equipada</b> en la pantalla principal y selecciona qué arma comprada quieres usar en la partida."
+            tut19Title: "Comprar y Equipar Armas", tut19Body: "Compra armas en la tienda con tu oro — ¡cuanto más fuerte, más cara! Después de comprar, ve a <b>Arma Equipada</b> en la pantalla principal y selecciona qué arma comprada quieres usar en la partida.",
+            tutSvgMove: "mover", tutSvgJump: "saltar", tutSvgAttack: "atacar", tutSvgSpecial: "especial",
+            tutSvgMobileMove1: "arrastra el dedo", tutSvgMobileMove2: "para mover",
+            tutSvgMobileAtk1: "atacar /", tutSvgMobileAtk2: "especial",
+            tutSvgCombatHint: "el ataque golpea a quien esté al frente",
+            tutSvgLivesHint: "HP a cero = pierdes una vida (corazón)",
+            tutSvgChestHint: "acércate y ábrelo (B o botón del cofre)",
+            tutSvgHideoutHint: "entra y quédate protegido un rato (E)",
+            tutSvgVsAiHint: "elige la dificultad antes de duelar",
+            missionsBtn: "🎯 Misiones", missionsTitle: "🎯 Misiones Diarias", missionsHint: "Las misiones se renuevan a medianoche. ¡Complétalas para ganar oro al instante!",
+            streakDaysLabel: "días seguidos", streakHint: "¡Juega todos los días para mantener tu racha encendida!",
+            welcomeBackTitle: "👋 ¡Bienvenido de vuelta!", welcomeBackMissionsHint: "¡No olvides revisar tus misiones diarias!",
+            welcomeBackCloseBtn: "¡A JUGAR!", welcomeBackOfflineLabel: "ganado mientras estabas desconectado",
+            missionCompleteToast: "Misión completada: {name} (+${gold})",
+            missionPlayMatches: "Juega {target} partidas", missionWinMatches: "Gana {target} partida",
+            missionKillEnemies: "Derrota a {target} enemigos", missionEarnGold: "Gana {target} de oro en partidas",
+            missionOpenChests: "Abre {target} cofres", missionWinVsAI: "Gana {target} partida contra la IA",
+            missionKillEnemiesBig: "Derrota a {target} enemigos", missionPlayMatchesBig: "Juega {target} partidas",
+            easterEggFoundToast: "¡Encontraste un secreto! Skin exclusiva desbloqueada (+$500)", easterEggAlreadyFound: "¡Ya desbloqueaste este secreto!"
         },
         'it': {
             rotateDeviceHint: "Ruota il tuo dispositivo per giocare in orizzontale",
@@ -1784,7 +1903,7 @@
             ach_champion_name: "Campione", ach_champion_desc: "Vinci 10 partite.",
             ach_legend_name: "Leggenda", ach_legend_desc: "Raggiungi il livello 10.",
             cosColor_default: "Predefinito dell'Archetipo", cosColor_gold: "Oro", cosColor_purple: "Viola", cosColor_cyan: "Ciano", cosColor_pink: "Rosa", cosColor_white: "Bianco", cosColor_obsidian: "Ossidiana",
-            cosSkin_default: "Predefinito", cosSkin_stripes: "Strisce", cosSkin_glow: "Bagliore", cosSkin_stars: "Stellato", cosSkin_flame: "Fiamme",
+            cosSkin_default: "Predefinito", cosSkin_stripes: "Strisce", cosSkin_glow: "Bagliore", cosSkin_stars: "Stellato", cosSkin_flame: "Fiamme", cosSkin_secret: "✨ Segreta",
             netRewardLabel: "Ricompense", playerLabel: "Giocatore",
             modeLabelOpenWorld: "MONDO APERTO", modeLabelBoss: "Livello Boss", modeLabelWave: "Ondata",
             hideoutAlertTitle: "Nascondiglio Segreto", hideoutAlertEnter: "Entra: E", hideoutHudExit: "Esci: E",
@@ -1902,7 +2021,7 @@
             tutSkip: "SALTA", tutNext: "AVANTI", tutStart: "INIZIA A GIOCARE",
             tut1Title: "Benvenuto!", tut1Body: "Questo tutorial rapido mostra tutto ciò che devi sapere per giocare. Iniziamo!",
             tut2Title: "Movimento", tut2BodyPc: "Usa le frecce o <b>W A S D</b> per muoverti, e <b>SPAZIO</b> o <b>W</b> per saltare.", tut2BodyMobile: "Usa i pulsanti <b>◀ ▶</b> nell'angolo in basso a sinistra dello schermo per muoverti.",
-            tut3Title: "Sparare", tut3BodyPc: "Clicca con il <b>tasto sinistro del mouse</b> (P1) per sparare verso il cursore.", tut3BodyMobile: "Tocca il pulsante <b>⚔</b> per attaccare e <b>✦</b> per usare l'abilità speciale del tuo personaggio.",
+            tut3Title: "Sparare", tut3BodyPc: "Premi <b>F</b> (P1) per attaccare nella direzione in cui il personaggio è rivolto, e <b>G</b> per l'abilità speciale.", tut3BodyMobile: "Tocca il pulsante <b>⚔</b> per attaccare e <b>✦</b> per usare l'abilità speciale del tuo personaggio.",
             tut4Title: "Vita e Abilità", tut4Body: "La barra della vita è in alto sullo schermo. Premi <b>[1]</b> per curarti un po' e <b>[2]</b> per attivare uno scudo temporaneo (su mobile, tocca i pulsanti <b>🧪</b> e <b>🛡</b> a schermo).",
             tut5Title: "Forzieri e Oro", tut5Body: "Esplora la mappa e sconfiggi nemici per guadagnare <b>oro</b>. Forzieri segreti appaiono sulla mappa — aprili per ottenere ricompense come cura, scudo, velocità o persino nuove armi!",
             tut6Title: "Negozio Potenziamenti", tut6Body: "Dal menu principale, apri l'<b>Arsenale Potenziamenti</b> per spendere il tuo oro in armi più forti, vita extra e velocità. Diventa più potente ad ogni partita!",
@@ -1930,7 +2049,25 @@
             tut16Title: "Nascondiglio Segreto", tut16Body: "Trova il nascondiglio segreto sulla mappa e premi <b>E</b> per entrare (su mobile, tocca il pulsante <b>🚪</b>). È un buon posto per ripararsi dai nemici.",
             tut17Title: "Seguire i Giocatori", tut17Body: "Oltre a chattare, puoi <b>seguire</b> altri giocatori dalla scheda <b>⭐ Seguiti</b> nella ricerca giocatori, per tenere traccia di con chi ti piace giocare.",
             tut18Title: "Segnala un Errore", tut18Body: "Hai trovato un errore? Vai su Impostazioni e usa il pulsante <b>🐞 SEGNALA UN ERRORE</b> per avvisarci. Questo aiuta a migliorare il gioco!",
-            tut19Title: "Acquistare ed Equipaggiare Armi", tut19Body: "Compra armi nel negozio con il tuo oro — più sono forti, più costano! Dopo l'acquisto, vai su <b>Arma Equipaggiata</b> nella schermata principale e seleziona quale arma acquistata vuoi usare nella partita."
+            tut19Title: "Acquistare ed Equipaggiare Armi", tut19Body: "Compra armi nel negozio con il tuo oro — più sono forti, più costano! Dopo l'acquisto, vai su <b>Arma Equipaggiata</b> nella schermata principale e seleziona quale arma acquistata vuoi usare nella partita.",
+            tutSvgMove: "muovi", tutSvgJump: "salta", tutSvgAttack: "attacca", tutSvgSpecial: "speciale",
+            tutSvgMobileMove1: "trascina il dito", tutSvgMobileMove2: "per muoverti",
+            tutSvgMobileAtk1: "attacca /", tutSvgMobileAtk2: "speciale",
+            tutSvgCombatHint: "l'attacco colpisce chi è davanti",
+            tutSvgLivesHint: "HP a zero = perdi una vita (cuore)",
+            tutSvgChestHint: "avvicinati e aprilo (B o pulsante forziere)",
+            tutSvgHideoutHint: "entra e resta protetto per un po' (E)",
+            tutSvgVsAiHint: "scegli la difficoltà prima del duello",
+            missionsBtn: "🎯 Missioni", missionsTitle: "🎯 Missioni Giornaliere", missionsHint: "Le missioni si rinnovano a mezzanotte. Completale per guadagnare oro all'istante!",
+            streakDaysLabel: "giorni di fila", streakHint: "Gioca ogni giorno per mantenere viva la tua serie!",
+            welcomeBackTitle: "👋 Bentornato!", welcomeBackMissionsHint: "Non dimenticare di controllare le tue missioni giornaliere!",
+            welcomeBackCloseBtn: "GIOCHIAMO!", welcomeBackOfflineLabel: "guadagnato mentre eri offline",
+            missionCompleteToast: "Missione completata: {name} (+${gold})",
+            missionPlayMatches: "Gioca {target} partite", missionWinMatches: "Vinci {target} partita",
+            missionKillEnemies: "Sconfiggi {target} nemici", missionEarnGold: "Guadagna {target} di oro nelle partite",
+            missionOpenChests: "Apri {target} forzieri", missionWinVsAI: "Vinci {target} partita contro l'IA",
+            missionKillEnemiesBig: "Sconfiggi {target} nemici", missionPlayMatchesBig: "Gioca {target} partite",
+            easterEggFoundToast: "Hai trovato un segreto! Skin esclusiva sbloccata (+$500)", easterEggAlreadyFound: "Hai già sbloccato questo segreto!"
         },
         'fr': {
             rotateDeviceHint: "Tournez votre appareil pour jouer en mode paysage",
@@ -1996,7 +2133,7 @@
             ach_champion_name: "Champion", ach_champion_desc: "Gagnez 10 parties.",
             ach_legend_name: "Légende", ach_legend_desc: "Atteignez le niveau 10.",
             cosColor_default: "Défaut de l'Archétype", cosColor_gold: "Or", cosColor_purple: "Violet", cosColor_cyan: "Cyan", cosColor_pink: "Rose", cosColor_white: "Blanc", cosColor_obsidian: "Obsidienne",
-            cosSkin_default: "Défaut", cosSkin_stripes: "Rayures", cosSkin_glow: "Lueur", cosSkin_stars: "Étoilé", cosSkin_flame: "Flammes",
+            cosSkin_default: "Défaut", cosSkin_stripes: "Rayures", cosSkin_glow: "Lueur", cosSkin_stars: "Étoilé", cosSkin_flame: "Flammes", cosSkin_secret: "✨ Secrète",
             netRewardLabel: "Récompenses", playerLabel: "Joueur",
             modeLabelOpenWorld: "MONDE OUVERT", modeLabelBoss: "Niveau Boss", modeLabelWave: "Vague",
             hideoutAlertTitle: "Cachette Secrète", hideoutAlertEnter: "Entrer : E", hideoutHudExit: "Sortir : E",
@@ -2114,7 +2251,7 @@
             tutSkip: "PASSER", tutNext: "SUIVANT", tutStart: "COMMENCER À JOUER",
             tut1Title: "Bienvenue !", tut1Body: "Ce tutoriel rapide vous montre tout ce qu'il faut savoir pour jouer. C'est parti !",
             tut2Title: "Déplacement", tut2BodyPc: "Utilisez les flèches ou <b>W A S D</b> pour vous déplacer, et <b>ESPACE</b> ou <b>W</b> pour sauter.", tut2BodyMobile: "Utilisez les boutons <b>◀ ▶</b> en bas à gauche de l'écran pour vous déplacer.",
-            tut3Title: "Tirer", tut3BodyPc: "Cliquez avec le <b>bouton gauche de la souris</b> (P1) pour tirer vers le curseur.", tut3BodyMobile: "Appuyez sur <b>⚔</b> pour attaquer et sur <b>✦</b> pour utiliser la capacité spéciale de votre personnage.",
+            tut3Title: "Tirer", tut3BodyPc: "Appuyez sur <b>F</b> (P1) pour attaquer dans la direction où votre personnage regarde, et sur <b>G</b> pour la capacité spéciale.", tut3BodyMobile: "Appuyez sur <b>⚔</b> pour attaquer et sur <b>✦</b> pour utiliser la capacité spéciale de votre personnage.",
             tut4Title: "Vie et Capacités", tut4Body: "Votre barre de vie se trouve en haut de l'écran. Appuyez sur <b>[1]</b> pour vous soigner un peu et <b>[2]</b> pour activer un bouclier temporaire (sur mobile, appuyez sur les boutons <b>🧪</b> et <b>🛡</b> à l'écran).",
             tut5Title: "Coffres et Or", tut5Body: "Explorez la carte et vainquez des ennemis pour gagner de l'<b>or</b>. Des coffres secrets apparaissent sur la carte — ouvrez-les pour obtenir des récompenses comme soin, bouclier, vitesse ou même de nouvelles armes !",
             tut6Title: "Boutique d'Améliorations", tut6Body: "Depuis le menu principal, ouvrez l'<b>Arsenal d'Améliorations</b> pour dépenser votre or en armes plus puissantes, vie supplémentaire et vitesse. Devenez plus fort à chaque partie !",
@@ -2142,7 +2279,25 @@
             tut16Title: "Cachette Secrète", tut16Body: "Trouvez la cachette secrète sur la carte et appuyez sur <b>E</b> pour y entrer (sur mobile, appuyez sur le bouton <b>🚪</b>). C'est un bon endroit pour se protéger des ennemis.",
             tut17Title: "Suivre des Joueurs", tut17Body: "En plus de discuter, vous pouvez <b>suivre</b> d'autres joueurs depuis l'onglet <b>⭐ Abonnements</b> dans la recherche de joueurs, pour garder une trace de ceux avec qui vous aimez jouer.",
             tut18Title: "Signaler un Bug", tut18Body: "Vous avez trouvé un bug ? Allez dans Paramètres et utilisez le bouton <b>🐞 SIGNALER UN BUG</b> pour nous le faire savoir. Cela aide à améliorer le jeu !",
-            tut19Title: "Acheter et Équiper des Armes", tut19Body: "Achetez des armes dans la boutique avec votre or — plus elles sont puissantes, plus elles coûtent cher ! Après l'achat, allez dans <b>Arme Équipée</b> sur l'écran principal et choisissez quelle arme achetée utiliser en match."
+            tut19Title: "Acheter et Équiper des Armes", tut19Body: "Achetez des armes dans la boutique avec votre or — plus elles sont puissantes, plus elles coûtent cher ! Après l'achat, allez dans <b>Arme Équipée</b> sur l'écran principal et choisissez quelle arme achetée utiliser en match.",
+            tutSvgMove: "bouger", tutSvgJump: "sauter", tutSvgAttack: "attaquer", tutSvgSpecial: "spécial",
+            tutSvgMobileMove1: "glissez le doigt", tutSvgMobileMove2: "pour bouger",
+            tutSvgMobileAtk1: "attaquer /", tutSvgMobileAtk2: "spécial",
+            tutSvgCombatHint: "l'attaque touche qui est devant",
+            tutSvgLivesHint: "HP à zéro = perd une vie (cœur)",
+            tutSvgChestHint: "approchez-vous et ouvrez (B ou bouton coffre)",
+            tutSvgHideoutHint: "entrez et restez protégé un moment (E)",
+            tutSvgVsAiHint: "choisissez la difficulté avant le duel",
+            missionsBtn: "🎯 Missions", missionsTitle: "🎯 Missions Quotidiennes", missionsHint: "Les missions se renouvellent à minuit. Complétez-les pour gagner de l'or instantanément !",
+            streakDaysLabel: "jours d'affilée", streakHint: "Jouez tous les jours pour garder votre série active !",
+            welcomeBackTitle: "👋 Content de vous revoir !", welcomeBackMissionsHint: "N'oubliez pas de consulter vos missions quotidiennes !",
+            welcomeBackCloseBtn: "C'EST PARTI !", welcomeBackOfflineLabel: "gagné pendant que vous étiez hors ligne",
+            missionCompleteToast: "Mission accomplie : {name} (+${gold})",
+            missionPlayMatches: "Jouez {target} matchs", missionWinMatches: "Gagnez {target} match",
+            missionKillEnemies: "Vainquez {target} ennemis", missionEarnGold: "Gagnez {target} d'or en match",
+            missionOpenChests: "Ouvrez {target} coffres", missionWinVsAI: "Gagnez {target} match contre l'IA",
+            missionKillEnemiesBig: "Vainquez {target} ennemis", missionPlayMatchesBig: "Jouez {target} matchs",
+            easterEggFoundToast: "Vous avez trouvé un secret ! Skin exclusif débloqué (+$500)", easterEggAlreadyFound: "Vous avez déjà débloqué ce secret !"
         }
     };
     function t(key) {
@@ -2175,16 +2330,16 @@
                     <text x="29" y="39" fill="#38bdf8" font-size="15">A</text>
                     <rect x="48" y="18" width="30" height="30" rx="6" fill="#1e293b" stroke="#38bdf8"/>
                     <text x="63" y="39" fill="#38bdf8" font-size="15">D</text>
-                    <text x="20" y="66" fill="#94a3b8" font-size="9">mover</text>
+                    <text x="20" y="66" fill="#94a3b8" font-size="9">${t('tutSvgMove')}</text>
                     <rect x="14" y="72" width="64" height="26" rx="6" fill="#1e293b" stroke="#38bdf8"/>
                     <text x="46" y="90" fill="#38bdf8" font-size="14">W</text>
-                    <text x="46" y="107" fill="#94a3b8" font-size="9">pular</text>
+                    <text x="46" y="107" fill="#94a3b8" font-size="9">${t('tutSvgJump')}</text>
                     <rect x="120" y="18" width="30" height="30" rx="6" fill="#1e293b" stroke="#f43f5e"/>
                     <text x="135" y="39" fill="#f43f5e" font-size="15">F</text>
-                    <text x="135" y="63" fill="#94a3b8" font-size="9">atacar</text>
+                    <text x="135" y="63" fill="#94a3b8" font-size="9">${t('tutSvgAttack')}</text>
                     <rect x="160" y="18" width="30" height="30" rx="6" fill="#1e293b" stroke="#a855f7"/>
                     <text x="175" y="39" fill="#a855f7" font-size="15">G</text>
-                    <text x="175" y="63" fill="#94a3b8" font-size="9">especial</text>
+                    <text x="175" y="63" fill="#94a3b8" font-size="9">${t('tutSvgSpecial')}</text>
                 </g>
             `);
         },
@@ -2201,16 +2356,16 @@
                 <circle cx="76" cy="48" r="20" fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
                 <text x="76" y="54" text-anchor="middle" fill="#38bdf8" font-size="15">▶</text>
                 <text x="53" y="82" text-anchor="middle" fill="#94a3b8" font-size="8">
-                    <tspan x="53" dy="0">arraste pra mover</tspan>
-                    <tspan x="53" dy="10">segure pra pular</tspan>
+                    <tspan x="53" dy="0">${t('tutSvgMobileMove1')}</tspan>
+                    <tspan x="53" dy="10">${t('tutSvgMobileMove2')}</tspan>
                 </text>
                 <circle cx="160" cy="30" r="15" fill="#1e293b" stroke="#f43f5e" stroke-width="2"/>
                 <text x="160" y="36" text-anchor="middle" fill="#f43f5e" font-size="13">⚔</text>
                 <circle cx="192" cy="52" r="15" fill="#1e293b" stroke="#a855f7" stroke-width="2"/>
                 <text x="192" y="58" text-anchor="middle" fill="#a855f7" font-size="13">✦</text>
                 <text x="176" y="82" text-anchor="middle" fill="#94a3b8" font-size="8">
-                    <tspan x="176" dy="0">atacar /</tspan>
-                    <tspan x="176" dy="10">especial</tspan>
+                    <tspan x="176" dy="0">${t('tutSvgMobileAtk1')}</tspan>
+                    <tspan x="176" dy="10">${t('tutSvgMobileAtk2')}</tspan>
                 </text>
             `);
         },
@@ -2222,7 +2377,7 @@
                 <line x1="50" y1="65" x2="165" y2="65" stroke="#38bdf8" stroke-width="3" stroke-dasharray="6 5"/>
                 <circle cx="150" cy="65" r="4" fill="#38bdf8"/>
                 <text x="182" y="45" text-anchor="middle" fill="#fbbf24" font-size="16">💥</text>
-                <text x="110" y="100" text-anchor="middle" fill="#94a3b8" font-size="9">ataque acerta quem estiver na frente</text>
+                <text x="110" y="100" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgCombatHint')}</text>
             `);
         },
         visualLives() {
@@ -2231,7 +2386,7 @@
                 <text x="55" y="60" text-anchor="middle" font-size="30">❤</text>
                 <text x="110" y="60" text-anchor="middle" font-size="30">❤</text>
                 <text x="165" y="60" text-anchor="middle" font-size="30" opacity="0.25">🖤</text>
-                <text x="110" y="90" text-anchor="middle" fill="#94a3b8" font-size="9">HP zerou = perde uma vida (coração)</text>
+                <text x="110" y="90" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgLivesHint')}</text>
             `);
         },
         visualChest() {
@@ -2240,14 +2395,14 @@
                 <circle cx="110" cy="55" r="42" fill="none" stroke="#eab308" stroke-width="2" stroke-dasharray="5 4"/>
                 <text x="145" y="63" text-anchor="middle" font-size="26">📦</text>
                 <rect x="70" y="46" width="20" height="28" rx="4" fill="#22c55e"/>
-                <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">chegue perto e abra (B ou botão de baú)</text>
+                <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgChestHint')}</text>
             `);
         },
         visualHideout() {
             return this.svgWrap(`
                 <rect x="4" y="4" width="212" height="102" rx="10" fill="#0f172a" stroke="#1e293b"/>
                 <text x="110" y="60" text-anchor="middle" font-size="30">🚪</text>
-                <text x="110" y="90" text-anchor="middle" fill="#94a3b8" font-size="9">entre e fique protegido por um tempo (E)</text>
+                <text x="110" y="90" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgHideoutHint')}</text>
             `);
         },
         visualVsAI() {
@@ -2257,7 +2412,7 @@
                 <text x="110" y="63" text-anchor="middle" fill="#f8fafc" font-weight="800" font-size="14">VS</text>
                 <rect x="168" y="40" width="26" height="36" rx="4" fill="#a855f7"/>
                 <text x="181" y="34" text-anchor="middle" font-size="16">🤖</text>
-                <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">escolha a dificuldade antes de duelar</text>
+                <text x="110" y="95" text-anchor="middle" fill="#94a3b8" font-size="9">${t('tutSvgVsAiHint')}</text>
             `);
         },
         buildSteps() {
@@ -2302,6 +2457,11 @@
             document.getElementById('tutorial-overlay').classList.add('hidden');
             this._cachedSteps = null;
             try { localStorage.setItem(this._seenKey, '1'); } catch(e) {}
+        },
+        shouldOpenFirstTime() {
+            let seen = true;
+            try { seen = localStorage.getItem(this._seenKey) === '1'; } catch(e) {}
+            return !seen;
         },
         openIfFirstTime() {
             let seen = true;
@@ -4747,6 +4907,92 @@
         //   nas dificuldades altas, quase nunca no fácil) pra não abusar do serviço gratuito.
         // - Depois de algumas falhas seguidas, ela "desiste" por um tempo (circuit breaker)
         //   e o jogo segue 100% normal só com a IA local.
+        // ==================== DailyFeatures ====================
+        // NOVO: sistema de engajamento diário — três peças que trabalham juntas:
+        // 1) Sequência (streak) diária, estilo Duolingo: joga em dias seguidos, o contador sobe;
+        //    perde um dia, volta pra 1.
+        // 2) Recompensa offline: ganha ouro proporcional ao tempo que ficou longe do jogo
+        //    (até um teto, pra não incentivar "ficar horas sem jogar" como estratégia).
+        // 3) Missões diárias: 3 objetivos sorteados por dia que dão OURO (não só XP) ao serem
+        //    completados, resetando à meia-noite (hora local do jogador).
+        // Tudo fica salvo dentro de persistentUpgradesP1 (mesmo lugar de sempre), então usa o
+        // mesmo saveProfile()/Accounts.saveProgress() que já existia — nenhum sistema de save novo.
+        const DailyFeatures = {
+            missionPool: [
+                { id:'play_matches', type:'matchesPlayed', target:3,  gold:60,  nameKey:'missionPlayMatches' },
+                { id:'win_matches',  type:'matchesWon',    target:1,  gold:120, nameKey:'missionWinMatches' },
+                { id:'kill_enemies', type:'kills',         target:20, gold:90,  nameKey:'missionKillEnemies' },
+                { id:'earn_gold',    type:'goldEarned',    target:400,gold:80,  nameKey:'missionEarnGold' },
+                { id:'open_chests',  type:'chestOpen',     target:2,  gold:70,  nameKey:'missionOpenChests' },
+                { id:'win_vs_ai',    type:'vsAiWin',       target:1,  gold:150, nameKey:'missionWinVsAI' },
+                { id:'kill_enemies_big', type:'kills',     target:40, gold:140, nameKey:'missionKillEnemiesBig' },
+                { id:'play_matches_big', type:'matchesPlayed', target:5, gold:100, nameKey:'missionPlayMatchesBig' }
+            ],
+            todayStr(offsetDays) {
+                let d = new Date(); if(offsetDays) d.setDate(d.getDate() + offsetDays);
+                return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+            },
+            ensureMissionsToday(profile) {
+                if(!profile.missions || profile.missions.date !== this.todayStr()) {
+                    let pool = this.missionPool.slice();
+                    for(let i = pool.length - 1; i > 0; i--) { let j = Math.floor(Math.random() * (i+1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+                    let chosen = pool.slice(0, 3).map(m => ({ id: m.id, progress: 0, claimed: false }));
+                    profile.missions = { date: this.todayStr(), list: chosen };
+                }
+                return profile.missions;
+            },
+            // Chamado nos pontos-chave do jogo (fim de partida, abrir baú, etc.) pra avançar
+            // qualquer missão ativa daquele tipo. Se completar, credita o ouro na hora.
+            registerEvent(type, amount) {
+                if(!amount) return;
+                let profile = Engine.persistentUpgradesP1;
+                let missions = this.ensureMissionsToday(profile);
+                let completedAny = false;
+                missions.list.forEach(entry => {
+                    if(entry.claimed) return;
+                    let def = this.missionPool.find(m => m.id === entry.id);
+                    if(!def || def.type !== type) return;
+                    entry.progress = Math.min(def.target, entry.progress + amount);
+                    if(entry.progress >= def.target) {
+                        entry.claimed = true; completedAny = true;
+                        Engine.walletP1 += def.gold;
+                        Engine.showMissionCompleteToast(def);
+                    }
+                });
+                if(completedAny) Engine.saveProfile();
+                if(typeof Engine.renderMissions === 'function') Engine.renderMissions();
+            },
+            // Roda uma vez por login/boot: atualiza streak, calcula ouro offline, e devolve um
+            // resumo pro Engine decidir se mostra o modal de "bem-vindo de volta".
+            checkInOnLogin(profile) {
+                let today = this.todayStr();
+                if(!profile.streak) profile.streak = { count: 0, lastDate: null, bestCount: 0 };
+                let st = profile.streak;
+                let streakChanged = false, streakGoldBonus = 0;
+                if(st.lastDate !== today) {
+                    let yStr = this.todayStr(-1);
+                    st.count = (st.lastDate === yStr) ? (st.count + 1) : 1;
+                    st.bestCount = Math.max(st.bestCount || 0, st.count);
+                    st.lastDate = today;
+                    streakChanged = true;
+                    // Bônus de ouro cresce com a sequência, mas com teto — recompensa quem
+                    // mantém o hábito sem virar uma fonte infinita de ouro.
+                    streakGoldBonus = Math.min(st.count, 30) * 15;
+                    Engine.walletP1 += streakGoldBonus;
+                }
+                let now = Date.now();
+                let lastSeen = profile.lastSeenAt || now;
+                let offlineHours = Math.min(12, Math.max(0, (now - lastSeen) / 3600000));
+                let offlineGold = offlineHours >= 0.1 ? Math.floor(offlineHours * 300) : 0;
+                if(offlineGold > 0) Engine.walletP1 += offlineGold;
+                profile.lastSeenAt = now;
+                this.ensureMissionsToday(profile);
+                if(streakChanged || offlineGold > 0) Engine.saveProfile();
+                return { streakChanged, streakCount: st.count, streakGoldBonus, offlineGold, offlineHours };
+            }
+        };
+        // ==================== fim DailyFeatures ====================
+
         const AIBrain = {
             strategy: 'balanced',
             _lastFetchAt: 0,
@@ -4817,10 +5063,16 @@
         modeSolo: false, soloActivePlayer: 1, device: 'pc',
         vsAI: false, aiDifficulty: 'medium',
         aiDiffConfig: {
-            easy:   { hpMult: 0.75, spdMult: 0.80, reaction: 40, accuracy: 0.45, aggressiveness: 0.35, atkCdMult: 1.6, rewardWin: 150,  rewardLoss: 20 },
-            medium: { hpMult: 1.0,  spdMult: 1.0,  reaction: 22, accuracy: 0.65, aggressiveness: 0.55, atkCdMult: 1.15, rewardWin: 350,  rewardLoss: 40 },
-            hard:   { hpMult: 1.3,  spdMult: 1.15, reaction: 10, accuracy: 0.82, aggressiveness: 0.75, atkCdMult: 0.85, rewardWin: 700,  rewardLoss: 60 },
-            brutal: { hpMult: 1.7,  spdMult: 1.3,  reaction: 4,  accuracy: 0.95, aggressiveness: 0.92, atkCdMult: 0.6,  rewardWin: 1400, rewardLoss: 80 }
+            // REBALANCEADO: a dificuldade "fácil" estava quase imbatível porque a esquiva de
+            // projéteis usava o mesmo valor de "accuracy" (0.45) e era testada A CADA FRAME
+            // enquanto o tiro se aproximava — isso combinava (efeito composto de várias
+            // tentativas) pra uma chance real de esquiva de mais de 95%, mesmo no fácil. Agora
+            // existe um "dodgeChance" separado, testado UMA ÚNICA VEZ por projétil (ver
+            // updateAIBot), então esses números refletem a chance real de esquiva/acerto.
+            easy:   { hpMult: 0.65, spdMult: 0.78, reaction: 50, accuracy: 0.32, aggressiveness: 0.28, atkCdMult: 1.8,  dodgeChance: 0.15, rewardWin: 150,  rewardLoss: 25 },
+            medium: { hpMult: 0.9,  spdMult: 0.95, reaction: 26, accuracy: 0.52, aggressiveness: 0.48, atkCdMult: 1.2,  dodgeChance: 0.35, rewardWin: 350,  rewardLoss: 45 },
+            hard:   { hpMult: 1.2,  spdMult: 1.1,  reaction: 14, accuracy: 0.70, aggressiveness: 0.68, atkCdMult: 0.9,  dodgeChance: 0.55, rewardWin: 700,  rewardLoss: 65 },
+            brutal: { hpMult: 1.5,  spdMult: 1.25, reaction: 7,  accuracy: 0.85, aggressiveness: 0.85, atkCdMult: 0.65, dodgeChance: 0.75, rewardWin: 1400, rewardLoss: 90 }
         },
         players: [], enemies: [], projectiles: [], particles: [], items: [], platforms: [], chunksLoaded: {},
         secretZones: [], inputKeys: {}, pendingSpawns: [], openWorldSpawnCd: 0,
@@ -4839,7 +5091,8 @@
             { id:'stripes', price:800 },
             { id:'glow',    price:1100 },
             { id:'stars',   price:1500 },
-            { id:'flame',   price:2000 }
+            { id:'flame',   price:2000 },
+            { id:'secret',  price:0, secret:true } // EASTER EGG: só some visível depois de desbloqueada, veja _checkEasterEggSequence
         ],
         defaultCosmetics() { return { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }; },
         defaultProgress() { return { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }; },
@@ -4917,6 +5170,11 @@
             s.totalKills += kills||0; s.totalGoldEarned += goldEarned||0;
             let xpGain = 20 + (kills||0)*2 + Math.floor((goldEarned||0)/10) + (won ? 30 : 0);
             this.awardXp(xpGain);
+            // NOVO: alimenta as missões diárias com o resultado desta partida.
+            DailyFeatures.registerEvent('matchesPlayed', 1);
+            if(won) DailyFeatures.registerEvent('matchesWon', 1);
+            DailyFeatures.registerEvent('kills', kills||0);
+            DailyFeatures.registerEvent('goldEarned', goldEarned||0);
         },
         modeSoloLabelKeys: { GOLDFUSH: 'soloLabelGoldfush', TITAN: 'soloLabelTitan', BOSS: 'soloLabelBoss' },
         // NOVO: Boost de Velocidade e Boost de HP Extra — em vez de um preço fixo, mostram um botão
@@ -4960,6 +5218,10 @@
             window.addEventListener('keydown', e => {
                 let k = e.key.toLowerCase();
                 this.inputKeys[k] = true;
+                // EASTER EGG: código secreto (setas + B + A, clássico) digitado no MENU desbloqueia
+                // uma skin exclusiva "✨ Secreta". Só ativa no menu (nunca durante a partida) porque
+                // as setas também controlam o movimento em jogo — não queremos interferir nisso.
+                if(this.state === 'MENU') this._checkEasterEggSequence(k);
                 if(e.repeat) return;
                 if(k === 'q') this.triggerDash(this.mySlot);
                 if(k === '1') this.useItemViaClick(this.mySlot, 'potion');
@@ -5010,7 +5272,17 @@
                 let hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
                 let ua = navigator.userAgent || '';
                 let uaLooksMobile = /Android|iPhone|iPad|iPod|Mobile|Silk|Windows Phone|Meta Quest|Oculus/i.test(ua);
-                return (hasTouch && (coarsePointer || uaLooksMobile)) ? 'mobile' : 'pc';
+                // FIX IMPORTANTE PRA TABLET: iPads modernos (iPadOS 13+) mandam um User-Agent
+                // que se identifica como "Macintosh" (desktop), pra sites tratarem o Safari do
+                // iPad como se fosse um navegador de computador. Isso quebrava a detecção: um
+                // iPad podia cair no "senão" (coarsePointer falso quando há teclado/trackpad
+                // pareado, uaLooksMobile falso por causa do UA de Mac) e ser tratado como PC —
+                // ou seja, sem os controles de toque na tela, tornando o jogo praticamente
+                // injogável num tablet sem teclado físico. maxTouchPoints > 1 num UA "Macintosh"
+                // só acontece de verdade em iPads (Macs de verdade sempre reportam 0), então
+                // isso identifica esse caso com segurança.
+                let isTabletDisguisedAsMac = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+                return (hasTouch && (coarsePointer || uaLooksMobile || isTabletDisguisedAsMac)) ? 'mobile' : 'pc';
             } catch(e) {
                 return 'pc';
             }
@@ -5096,7 +5368,7 @@
                 if(volSlider) volSlider.value = Math.round(Settings.volume * 100);
                 this.applyLanguage();
                 let lblUser = document.getElementById('lbl-logged-in-user');
-                if(lblUser) lblUser.textContent = '👤 ' + acc.name;
+                if(lblUser) lblUser.textContent = this.getPlayerBadge(this.mySlot) + ' ' + acc.name;
                 // NOVO: modo visitante não tem conta real na nuvem, então não faz sentido buscar
                 // jogadores nem mostrar conversas — e mais importante, isso evita que sobrem na tela
                 // conversas de uma conta que estava logada antes nesse mesmo navegador.
@@ -5132,6 +5404,20 @@
             try { Social.subscribeToIncomingInvites(); } catch(err) { console.error('Erro em subscribeToIncomingInvites:', err); }
             try { Social.startPresenceHeartbeat(); } catch(err) { console.error('Erro em startPresenceHeartbeat:', err); }
             if (typeof fitGameContainer === 'function') fitGameContainer();
+            // NOVO: sequência diária + recompensa offline + missões — roda uma vez ao entrar.
+            // Se for a primeira vez jogando (streak não existia ainda) ou não tiver nada de
+            // ganho offline, não mostra modal nenhum (não faz sentido "dar boas-vindas de
+            // volta" pra quem nunca saiu). O tutorial de primeira vez continua tendo prioridade
+            // visual — o modal de boas-vindas só aparece depois dele, se aplicável.
+            try {
+                let hadStreakBefore = !!(this.persistentUpgradesP1.streak && this.persistentUpgradesP1.streak.lastDate);
+                let summary = DailyFeatures.checkInOnLogin(this.persistentUpgradesP1);
+                if (hadStreakBefore && (summary.streakChanged || summary.offlineGold > 0)) {
+                    setTimeout(() => this.showWelcomeBackModal(summary), Tutorial.shouldOpenFirstTime() ? 600 : 300);
+                }
+                this.renderMissions();
+                this.refreshStreakBadge();
+            } catch(err) { console.error('Erro no check-in diário:', err); }
             try { Tutorial.openIfFirstTime(); } catch(err) { console.error('Erro ao abrir tutorial:', err); }
         },
         logoutAccount() {
@@ -5207,6 +5493,18 @@
             let nm = profileId === 1 ? this.playerNames.p1 : this.playerNames.p2;
             return (nm && nm.length) ? nm : ('Player ' + profileId);
         },
+        // NOVO: um pequeno selo (emoji) único por conta — dá aquele toque de "cada jogador é um
+        // pouco diferente" sem precisar de nenhum sistema novo de dados. É só um hash simples do
+        // ID/nome da conta escolhendo um emoji fixo de uma lista — sempre o mesmo pra você, e
+        // bem provavelmente diferente do de outra pessoa.
+        _badgeEmojis: ['🦊','🐺','🦁','🐯','🐸','🦉','🐲','🦅','🐙','🦈','🐝','🦄','🐧','🦋','🐢','🦂','🐳','🦖','🐿️','🦔'],
+        getPlayerBadge(profileId) {
+            let seed = (profileId === this.mySlot && Accounts.current) ? (Accounts.current.uid || this.myAccountName || '') : this.getProfileName(profileId);
+            let hash = 0;
+            for(let i = 0; i < seed.length; i++) { hash = (hash * 31 + seed.charCodeAt(i)) & 0xffffffff; }
+            let idx = Math.abs(hash) % this._badgeEmojis.length;
+            return this._badgeEmojis[idx];
+        },
         async resetSavedData() {
             this.walletP1 = 100; this.walletP2 = 100;
             this.persistentUpgradesP1 = { maxHp:100, baseSpd:4.8, weaponKey:'default', weaponSpd:13, weaponDmg:1.0, atkCd:16, potion:0, shield:0, cosmetics: this.defaultCosmetics(), progress: this.defaultProgress(), ownedWeapons:['default'], selectedWeaponKey:'default', boosts: { speed:0, hp:0 } };
@@ -5269,6 +5567,13 @@
             this.state = 'MENU';
             this.activeMatch = false;
             Hideout.active = false;
+            // FIX CRÍTICO: sair de uma partida contra IA pelo botão 🚪 não zerava a flag
+            // "vsAI" — na próxima vez que você iniciasse QUALQUER outro modo (2 jogadores local,
+            // mundo aberto, etc.) pelo botão "INICIAR SIMULAÇÃO", startMatch() ainda via
+            // this.vsAI=true e recriava um bot pra jogar junto, mesmo em modos que não deveriam
+            // ter IA nenhuma. Por isso a IA parecia "continuar jogando" depois de trocar de modo.
+            this.vsAI = false;
+            AIBrain.reset();
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
             document.getElementById('chest-alert').style.display = 'none';
@@ -5400,8 +5705,15 @@
                 .sort((a,b) => Math.abs(a.x-bot.x) - Math.abs(b.x-bot.x))[0];
 
             // --- Esquiva de projéteis: se um tiro inimigo estiver vindo em direção ao bot e
-            // perto o suficiente, tenta pular ou se afastar da linha de tiro. Dificuldades
-            // altas percebem isso quase de imediato; fáceis quase não reagem.
+            // perto o suficiente, tenta pular ou se afastar da linha de tiro.
+            // FIX CRÍTICO DE JOGABILIDADE: antes essa chance era testada A CADA QUADRO (60x por
+            // segundo) enquanto o projétil se aproximava — mesmo com uma chance "baixa" por
+            // teste, repetir o sorteio dezenas de vezes fazia a esquiva real ficar perto de
+            // 100%, até no fácil. Era basicamente impossível acertar o bot com um tiro. Agora
+            // ele só reage UMA VEZ por projétil (guardado num WeakSet), como um jogador humano
+            // que só tem uma chance de reagir a cada ameaça — usando cfg.dodgeChance, um valor
+            // dedicado e bem mais baixo que reflete de verdade a dificuldade escolhida.
+            if(!bot._reactedProjectiles) bot._reactedProjectiles = new WeakSet();
             let incoming = this.projectiles.find(pr => {
                 if(!pr || pr.owner === bot) return false;
                 let sameLevel = Math.abs((pr.y) - (bot.y + bot.h/2)) < 40;
@@ -5409,8 +5721,11 @@
                 let closeEnough = Math.abs(pr.x - bot.x) < 260;
                 return sameLevel && approaching && closeEnough;
             });
-            let dodgeChance = cfg.accuracy; // reaproveita o parâmetro de "precisão/reflexos" pra esquiva também
-            let wantDodgeJump = !!incoming && bot.isGrounded && Math.random() < dodgeChance;
+            let wantDodgeJump = false;
+            if(incoming && !bot._reactedProjectiles.has(incoming)) {
+                bot._reactedProjectiles.add(incoming);
+                if(bot.isGrounded && Math.random() < cfg.dodgeChance) wantDodgeJump = true;
+            }
 
             // --- Reavalia posicionamento tático a cada N frames (tempo de reação por dificuldade).
             // A estratégia vinda do AIBrain (quando disponível e "escolhida" pro peso da
@@ -5460,8 +5775,12 @@
             let predictedDir = predictedDx >= 0 ? 1 : -1;
             let aimIsGood = (predictedDir === dirToTarget) || Math.abs(predictedDx) < 40;
             let verticalOk = Math.abs(dy) < 55; // arma é horizontal; só faz sentido atirar se estiver quase no mesmo nível
-            let proximityBonus = Math.max(0, 1 - dist / 700) * 0.3;
-            let effectiveAccuracy = Math.min(0.98, cfg.accuracy + proximityBonus);
+            // FIX: o bônus de proximidade (até +0.3 de precisão de perto) somado a um teto fixo de
+            // 0.98 fazia até o fácil acertar quase sempre em combate corpo a corpo. Reduzimos o
+            // bônus e o teto agora também escala pela dificuldade, então "fácil" continua errando
+            // com frequência perceptível mesmo bem perto — do jeito que um jogador esperaria.
+            let proximityBonus = Math.max(0, 1 - dist / 700) * 0.18;
+            let effectiveAccuracy = Math.min(cfg.accuracy + 0.15, cfg.accuracy + proximityBonus);
             let wantsToFightNow = strategy !== 'flee' && strategy !== 'chase_chest';
             if(wantsToFightNow && bot.cdAttack <= 0 && dist < 620 && verticalOk && aimIsGood && Math.random() < effectiveAccuracy) {
                 keys.attack = true;
@@ -5527,6 +5846,8 @@
         },
         updateMenu() {
             this.refreshLevelBadge();
+            this.refreshStreakBadge();
+            this.renderMissions();
             let desc = document.getElementById('lbl-arch-desc');
             let solo = this.isSoloMatch();
             if(solo) {
@@ -5590,6 +5911,9 @@
                 sknWrap.innerHTML = '';
                 this.cosmeticSkins.forEach(s => {
                     let owned = cos.ownedSkins.includes(s.id);
+                    // EASTER EGG: a skin secreta só aparece na lista depois de desbloqueada —
+                    // antes disso fica escondida, pra manter a surpresa de quem encontrar o código.
+                    if(s.secret && !owned) return;
                     let selected = cos.skin === s.id;
                     let btn = document.createElement('div');
                     btn.className = 'cosmetic-skin-btn' + (selected ? ' selected' : '');
@@ -5624,6 +5948,98 @@
             document.getElementById('achievements-screen').classList.remove('hidden');
         },
         closeAchievements() { document.getElementById('achievements-screen').classList.add('hidden'); },
+        // NOVO: painel de Missões Diárias + sequência (streak), reaproveitando o mesmo padrão
+        // visual/estrutural das Conquistas.
+        openMissions() {
+            this.renderMissions();
+            document.getElementById('missions-screen').classList.remove('hidden');
+        },
+        closeMissions() { document.getElementById('missions-screen').classList.add('hidden'); },
+        renderMissions() {
+            let prog = this.persistentUpgradesP1;
+            if(!prog) return;
+            let missions = DailyFeatures.ensureMissionsToday(prog);
+            let streak = prog.streak || { count: 0 };
+            let panelCount = document.getElementById('lbl-streak-panel-count');
+            if(panelCount) panelCount.textContent = streak.count;
+            let list = document.getElementById('missions-list');
+            if(!list) return;
+            list.innerHTML = '';
+            missions.list.forEach(entry => {
+                let def = DailyFeatures.missionPool.find(m => m.id === entry.id);
+                if(!def) return;
+                let pct = Math.min(100, Math.round((entry.progress / def.target) * 100));
+                let card = document.createElement('div');
+                card.style.cssText = `background:${entry.claimed ? 'rgba(34,197,94,0.1)' : '#1e293b'}; border:1px solid ${entry.claimed ? '#22c55e' : '#334155'}; border-radius:8px; padding:12px;`;
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="font-weight:700; font-size:0.85rem; color:${entry.claimed ? '#86efac' : '#e2e8f0'};">${entry.claimed ? '✅ ' : ''}${t(def.nameKey).replace('{target}', def.target)}</span>
+                        <span style="font-weight:800; font-size:0.8rem; color:#fbbf24;">+$${def.gold}</span>
+                    </div>
+                    <div style="height:8px; background:#0f172a; border-radius:4px; overflow:hidden;">
+                        <div style="height:100%; width:${pct}%; background:${entry.claimed ? '#22c55e' : 'linear-gradient(to right,#3b82f6,#60a5fa)'};"></div>
+                    </div>
+                    <div style="font-size:0.68rem; color:#64748b; margin-top:4px; text-align:right;">${Math.min(entry.progress, def.target)}/${def.target}</div>
+                `;
+                list.appendChild(card);
+            });
+        },
+        refreshStreakBadge() {
+            let streak = this.persistentUpgradesP1 && this.persistentUpgradesP1.streak;
+            let badge = document.getElementById('streak-badge');
+            let countEl = document.getElementById('lbl-streak-count');
+            if(!badge || !countEl) return;
+            if(streak && streak.count > 0) {
+                countEl.textContent = streak.count;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        },
+        showWelcomeBackModal(summary) {
+            let streakRow = document.getElementById('welcome-back-streak-row');
+            let streakText = document.getElementById('welcome-back-streak-text');
+            let offlineRow = document.getElementById('welcome-back-offline-row');
+            let offlineText = document.getElementById('welcome-back-offline-text');
+            if(summary.streakChanged && streakRow && streakText) {
+                streakRow.style.display = 'flex';
+                streakText.textContent = `${summary.streakCount} ${t('streakDaysLabel')} (+$${summary.streakGoldBonus})`;
+            } else if(streakRow) streakRow.style.display = 'none';
+            if(summary.offlineGold > 0 && offlineRow && offlineText) {
+                offlineRow.style.display = 'flex';
+                offlineText.textContent = `+$${summary.offlineGold} ${t('welcomeBackOfflineLabel')}`;
+            } else if(offlineRow) offlineRow.style.display = 'none';
+            this.refreshStreakBadge();
+            this.renderMissions();
+            document.getElementById('welcome-back-modal').classList.remove('hidden');
+        },
+        closeWelcomeBackModal() {
+            document.getElementById('welcome-back-modal').classList.add('hidden');
+        },
+        // EASTER EGG: sequência clássica de setas + B + A. Guardamos só as últimas 10 teclas
+        // digitadas e comparamos com o alvo — nada pesado, roda só quando alguma tecla é
+        // pressionada no menu.
+        _eggSequence: ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'],
+        _checkEasterEggSequence(k) {
+            if(!this._eggBuffer) this._eggBuffer = [];
+            this._eggBuffer.push(k);
+            if(this._eggBuffer.length > this._eggSequence.length) this._eggBuffer.shift();
+            if(this._eggBuffer.length === this._eggSequence.length && this._eggBuffer.every((key, i) => key === this._eggSequence[i])) {
+                this._eggBuffer = [];
+                this.unlockEasterEggSkin();
+            }
+        },
+        unlockEasterEggSkin() {
+            if(!this.persistentUpgradesP1.cosmetics) this.persistentUpgradesP1.cosmetics = this.defaultCosmetics();
+            let cos = this.persistentUpgradesP1.cosmetics;
+            if(cos.ownedSkins.includes('secret')) { this.showToast(`✨ ${t('easterEggAlreadyFound')}`); return; }
+            cos.ownedSkins.push('secret');
+            this.walletP1 += 500;
+            this.saveProfile();
+            this.renderCosmetics();
+            this.showToast(`🎉 ${t('easterEggFoundToast')}`);
+            AudioFX.play('coin');
+        },
         refreshLevelBadge() {
             if(!this.persistentUpgradesP1.progress) this.persistentUpgradesP1.progress = this.defaultProgress();
             let { level, xpIntoLevel, xpForNext } = this.levelFromXp(this.persistentUpgradesP1.progress.xp);
@@ -5666,6 +6082,7 @@
         },
         showLevelUpToast(level) { this.showToast(`⭐ ${t('levelUpToast').replace('{level}', level)}`); },
         showAchievementToast(ach) { this.showToast(`🏆 ${t('achievementUnlockedToast').replace('{name}', t(ach.nameKey))}`); },
+        showMissionCompleteToast(def) { this.showToast(`🎯 ${t('missionCompleteToast').replace('{name}', t(def.nameKey)).replace('{gold}', def.gold)}`); },
         buyItemMenu(itemId) {
             let item = this.shopCatalog.find(i => i.id === itemId); if(!item || item.type === 'boost') return;
             if(this.walletP1 < item.price) return; this.walletP1 -= item.price; this.applyUpgradeData(this.persistentUpgradesP1, item);
@@ -5762,6 +6179,14 @@
                 container.innerHTML += `<div class="ranking-item"><span><b>#${idx+1}</b> ${rk.name}</span><span style="color:#22c55e; font-weight:bold;">${rk.wins} ${t('winsLabel')}</span></div>`;
             });
         },
+        // NOVO: ponto de entrada usado pelo botão genérico "INICIAR SIMULAÇÃO" do menu principal
+        // (2 jogadores local, solo, mundo aberto). Zera "vsAI" explicitamente antes de montar a
+        // partida — proteção extra pro bug de bot "grudado" em outros modos, além do fix em
+        // exitMatch().
+        startNormalMatch() {
+            this.vsAI = false;
+            this.startMatch();
+        },
         startMatch() {
             document.getElementById('menu-screen').classList.add('hidden');
             this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999;
@@ -5855,6 +6280,7 @@
                     if(dst < 70) {
                         it.destroyed = true; AudioFX.play('coin');
                         createFXBurst(it.x+18, it.y+14, '#eab308', 25);
+                        DailyFeatures.registerEvent('chestOpen', 1);
                         let rng = Math.random(), rewardText = '';
                         if(rng < 0.30) { p.goldCollected += 150; rewardText = t('rewardGold'); }
                         else if(rng < 0.53) { p.inventory.potion++; rewardText = t('rewardPotion'); }
@@ -5987,16 +6413,36 @@
             let dt = (timestamp - this.lastTime) / 1000;
             if(dt > 0.1) dt = 0.1;
             this.lastTime = timestamp;
-            document.getElementById('touch-controls').classList.toggle('active', this.device !== 'pc' && this.state === 'IN_GAME');
+            // OTIMIZAÇÃO MOBILE/TABLET: esses elementos (controles de toque) eram buscados no
+            // DOM com getElementById TODO frame, e o classList.toggle rodava mesmo quando o
+            // estado não tinha mudado. Agora os elementos ficam em cache (buscados uma única
+            // vez) e só mexemos nas classes quando o valor realmente muda — menos trabalho de
+            // layout/estilo repetido, principal responsável por engasgos em aparelhos mais
+            // fracos (tablets em especial).
+            if (!this._loopDom) {
+                this._loopDom = {
+                    touchControls: document.getElementById('touch-controls'),
+                    tcChest: document.getElementById('tc-chest'),
+                    tcHideout: document.getElementById('tc-hideout'),
+                    chestAlert: document.getElementById('chest-alert'),
+                    hideoutAlert: document.getElementById('hideout-alert'),
+                    hideoutHud: document.getElementById('hideout-hud')
+                };
+                this._loopDomLast = {};
+            }
+            let ld = this._loopDom, ldl = this._loopDomLast;
+            let touchActive = this.device !== 'pc' && this.state === 'IN_GAME';
+            if (ld.touchControls && ldl.touchActive !== touchActive) { ld.touchControls.classList.toggle('active', touchActive); ldl.touchActive = touchActive; }
             // NOVO: mantém os botões de toque de baú e esconderijo sincronizados com os avisos de
             // tela (chest-alert / hideout-alert / hideout-hud) — assim eles só aparecem quando faz
             // sentido interagir, igual acontece no PC com as teclas [B] e [E].
-            let tcChestBtn = document.getElementById('tc-chest');
-            if(tcChestBtn) tcChestBtn.classList.toggle('show', document.getElementById('chest-alert').style.display === 'block');
-            let tcHideoutBtn = document.getElementById('tc-hideout');
-            if(tcHideoutBtn) {
-                let hOn = document.getElementById('hideout-alert').style.display === 'block' || document.getElementById('hideout-hud').style.display === 'block';
-                tcHideoutBtn.classList.toggle('show', hOn);
+            if (ld.tcChest && ld.chestAlert) {
+                let showChest = ld.chestAlert.style.display === 'block';
+                if (ldl.showChest !== showChest) { ld.tcChest.classList.toggle('show', showChest); ldl.showChest = showChest; }
+            }
+            if (ld.tcHideout && ld.hideoutAlert && ld.hideoutHud) {
+                let hOn = ld.hideoutAlert.style.display === 'block' || ld.hideoutHud.style.display === 'block';
+                if (ldl.hOn !== hOn) { ld.tcHideout.classList.toggle('show', hOn); ldl.hOn = hOn; }
             }
             if(this.state === 'IN_GAME') {
                 if(OnlineSync.isOnline) {
@@ -6181,6 +6627,7 @@
                     `${descMsg}<br><span style="color:#a855f7; font-weight:bold;">🤖 ${t('vsAiDuelLabel')} (${diffLabelMap[this.aiDifficulty]}) — ${resultLabel}</span>` +
                     `<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${reward}</span>`;
                 if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: reward, won: iWon });
+                if(iWon) DailyFeatures.registerEvent('vsAiWin', 1);
                 this.saveProfile();
                 this.vsAI = false;
                 return;
@@ -6381,34 +6828,65 @@
         }
         syncHUD() {
             let pfx = 'p' + this.id;
-            let fillHp = document.getElementById(`bar-${pfx}-hp`); if(fillHp) fillHp.style.width = `${Math.max(0,(this.hp/this.maxHp)*100)}%`;
-            let fillMp = document.getElementById(`bar-${pfx}-mp`); if(fillMp) fillMp.style.width = `${this.mp}%`;
-            let livesEl = document.getElementById(`lbl-${pfx}-lives`); if(livesEl) livesEl.innerText = "❤".repeat(Math.max(0,this.lives));
-            let goldEl = document.getElementById(`lbl-${pfx}-gold`); if(goldEl) goldEl.innerText = `${t('earningsLabel')}: $${this.goldCollected}`;
-            let wpnEl = document.getElementById(`lbl-${pfx}-weapon`); if(wpnEl) wpnEl.innerText = `${t('weaponLabel')}: ${t('weaponName_' + this.weaponKey)}`;
-            let nameEl = document.getElementById(`hud-${pfx}-name`); if(nameEl) nameEl.innerText = `${Engine.getProfileName(this.profileId)}${this.id===Engine.mySlot?' ★':''}`;
-            let invEl = document.getElementById(`inv-${pfx}`);
-            if(invEl) {
-                let slots = invEl.children;
+            // OTIMIZAÇÃO MOBILE/TABLET: antes esta função buscava até 7 elementos no DOM
+            // (document.getElementById) e escrevia neles — inclusive innerHTML, uma operação
+            // cara — TODO FRAME, pra CADA jogador (chamada de dentro do loop principal, 60-120x
+            // por segundo). Em tablets, que costumam ter CPU bem mais fraca que a de um PC
+            // mesmo com tela grande, esse trabalho repetido de DOM é uma das maiores causas de
+            // travamento. Agora: (1) os elementos são buscados só UMA VEZ e guardados em cache
+            // no próprio jogador, e (2) só escrevemos no DOM quando o valor realmente mudou
+            // desde a última vez (dirty-checking) — evitando milhares de escritas por partida
+            // que não mudavam nada visualmente.
+            if (!this._hud) {
+                this._hud = {
+                    hp: document.getElementById(`bar-${pfx}-hp`), mp: document.getElementById(`bar-${pfx}-mp`),
+                    lives: document.getElementById(`lbl-${pfx}-lives`), gold: document.getElementById(`lbl-${pfx}-gold`),
+                    weapon: document.getElementById(`lbl-${pfx}-weapon`), name: document.getElementById(`hud-${pfx}-name`),
+                    inv: document.getElementById(`inv-${pfx}`), boosts: this.id === 1 ? document.getElementById('hud-p1-boosts') : null
+                };
+                this._hudLast = {};
+            }
+            let h = this._hud, last = this._hudLast;
+            let hpPct = Math.max(0, (this.hp / this.maxHp) * 100);
+            if (h.hp && last.hpPct !== hpPct) { h.hp.style.width = hpPct + '%'; last.hpPct = hpPct; }
+            if (h.mp && last.mp !== this.mp) { h.mp.style.width = this.mp + '%'; last.mp = this.mp; }
+            if (h.lives && last.lives !== this.lives) { h.lives.innerText = "❤".repeat(Math.max(0, this.lives)); last.lives = this.lives; }
+            if (h.gold && last.gold !== this.goldCollected) { h.gold.innerText = `${t('earningsLabel')}: $${this.goldCollected}`; last.gold = this.goldCollected; }
+            if (h.weapon && last.wpnKey !== this.weaponKey) { h.weapon.innerText = `${t('weaponLabel')}: ${t('weaponName_' + this.weaponKey)}`; last.wpnKey = this.weaponKey; }
+            let nameStr = `${Engine.getPlayerBadge(this.profileId)} ${Engine.getProfileName(this.profileId)}${this.id===Engine.mySlot?' ★':''}`;
+            if (h.name && last.nameStr !== nameStr) { h.name.innerText = nameStr; last.nameStr = nameStr; }
+            if (h.inv && (last.potion !== this.inventory.potion || last.shield !== this.inventory.shield)) {
+                let slots = h.inv.children;
                 if(slots[0]){ slots[0].className = `hud-slot ${this.inventory.potion<=0?'empty':''}`; slots[0].innerHTML = this.inventory.potion>0?`P<span class="count">${this.inventory.potion}</span>`:''; }
                 if(slots[1]){ slots[1].className = `hud-slot ${this.inventory.shield<=0?'empty':''}`; slots[1].innerHTML = this.inventory.shield>0?`E<span class="count">${this.inventory.shield}</span>`:''; }
+                last.potion = this.inventory.potion; last.shield = this.inventory.shield;
             }
             // NOVO: mostra os boosts ativos (velocidade/HP) e o tempo restante de cada, só no HUD do P1.
-            if(this.id === 1) {
-                let boostEl = document.getElementById('hud-p1-boosts');
-                if(boostEl) {
-                    let boosts = Engine.persistentUpgradesP1.boosts || {};
-                    let parts = [];
-                    if(boosts.speed > 0) parts.push(`⚡ ${Engine.formatBoostTime(boosts.speed)}`);
-                    if(boosts.hp > 0) parts.push(`❤+ ${Engine.formatBoostTime(boosts.hp)}`);
-                    boostEl.textContent = parts.join('   ');
-                    boostEl.style.display = parts.length ? 'block' : 'none';
+            if(this.id === 1 && h.boosts) {
+                let boosts = Engine.persistentUpgradesP1.boosts || {};
+                let parts = [];
+                if(boosts.speed > 0) parts.push(`⚡ ${Engine.formatBoostTime(boosts.speed)}`);
+                if(boosts.hp > 0) parts.push(`❤+ ${Engine.formatBoostTime(boosts.hp)}`);
+                let boostStr = parts.join('   ');
+                if(last.boostStr !== boostStr) {
+                    h.boosts.textContent = boostStr;
+                    h.boosts.style.display = parts.length ? 'block' : 'none';
+                    last.boostStr = boostStr;
                 }
             }
         }
         draw(ctx) {
             ctx.save(); ctx.fillStyle = this.color;
-            ctx.shadowBlur = (this.shieldTime > 0 ? 15 : 4) + (this.skin === 'glow' ? 10 : 0); ctx.shadowColor = this.color;
+            // OTIMIZAÇÃO MOBILE: antes o personagem sempre desenhava com shadowBlur (mínimo 4),
+            // mesmo sem escudo/brilho ativo. ctx.shadowBlur é uma das operações mais pesadas do
+            // Canvas2D — em celulares e principalmente tablets (que costumam ter tela de maior
+            // resolução física pra desenhar, mas GPU parecida com a de um celular) isso sozinho
+            // já derruba o FPS perceptivelmente. Agora só ativa sombra quando ela realmente
+            // aparece visualmente (escudo ativo ou visual "brilho" comprado), e desliga em
+            // seguida — o resto do tempo o desenho é bem mais barato.
+            let needsGlow = this.shieldTime > 0 || this.skin === 'glow';
+            ctx.shadowBlur = needsGlow ? ((this.shieldTime > 0 ? 15 : 0) + (this.skin === 'glow' ? 10 : 0)) : 0;
+            ctx.shadowColor = this.color;
             ctx.fillRect(this.x, this.y, this.w, this.h);
             if(this.skin === 'stripes') {
                 ctx.save(); ctx.beginPath(); ctx.rect(this.x, this.y, this.w, this.h); ctx.clip();
@@ -6429,6 +6907,15 @@
                 ctx.save(); ctx.fillStyle = 'rgba(249,115,22,0.85)';
                 ctx.beginPath(); ctx.moveTo(this.x+3, this.y+this.h); ctx.lineTo(this.x+9, this.y+this.h+11); ctx.lineTo(this.x+15, this.y+this.h); ctx.fill();
                 ctx.beginPath(); ctx.moveTo(this.x+this.w-15, this.y+this.h); ctx.lineTo(this.x+this.w-9, this.y+this.h+11); ctx.lineTo(this.x+this.w-3, this.y+this.h); ctx.fill();
+                ctx.restore();
+            } else if(this.skin === 'secret') {
+                // EASTER EGG: skin secreta desbloqueada pelo código especial no menu (ver
+                // Engine._checkEasterEggSequence). Borda com cor girando no espectro — efeito
+                // barato (só stroke, sem shadowBlur) pra não pesar nem no celular/tablet.
+                ctx.save();
+                let hue = (performance.now() / 8) % 360;
+                ctx.strokeStyle = `hsl(${hue}, 90%, 60%)`; ctx.lineWidth = 3;
+                ctx.strokeRect(this.x-3, this.y-3, this.w+6, this.h+6);
                 ctx.restore();
             }
             ctx.fillStyle = '#000'; ctx.fillRect(this.facing===1?this.x+20:this.x+6, this.y+10, 6, 6);
@@ -6562,7 +7049,7 @@
     }
     class Particle {
         constructor(x, y, color, vx, vy, life) { this.x = x; this.y = y; this.color = color; this.vx = vx; this.vy = vy; this.life = life; }
-        update(dt) { this.x += this.vx; this.y += this.vy; this.life -= dt*60; }
+        update(dt) { this.x += this.vx * dt * 60; this.y += this.vy * dt * 60; this.life -= dt*60; }
         draw(ctx) { ctx.save(); ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, 3, 3); ctx.restore(); }
     }
     function createFXBurst(x, y, color, qty) {
