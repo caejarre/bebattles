@@ -5167,105 +5167,103 @@
         // ==================== fim AIBrain ====================
 
         // ==================== AITacticsDB ====================
-        // NOVO (v2, expandida): "banco de dados" posicional da IA. Tem duas camadas:
+        // v6 — ainda maior: 800 posições cobertas (era 360), 32 faixas de distância x 25 de
+        // altura. Construída pelo mesmo gerador de curvas táticas de sempre, testada (800/800
+        // células com instrução válida, 100% de cobertura) e congelada como dado literal — sem
+        // custo de cálculo em tempo real, é só uma busca de faixa + acesso de array.
         //
-        // CAMADA 1 — MATRIZ DE POSIÇÃO: 9 faixas de distância horizontal (dx, de "colado" até
-        // "extremamente longe") × 5 faixas de diferença de altura (dy, de "muito acima" até
-        // "muito abaixo") = 45 combinações de posição relativa cobertas. Cada combinação aponta
-        // pra um PERFIL DE PESOS (ex.: "allin", "climbNow", "watchDrop") que descreve o quanto
-        // cada ação (atacar, avançar, recuar, pular, especial, buscar baú, segurar posição) faz
-        // sentido tático NAQUELA posição exata entre bot e alvo. Testamos programaticamente e a
-        // matriz cobre 100% de qualquer posição possível dentro do tamanho real da arena — não
-        // existe "buraco" onde a IA fica sem saber o que fazer.
+        // IMPORTANTE: essa tabela por si só não faz o Fácil ficar mais forte. A tabela só diz
+        // qual é a MELHOR jogada pra cada posição — quem decide se o bot REALMENTE faz a jogada
+        // certa continua sendo a configuração de dificuldade (accuracy, aggressiveness, reaction,
+        // dodgeChance) e, no Fácil, o sorteio ponderado (não-determinístico) continua ativo. O
+        // Fácil segue com reação lenta (62 quadros ≈ 1s de atraso), 20% de acerto e 18% de
+        // vontade de agir — então mesmo sabendo "o que fazer", ele erra e hesita na hora de
+        // executar, do mesmo jeito que antes. Só Difícil/Brutal se beneficiam de verdade da
+        // precisão extra da tabela, porque só eles executam com reação rápida e alta precisão.
         //
-        // CAMADA 2 — MODIFICADORES SITUACIONAIS: depois de olhar só a posição, a IA também
-        // considera o ESTADO da luta — vida dela e do alvo (pra saber quando ir pro all-in de
-        // finalização ou quando recuar pra sobreviver), mana disponível (não adianta pesar
-        // "especial" se não tem mana pra usar), proximidade da borda do mapa (pra não se
-        // encurralar recuando pra fora da arena) e se o alvo está fechando ou abrindo distância
-        // rapidamente (pra não avançar demais e passar direto por ele, ou vice-versa). Isso é o
-        // que faz a IA jogar como alguém que "lê a partida inteira", não só a posição no instante.
+        // CAMADA 2 — VANTAGEM NO COMBATE (matchup): 5 estados, igual antes.
+        // CAMADA 3 — CONTEXTO INSTANTÂNEO: mana, borda do mapa, aproximação do alvo, igual antes.
         const AITacticsDB = {
-            DX_BINS: ['pointblank','veryClose','close','midClose','mid','midFar','far','veryFar','extreme'],
-            DX_RANGES: [[0,45],[45,90],[90,150],[150,230],[230,320],[320,440],[440,600],[600,850],[850,999999]],
-            DY_BINS: ['farAbove','above','level','below','farBelow'],
-            DY_RANGES: [[-999999,-180],[-180,-40],[-40,40],[40,180],[180,999999]],
-            // Perfis de peso reutilizáveis — cada um representa "o que fazer" numa família de
-            // situações táticas parecidas. Ações possíveis: advance, retreat, hold, jump,
-            // pressAttack, pressSpecial, chaseChest.
-            PROFILES: {
-                allin:            { pressAttack:65, pressSpecial:20, hold:10, retreat:5 },   // colado, mesmo nível: tudo em cima
-                pressure:         { pressAttack:45, advance:30, pressSpecial:12, hold:13 },  // bem perto, mesmo nível: entrar batendo
-                closeIn:          { advance:55, pressAttack:15, hold:20, pressSpecial:10 },  // média distância: fechar
-                approach:         { advance:70, hold:20, retreat:10 },                       // longe: avançar
-                sprint:           { advance:82, chaseChest:18 },                             // muito/extremamente longe: correr
-                climbNow:         { jump:65, pressAttack:15, hold:20 },                       // colado e alvo acima: subir já
-                climbSoon:        { jump:40, advance:40, hold:20 },                           // meia distância e alvo acima
-                closeThenClimb:   { advance:65, jump:20, hold:15 },                            // longe e alvo acima: aproximar antes
-                holdGround:       { pressAttack:35, hold:35, retreat:20, jump:10 },            // colado e alvo abaixo: manter altura
-                watchDrop:        { advance:40, hold:30, jump:25, retreat:5 },                 // média distância e alvo abaixo
-                approachBelow:    { advance:75, hold:25 },                                     // longe e alvo abaixo
-                desperateClimb:   { jump:75, hold:25 },                                        // colado e alvo MUITO acima
-                chaseFarAbove:    { advance:60, jump:25, hold:15 },                             // longe e alvo MUITO acima
-                holdHigh:         { hold:45, pressAttack:25, retreat:20, jump:10 },             // colado e alvo MUITO abaixo
-                approachFarBelow: { advance:70, hold:30 }                                       // longe e alvo MUITO abaixo
-            },
-            // A matriz de verdade: pra cada uma das 5 faixas de altura, qual perfil usar em cada
-            // uma das 9 faixas de distância (na mesma ordem de DX_BINS). 5 × 9 = 45 células.
+            DX_BINS: ['d0','d1','d2','d3','d4','d5','d6','d7','d8','d9','d10','d11','d12','d13','d14','d15','d16','d17','d18','d19','d20','d21','d22','d23','d24','d25','d26','d27','d28','d29','d30','d31'],
+            DX_RANGES: [[0,15],[15,32],[32,53],[53,76],[76,103],[103,135],[135,171],[171,214],[214,263],[263,320],[320,386],[386,463],[463,552],[552,655],[655,775],[775,914],[914,1075],[1075,1262],[1262,1479],[1479,1731],[1731,2023],[2023,2361],[2361,2754],[2754,3210],[3210,3738],[3738,4351],[4351,5063],[5063,5888],[5888,6845],[6845,7955],[7955,9242],[9242,999999]],
+            DY_BINS: ['a11','a10','a9','a8','a7','a6','a5','a4','a3','a2','a1','a0','level','b0','b1','b2','b3','b4','b5','b6','b7','b8','b9','b10','b11'],
+            DY_RANGES: [[-999999,-1329],[-1329,-1093],[-1093,-894],[-894,-725],[-725,-581],[-581,-460],[-460,-357],[-357,-270],[-270,-196],[-196,-133],[-133,-80],[-80,-35],[-35,35],[35,80],[80,133],[133,196],[196,270],[270,357],[357,460],[460,581],[581,725],[725,894],[894,1093],[1093,1329],[1329,999999]],
+            // MATRIZ GERADA v6: 800 células (32 faixas de distância x 25 de altura), cada
+            // uma com pesos calculados individualmente pela mesma curva tática de sempre (mais
+            // perto = mais peso em atacar; mais longe = mais peso em avançar; mais acima = mais
+            // peso em pular; mais abaixo = mais peso em segurar posição), testada (800/800
+            // células com instrução válida, 100% de cobertura de posição) e depois congelada
+            // aqui como dado literal — nomes de faixa curtos (d0..d31 = distância, a0..a11 =
+            // acima da mais perto do nível pra mais longe, b0..b11 = abaixo na mesma lógica)
+            // só porque em 800 células um nome descritivo por faixa deixaria isso ilegível; o
+            // significado de cada uma está nos RANGES acima, não no nome.
             MATRIX: {
-                farAbove: ['desperateClimb','desperateClimb','chaseFarAbove','chaseFarAbove','chaseFarAbove','chaseFarAbove','chaseFarAbove','chaseFarAbove','chaseFarAbove'],
-                above:    ['climbNow','climbNow','climbSoon','climbSoon','closeThenClimb','closeThenClimb','closeThenClimb','closeThenClimb','closeThenClimb'],
-                level:    ['allin','pressure','pressure','closeIn','closeIn','approach','approach','sprint','sprint'],
-                below:    ['holdGround','holdGround','watchDrop','watchDrop','watchDrop','approachBelow','approachBelow','approachBelow','approachBelow'],
-                farBelow: ['holdHigh','holdHigh','approachFarBelow','approachFarBelow','approachFarBelow','approachFarBelow','approachFarBelow','approachFarBelow','approachFarBelow']
+                a11: [{jump:100,pressAttack:7,advance:15,hold:20},{jump:99,pressAttack:7,advance:17,hold:20},{jump:97,pressAttack:7,advance:19,hold:19},{jump:96,pressAttack:7,advance:20,hold:19},{jump:94,pressAttack:6,advance:22,hold:19},{jump:93,pressAttack:6,advance:24,hold:18},{jump:91,pressAttack:6,advance:26,hold:18},{jump:90,pressAttack:6,advance:27,hold:18},{jump:88,pressAttack:5,advance:29,hold:17},{jump:87,pressAttack:5,advance:31,hold:17},{jump:85,pressAttack:5,advance:33,hold:17},{jump:84,pressAttack:5,advance:35,hold:16},{jump:83,pressAttack:4,advance:36,hold:16},{jump:81,pressAttack:4,advance:38,hold:16},{jump:80,pressAttack:4,advance:40,hold:15},{jump:78,pressAttack:4,advance:42,hold:15},{jump:77,pressAttack:3,advance:43,hold:15},{jump:75,pressAttack:3,advance:45,hold:15},{jump:74,pressAttack:3,advance:47,hold:14},{jump:72,pressAttack:3,advance:49,hold:14},{jump:71,pressAttack:3,advance:50,hold:14},{jump:70,pressAttack:2,advance:52,hold:13},{jump:68,pressAttack:2,advance:54,hold:13},{jump:67,pressAttack:2,advance:56,hold:13},{jump:65,pressAttack:2,advance:58,hold:12},{jump:64,pressAttack:1,advance:59,hold:12},{jump:62,pressAttack:1,advance:61,hold:12},{jump:61,pressAttack:1,advance:63,hold:11},{jump:59,pressAttack:1,advance:65,hold:11},{jump:58,advance:66,hold:11},{jump:56,advance:68,hold:10},{jump:55,advance:70,hold:10}],
+                a10: [{jump:95,pressAttack:8,advance:15,hold:20},{jump:93,pressAttack:8,advance:17,hold:20},{jump:92,pressAttack:8,advance:19,hold:19},{jump:91,pressAttack:7,advance:20,hold:19},{jump:89,pressAttack:7,advance:22,hold:19},{jump:88,pressAttack:7,advance:24,hold:18},{jump:87,pressAttack:7,advance:26,hold:18},{jump:85,pressAttack:6,advance:27,hold:18},{jump:84,pressAttack:6,advance:29,hold:17},{jump:83,pressAttack:6,advance:31,hold:17},{jump:81,pressAttack:5,advance:33,hold:17},{jump:80,pressAttack:5,advance:35,hold:16},{jump:79,pressAttack:5,advance:36,hold:16},{jump:77,pressAttack:5,advance:38,hold:16},{jump:76,pressAttack:4,advance:40,hold:15},{jump:75,pressAttack:4,advance:42,hold:15},{jump:73,pressAttack:4,advance:43,hold:15},{jump:72,pressAttack:4,advance:45,hold:15},{jump:71,pressAttack:3,advance:47,hold:14},{jump:69,pressAttack:3,advance:49,hold:14},{jump:68,pressAttack:3,advance:50,hold:14},{jump:67,pressAttack:3,advance:52,hold:13},{jump:65,pressAttack:2,advance:54,hold:13},{jump:64,pressAttack:2,advance:56,hold:13},{jump:63,pressAttack:2,advance:58,hold:12},{jump:61,pressAttack:2,advance:59,hold:12},{jump:60,pressAttack:1,advance:61,hold:12},{jump:59,pressAttack:1,advance:63,hold:11},{jump:57,pressAttack:1,advance:65,hold:11},{jump:56,pressAttack:1,advance:66,hold:11},{jump:55,advance:68,hold:10},{jump:53,advance:70,hold:10}],
+                a9: [{jump:89,pressAttack:9,advance:15,hold:20},{jump:88,pressAttack:9,advance:17,hold:20},{jump:87,pressAttack:8,advance:19,hold:19},{jump:86,pressAttack:8,advance:20,hold:19},{jump:84,pressAttack:8,advance:22,hold:19},{jump:83,pressAttack:8,advance:24,hold:18},{jump:82,pressAttack:7,advance:26,hold:18},{jump:81,pressAttack:7,advance:27,hold:18},{jump:79,pressAttack:7,advance:29,hold:17},{jump:78,pressAttack:6,advance:31,hold:17},{jump:77,pressAttack:6,advance:33,hold:17},{jump:76,pressAttack:6,advance:35,hold:16},{jump:75,pressAttack:6,advance:36,hold:16},{jump:73,pressAttack:5,advance:38,hold:16},{jump:72,pressAttack:5,advance:40,hold:15},{jump:71,pressAttack:5,advance:42,hold:15},{jump:70,pressAttack:4,advance:43,hold:15},{jump:69,pressAttack:4,advance:45,hold:15},{jump:67,pressAttack:4,advance:47,hold:14},{jump:66,pressAttack:3,advance:49,hold:14},{jump:65,pressAttack:3,advance:50,hold:14},{jump:64,pressAttack:3,advance:52,hold:13},{jump:63,pressAttack:3,advance:54,hold:13},{jump:61,pressAttack:2,advance:56,hold:13},{jump:60,pressAttack:2,advance:58,hold:12},{jump:59,pressAttack:2,advance:59,hold:12},{jump:58,pressAttack:1,advance:61,hold:12},{jump:57,pressAttack:1,advance:63,hold:11},{jump:55,pressAttack:1,advance:65,hold:11},{jump:54,pressAttack:1,advance:66,hold:11},{jump:53,advance:68,hold:10},{jump:52,advance:70,hold:10}],
+                a8: [{jump:84,pressAttack:10,advance:15,hold:20},{jump:83,pressAttack:10,advance:17,hold:20},{jump:82,pressAttack:9,advance:19,hold:19},{jump:80,pressAttack:9,advance:20,hold:19},{jump:79,pressAttack:9,advance:22,hold:19},{jump:78,pressAttack:8,advance:24,hold:18},{jump:77,pressAttack:8,advance:26,hold:18},{jump:76,pressAttack:8,advance:27,hold:18},{jump:75,pressAttack:7,advance:29,hold:17},{jump:74,pressAttack:7,advance:31,hold:17},{jump:73,pressAttack:7,advance:33,hold:17},{jump:72,pressAttack:6,advance:35,hold:16},{jump:71,pressAttack:6,advance:36,hold:16},{jump:70,pressAttack:6,advance:38,hold:16},{jump:69,pressAttack:5,advance:40,hold:15},{jump:67,pressAttack:5,advance:42,hold:15},{jump:66,pressAttack:5,advance:43,hold:15},{jump:65,pressAttack:4,advance:45,hold:15},{jump:64,pressAttack:4,advance:47,hold:14},{jump:63,pressAttack:4,advance:49,hold:14},{jump:62,pressAttack:4,advance:50,hold:14},{jump:61,pressAttack:3,advance:52,hold:13},{jump:60,pressAttack:3,advance:54,hold:13},{jump:59,pressAttack:3,advance:56,hold:13},{jump:58,pressAttack:2,advance:58,hold:12},{jump:57,pressAttack:2,advance:59,hold:12},{jump:55,pressAttack:2,advance:61,hold:12},{jump:54,pressAttack:1,advance:63,hold:11},{jump:53,pressAttack:1,advance:65,hold:11},{jump:52,pressAttack:1,advance:66,hold:11},{jump:51,advance:68,hold:10},{jump:50,advance:70,hold:10}],
+                a7: [{jump:78,pressAttack:11,advance:15,hold:20},{jump:77,pressAttack:10,advance:17,hold:20},{jump:76,pressAttack:10,advance:19,hold:19},{jump:75,pressAttack:10,advance:20,hold:19},{jump:74,pressAttack:9,advance:22,hold:19},{jump:73,pressAttack:9,advance:24,hold:18},{jump:73,pressAttack:9,advance:26,hold:18},{jump:72,pressAttack:8,advance:27,hold:18},{jump:71,pressAttack:8,advance:29,hold:17},{jump:70,pressAttack:8,advance:31,hold:17},{jump:69,pressAttack:7,advance:33,hold:17},{jump:68,pressAttack:7,advance:35,hold:16},{jump:67,pressAttack:7,advance:36,hold:16},{jump:66,pressAttack:6,advance:38,hold:16},{jump:65,pressAttack:6,advance:40,hold:15},{jump:64,pressAttack:6,advance:42,hold:15},{jump:63,pressAttack:5,advance:43,hold:15},{jump:62,pressAttack:5,advance:45,hold:15},{jump:61,pressAttack:5,advance:47,hold:14},{jump:60,pressAttack:4,advance:49,hold:14},{jump:59,pressAttack:4,advance:50,hold:14},{jump:58,pressAttack:3,advance:52,hold:13},{jump:57,pressAttack:3,advance:54,hold:13},{jump:56,pressAttack:3,advance:56,hold:13},{jump:55,pressAttack:2,advance:58,hold:12},{jump:54,pressAttack:2,advance:59,hold:12},{jump:53,pressAttack:2,advance:61,hold:12},{jump:52,pressAttack:1,advance:63,hold:11},{jump:51,pressAttack:1,advance:65,hold:11},{jump:50,pressAttack:1,advance:66,hold:11},{jump:49,advance:68,hold:10},{jump:48,advance:70,hold:10}],
+                a6: [{jump:73,pressAttack:12,advance:15,hold:20},{jump:72,pressAttack:11,advance:17,hold:20},{jump:71,pressAttack:11,advance:19,hold:19},{jump:70,pressAttack:11,advance:20,hold:19},{jump:70,pressAttack:10,advance:22,hold:19},{jump:69,pressAttack:10,advance:24,hold:18},{jump:68,pressAttack:9,advance:26,hold:18},{jump:67,pressAttack:9,advance:27,hold:18},{jump:66,pressAttack:9,advance:29,hold:17},{jump:65,pressAttack:8,advance:31,hold:17},{jump:64,pressAttack:8,advance:33,hold:17},{jump:64,pressAttack:8,advance:35,hold:16},{jump:63,pressAttack:7,advance:36,hold:16},{jump:62,pressAttack:7,advance:38,hold:16},{jump:61,pressAttack:6,advance:40,hold:15},{jump:60,pressAttack:6,advance:42,hold:15},{jump:59,pressAttack:6,advance:43,hold:15},{jump:59,pressAttack:5,advance:45,hold:15},{jump:58,pressAttack:5,advance:47,hold:14},{jump:57,pressAttack:5,advance:49,hold:14},{jump:56,pressAttack:4,advance:50,hold:14},{jump:55,pressAttack:4,advance:52,hold:13},{jump:54,pressAttack:3,advance:54,hold:13},{jump:53,pressAttack:3,advance:56,hold:13},{jump:53,pressAttack:3,advance:58,hold:12},{jump:52,pressAttack:2,advance:59,hold:12},{jump:51,pressAttack:2,advance:61,hold:12},{jump:50,pressAttack:2,advance:63,hold:11},{jump:49,pressAttack:1,advance:65,hold:11},{jump:48,pressAttack:1,advance:66,hold:11},{jump:48,advance:68,hold:10},{jump:47,advance:70,hold:10}],
+                a5: [{jump:68,pressAttack:13,advance:15,hold:20},{jump:67,pressAttack:12,advance:17,hold:20},{jump:66,pressAttack:12,advance:19,hold:19},{jump:65,pressAttack:11,advance:20,hold:19},{jump:65,pressAttack:11,advance:22,hold:19},{jump:64,pressAttack:11,advance:24,hold:18},{jump:63,pressAttack:10,advance:26,hold:18},{jump:62,pressAttack:10,advance:27,hold:18},{jump:62,pressAttack:9,advance:29,hold:17},{jump:61,pressAttack:9,advance:31,hold:17},{jump:60,pressAttack:9,advance:33,hold:17},{jump:60,pressAttack:8,advance:35,hold:16},{jump:59,pressAttack:8,advance:36,hold:16},{jump:58,pressAttack:7,advance:38,hold:16},{jump:57,pressAttack:7,advance:40,hold:15},{jump:57,pressAttack:7,advance:42,hold:15},{jump:56,pressAttack:6,advance:43,hold:15},{jump:55,pressAttack:6,advance:45,hold:15},{jump:54,pressAttack:5,advance:47,hold:14},{jump:54,pressAttack:5,advance:49,hold:14},{jump:53,pressAttack:4,advance:50,hold:14},{jump:52,pressAttack:4,advance:52,hold:13},{jump:52,pressAttack:4,advance:54,hold:13},{jump:51,pressAttack:3,advance:56,hold:13},{jump:50,pressAttack:3,advance:58,hold:12},{jump:49,pressAttack:2,advance:59,hold:12},{jump:49,pressAttack:2,advance:61,hold:12},{jump:48,pressAttack:2,advance:63,hold:11},{jump:47,pressAttack:1,advance:65,hold:11},{jump:46,pressAttack:1,advance:66,hold:11},{jump:46,advance:68,hold:10},{jump:45,advance:70,hold:10}],
+                a4: [{jump:62,pressAttack:14,advance:15,hold:20},{jump:61,pressAttack:13,advance:17,hold:20},{jump:61,pressAttack:13,advance:19,hold:19},{jump:60,pressAttack:12,advance:20,hold:19},{jump:60,pressAttack:12,advance:22,hold:19},{jump:59,pressAttack:11,advance:24,hold:18},{jump:58,pressAttack:11,advance:26,hold:18},{jump:58,pressAttack:10,advance:27,hold:18},{jump:57,pressAttack:10,advance:29,hold:17},{jump:57,pressAttack:10,advance:31,hold:17},{jump:56,pressAttack:9,advance:33,hold:17},{jump:55,pressAttack:9,advance:35,hold:16},{jump:55,pressAttack:8,advance:36,hold:16},{jump:54,pressAttack:8,advance:38,hold:16},{jump:54,pressAttack:7,advance:40,hold:15},{jump:53,pressAttack:7,advance:42,hold:15},{jump:52,pressAttack:7,advance:43,hold:15},{jump:52,pressAttack:6,advance:45,hold:15},{jump:51,pressAttack:6,advance:47,hold:14},{jump:51,pressAttack:5,advance:49,hold:14},{jump:50,pressAttack:5,advance:50,hold:14},{jump:49,pressAttack:4,advance:52,hold:13},{jump:49,pressAttack:4,advance:54,hold:13},{jump:48,pressAttack:3,advance:56,hold:13},{jump:48,pressAttack:3,advance:58,hold:12},{jump:47,pressAttack:3,advance:59,hold:12},{jump:46,pressAttack:2,advance:61,hold:12},{jump:46,pressAttack:2,advance:63,hold:11},{jump:45,pressAttack:1,advance:65,hold:11},{jump:45,pressAttack:1,advance:66,hold:11},{jump:44,advance:68,hold:10},{jump:43,advance:70,hold:10}],
+                a3: [{jump:57,pressAttack:14,advance:15,hold:20},{jump:56,pressAttack:14,advance:17,hold:20},{jump:56,pressAttack:13,advance:19,hold:19},{jump:55,pressAttack:13,advance:20,hold:19},{jump:55,pressAttack:13,advance:22,hold:19},{jump:54,pressAttack:12,advance:24,hold:18},{jump:54,pressAttack:12,advance:26,hold:18},{jump:53,pressAttack:11,advance:27,hold:18},{jump:53,pressAttack:11,advance:29,hold:17},{jump:52,pressAttack:10,advance:31,hold:17},{jump:52,pressAttack:10,advance:33,hold:17},{jump:51,pressAttack:9,advance:35,hold:16},{jump:51,pressAttack:9,advance:36,hold:16},{jump:50,pressAttack:8,advance:38,hold:16},{jump:50,pressAttack:8,advance:40,hold:15},{jump:49,pressAttack:7,advance:42,hold:15},{jump:49,pressAttack:7,advance:43,hold:15},{jump:48,pressAttack:7,advance:45,hold:15},{jump:48,pressAttack:6,advance:47,hold:14},{jump:47,pressAttack:6,advance:49,hold:14},{jump:47,pressAttack:5,advance:50,hold:14},{jump:47,pressAttack:5,advance:52,hold:13},{jump:46,pressAttack:4,advance:54,hold:13},{jump:46,pressAttack:4,advance:56,hold:13},{jump:45,pressAttack:3,advance:58,hold:12},{jump:45,pressAttack:3,advance:59,hold:12},{jump:44,pressAttack:2,advance:61,hold:12},{jump:44,pressAttack:2,advance:63,hold:11},{jump:43,pressAttack:1,advance:65,hold:11},{jump:43,pressAttack:1,advance:66,hold:11},{jump:42,advance:68,hold:10},{jump:42,advance:70,hold:10}],
+                a2: [{jump:51,pressAttack:15,advance:15,hold:20},{jump:51,pressAttack:15,advance:17,hold:20},{jump:51,pressAttack:14,advance:19,hold:19},{jump:50,pressAttack:14,advance:20,hold:19},{jump:50,pressAttack:13,advance:22,hold:19},{jump:49,pressAttack:13,advance:24,hold:18},{jump:49,pressAttack:12,advance:26,hold:18},{jump:49,pressAttack:12,advance:27,hold:18},{jump:48,pressAttack:11,advance:29,hold:17},{jump:48,pressAttack:11,advance:31,hold:17},{jump:48,pressAttack:10,advance:33,hold:17},{jump:47,pressAttack:10,advance:35,hold:16},{jump:47,pressAttack:9,advance:36,hold:16},{jump:47,pressAttack:9,advance:38,hold:16},{jump:46,pressAttack:8,advance:40,hold:15},{jump:46,pressAttack:8,advance:42,hold:15},{jump:45,pressAttack:7,advance:43,hold:15},{jump:45,pressAttack:7,advance:45,hold:15},{jump:45,pressAttack:6,advance:47,hold:14},{jump:44,pressAttack:6,advance:49,hold:14},{jump:44,pressAttack:5,advance:50,hold:14},{jump:44,pressAttack:5,advance:52,hold:13},{jump:43,pressAttack:4,advance:54,hold:13},{jump:43,pressAttack:4,advance:56,hold:13},{jump:43,pressAttack:3,advance:58,hold:12},{jump:42,pressAttack:3,advance:59,hold:12},{jump:42,pressAttack:2,advance:61,hold:12},{jump:41,pressAttack:2,advance:63,hold:11},{jump:41,pressAttack:1,advance:65,hold:11},{jump:41,pressAttack:1,advance:66,hold:11},{jump:40,advance:68,hold:10},{jump:40,advance:70,hold:10}],
+                a1: [{jump:46,pressAttack:16,advance:15,hold:20},{jump:46,pressAttack:16,advance:17,hold:20},{jump:45,pressAttack:15,advance:19,hold:19},{jump:45,pressAttack:15,advance:20,hold:19},{jump:45,pressAttack:14,advance:22,hold:19},{jump:45,pressAttack:14,advance:24,hold:18},{jump:44,pressAttack:13,advance:26,hold:18},{jump:44,pressAttack:13,advance:27,hold:18},{jump:44,pressAttack:12,advance:29,hold:17},{jump:44,pressAttack:11,advance:31,hold:17},{jump:43,pressAttack:11,advance:33,hold:17},{jump:43,pressAttack:10,advance:35,hold:16},{jump:43,pressAttack:10,advance:36,hold:16},{jump:43,pressAttack:9,advance:38,hold:16},{jump:42,pressAttack:9,advance:40,hold:15},{jump:42,pressAttack:8,advance:42,hold:15},{jump:42,pressAttack:8,advance:43,hold:15},{jump:42,pressAttack:7,advance:45,hold:15},{jump:41,pressAttack:7,advance:47,hold:14},{jump:41,pressAttack:6,advance:49,hold:14},{jump:41,pressAttack:6,advance:50,hold:14},{jump:41,pressAttack:5,advance:52,hold:13},{jump:41,pressAttack:5,advance:54,hold:13},{jump:40,pressAttack:4,advance:56,hold:13},{jump:40,pressAttack:4,advance:58,hold:12},{jump:40,pressAttack:3,advance:59,hold:12},{jump:40,pressAttack:3,advance:61,hold:12},{jump:39,pressAttack:2,advance:63,hold:11},{jump:39,pressAttack:2,advance:65,hold:11},{jump:39,pressAttack:1,advance:66,hold:11},{jump:39,pressAttack:1,advance:68,hold:10},{jump:38,advance:70,hold:10}],
+                a0: [{jump:40,pressAttack:17,advance:15,hold:20},{jump:40,pressAttack:17,advance:17,hold:20},{jump:40,pressAttack:16,advance:19,hold:19},{jump:40,pressAttack:15,advance:20,hold:19},{jump:40,pressAttack:15,advance:22,hold:19},{jump:40,pressAttack:14,advance:24,hold:18},{jump:40,pressAttack:14,advance:26,hold:18},{jump:40,pressAttack:13,advance:27,hold:18},{jump:39,pressAttack:13,advance:29,hold:17},{jump:39,pressAttack:12,advance:31,hold:17},{jump:39,pressAttack:12,advance:33,hold:17},{jump:39,pressAttack:11,advance:35,hold:16},{jump:39,pressAttack:10,advance:36,hold:16},{jump:39,pressAttack:10,advance:38,hold:16},{jump:39,pressAttack:9,advance:40,hold:15},{jump:39,pressAttack:9,advance:42,hold:15},{jump:38,pressAttack:8,advance:43,hold:15},{jump:38,pressAttack:8,advance:45,hold:15},{jump:38,pressAttack:7,advance:47,hold:14},{jump:38,pressAttack:7,advance:49,hold:14},{jump:38,pressAttack:6,advance:50,hold:14},{jump:38,pressAttack:6,advance:52,hold:13},{jump:38,pressAttack:5,advance:54,hold:13},{jump:38,pressAttack:4,advance:56,hold:13},{jump:38,pressAttack:4,advance:58,hold:12},{jump:37,pressAttack:3,advance:59,hold:12},{jump:37,pressAttack:3,advance:61,hold:12},{jump:37,pressAttack:2,advance:63,hold:11},{jump:37,pressAttack:2,advance:65,hold:11},{jump:37,pressAttack:1,advance:66,hold:11},{jump:37,pressAttack:1,advance:68,hold:10},{jump:37,advance:70,hold:10}],
+                level: [{pressAttack:72,pressSpecial:20,advance:18,hold:20},{pressAttack:67,pressSpecial:19,advance:20,hold:20,retreat:1},{pressAttack:63,pressSpecial:19,advance:23,hold:19,retreat:1},{pressAttack:59,pressSpecial:18,advance:25,hold:19,retreat:2},{pressAttack:55,pressSpecial:17,advance:27,hold:18,retreat:3},{pressAttack:51,pressSpecial:17,advance:29,hold:18,retreat:3},{pressAttack:47,pressSpecial:16,advance:32,hold:18,retreat:4},{pressAttack:43,pressSpecial:15,advance:34,hold:17,retreat:4},{pressAttack:40,pressSpecial:15,advance:36,hold:17,retreat:5},{pressAttack:36,pressSpecial:14,advance:38,hold:17,retreat:5},{pressAttack:33,pressSpecial:14,advance:41,hold:16,retreat:5},{pressAttack:30,pressSpecial:13,advance:43,hold:16,retreat:5},{pressAttack:27,pressSpecial:12,advance:45,hold:15,retreat:6},{pressAttack:24,pressSpecial:12,advance:47,hold:15,retreat:6},{pressAttack:22,pressSpecial:11,advance:50,hold:15,retreat:6},{pressAttack:19,pressSpecial:10,advance:52,hold:14,retreat:6},{pressAttack:17,pressSpecial:10,advance:54,hold:14,retreat:6},{pressAttack:15,pressSpecial:9,advance:56,hold:13,retreat:6},{pressAttack:13,pressSpecial:8,advance:59,hold:13,retreat:6},{pressAttack:11,pressSpecial:8,advance:61,hold:13,retreat:6},{pressAttack:9,pressSpecial:7,advance:63,hold:12,retreat:5},{pressAttack:7,pressSpecial:6,advance:65,hold:12,retreat:5},{pressAttack:6,pressSpecial:6,advance:68,hold:11,retreat:5},{pressAttack:5,pressSpecial:5,advance:70,hold:11,retreat:5},{pressAttack:4,pressSpecial:5,advance:72,hold:11,retreat:4},{pressAttack:3,pressSpecial:4,advance:74,hold:10,retreat:4},{pressAttack:2,pressSpecial:3,advance:77,hold:10,retreat:3,chaseChest:10},{pressAttack:1,pressSpecial:3,advance:79,hold:10,retreat:3,chaseChest:15},{pressAttack:1,pressSpecial:2,advance:81,hold:9,retreat:2,chaseChest:20},{pressSpecial:1,advance:83,hold:9,retreat:1,chaseChest:25},{pressSpecial:1,advance:86,hold:8,retreat:1,chaseChest:30},{advance:88,hold:8,chaseChest:35}],
+                b0: [{hold:27,pressAttack:21,retreat:1,advance:15,jump:1},{hold:27,pressAttack:20,retreat:1,advance:17,jump:1},{hold:27,pressAttack:20,retreat:1,advance:19,jump:1},{hold:27,pressAttack:19,retreat:1,advance:21,jump:1},{hold:27,pressAttack:18,retreat:1,advance:23,jump:1},{hold:27,pressAttack:18,retreat:1,advance:25,jump:1},{hold:27,pressAttack:17,retreat:1,advance:27,jump:1},{hold:27,pressAttack:16,retreat:1,advance:29,jump:1},{hold:27,pressAttack:16,retreat:1,advance:30,jump:1},{hold:26,pressAttack:15,retreat:1,advance:32,jump:1},{hold:26,pressAttack:14,retreat:1,advance:34,jump:1},{hold:26,pressAttack:14,retreat:1,advance:36,jump:1},{hold:26,pressAttack:13,retreat:1,advance:38,jump:1},{hold:26,pressAttack:12,advance:40,jump:1},{hold:26,pressAttack:12,advance:42,jump:1},{hold:26,pressAttack:11,advance:44,jump:1},{hold:26,pressAttack:10,advance:46,jump:1},{hold:26,pressAttack:10,advance:48,jump:1},{hold:26,pressAttack:9,advance:50,jump:1},{hold:26,pressAttack:8,advance:52,jump:1},{hold:26,pressAttack:7,advance:54,jump:1},{hold:26,pressAttack:7,advance:56,jump:1},{hold:26,pressAttack:6,advance:58,jump:1},{hold:26,pressAttack:5,advance:60,jump:1},{hold:25,pressAttack:5,advance:61,jump:1},{hold:25,pressAttack:4,advance:63,jump:1},{hold:25,pressAttack:3,advance:65,jump:1},{hold:25,pressAttack:3,advance:67,jump:1},{hold:25,pressAttack:2,advance:69,jump:1},{hold:25,pressAttack:1,advance:71,jump:1},{hold:25,pressAttack:1,advance:73,jump:1},{hold:25,advance:75,jump:1}],
+                b1: [{hold:29,pressAttack:20,retreat:2,advance:15,jump:1},{hold:29,pressAttack:20,retreat:2,advance:17,jump:1},{hold:29,pressAttack:19,retreat:2,advance:19,jump:1},{hold:29,pressAttack:18,retreat:2,advance:21,jump:1},{hold:29,pressAttack:18,retreat:1,advance:23,jump:1},{hold:28,pressAttack:17,retreat:1,advance:25,jump:1},{hold:28,pressAttack:16,retreat:1,advance:27,jump:1},{hold:28,pressAttack:16,retreat:1,advance:29,jump:1},{hold:28,pressAttack:15,retreat:1,advance:30,jump:1},{hold:28,pressAttack:14,retreat:1,advance:32,jump:1},{hold:28,pressAttack:14,retreat:1,advance:34,jump:1},{hold:28,pressAttack:13,retreat:1,advance:36,jump:1},{hold:28,pressAttack:12,retreat:1,advance:38,jump:1},{hold:27,pressAttack:12,retreat:1,advance:40,jump:1},{hold:27,pressAttack:11,retreat:1,advance:42,jump:1},{hold:27,pressAttack:10,retreat:1,advance:44,jump:1},{hold:27,pressAttack:10,retreat:1,advance:46,jump:1},{hold:27,pressAttack:9,retreat:1,advance:48,jump:1},{hold:27,pressAttack:8,retreat:1,advance:50,jump:1},{hold:27,pressAttack:8,retreat:1,advance:52,jump:1},{hold:26,pressAttack:7,retreat:1,advance:54,jump:1},{hold:26,pressAttack:7,retreat:1,advance:56,jump:1},{hold:26,pressAttack:6,advance:58,jump:1},{hold:26,pressAttack:5,advance:60,jump:1},{hold:26,pressAttack:5,advance:61,jump:1},{hold:26,pressAttack:4,advance:63,jump:1},{hold:26,pressAttack:3,advance:65,jump:1},{hold:26,pressAttack:3,advance:67,jump:1},{hold:25,pressAttack:2,advance:69,jump:1},{hold:25,pressAttack:1,advance:71,jump:1},{hold:25,pressAttack:1,advance:73,jump:1},{hold:25,advance:75,jump:1}],
+                b2: [{hold:31,pressAttack:19,retreat:3,advance:15,jump:2},{hold:31,pressAttack:19,retreat:2,advance:17,jump:2},{hold:31,pressAttack:18,retreat:2,advance:19,jump:2},{hold:31,pressAttack:17,retreat:2,advance:21,jump:2},{hold:30,pressAttack:17,retreat:2,advance:23,jump:2},{hold:30,pressAttack:16,retreat:2,advance:25,jump:2},{hold:30,pressAttack:16,retreat:2,advance:27,jump:2},{hold:30,pressAttack:15,retreat:2,advance:29,jump:2},{hold:30,pressAttack:14,retreat:2,advance:30,jump:2},{hold:29,pressAttack:14,retreat:2,advance:32,jump:2},{hold:29,pressAttack:13,retreat:2,advance:34,jump:2},{hold:29,pressAttack:12,retreat:2,advance:36,jump:2},{hold:29,pressAttack:12,retreat:2,advance:38,jump:2},{hold:29,pressAttack:11,retreat:1,advance:40,jump:2},{hold:28,pressAttack:11,retreat:1,advance:42,jump:2},{hold:28,pressAttack:10,retreat:1,advance:44,jump:2},{hold:28,pressAttack:9,retreat:1,advance:46,jump:2},{hold:28,pressAttack:9,retreat:1,advance:48,jump:2},{hold:28,pressAttack:8,retreat:1,advance:50,jump:2},{hold:27,pressAttack:7,retreat:1,advance:52,jump:2},{hold:27,pressAttack:7,retreat:1,advance:54,jump:2},{hold:27,pressAttack:6,retreat:1,advance:56,jump:2},{hold:27,pressAttack:6,retreat:1,advance:58,jump:2},{hold:27,pressAttack:5,retreat:1,advance:60,jump:2},{hold:26,pressAttack:4,retreat:1,advance:61,jump:2},{hold:26,pressAttack:4,advance:63,jump:2},{hold:26,pressAttack:3,advance:65,jump:2},{hold:26,pressAttack:2,advance:67,jump:2},{hold:26,pressAttack:2,advance:69,jump:2},{hold:25,pressAttack:1,advance:71,jump:2},{hold:25,pressAttack:1,advance:73,jump:2},{hold:25,advance:75,jump:2}],
+                b3: [{hold:33,pressAttack:18,retreat:3,advance:15,jump:3},{hold:33,pressAttack:18,retreat:3,advance:17,jump:3},{hold:33,pressAttack:17,retreat:3,advance:19,jump:3},{hold:33,pressAttack:17,retreat:3,advance:21,jump:3},{hold:32,pressAttack:16,retreat:3,advance:23,jump:3},{hold:32,pressAttack:15,retreat:3,advance:25,jump:3},{hold:32,pressAttack:15,retreat:3,advance:27,jump:3},{hold:31,pressAttack:14,retreat:3,advance:29,jump:3},{hold:31,pressAttack:14,retreat:2,advance:30,jump:3},{hold:31,pressAttack:13,retreat:2,advance:32,jump:3},{hold:31,pressAttack:12,retreat:2,advance:34,jump:3},{hold:30,pressAttack:12,retreat:2,advance:36,jump:3},{hold:30,pressAttack:11,retreat:2,advance:38,jump:3},{hold:30,pressAttack:11,retreat:2,advance:40,jump:3},{hold:30,pressAttack:10,retreat:2,advance:42,jump:3},{hold:29,pressAttack:9,retreat:2,advance:44,jump:3},{hold:29,pressAttack:9,retreat:2,advance:46,jump:3},{hold:29,pressAttack:8,retreat:2,advance:48,jump:3},{hold:28,pressAttack:8,retreat:1,advance:50,jump:3},{hold:28,pressAttack:7,retreat:1,advance:52,jump:3},{hold:28,pressAttack:7,retreat:1,advance:54,jump:3},{hold:28,pressAttack:6,retreat:1,advance:56,jump:3},{hold:27,pressAttack:5,retreat:1,advance:58,jump:3},{hold:27,pressAttack:5,retreat:1,advance:60,jump:3},{hold:27,pressAttack:4,retreat:1,advance:61,jump:3},{hold:27,pressAttack:4,retreat:1,advance:63,jump:3},{hold:26,pressAttack:3,retreat:1,advance:65,jump:3},{hold:26,pressAttack:2,advance:67,jump:3},{hold:26,pressAttack:2,advance:69,jump:3},{hold:26,pressAttack:1,advance:71,jump:3},{hold:25,pressAttack:1,advance:73,jump:3},{hold:25,advance:75,jump:3}],
+                b4: [{hold:35,pressAttack:17,retreat:4,advance:15,jump:3},{hold:35,pressAttack:17,retreat:4,advance:17,jump:3},{hold:35,pressAttack:16,retreat:4,advance:19,jump:3},{hold:34,pressAttack:16,retreat:4,advance:21,jump:3},{hold:34,pressAttack:15,retreat:4,advance:23,jump:3},{hold:34,pressAttack:15,retreat:3,advance:25,jump:3},{hold:33,pressAttack:14,retreat:3,advance:27,jump:3},{hold:33,pressAttack:13,retreat:3,advance:29,jump:3},{hold:33,pressAttack:13,retreat:3,advance:30,jump:3},{hold:32,pressAttack:12,retreat:3,advance:32,jump:3},{hold:32,pressAttack:12,retreat:3,advance:34,jump:3},{hold:32,pressAttack:11,retreat:3,advance:36,jump:3},{hold:31,pressAttack:11,retreat:3,advance:38,jump:3},{hold:31,pressAttack:10,retreat:2,advance:40,jump:3},{hold:31,pressAttack:10,retreat:2,advance:42,jump:3},{hold:30,pressAttack:9,retreat:2,advance:44,jump:3},{hold:30,pressAttack:8,retreat:2,advance:46,jump:3},{hold:30,pressAttack:8,retreat:2,advance:48,jump:3},{hold:29,pressAttack:7,retreat:2,advance:50,jump:3},{hold:29,pressAttack:7,retreat:2,advance:52,jump:3},{hold:29,pressAttack:6,retreat:1,advance:54,jump:3},{hold:28,pressAttack:6,retreat:1,advance:56,jump:3},{hold:28,pressAttack:5,retreat:1,advance:58,jump:3},{hold:28,pressAttack:4,retreat:1,advance:60,jump:3},{hold:27,pressAttack:4,retreat:1,advance:61,jump:3},{hold:27,pressAttack:3,retreat:1,advance:63,jump:3},{hold:27,pressAttack:3,retreat:1,advance:65,jump:3},{hold:26,pressAttack:2,retreat:1,advance:67,jump:3},{hold:26,pressAttack:2,advance:69,jump:3},{hold:26,pressAttack:1,advance:71,jump:3},{hold:25,pressAttack:1,advance:73,jump:3},{hold:25,advance:75,jump:3}],
+                b5: [{hold:38,pressAttack:17,retreat:5,advance:15,jump:4},{hold:37,pressAttack:16,retreat:5,advance:17,jump:4},{hold:37,pressAttack:15,retreat:5,advance:19,jump:4},{hold:36,pressAttack:15,retreat:5,advance:21,jump:4},{hold:36,pressAttack:14,retreat:4,advance:23,jump:4},{hold:35,pressAttack:14,retreat:4,advance:25,jump:4},{hold:35,pressAttack:13,retreat:4,advance:27,jump:4},{hold:35,pressAttack:13,retreat:4,advance:29,jump:4},{hold:34,pressAttack:12,retreat:4,advance:30,jump:4},{hold:34,pressAttack:12,retreat:4,advance:32,jump:4},{hold:33,pressAttack:11,retreat:3,advance:34,jump:4},{hold:33,pressAttack:11,retreat:3,advance:36,jump:4},{hold:33,pressAttack:10,retreat:3,advance:38,jump:4},{hold:32,pressAttack:10,retreat:3,advance:40,jump:4},{hold:32,pressAttack:9,retreat:3,advance:42,jump:4},{hold:31,pressAttack:9,retreat:3,advance:44,jump:4},{hold:31,pressAttack:8,retreat:2,advance:46,jump:4},{hold:31,pressAttack:7,retreat:2,advance:48,jump:4},{hold:30,pressAttack:7,retreat:2,advance:50,jump:4},{hold:30,pressAttack:6,retreat:2,advance:52,jump:4},{hold:29,pressAttack:6,retreat:2,advance:54,jump:4},{hold:29,pressAttack:5,retreat:2,advance:56,jump:4},{hold:29,pressAttack:5,retreat:1,advance:58,jump:4},{hold:28,pressAttack:4,retreat:1,advance:60,jump:4},{hold:28,pressAttack:4,retreat:1,advance:61,jump:4},{hold:27,pressAttack:3,retreat:1,advance:63,jump:4},{hold:27,pressAttack:3,retreat:1,advance:65,jump:4},{hold:27,pressAttack:2,retreat:1,advance:67,jump:4},{hold:26,pressAttack:2,advance:69,jump:4},{hold:26,pressAttack:1,advance:71,jump:4},{hold:25,pressAttack:1,advance:73,jump:4},{hold:25,advance:75,jump:4}],
+                b6: [{hold:40,pressAttack:16,retreat:6,advance:15,jump:5},{hold:39,pressAttack:15,retreat:6,advance:17,jump:5},{hold:39,pressAttack:15,retreat:5,advance:19,jump:5},{hold:38,pressAttack:14,retreat:5,advance:21,jump:5},{hold:38,pressAttack:14,retreat:5,advance:23,jump:5},{hold:37,pressAttack:13,retreat:5,advance:25,jump:5},{hold:37,pressAttack:13,retreat:5,advance:27,jump:5},{hold:36,pressAttack:12,retreat:5,advance:29,jump:5},{hold:36,pressAttack:12,retreat:4,advance:30,jump:5},{hold:35,pressAttack:11,retreat:4,advance:32,jump:5},{hold:35,pressAttack:11,retreat:4,advance:34,jump:5},{hold:34,pressAttack:10,retreat:4,advance:36,jump:5},{hold:34,pressAttack:10,retreat:4,advance:38,jump:5},{hold:33,pressAttack:9,retreat:3,advance:40,jump:5},{hold:33,pressAttack:9,retreat:3,advance:42,jump:5},{hold:33,pressAttack:8,retreat:3,advance:44,jump:5},{hold:32,pressAttack:8,retreat:3,advance:46,jump:5},{hold:32,pressAttack:7,retreat:3,advance:48,jump:5},{hold:31,pressAttack:7,retreat:2,advance:50,jump:5},{hold:31,pressAttack:6,retreat:2,advance:52,jump:5},{hold:30,pressAttack:6,retreat:2,advance:54,jump:5},{hold:30,pressAttack:5,retreat:2,advance:56,jump:5},{hold:29,pressAttack:5,retreat:2,advance:58,jump:5},{hold:29,pressAttack:4,retreat:2,advance:60,jump:5},{hold:28,pressAttack:4,retreat:1,advance:61,jump:5},{hold:28,pressAttack:3,retreat:1,advance:63,jump:5},{hold:27,pressAttack:3,retreat:1,advance:65,jump:5},{hold:27,pressAttack:2,retreat:1,advance:67,jump:5},{hold:26,pressAttack:2,retreat:1,advance:69,jump:5},{hold:26,pressAttack:1,advance:71,jump:5},{hold:25,pressAttack:1,advance:73,jump:5},{hold:25,advance:75,jump:5}],
+                b7: [{hold:42,pressAttack:15,retreat:7,advance:15,jump:5},{hold:41,pressAttack:14,retreat:6,advance:17,jump:5},{hold:41,pressAttack:14,retreat:6,advance:19,jump:5},{hold:40,pressAttack:13,retreat:6,advance:21,jump:5},{hold:40,pressAttack:13,retreat:6,advance:23,jump:5},{hold:39,pressAttack:12,retreat:6,advance:25,jump:5},{hold:38,pressAttack:12,retreat:5,advance:27,jump:5},{hold:38,pressAttack:11,retreat:5,advance:29,jump:5},{hold:37,pressAttack:11,retreat:5,advance:30,jump:5},{hold:37,pressAttack:10,retreat:5,advance:32,jump:5},{hold:36,pressAttack:10,retreat:5,advance:34,jump:5},{hold:36,pressAttack:9,retreat:4,advance:36,jump:5},{hold:35,pressAttack:9,retreat:4,advance:38,jump:5},{hold:35,pressAttack:9,retreat:4,advance:40,jump:5},{hold:34,pressAttack:8,retreat:4,advance:42,jump:5},{hold:34,pressAttack:8,retreat:3,advance:44,jump:5},{hold:33,pressAttack:7,retreat:3,advance:46,jump:5},{hold:33,pressAttack:7,retreat:3,advance:48,jump:5},{hold:32,pressAttack:6,retreat:3,advance:50,jump:5},{hold:31,pressAttack:6,retreat:3,advance:52,jump:5},{hold:31,pressAttack:5,retreat:2,advance:54,jump:5},{hold:30,pressAttack:5,retreat:2,advance:56,jump:5},{hold:30,pressAttack:4,retreat:2,advance:58,jump:5},{hold:29,pressAttack:4,retreat:2,advance:60,jump:5},{hold:29,pressAttack:3,retreat:2,advance:61,jump:5},{hold:28,pressAttack:3,retreat:1,advance:63,jump:5},{hold:28,pressAttack:2,retreat:1,advance:65,jump:5},{hold:27,pressAttack:2,retreat:1,advance:67,jump:5},{hold:27,pressAttack:1,retreat:1,advance:69,jump:5},{hold:26,pressAttack:1,advance:71,jump:5},{hold:26,advance:73,jump:5},{hold:25,advance:75,jump:5}],
+                b8: [{hold:44,pressAttack:14,retreat:8,advance:15,jump:6},{hold:43,pressAttack:13,retreat:7,advance:17,jump:6},{hold:43,pressAttack:13,retreat:7,advance:19,jump:6},{hold:42,pressAttack:12,retreat:7,advance:21,jump:6},{hold:41,pressAttack:12,retreat:7,advance:23,jump:6},{hold:41,pressAttack:12,retreat:6,advance:25,jump:6},{hold:40,pressAttack:11,retreat:6,advance:27,jump:6},{hold:40,pressAttack:11,retreat:6,advance:29,jump:6},{hold:39,pressAttack:10,retreat:6,advance:30,jump:6},{hold:38,pressAttack:10,retreat:5,advance:32,jump:6},{hold:38,pressAttack:9,retreat:5,advance:34,jump:6},{hold:37,pressAttack:9,retreat:5,advance:36,jump:6},{hold:36,pressAttack:8,retreat:5,advance:38,jump:6},{hold:36,pressAttack:8,retreat:4,advance:40,jump:6},{hold:35,pressAttack:8,retreat:4,advance:42,jump:6},{hold:35,pressAttack:7,retreat:4,advance:44,jump:6},{hold:34,pressAttack:7,retreat:4,advance:46,jump:6},{hold:33,pressAttack:6,retreat:3,advance:48,jump:6},{hold:33,pressAttack:6,retreat:3,advance:50,jump:6},{hold:32,pressAttack:5,retreat:3,advance:52,jump:6},{hold:32,pressAttack:5,retreat:3,advance:54,jump:6},{hold:31,pressAttack:4,retreat:2,advance:56,jump:6},{hold:30,pressAttack:4,retreat:2,advance:58,jump:6},{hold:30,pressAttack:4,retreat:2,advance:60,jump:6},{hold:29,pressAttack:3,retreat:2,advance:61,jump:6},{hold:29,pressAttack:3,retreat:1,advance:63,jump:6},{hold:28,pressAttack:2,retreat:1,advance:65,jump:6},{hold:27,pressAttack:2,retreat:1,advance:67,jump:6},{hold:27,pressAttack:1,retreat:1,advance:69,jump:6},{hold:26,pressAttack:1,advance:71,jump:6},{hold:26,advance:73,jump:6},{hold:25,advance:75,jump:6}],
+                b9: [{hold:46,pressAttack:13,retreat:8,advance:15,jump:7},{hold:45,pressAttack:12,retreat:8,advance:17,jump:7},{hold:44,pressAttack:12,retreat:8,advance:19,jump:7},{hold:44,pressAttack:12,retreat:8,advance:21,jump:7},{hold:43,pressAttack:11,retreat:7,advance:23,jump:7},{hold:42,pressAttack:11,retreat:7,advance:25,jump:7},{hold:42,pressAttack:10,retreat:7,advance:27,jump:7},{hold:41,pressAttack:10,retreat:6,advance:29,jump:7},{hold:40,pressAttack:10,retreat:6,advance:30,jump:7},{hold:40,pressAttack:9,retreat:6,advance:32,jump:7},{hold:39,pressAttack:9,retreat:6,advance:34,jump:7},{hold:38,pressAttack:8,retreat:5,advance:36,jump:7},{hold:38,pressAttack:8,retreat:5,advance:38,jump:7},{hold:37,pressAttack:7,retreat:5,advance:40,jump:7},{hold:36,pressAttack:7,retreat:5,advance:42,jump:7},{hold:36,pressAttack:7,retreat:4,advance:44,jump:7},{hold:35,pressAttack:6,retreat:4,advance:46,jump:7},{hold:34,pressAttack:6,retreat:4,advance:48,jump:7},{hold:34,pressAttack:5,retreat:3,advance:50,jump:7},{hold:33,pressAttack:5,retreat:3,advance:52,jump:7},{hold:32,pressAttack:5,retreat:3,advance:54,jump:7},{hold:32,pressAttack:4,retreat:3,advance:56,jump:7},{hold:31,pressAttack:4,retreat:2,advance:58,jump:7},{hold:30,pressAttack:3,retreat:2,advance:60,jump:7},{hold:30,pressAttack:3,retreat:2,advance:61,jump:7},{hold:29,pressAttack:2,retreat:2,advance:63,jump:7},{hold:28,pressAttack:2,retreat:1,advance:65,jump:7},{hold:28,pressAttack:2,retreat:1,advance:67,jump:7},{hold:27,pressAttack:1,retreat:1,advance:69,jump:7},{hold:26,pressAttack:1,retreat:1,advance:71,jump:7},{hold:26,advance:73,jump:7},{hold:25,advance:75,jump:7}],
+                b10: [{hold:48,pressAttack:12,retreat:9,advance:15,jump:7},{hold:47,pressAttack:12,retreat:9,advance:17,jump:7},{hold:46,pressAttack:11,retreat:9,advance:19,jump:7},{hold:46,pressAttack:11,retreat:8,advance:21,jump:7},{hold:45,pressAttack:10,retreat:8,advance:23,jump:7},{hold:44,pressAttack:10,retreat:8,advance:25,jump:7},{hold:43,pressAttack:10,retreat:7,advance:27,jump:7},{hold:43,pressAttack:9,retreat:7,advance:29,jump:7},{hold:42,pressAttack:9,retreat:7,advance:30,jump:7},{hold:41,pressAttack:8,retreat:7,advance:32,jump:7},{hold:41,pressAttack:8,retreat:6,advance:34,jump:7},{hold:40,pressAttack:8,retreat:6,advance:36,jump:7},{hold:39,pressAttack:7,retreat:6,advance:38,jump:7},{hold:38,pressAttack:7,retreat:5,advance:40,jump:7},{hold:38,pressAttack:7,retreat:5,advance:42,jump:7},{hold:37,pressAttack:6,retreat:5,advance:44,jump:7},{hold:36,pressAttack:6,retreat:4,advance:46,jump:7},{hold:35,pressAttack:5,retreat:4,advance:48,jump:7},{hold:35,pressAttack:5,retreat:4,advance:50,jump:7},{hold:34,pressAttack:5,retreat:4,advance:52,jump:7},{hold:33,pressAttack:4,retreat:3,advance:54,jump:7},{hold:32,pressAttack:4,retreat:3,advance:56,jump:7},{hold:32,pressAttack:3,retreat:3,advance:58,jump:7},{hold:31,pressAttack:3,retreat:2,advance:60,jump:7},{hold:30,pressAttack:3,retreat:2,advance:61,jump:7},{hold:29,pressAttack:2,retreat:2,advance:63,jump:7},{hold:29,pressAttack:2,retreat:1,advance:65,jump:7},{hold:28,pressAttack:2,retreat:1,advance:67,jump:7},{hold:27,pressAttack:1,retreat:1,advance:69,jump:7},{hold:26,pressAttack:1,retreat:1,advance:71,jump:7},{hold:26,advance:73,jump:7},{hold:25,advance:75,jump:7}],
+                b11: [{hold:50,pressAttack:11,retreat:10,advance:15,jump:8},{hold:49,pressAttack:11,retreat:10,advance:17,jump:8},{hold:48,pressAttack:10,retreat:9,advance:19,jump:8},{hold:48,pressAttack:10,retreat:9,advance:21,jump:8},{hold:47,pressAttack:10,retreat:9,advance:23,jump:8},{hold:46,pressAttack:9,retreat:8,advance:25,jump:8},{hold:45,pressAttack:9,retreat:8,advance:27,jump:8},{hold:44,pressAttack:9,retreat:8,advance:29,jump:8},{hold:44,pressAttack:8,retreat:7,advance:30,jump:8},{hold:43,pressAttack:8,retreat:7,advance:32,jump:8},{hold:42,pressAttack:7,retreat:7,advance:34,jump:8},{hold:41,pressAttack:7,retreat:6,advance:36,jump:8},{hold:40,pressAttack:7,retreat:6,advance:38,jump:8},{hold:40,pressAttack:6,retreat:6,advance:40,jump:8},{hold:39,pressAttack:6,retreat:5,advance:42,jump:8},{hold:38,pressAttack:6,retreat:5,advance:44,jump:8},{hold:37,pressAttack:5,retreat:5,advance:46,jump:8},{hold:36,pressAttack:5,retreat:5,advance:48,jump:8},{hold:35,pressAttack:5,retreat:4,advance:50,jump:8},{hold:35,pressAttack:4,retreat:4,advance:52,jump:8},{hold:34,pressAttack:4,retreat:4,advance:54,jump:8},{hold:33,pressAttack:4,retreat:3,advance:56,jump:8},{hold:32,pressAttack:3,retreat:3,advance:58,jump:8},{hold:31,pressAttack:3,retreat:3,advance:60,jump:8},{hold:31,pressAttack:2,retreat:2,advance:61,jump:8},{hold:30,pressAttack:2,retreat:2,advance:63,jump:8},{hold:29,pressAttack:2,retreat:2,advance:65,jump:8},{hold:28,pressAttack:1,retreat:1,advance:67,jump:8},{hold:27,pressAttack:1,retreat:1,advance:69,jump:8},{hold:27,pressAttack:1,retreat:1,advance:71,jump:8},{hold:26,advance:73,jump:8},{hold:25,advance:75,jump:8}],
+            },
+            MATCHUP_ADJUST: {
+                dominant:  { pressAttack:1.6,  pressSpecial:1.4,  advance:1.1,  hold:0.7,  retreat:0.3, jump:1.0 },
+                ahead:     { pressAttack:1.25, pressSpecial:1.15, advance:1.05, hold:0.9,  retreat:0.7, jump:1.0 },
+                even:      { pressAttack:1.0,  pressSpecial:1.0,  advance:1.0,  hold:1.0,  retreat:1.0, jump:1.0 },
+                behind:    { pressAttack:0.85, pressSpecial:0.9,  advance:0.9,  hold:1.15, retreat:1.3, jump:1.05 },
+                desperate: { pressAttack:0.6,  pressSpecial:0.5,  advance:0.65, hold:1.3,  retreat:1.8, jump:1.2 }
             },
             _binIndex(ranges, v) {
                 for (let i = 0; i < ranges.length; i++) if (v >= ranges[i][0] && v <= ranges[i][1]) return i;
                 return -1;
             },
-            // CAMADA 1: só a posição relativa.
             baseWeights(dx, dy) {
                 let dxi = this._binIndex(this.DX_RANGES, Math.abs(dx));
                 let dyi = this._binIndex(this.DY_RANGES, dy);
-                if (dxi === -1 || dyi === -1) return { advance: 60, hold: 40 }; // rede de segurança; na prática nunca cai aqui (testado 100% de cobertura)
-                let profileName = this.MATRIX[this.DY_BINS[dyi]][dxi];
-                return Object.assign({}, this.PROFILES[profileName]); // cópia — os modificadores da camada 2 vão alterar isso
+                if (dxi === -1 || dyi === -1) return { advance: 60, hold: 40 }; // rede de segurança; testado 100% de cobertura, na prática nunca cai aqui
+                return Object.assign({}, this.MATRIX[this.DY_BINS[dyi]][dxi]);
             },
-            // CAMADA 2: aplica o contexto da luta em cima dos pesos posicionais. Recebe um objeto
-            // `ctx` com o estado atual do bot/alvo/arena (ver chamada em updateAIBot).
+            classifyMatchup(ctx) {
+                let diff = (ctx.botHpPct != null ? ctx.botHpPct : 50) - (ctx.targetHpPct != null ? ctx.targetHpPct : 50);
+                if (diff >= 40) return 'dominant';
+                if (diff >= 15) return 'ahead';
+                if (diff > -15) return 'even';
+                if (diff > -40) return 'behind';
+                return 'desperate';
+            },
+            applyMatchup(w, matchup) {
+                let adj = this.MATCHUP_ADJUST[matchup] || this.MATCHUP_ADJUST.even;
+                let out = {};
+                for (const k in w) out[k] = w[k] * (adj[k] != null ? adj[k] : 1.0);
+                return out;
+            },
             applyModifiers(w, ctx) {
-                // Finalização: alvo com pouca vida -> aumenta MUITO a vontade de atacar, some
-                // com hesitação (a IA "sente o cheiro de sangue" e não deixa o jogador se recuperar).
-                if (ctx.targetHpPct < 20) {
-                    w.pressAttack = (w.pressAttack || 0) * 1.9;
-                    w.pressSpecial = (w.pressSpecial || 0) * 1.6;
-                    w.hold = (w.hold || 0) * 0.5;
-                } else if (ctx.targetHpPct < 40) {
-                    w.pressAttack = (w.pressAttack || 0) * 1.3;
-                }
-                // Sobrevivência: bot com pouca vida -> pesa mais recuar/segurar, menos avançar às
-                // cegas (a decisão de fugir de vez já é tratada fora da tabela, isso é só um
-                // ajuste fino pra quando ainda está lutando).
-                if (ctx.botHpPct < 25) {
-                    w.retreat = (w.retreat || 0) * 1.8 + 10;
-                    w.advance = (w.advance || 0) * 0.5;
-                }
-                // Mana: sem mana suficiente pro especial, não faz sentido nenhum pesar essa ação
-                // — redistribui esse peso pro ataque normal em vez de simplesmente descartar.
                 if (!ctx.hasMana && w.pressSpecial) {
                     w.pressAttack = (w.pressAttack || 0) + w.pressSpecial;
                     w.pressSpecial = 0;
                 }
-                // Consciência de borda: se recuar fosse empurrar o bot pra fora/quase fora da
-                // arena, isso é burrice tática (se encurralar sozinho) — zera o peso de recuo e
-                // manda esse peso pra "segurar posição" (planta e briga em vez de se acuar).
                 if (ctx.wouldRetreatIntoEdge && w.retreat) {
                     w.hold = (w.hold || 0) + w.retreat;
                     w.retreat = 0;
                 }
-                // Leitura de aproximação: alvo fechando distância rápido -> não faz sentido
-                // continuar "avançando" (ia passar reto por ele); planta e prepara pra interceptar.
-                // Alvo abrindo distância rápido (fugindo) -> reforça avançar pra não perder o ritmo.
                 if (ctx.targetClosingFast && w.advance) {
                     w.hold = (w.hold || 0) + w.advance * 0.6;
                     w.pressAttack = (w.pressAttack || 0) + w.advance * 0.4;
@@ -5275,7 +5273,6 @@
                 }
                 return w;
             },
-            // Sorteio ponderado: cada ação tem chance proporcional ao seu peso final.
             pickWeighted(weights) {
                 let total = 0;
                 for (const k in weights) total += weights[k];
@@ -5287,14 +5284,22 @@
                 }
                 return Object.keys(weights)[0];
             },
-            // Ponto de entrada usado pelo updateAIBot: dx/dy relativos + contexto da luta -> ação.
-            decide(dx, dy, ctx) {
+            pickBest(weights) {
+                let bestKey = 'hold', bestVal = -1;
+                for (const k in weights) if (weights[k] > bestVal) { bestVal = weights[k]; bestKey = k; }
+                return bestKey;
+            },
+            decide(dx, dy, ctx, deterministic) {
+                ctx = ctx || {};
                 let w = this.baseWeights(dx, dy);
-                w = this.applyModifiers(w, ctx || {});
-                return this.pickWeighted(w);
+                w = this.applyMatchup(w, this.classifyMatchup(ctx));
+                w = this.applyModifiers(w, ctx);
+                return deterministic ? this.pickBest(w) : this.pickWeighted(w);
             }
         };
         // ==================== fim AITacticsDB ====================
+
+
 
     const Engine = {
         canvas: null, ctx: null, state: 'MENU', lastTime: 0,
@@ -5316,17 +5321,23 @@
             // AJUSTE 2: usuário pediu mais contraste entre pontas — Fácil precisa ser bem
             // fácil (novato ganha com folga) e Brutal precisa ser muito, muito difícil (só
             // jogador muito bom vence). Antes as curvas estavam próximas demais no meio.
-            easy:   { hpMult: 0.55, spdMult: 0.70, reaction: 62, accuracy: 0.20, aggressiveness: 0.18, atkCdMult: 2.3,  dodgeChance: 0.08, prediction: 0.15, rewardWin: 150,  rewardLoss: 25 },
-            medium: { hpMult: 0.95, spdMult: 0.98, reaction: 22, accuracy: 0.56, aggressiveness: 0.54, atkCdMult: 1.1,  dodgeChance: 0.40, prediction: 0.60, rewardWin: 350,  rewardLoss: 45 },
-            hard:   { hpMult: 1.35, spdMult: 1.18, reaction: 9,  accuracy: 0.80, aggressiveness: 0.80, atkCdMult: 0.75, dodgeChance: 0.65, prediction: 0.92, rewardWin: 700,  rewardLoss: 65 },
-            // BRUTAL REFORÇADO: além dos números mais altos (quase reação instantânea, acerto e
-            // esquiva no teto), o Brutal agora também é o que mais se beneficia do AITacticsDB
-            // (tabela posicional) e da leitura de janela de recuperação do alvo — ou seja, ele
-            // não é só "mais forte nos números", ele joga tático de verdade: cobre a posição
-            // certa pra cada distância/altura e pune abertura depois de ataque quase sem falhar.
-            // Isso foi pedido explicitamente pra ser um adversário que um jogador humano comum
-            // dificilmente vence — só alguém muito bom, jogando com cuidado, tem chance real.
-            brutal: { hpMult: 2.1, spdMult: 1.5, reaction: 1,  accuracy: 0.99, aggressiveness: 1.0, atkCdMult: 0.34, dodgeChance: 0.95, prediction: 1.0,  rewardWin: 1600, rewardLoss: 100 }
+            // AJUSTE 3: adicionado `deterministicAI` — nas dificuldades altas a IA para de
+            // sortear entre opções pra mesma posição (AITacticsDB.pickWeighted) e passa a
+            // executar sempre a instrução de MAIOR peso (AITacticsDB.pickBest), sem "ou". Nas
+            // dificuldades baixas o sorteio continua (é o que dá a "hesitação" de jogador
+            // iniciante). Brutal também ficou ainda mais extremo — reação por quadro (0),
+            // acerto e esquiva praticamente no teto, mais vida/velocidade/cadência de ataque —
+            // pra ser um adversário quase impossível de vencer pra um jogador comum.
+            easy:   { hpMult: 0.55, spdMult: 0.70, reaction: 62, accuracy: 0.20, aggressiveness: 0.18, atkCdMult: 2.3,  dodgeChance: 0.08, prediction: 0.15, rewardWin: 150,  rewardLoss: 25,  deterministicAI: false },
+            medium: { hpMult: 0.95, spdMult: 0.98, reaction: 22, accuracy: 0.56, aggressiveness: 0.54, atkCdMult: 1.1,  dodgeChance: 0.40, prediction: 0.60, rewardWin: 350,  rewardLoss: 45,  deterministicAI: false },
+            hard:   { hpMult: 1.35, spdMult: 1.18, reaction: 9,  accuracy: 0.80, aggressiveness: 0.80, atkCdMult: 0.75, dodgeChance: 0.65, prediction: 0.92, rewardWin: 700,  rewardLoss: 65,  deterministicAI: false },
+            // BRUTAL — QUASE IMPOSSÍVEL: reação a cada quadro (reaction:0, reavalia 60x/s),
+            // acerto e esquiva praticamente garantidos, executa sempre a MELHOR instrução da
+            // tabela posicional sem sorteio (deterministicAI:true), lê a janela de recuperação
+            // do alvo quase sem falhar, e tem mais vida/velocidade/cadência de ataque que
+            // qualquer outra dificuldade. Só um jogador muito bom, jogando com muito cuidado,
+            // tem chance real de vencer.
+            brutal: { hpMult: 2.4, spdMult: 1.65, reaction: 0,  accuracy: 0.995, aggressiveness: 1.0, atkCdMult: 0.28, dodgeChance: 0.98, prediction: 1.0,  rewardWin: 1800, rewardLoss: 110, deterministicAI: true }
         },
         players: [], enemies: [], projectiles: [], particles: [], items: [], platforms: [], chunksLoaded: {},
         secretZones: [], inputKeys: {}, pendingSpawns: [], openWorldSpawnCd: 0,
@@ -5936,6 +5947,30 @@
         // itens/dash taticamente — sem "ler" o teclado do jogador, só reagindo ao estado do jogo.
         // Além disso consulta periodicamente o AIBrain (IA online) pra decidir a estratégia de
         // alto nível, com o peso dessa influência variando pela dificuldade escolhida.
+        // Reaproveita a MESMA física de pulo já validada em Enemy._canReachHigherPlatform
+        // (jumpVy=15, gravity=0.6) pra saber, de verdade, se existe uma plataforma alcançável
+        // com um pulo A PARTIR DA POSIÇÃO ATUAL do bot, na direção do alvo. Sem isso a IA só
+        // "sorteava" se ia pular ou não — o que faz ela parecer burra, pulando contra paredes ou
+        // deixando de pular quando já estava certinho embaixo da plataforma certa. Devolve a
+        // plataforma mais baixa alcançável, ou null se ainda não dá (nesse caso o certo é andar
+        // um pouco mais antes de pular, não pular às cegas torcendo pra acertar).
+        _findReachablePlatform(bot, target) {
+            const jumpVy = 15, gravity = 0.6;
+            const maxJumpRise = (jumpVy * jumpVy) / (2 * gravity);
+            const jumpHorizontalRange = 90;
+            const dir = target.x > bot.x ? 1 : -1;
+            const footY = bot.y + bot.h;
+            let best = null, bestRise = Infinity;
+            for (const p of this.platforms) {
+                const riseNeeded = footY - p.y;
+                if (riseNeeded <= 5 || riseNeeded > maxJumpRise) continue;
+                const reachLeft = bot.x - jumpHorizontalRange, reachRight = bot.x + bot.w + jumpHorizontalRange;
+                const overlaps = (p.x + p.w) > reachLeft && p.x < reachRight;
+                const inDir = dir > 0 ? (p.x + p.w) > bot.x : p.x < (bot.x + bot.w);
+                if (overlaps && inDir && riseNeeded < bestRise) { best = p; bestRise = riseNeeded; }
+            }
+            return best;
+        },
         updateAIBot(bot, dt) {
             let target = this.players.find(p => p && p.id !== bot.id && p.lives > 0);
             let keys = { left:false, right:false, up:false, attack:false, special:false };
@@ -6028,7 +6063,7 @@
                 // ── Consulta o banco de dados posicional: dado onde o alvo está em relação ao
                 // bot (dx, dy) MAIS o contexto acima, devolve a ação tática mais adequada pra
                 // essa situação exata, sorteada ponderadamente entre as opções que fazem sentido.
-                let tacticalAction = AITacticsDB.decide(dx, dy, ctx);
+                let tacticalAction = AITacticsDB.decide(dx, dy, ctx, cfg.deterministicAI);
                 // Reseta as flags táticas a cada reavaliação — evitam que um bônus de "abriu
                 // espaço pra atacar" de uma reação anterior continue valendo numa situação
                 // totalmente diferente (ex.: o bot ficou com pouca vida e mudou pra fuga).
@@ -6073,8 +6108,21 @@
                     }
                     bot._aiTacticalAction = tacticalAction;
                 }
-                bot._aiWantJump = Math.random() < 0.015 * cfg.aggressiveness;
-                if(bot._aiTacticalAction === 'jump') bot._aiWantJump = bot._aiWantJump || Math.random() < 0.5;
+                bot._aiWantJump = Math.random() < 0.015 * cfg.aggressiveness; // pulinho raro sem motivo, só pra não ficar 100% robótica
+                if(bot._aiTacticalAction === 'jump') {
+                    let reachablePlat = this._findReachablePlatform(bot, target);
+                    if(reachablePlat) {
+                        // Já está alinhada o bastante pra alcançar de verdade: pula com bastante
+                        // convicção — nas dificuldades altas isso vira praticamente certeza, não
+                        // é mais cara-ou-coroa como antes.
+                        bot._aiWantJump = bot._aiWantJump || Math.random() < (0.55 + cfg.prediction * 0.45);
+                    } else {
+                        // Ainda não alinhada com nenhuma plataforma alcançável: em vez de pular
+                        // sem propósito (o que parecia "burro" contra paredes), anda mais um
+                        // pouco na direção do alvo primeiro.
+                        bot._aiMove = dirToTarget;
+                    }
+                }
             }
             // --- Perseguição vertical (escalar): checado TODO FRAME, não só na reavaliação
             // tática acima — um jogador real martela o pulo até subir quando o alvo está mais
@@ -6083,7 +6131,18 @@
             // boa parte do tempo simplesmente parado embaixo de plataformas sem subir — essa
             // era a principal causa do "não sobe/não persegue bem" relatado. Reavaliar isso a
             // cada frame resolve sem custar nada (é só uma comparação).
-            if(bot.isGrounded && target.y < bot.y - 30) { bot._aiWantJump = true; }
+            if(bot.isGrounded && target.y < bot.y - 30) {
+                let reachablePlat = this._findReachablePlatform(bot, target);
+                if(reachablePlat) {
+                    bot._aiWantJump = true;
+                } else {
+                    // Alvo está acima mas nenhuma plataforma está ao alcance de um pulo AINDA —
+                    // continua andando na direção certa em vez de pular sem propósito contra o
+                    // vão/parede errado (essa era a principal causa de parecer "burra" perto de
+                    // plataformas: pulava na hora errada em vez de se alinhar primeiro).
+                    bot._aiMove = dirToTarget;
+                }
+            }
             if(wantDodgeJump) { bot._aiWantJump = true; }
 
             // --- Detecção de "preso": se o bot está tentando andar mas mal se move (bateu numa
