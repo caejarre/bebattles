@@ -195,6 +195,9 @@
         .btn-follow { background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd; }
         .btn-follow.following { background:#334155; border-color:#475569; color:#cbd5e1; }
         .btn-play-invite { background:linear-gradient(to right,#10b981,#059669); color:white; border:none; font-weight:800; font-size:1.05rem; padding:14px; }
+        /* Editor de Fases: botões de ferramenta com estado "ativo" destacado */
+        .editor-tool-btn { padding:8px 12px; font-size:0.82rem; }
+        .editor-tool-btn.active { background:#1d4ed8; border-color:#3b82f6; color:#fff; box-shadow:0 0 0 2px rgba(59,130,246,0.4); }
         .btn-play-invite:disabled { background:#334155; color:#64748b; cursor:not-allowed; }
         /* Sino de notificações de convite */
         #invite-bell { position:relative; }
@@ -519,6 +522,7 @@
                 <div class="section-title" data-i18n="arenaStructureTitle">Estrutura de Arena</div>
                 <button id="btn-world-type" onclick="Engine.toggleOpenWorld()" style="width:100%; margin-bottom:12px; background:#0ea5e9; color:#020617; font-weight:800;">Mundo Aberto: DESATIVADO</button>
                 <button id="btn-vs-ai" onclick="Engine.toggleAIPanel()" style="width:100%; margin-bottom:12px; background:#7c3aed; color:#fff; font-weight:800;" data-i18n="vsAiBtn">🤖 Jogar Contra Inteligência Artificial</button>
+                <button onclick="LevelEditor.open()" style="width:100%; margin-bottom:12px; background:#1d4ed8; color:#fff; font-weight:800;" data-i18n="levelEditorBtn">🛠️ Editor de Fases</button>
                 <div id="ai-diff-panel" class="hidden" style="margin-bottom:12px; background:#0f172a; border:1px solid #7c3aed; border-radius:8px; padding:12px;">
                     <div style="font-size:0.82rem; color:#c4b5fd; margin-bottom:8px; font-weight:700;" data-i18n="vsAiChooseDiff">Escolha a Dificuldade da IA:</div>
                     <div class="btn-group" style="margin-bottom:8px;">
@@ -644,6 +648,44 @@
             </div>
             <p style="font-size:0.78rem; color:#64748b; margin:2px 0 0;" data-i18n="missionsHint">As missões renovam à meia-noite. Complete pra ganhar ouro na hora!</p>
             <div id="missions-list" style="display:flex; flex-direction:column; gap:10px; max-height:320px; overflow-y:auto; margin-top:4px;"></div>
+        </div>
+    </div>
+    <!-- NOVO: Editor de Fases — permite criar layouts personalizados (plataformas normais, de
+         salto, aceleradoras de velocidade e coletáveis) e compartilhar a criação com uma senha
+         curta, pra qualquer outro jogador carregar e jogar a mesma fase. -->
+    <div id="level-editor-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="lobby-box" style="max-width:900px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 style="font-size:1.35rem; color:#93c5fd; margin:0;" data-i18n="levelEditorTitle">🛠️ Editor de Fases</h2>
+                <button onclick="LevelEditor.close()" style="padding:7px 13px; font-size:0.83rem;" data-i18n="lobbyBackBtn">✕ Voltar</button>
+            </div>
+            <p style="font-size:0.78rem; color:#64748b; margin:2px 0 0;" data-i18n="levelEditorHint">Escolha uma ferramenta e clique/toque na grade para posicionar. Defina um ponto de partida antes de salvar.</p>
+            <div id="editor-toolbar" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+                <button id="tool-spawn" class="editor-tool-btn" onclick="LevelEditor.selectTool('spawn')" data-i18n="editorToolSpawn">🚩 Início</button>
+                <button id="tool-platform" class="editor-tool-btn" onclick="LevelEditor.selectTool('platform')" data-i18n="editorToolPlatform">▬ Plataforma</button>
+                <button id="tool-jump" class="editor-tool-btn" onclick="LevelEditor.selectTool('jump')" data-i18n="editorToolJump">🟢 Salto</button>
+                <button id="tool-speed" class="editor-tool-btn" onclick="LevelEditor.selectTool('speed')" data-i18n="editorToolSpeed">🟡 Acelerador</button>
+                <button id="tool-gem" class="editor-tool-btn" onclick="LevelEditor.selectTool('gem')" data-i18n="editorToolGem">💎 Coletável</button>
+                <button id="tool-eraser" class="editor-tool-btn" onclick="LevelEditor.selectTool('eraser')" data-i18n="editorToolEraser">🗑️ Apagar</button>
+                <button onclick="LevelEditor.clearAll()" style="background:#7f1d1d; border-color:#991b1b; color:#fecaca; margin-left:auto;" data-i18n="editorClearAllBtn">Limpar Tudo</button>
+            </div>
+            <div style="margin-top:10px; border:1px solid #334155; border-radius:8px; background:#020617;">
+                <canvas id="editor-canvas" width="1920" height="700" style="display:block; width:100%; height:auto; touch-action:none; cursor:crosshair;"></canvas>
+            </div>
+            <div id="editor-status" style="font-size:0.78rem; color:#94a3b8; min-height:16px; margin-top:4px;"></div>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;">
+                <button onclick="LevelEditor.saveAndShare()" style="flex:1; min-width:220px; background:linear-gradient(to right,#10b981,#059669); color:#fff; font-weight:800;" data-i18n="editorSaveBtn">💾 Salvar e Gerar Senha</button>
+            </div>
+            <div id="editor-share-result" class="hidden" style="margin-top:6px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.4); border-radius:8px; padding:10px; font-size:0.85rem;"></div>
+            <div style="border-top:1px solid #1e293b; margin-top:14px; padding-top:12px;">
+                <div class="section-title" style="margin-bottom:8px;" data-i18n="editorLoadTitle">Carregar Fase de Outro Jogador</div>
+                <div style="display:flex; gap:8px;">
+                    <input class="auth-input" id="editor-load-code-input" type="text" placeholder="Cole a senha da fase aqui..." data-i18n-placeholder="editorLoadPlaceholder" maxlength="12" style="flex:1;">
+                    <button onclick="LevelEditor.loadByCode()" style="padding:10px 16px; background:#3b82f6; color:white; border:none; border-radius:6px; font-weight:700; white-space:nowrap;" data-i18n="editorLoadBtn">CARREGAR</button>
+                </div>
+                <div id="editor-load-status" style="font-size:0.8rem; color:#94a3b8; min-height:18px; margin-top:6px;"></div>
+                <button id="btn-editor-play-loaded" onclick="LevelEditor.playLoaded()" class="hidden" style="width:100%; margin-top:6px; background:linear-gradient(to right,#7c3aed,#a855f7); color:#fff; font-weight:800; padding:10px;" data-i18n="editorPlayLoadedBtn">▶ JOGAR ESTA FASE</button>
+            </div>
         </div>
     </div>
     <!-- NOVO: modal de "bem-vindo de volta" — mostra ouro ganho offline e a sequência diária
@@ -1079,9 +1121,23 @@
             lobbyTitle: "🌐 Jogo Online", lobbyBackBtn: "✕ Voltar",
             lobbyCreateBtn: "➕ CRIAR SALA", lobbyCodeLabel: "Código da Sala (clique para copiar)",
             lobbyPlayerCountLabel: "Quantos jogadores no total?", lobbyStartNowBtn: "▶ COMEÇAR AGORA", lobbyWaitingCount: "Aguardando jogadores",
-            lobbyConnecting: "🔌 Conectando...",
+            lobbyConnecting: "🔌 Conectando...", lobbyCodeExpired: "🚫 Código expirado. Peça um novo convite.",
             lobbyWaiting: "Aguardando amigo...", lobbyOrJoin: "ou entre em uma sala existente",
             lobbyJoinPlaceholder: "Cole o código da sala aqui...", lobbyJoinBtn: "ENTRAR",
+            levelEditorBtn: "🛠️ Editor de Fases", levelEditorTitle: "🛠️ Editor de Fases",
+            levelEditorHint: "Escolha uma ferramenta e clique/toque na grade para posicionar. Defina um ponto de partida antes de salvar.",
+            editorToolSpawn: "🚩 Início", editorToolPlatform: "▬ Plataforma", editorToolJump: "🟢 Salto",
+            editorToolSpeed: "🟡 Acelerador", editorToolGem: "💎 Coletável", editorToolEraser: "🗑️ Apagar",
+            editorClearAllBtn: "Limpar Tudo", editorSaveBtn: "💾 Salvar e Gerar Senha",
+            editorLoadTitle: "Carregar Fase de Outro Jogador", editorLoadPlaceholder: "Cole a senha da fase aqui...",
+            editorLoadBtn: "CARREGAR", editorPlayLoadedBtn: "▶ JOGAR ESTA FASE",
+            editorNeedSpawn: "Defina um ponto de partida (🚩 Início) antes de salvar.",
+            editorNeedPlatform: "Coloque pelo menos uma plataforma antes de salvar.",
+            editorSaving: "Salvando fase...", editorSaveError: "Erro ao salvar a fase. Tente de novo.",
+            editorShareResult: "✅ Fase salva! Senha para compartilhar:",
+            editorLoadEmpty: "Cole uma senha de fase.", editorLoading: "Buscando fase...",
+            editorLoadNotFound: "Nenhuma fase encontrada com essa senha.", editorLoadError: "Erro ao buscar a fase.",
+            editorLoadFound: "Fase encontrada! Elementos:", editorClearConfirm: "Isso apaga tudo o que você desenhou nesta fase. Continuar?",
             lobbyFooterHint: "Requer conexão com a internet &bull; WebRTC via PeerJS &bull; Funciona no GitHub Pages",
             shop: {
                 stat_hp: { name: "Módulo de Vitalidade", desc: "+25 HP Máximo para o usuário." },
@@ -1273,7 +1329,7 @@
             modeLabelOpenWorld: "OPEN WORLD", modeLabelBoss: "Boss Level", modeLabelWave: "Wave",
             hideoutAlertTitle: "Secret Hideout", hideoutAlertEnter: "Enter: E", hideoutHudExit: "Exit: E",
             exitMatchBtn: "Exit Match", exitMatchConfirmMsg: "Are you sure you want to exit the match and return to the menu? Your progress in this match will be lost.",
-            chatOptionsBtn: "More options", chatClearOption: "🗑️ Clear conversation", chatBlockOption: "🚫 Block player", chatUnblockOption: "✓ Unblock player", chatReportOption: "🚩 Report player", lobbyConnecting: "🔌 Connecting...",
+            chatOptionsBtn: "More options", chatClearOption: "🗑️ Clear conversation", chatBlockOption: "🚫 Block player", chatUnblockOption: "✓ Unblock player", chatReportOption: "🚩 Report player", lobbyConnecting: "🔌 Connecting...", lobbyCodeExpired: "🚫 Expired code. Ask for a new invite.",
             chatClearConfirmMsg: "Are you sure you want to delete all messages in this conversation? This cannot be undone.", chatClearedToast: "Conversation cleared.",
             chatBlockConfirmMsg: "Block this player? You won't be able to message each other until you unblock.", chatBlockedToast: "Player blocked.", chatUnblockedToast: "Player unblocked.",
             chatBlockedNotice: "You blocked this player. Unblock to send messages.", chatBlockedByPeerNotice: "You can't send messages to this player.",
@@ -1508,7 +1564,7 @@
             modeLabelOpenWorld: "OFFENE WELT", modeLabelBoss: "Boss-Level", modeLabelWave: "Welle",
             hideoutAlertTitle: "Geheimes Versteck", hideoutAlertEnter: "Eintreten: E", hideoutHudExit: "Verlassen: E",
             exitMatchBtn: "Partie verlassen", exitMatchConfirmMsg: "Bist du sicher, dass du die Partie verlassen und zum Menü zurückkehren willst? Dein Fortschritt in dieser Partie geht verloren.",
-            chatOptionsBtn: "Weitere Optionen", chatClearOption: "🗑️ Unterhaltung löschen", chatBlockOption: "🚫 Spieler blockieren", chatUnblockOption: "✓ Spieler entsperren", chatReportOption: "🚩 Spieler melden", chatNewGroupBtn: "➕ Neue Gruppe erstellen", chatNewGroupTitle: "➕ Neue Gruppe", chatGroupNamePlaceholder: "Gruppenname", chatCreateGroupBtn: "GRUPPE ERSTELLEN", chatGroupNameRequired: "Gib einen Namen für die Gruppe ein.", chatGroupNeedMembers: "Wähle mindestens 1 Person aus.", chatGroupCreateError: "Fehler beim Erstellen der Gruppe.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Zum Spielen einladen", chatInviteSentToast: "Einladung im Chat gesendet!", chatInviteCreatingRoom: "Raum wird erstellt...", chatInviteCardTitle: "🎮 Spieleinladung", chatInviteJoinBtn: "Am Match teilnehmen", chatGroupNoFollowingHint: "Du musst jemandem folgen, um eine Gruppe zu erstellen.", lobbyConnecting: "🔌 Verbinde...",
+            chatOptionsBtn: "Weitere Optionen", chatClearOption: "🗑️ Unterhaltung löschen", chatBlockOption: "🚫 Spieler blockieren", chatUnblockOption: "✓ Spieler entsperren", chatReportOption: "🚩 Spieler melden", chatNewGroupBtn: "➕ Neue Gruppe erstellen", chatNewGroupTitle: "➕ Neue Gruppe", chatGroupNamePlaceholder: "Gruppenname", chatCreateGroupBtn: "GRUPPE ERSTELLEN", chatGroupNameRequired: "Gib einen Namen für die Gruppe ein.", chatGroupNeedMembers: "Wähle mindestens 1 Person aus.", chatGroupCreateError: "Fehler beim Erstellen der Gruppe.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Zum Spielen einladen", chatInviteSentToast: "Einladung im Chat gesendet!", chatInviteCreatingRoom: "Raum wird erstellt...", chatInviteCardTitle: "🎮 Spieleinladung", chatInviteJoinBtn: "Am Match teilnehmen", chatGroupNoFollowingHint: "Du musst jemandem folgen, um eine Gruppe zu erstellen.", lobbyConnecting: "🔌 Verbinde...", lobbyCodeExpired: "🚫 Code abgelaufen. Bitte eine neue Einladung anfordern.",
             chatClearConfirmMsg: "Möchtest du wirklich alle Nachrichten dieser Unterhaltung löschen? Dies kann nicht rückgängig gemacht werden.", chatClearedToast: "Unterhaltung gelöscht.",
             chatBlockConfirmMsg: "Diesen Spieler blockieren? Ihr könnt euch dann keine Nachrichten mehr schicken, bis du ihn entsperrst.", chatBlockedToast: "Spieler blockiert.", chatUnblockedToast: "Spieler entsperrt.",
             chatBlockedNotice: "Du hast diesen Spieler blockiert. Entsperre ihn, um Nachrichten zu senden.", chatBlockedByPeerNotice: "Du kannst diesem Spieler keine Nachrichten senden.",
@@ -1738,7 +1794,7 @@
             modeLabelOpenWorld: "MUNDO ABIERTO", modeLabelBoss: "Nivel de Jefe", modeLabelWave: "Oleada",
             hideoutAlertTitle: "Escondite Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Salir: E",
             exitMatchBtn: "Salir de la Partida", exitMatchConfirmMsg: "¿Seguro que quieres salir de la partida y volver al menú? Tu progreso en esta partida se perderá.",
-            chatOptionsBtn: "Más opciones", chatClearOption: "🗑️ Limpiar conversación", chatBlockOption: "🚫 Bloquear jugador", chatUnblockOption: "✓ Desbloquear jugador", chatReportOption: "🚩 Denunciar jugador", chatNewGroupBtn: "➕ Crear nuevo grupo", chatNewGroupTitle: "➕ Nuevo Grupo", chatGroupNamePlaceholder: "Nombre del grupo", chatCreateGroupBtn: "CREAR GRUPO", chatGroupNameRequired: "Escribe un nombre para el grupo.", chatGroupNeedMembers: "Selecciona al menos 1 persona.", chatGroupCreateError: "Error al crear el grupo.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Invitar a jugar", chatInviteSentToast: "¡Invitación enviada en la conversación!", chatInviteCreatingRoom: "Creando sala...", chatInviteCardTitle: "🎮 Invitación a jugar", chatInviteJoinBtn: "Unirse a la partida", chatGroupNoFollowingHint: "Necesitas seguir a alguien para crear un grupo.", lobbyConnecting: "🔌 Conectando...",
+            chatOptionsBtn: "Más opciones", chatClearOption: "🗑️ Limpiar conversación", chatBlockOption: "🚫 Bloquear jugador", chatUnblockOption: "✓ Desbloquear jugador", chatReportOption: "🚩 Denunciar jugador", chatNewGroupBtn: "➕ Crear nuevo grupo", chatNewGroupTitle: "➕ Nuevo Grupo", chatGroupNamePlaceholder: "Nombre del grupo", chatCreateGroupBtn: "CREAR GRUPO", chatGroupNameRequired: "Escribe un nombre para el grupo.", chatGroupNeedMembers: "Selecciona al menos 1 persona.", chatGroupCreateError: "Error al crear el grupo.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Invitar a jugar", chatInviteSentToast: "¡Invitación enviada en la conversación!", chatInviteCreatingRoom: "Creando sala...", chatInviteCardTitle: "🎮 Invitación a jugar", chatInviteJoinBtn: "Unirse a la partida", chatGroupNoFollowingHint: "Necesitas seguir a alguien para crear un grupo.", lobbyConnecting: "🔌 Conectando...", lobbyCodeExpired: "🚫 Código caducado. Pide una nueva invitación.",
             chatClearConfirmMsg: "¿Seguro que quieres borrar todos los mensajes de esta conversación? No se puede deshacer.", chatClearedToast: "Conversación borrada.",
             chatBlockConfirmMsg: "¿Bloquear a este jugador? No podrán enviarse mensajes hasta que lo desbloquees.", chatBlockedToast: "Jugador bloqueado.", chatUnblockedToast: "Jugador desbloqueado.",
             chatBlockedNotice: "Bloqueaste a este jugador. Desbloquéalo para enviar mensajes.", chatBlockedByPeerNotice: "No puedes enviar mensajes a este jugador.",
@@ -1968,7 +2024,7 @@
             modeLabelOpenWorld: "MONDO APERTO", modeLabelBoss: "Livello Boss", modeLabelWave: "Ondata",
             hideoutAlertTitle: "Nascondiglio Segreto", hideoutAlertEnter: "Entra: E", hideoutHudExit: "Esci: E",
             exitMatchBtn: "Esci dalla Partita", exitMatchConfirmMsg: "Sei sicuro di voler uscire dalla partita e tornare al menu? I tuoi progressi in questa partita andranno persi.",
-            chatOptionsBtn: "Altre opzioni", chatClearOption: "🗑️ Cancella conversazione", chatBlockOption: "🚫 Blocca giocatore", chatUnblockOption: "✓ Sblocca giocatore", chatReportOption: "🚩 Segnala giocatore", chatNewGroupBtn: "➕ Crea nuovo gruppo", chatNewGroupTitle: "➕ Nuovo Gruppo", chatGroupNamePlaceholder: "Nome del gruppo", chatCreateGroupBtn: "CREA GRUPPO", chatGroupNameRequired: "Inserisci un nome per il gruppo.", chatGroupNeedMembers: "Seleziona almeno 1 persona.", chatGroupCreateError: "Errore durante la creazione del gruppo.", chatEmojiBtn: "Emoji", chatInviteOption: "🎮 Invita a giocare", chatInviteSentToast: "Invito inviato nella conversazione!", chatInviteCreatingRoom: "Creazione stanza...", chatInviteCardTitle: "🎮 Invito a giocare", chatInviteJoinBtn: "Unisciti alla partita", chatGroupNoFollowingHint: "Devi seguire qualcuno per creare un gruppo.", lobbyConnecting: "🔌 Connessione...",
+            chatOptionsBtn: "Altre opzioni", chatClearOption: "🗑️ Cancella conversazione", chatBlockOption: "🚫 Blocca giocatore", chatUnblockOption: "✓ Sblocca giocatore", chatReportOption: "🚩 Segnala giocatore", chatNewGroupBtn: "➕ Crea nuovo gruppo", chatNewGroupTitle: "➕ Nuovo Gruppo", chatGroupNamePlaceholder: "Nome del gruppo", chatCreateGroupBtn: "CREA GRUPPO", chatGroupNameRequired: "Inserisci un nome per il gruppo.", chatGroupNeedMembers: "Seleziona almeno 1 persona.", chatGroupCreateError: "Errore durante la creazione del gruppo.", chatEmojiBtn: "Emoji", chatInviteOption: "🎮 Invita a giocare", chatInviteSentToast: "Invito inviato nella conversazione!", chatInviteCreatingRoom: "Creazione stanza...", chatInviteCardTitle: "🎮 Invito a giocare", chatInviteJoinBtn: "Unisciti alla partita", chatGroupNoFollowingHint: "Devi seguire qualcuno per creare un gruppo.", lobbyConnecting: "🔌 Connessione...", lobbyCodeExpired: "🚫 Codice scaduto. Chiedi un nuovo invito.",
             chatClearConfirmMsg: "Sei sicuro di voler eliminare tutti i messaggi di questa conversazione? Non può essere annullato.", chatClearedToast: "Conversazione cancellata.",
             chatBlockConfirmMsg: "Bloccare questo giocatore? Non potrete più scambiarvi messaggi finché non lo sblocchi.", chatBlockedToast: "Giocatore bloccato.", chatUnblockedToast: "Giocatore sbloccato.",
             chatBlockedNotice: "Hai bloccato questo giocatore. Sblocca per inviare messaggi.", chatBlockedByPeerNotice: "Non puoi inviare messaggi a questo giocatore.",
@@ -2198,7 +2254,7 @@
             modeLabelOpenWorld: "MONDE OUVERT", modeLabelBoss: "Niveau Boss", modeLabelWave: "Vague",
             hideoutAlertTitle: "Cachette Secrète", hideoutAlertEnter: "Entrer : E", hideoutHudExit: "Sortir : E",
             exitMatchBtn: "Quitter la Partie", exitMatchConfirmMsg: "Voulez-vous vraiment quitter la partie et retourner au menu ? Votre progression dans cette partie sera perdue.",
-            chatOptionsBtn: "Plus d'options", chatClearOption: "🗑️ Effacer la conversation", chatBlockOption: "🚫 Bloquer le joueur", chatUnblockOption: "✓ Débloquer le joueur", chatReportOption: "🚩 Signaler le joueur", chatNewGroupBtn: "➕ Créer un nouveau groupe", chatNewGroupTitle: "➕ Nouveau Groupe", chatGroupNamePlaceholder: "Nom du groupe", chatCreateGroupBtn: "CRÉER LE GROUPE", chatGroupNameRequired: "Entrez un nom pour le groupe.", chatGroupNeedMembers: "Sélectionnez au moins 1 personne.", chatGroupCreateError: "Erreur lors de la création du groupe.", chatEmojiBtn: "Émojis", chatInviteOption: "🎮 Inviter à jouer", chatInviteSentToast: "Invitation envoyée dans la conversation !", chatInviteCreatingRoom: "Création de la salle...", chatInviteCardTitle: "🎮 Invitation à jouer", chatInviteJoinBtn: "Rejoindre la partie", chatGroupNoFollowingHint: "Vous devez suivre quelqu’un pour créer un groupe.", lobbyConnecting: "🔌 Connexion...",
+            chatOptionsBtn: "Plus d'options", chatClearOption: "🗑️ Effacer la conversation", chatBlockOption: "🚫 Bloquer le joueur", chatUnblockOption: "✓ Débloquer le joueur", chatReportOption: "🚩 Signaler le joueur", chatNewGroupBtn: "➕ Créer un nouveau groupe", chatNewGroupTitle: "➕ Nouveau Groupe", chatGroupNamePlaceholder: "Nom du groupe", chatCreateGroupBtn: "CRÉER LE GROUPE", chatGroupNameRequired: "Entrez un nom pour le groupe.", chatGroupNeedMembers: "Sélectionnez au moins 1 personne.", chatGroupCreateError: "Erreur lors de la création du groupe.", chatEmojiBtn: "Émojis", chatInviteOption: "🎮 Inviter à jouer", chatInviteSentToast: "Invitation envoyée dans la conversation !", chatInviteCreatingRoom: "Création de la salle...", chatInviteCardTitle: "🎮 Invitation à jouer", chatInviteJoinBtn: "Rejoindre la partie", chatGroupNoFollowingHint: "Vous devez suivre quelqu’un pour créer un groupe.", lobbyConnecting: "🔌 Connexion...", lobbyCodeExpired: "🚫 Code expiré. Demandez une nouvelle invitation.",
             chatClearConfirmMsg: "Voulez-vous vraiment supprimer tous les messages de cette conversation ? Cette action est irréversible.", chatClearedToast: "Conversation effacée.",
             chatBlockConfirmMsg: "Bloquer ce joueur ? Vous ne pourrez plus vous envoyer de messages tant que vous ne le débloquez pas.", chatBlockedToast: "Joueur bloqué.", chatUnblockedToast: "Joueur débloqué.",
             chatBlockedNotice: "Vous avez bloqué ce joueur. Débloquez-le pour envoyer des messages.", chatBlockedByPeerNotice: "Vous ne pouvez pas envoyer de messages à ce joueur.",
@@ -4762,13 +4818,13 @@
             });
             this.peer.on('error',err=>{
                 let msgs={
-                    'peer-unavailable':'Sala não encontrada. Verifique o código e tente de novo.',
+                    'peer-unavailable':t('lobbyCodeExpired'),
                     'network':'Sem conexão com a internet.',
                     'server-error':'Servidor indisponível. Tente em alguns segundos.'
                 };
                 if(Engine.state==='IN_GAME'){ this._handleConnectionLost(msgs[err.type]||'Erro de conexão: '+err.type); return; }
-                this._err(msgs[err.type]||'Erro: '+err.type);
-                this._jst('','');
+                if(err.type==='peer-unavailable'){ this._jst(msgs[err.type],'err'); }
+                else { this._err(msgs[err.type]||'Erro: '+err.type); this._jst('',''); }
                 document.getElementById('btn-create-room').disabled=false;
                 document.getElementById('btn-join-room').disabled=false;
                 this.peer=null;
@@ -4925,9 +4981,18 @@
         _handleConnectionLost(msg) {
             if(!this.isOnline && !this.conn && !this.peer) return;
             let wasInGame = Engine.state==='IN_GAME';
+            let wasHost = this.isHost;
             this.disconnect();
             if(wasInGame){
                 Engine.triggerMatchEnd(null,'DESCONECTADO',msg||'A conexão com o amigo foi perdida.');
+            } else if(!wasHost) {
+                // Ainda estávamos na sala de espera (convite aceito, mas a partida não começou) e a
+                // conexão com o anfitrião caiu — na prática o anfitrião saiu do menu de espera, então
+                // esse código de sala parou de funcionar. Mostra "código expirado" em vez de deixar a
+                // tela sem nenhuma explicação.
+                this._jst(t('lobbyCodeExpired'), 'err');
+                let cb = document.getElementById('btn-create-room'); if(cb) cb.disabled=false;
+                let jb = document.getElementById('btn-join-room'); if(jb) jb.disabled=false;
             }
         },
         sendState() {
@@ -5322,7 +5387,7 @@
 
     const Engine = {
         canvas: null, ctx: null, state: 'MENU', lastTime: 0,
-        isOpenWorld: false, gameMode: 'HORDA',
+        isOpenWorld: false, gameMode: 'HORDA', customLevelData: null,
         selectedArchP1: 'hero', selectedArchP2: 'vilan',
         currentShopBuyer: 1, walletP1: 100, walletP2: 100,
         killsCounter: 0, round: 1, spawnTimer: 0, goldSpawnTimer: 0, bossSpawnTimer: 0,
@@ -5466,13 +5531,13 @@
         // duração tem um preço diferente. O efeito fica sempre ativo automaticamente enquanto
         // sobrar tempo comprado, e esse tempo só é descontado durante partidas (ver Engine.update).
         shopCatalog: [
-            { id: 'wpn_pistol', price: 300, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.9, weaponAtkCd: 8 },
-            { id: 'wpn_smg', price: 550, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.6, weaponAtkCd: 5 },
-            { id: 'wpn_laser', price: 900, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
-            { id: 'wpn_plasma', price: 1400, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
-            { id: 'wpn_cannon', price: 2100, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 2.0, weaponAtkCd: 34 },
-            { id: 'wpn_sniper', price: 3200, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 2.8, weaponAtkCd: 46 },
-            { id: 'wpn_railgun', price: 4800, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 3.4, weaponAtkCd: 58 },
+            { id: 'wpn_pistol', price: 450, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.9, weaponAtkCd: 8 },
+            { id: 'wpn_smg', price: 800, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.6, weaponAtkCd: 5 },
+            { id: 'wpn_laser', price: 1400, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
+            { id: 'wpn_plasma', price: 2300, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
+            { id: 'wpn_cannon', price: 3600, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 2.0, weaponAtkCd: 34 },
+            { id: 'wpn_sniper', price: 5500, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 2.8, weaponAtkCd: 46 },
+            { id: 'wpn_railgun', price: 9000, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 3.4, weaponAtkCd: 58 },
             { id: 'itm_pot', price: 60, type: 'item', itemKey: 'potion' },
             { id: 'itm_pot3', price: 150, type: 'item', itemKey: 'potion', qty: 3 },
             { id: 'itm_shd', price: 80, type: 'item', itemKey: 'shield' },
@@ -5964,6 +6029,7 @@
             this.vsAI = true;
             this.gameMode = 'HORDA';
             this.isOpenWorld = false;
+            this.customLevelData = null;
             OnlineSync.disconnect();
             document.getElementById('ai-diff-panel').classList.add('hidden');
             AIBrain.reset();
@@ -6630,6 +6696,13 @@
         // exitMatch().
         startNormalMatch() {
             this.vsAI = false;
+            this.customLevelData = null;
+            this.startMatch();
+        },
+        // NOVO: inicia uma partida solo usando uma fase criada no Editor de Fases (ver LevelEditor).
+        startCustomLevelMatch(levelData) {
+            this.vsAI = false;
+            this.customLevelData = levelData;
             this.startMatch();
         },
         startMatch() {
@@ -6643,7 +6716,13 @@
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
             this.platforms.push(new Platform(-1000, 680, 3280, 40));
-            if(!this.isOpenWorld) {
+            if(this.customLevelData) {
+                // NOVO: fase criada no Editor de Fases — usa o layout salvo (plataformas normais,
+                // de salto e aceleradoras, além de coletáveis) em vez do layout padrão do modo Arena.
+                this.isOpenWorld = false;
+                (this.customLevelData.platforms || []).forEach(pl => this.platforms.push(new Platform(pl.x, pl.y, pl.w, pl.h, pl.kind)));
+                (this.customLevelData.items || []).forEach(it => this.items.push(new Item(it.x, it.y, it.type)));
+            } else if(!this.isOpenWorld) {
                 this.platforms.push(new Platform(150, 500, 320, 20));
                 this.platforms.push(new Platform(810, 500, 320, 20));
                 this.platforms.push(new Platform(490, 350, 300, 20));
@@ -6662,7 +6741,10 @@
                 let upgData = profileNum === 1 ? this.persistentUpgradesP1 : this.persistentUpgradesP2;
                 this.players = [new Player(1, 300, 400, archChoice, { left: 'a', right: 'd', up: 'w', attack: 'f', special: 'g' }, upgData, profileNum, upgData.cosmetics)];
                 let botArch = ['hero','vilan','killer'].filter(a => a !== archChoice)[Math.floor(Math.random()*2)] || 'vilan';
-                let botUpg = { maxHp: 100, baseSpd: 3.2, weaponKey: 'default', weaponDmg: 1, weaponSpd: 9, atkCd: 16, potion: 1, shield: 1, cosmetics: { color: '#f43f5e', skin: 'default' } };
+                // A IA usa a MESMA arma que o jogador humano tem equipada no momento (nunca uma arma
+                // inventada/mais forte que não existe na loja) — antes ela sempre usava a arma
+                // "default" independente do que o jogador tivesse comprado e equipado.
+                let botUpg = { maxHp: 100, baseSpd: 3.2, weaponKey: upgData.weaponKey || 'default', weaponDmg: upgData.weaponDmg || 1, weaponSpd: upgData.weaponSpd || 9, atkCd: upgData.atkCd || 16, potion: 1, shield: 1, cosmetics: { color: '#f43f5e', skin: 'default' } };
                 let bot = new Player(2, 900, 400, botArch, null, botUpg, 2, botUpg.cosmetics);
                 bot.maxHp = Math.round(bot.maxHp * cfg.hpMult); bot.hp = bot.maxHp;
                 bot.baseSpd = bot.baseSpd * cfg.spdMult;
@@ -6685,6 +6767,9 @@
             }
             let p3el = document.getElementById('hud-p3'); if(p3el) p3el.classList.add('hidden');
             let p4el = document.getElementById('hud-p4'); if(p4el) p4el.classList.add('hidden');
+            if(this.customLevelData && this.customLevelData.spawn && this.players[0]) {
+                this.players[0].x = this.customLevelData.spawn.x; this.players[0].y = this.customLevelData.spawn.y;
+            }
             if(this.gameMode === 'TITAN') {
                 this.players.forEach(titan => { titan.maxHp *= 2.5; titan.hp = titan.maxHp; titan.baseSpd *= 1.6; titan.dmgMod *= 2.5; titan.lives = 5; });
             }
@@ -7157,7 +7242,7 @@
             this.atkCd = upg.atkCd || 16;
             this.inventory = { potion: upg.potion, shield: upg.shield };
             this.mp = 100; this.cdAttack = 0; this.cdSpecial = 0; this.shieldTime = 0; this.dashCooldown = 0; this.kills = 0;
-            this._hpBoostActive = false;
+            this._hpBoostActive = false; this._speedPadTimer = 0;
             let archColor = archetype === 'hero' ? '#22c55e' : (archetype === 'vilan' ? '#ef4444' : '#38bdf8');
             this.color = (cosmetics && cosmetics.color) ? cosmetics.color : archColor;
             this.skin = (cosmetics && cosmetics.skin) ? cosmetics.skin : 'default';
@@ -7171,7 +7256,10 @@
                 let boosts = Engine.persistentUpgradesP1.boosts;
                 if(boosts && boosts.speed > 0) spd += Engine.BOOST_SPEED_BONUS;
             }
-            return Math.min(spd, Engine.MAX_PLAYER_SPEED);
+            // NOVO: acelerador de velocidade (plataforma 'speed') — bônus temporário que decai
+            // sozinho em Player.update(), independente de quem pisou nele.
+            if(this._speedPadTimer > 0) spd += 3.2;
+            return Math.min(spd, Engine.MAX_PLAYER_SPEED + 3.2);
         }
         update(dt, inHideout) {
             if(OnlineSync.isOnline && !OnlineSync.isHost) { this.syncHUD(); return; }
@@ -7179,6 +7267,7 @@
             if(this.cdSpecial > 0) this.cdSpecial -= dt * 60;
             if(this.shieldTime > 0) this.shieldTime -= dt * 60;
             if(this.dashCooldown > 0) this.dashCooldown -= dt * 60;
+            if(this._speedPadTimer > 0) this._speedPadTimer -= dt * 60;
             if(this.mp < 100) this.mp += dt * 15;
             // NOVO: regeneração lenta e passiva de vida ao longo da partida — só recupera o HP
             // dentro da vida (coração) atual, nunca recupera uma vida/coração perdido.
@@ -7374,10 +7463,41 @@
         }
     }
     class Platform {
-        constructor(x, y, w, h) { this.x = x; this.y = y; this.w = w; this.h = h; }
+        // NOVO: 'kind' define o tipo especial da plataforma — 'normal' (padrão), 'jump' (plataforma
+        // de salto: impulsiona quem pisa nela bem mais alto que um pulo normal) ou 'speed'
+        // (acelerador: dá um boost de velocidade temporário a quem passa por cima). Ver
+        // Physics.resolveAll() para o efeito de cada uma.
+        constructor(x, y, w, h, kind) { this.x = x; this.y = y; this.w = w; this.h = h; this.kind = kind || 'normal'; }
         draw(ctx) {
-            ctx.save(); ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
-            ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h); ctx.restore();
+            ctx.save();
+            if(this.kind === 'jump') {
+                ctx.fillStyle = '#052e1b'; ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2.5;
+                ctx.shadowColor = '#22c55e'; ctx.shadowBlur = 8;
+                ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h);
+                ctx.shadowBlur = 0; ctx.fillStyle = '#4ade80';
+                let t = performance.now() / 260;
+                for(let cx = this.x + 16; cx < this.x + this.w - 10; cx += 26) {
+                    let bob = (Math.sin(t + cx) + 1) / 2 * 3;
+                    ctx.beginPath();
+                    ctx.moveTo(cx, this.y + 9 - bob); ctx.lineTo(cx - 7, this.y + this.h - 3 - bob); ctx.lineTo(cx + 7, this.y + this.h - 3 - bob);
+                    ctx.closePath(); ctx.fill();
+                }
+            } else if(this.kind === 'speed') {
+                ctx.fillStyle = '#082032'; ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2.5;
+                ctx.shadowColor = '#facc15'; ctx.shadowBlur = 8;
+                ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h);
+                ctx.shadowBlur = 0; ctx.fillStyle = '#fde047';
+                let off = (performance.now() / 9) % 26;
+                for(let cx = this.x - 26 + off; cx < this.x + this.w; cx += 26) {
+                    ctx.beginPath();
+                    ctx.moveTo(cx, this.y + this.h/2); ctx.lineTo(cx + 14, this.y + 4); ctx.lineTo(cx + 14, this.y + this.h - 4);
+                    ctx.closePath(); ctx.fill();
+                }
+            } else {
+                ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+                ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h);
+            }
+            ctx.restore();
         }
     }
     class Enemy {
@@ -7492,6 +7612,12 @@
                 ctx.fillStyle = '#fde68a'; ctx.fillRect(this.x + 4, this.y + 2, 3, 3); ctx.fillRect(this.x + this.w - 7, this.y + 2, 3, 3);
                 ctx.shadowBlur = 0; ctx.fillStyle = '#fbbf24'; ctx.fillRect(this.x + this.w/2 - 5, this.y + 8, 10, 9);
                 ctx.fillStyle = '#78350f'; ctx.beginPath(); ctx.arc(this.x + this.w/2, this.y + 12, 2, 0, Math.PI*2); ctx.fill();
+            } else if(this.type === 'gem') {
+                let pulse = (Math.sin(performance.now() / 220 + this.x) + 1) / 2;
+                ctx.translate(this.x + 9, this.y + 9); ctx.rotate(Math.PI / 4);
+                ctx.shadowColor = '#a855f7'; ctx.shadowBlur = 6 + pulse * 8;
+                ctx.fillStyle = '#c084fc'; ctx.fillRect(-7, -7, 14, 14);
+                ctx.strokeStyle = '#f5d0fe'; ctx.lineWidth = 1.5; ctx.strokeRect(-7, -7, 14, 14);
             } else {
                 ctx.fillStyle = '#eab308'; ctx.beginPath(); ctx.arc(this.x+9, this.y+9, 8, 0, Math.PI*2); ctx.fill();
             }
@@ -7516,7 +7642,24 @@
                 a.isGrounded = false;
                 Engine.platforms.forEach(p => {
                     if(a.x + a.w > p.x && a.x < p.x + p.w && a.y + a.h >= p.y && a.y <= p.y + p.h) {
-                        if(a.vy >= 0 && (a.y + a.h - a.vy * dt * 60) <= p.y + 8) { a.y = p.y - a.h; a.vy = 0; a.isGrounded = true; }
+                        if(a.vy >= 0 && (a.y + a.h - a.vy * dt * 60) <= p.y + 8) {
+                            a.y = p.y - a.h;
+                            if(p.kind === 'jump') {
+                                // Plataforma de salto: impulsiona bem mais forte que um pulo normal e
+                                // não deixa o personagem "grudado" no chão (isGrounded fica false pra
+                                // já poder pular de novo no ar, se quiser, assim que aterrissar depois).
+                                a.vy = -24; a.isGrounded = false;
+                                AudioFX.play('jump');
+                                if(typeof createFXBurst === 'function') createFXBurst(a.x + a.w/2, p.y, '#4ade80', 10);
+                            } else {
+                                a.vy = 0; a.isGrounded = true;
+                                if(p.kind === 'speed') {
+                                    // Acelerador: enquanto o timer estiver ativo, getEffectiveSpeed()
+                                    // (Player) aplica um bônus de velocidade — ver classe Player.
+                                    a._speedPadTimer = 40;
+                                }
+                            }
+                        }
                         else if(a.vy < 0 && (a.y - a.vy * dt * 60) >= p.y + p.h - 8) { a.y = p.y + p.h; a.vy = 0; }
                     }
                 });
@@ -7585,8 +7728,185 @@
                             p.goldCollected += 35; AudioFX.play('coin'); it.destroyed = true; p.syncHUD();
                         }
                     });
+                } else if(it.type === 'gem' && !it.destroyed) {
+                    // NOVO: coletável de mapa — mais raro/valioso que a moeda comum, pensado pra ser
+                    // posicionado deliberadamente pelo editor de fases em pontos de risco/recompensa.
+                    Engine.players.forEach(p => {
+                        if(!it.destroyed && p && p.lives > 0 && it.x < p.x+p.w && it.x+it.w > p.x && it.y < p.y+p.h && it.y+it.h > p.y) {
+                            p.goldCollected += 90; AudioFX.play('coin'); it.destroyed = true; p.syncHUD();
+                            if(typeof createFXBurst === 'function') createFXBurst(it.x+9, it.y+9, '#c084fc', 12);
+                        }
+                    });
                 }
             });
+        }
+    };
+    // NOVO: Editor de Fases — desenha plataformas (normais, de salto e aceleradoras) e coletáveis
+    // numa grade que usa o MESMO sistema de coordenadas do modo Arena (0–1920 x 0–700, chão em
+    // y=680), assim uma fase criada aqui encaixa perfeitamente quando jogada de verdade (ver
+    // Engine.startCustomLevelMatch). Compartilhamento usa uma senha curta salva na tabela
+    // 'custom_levels' do Supabase (ver SQL necessário nas notas do projeto).
+    const LevelEditor = {
+        tool: 'platform',
+        platforms: [], items: [], spawn: null,
+        loadedLevel: null,
+        GRID: 20, GROUND_Y: 680, ARENA_W: 1920, ARENA_H: 700,
+        canvas: null, ctx: null, _bound: false,
+        open() {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('level-editor-screen').classList.remove('hidden');
+            this.canvas = document.getElementById('editor-canvas');
+            this.ctx = this.canvas.getContext('2d');
+            if(!this._bound) {
+                this.canvas.addEventListener('pointerdown', e => { e.preventDefault(); this._onPointer(e); });
+                this._bound = true;
+            }
+            let shareBox = document.getElementById('editor-share-result'); if(shareBox) shareBox.classList.add('hidden');
+            let playBtn = document.getElementById('btn-editor-play-loaded'); if(playBtn) playBtn.classList.add('hidden');
+            let loadStatus = document.getElementById('editor-load-status'); if(loadStatus) loadStatus.textContent = '';
+            this.selectTool(this.tool);
+            this._status('');
+            this._render();
+        },
+        close() {
+            document.getElementById('level-editor-screen').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+        },
+        selectTool(tool) {
+            this.tool = tool;
+            document.querySelectorAll('.editor-tool-btn').forEach(b => b.classList.remove('active'));
+            let btn = document.getElementById('tool-' + tool); if(btn) btn.classList.add('active');
+        },
+        _status(msg) { let e = document.getElementById('editor-status'); if(e) e.textContent = msg; },
+        _snap(v) { return Math.round(v / this.GRID) * this.GRID; },
+        _onPointer(evt) {
+            if(!this.canvas) return;
+            let rect = this.canvas.getBoundingClientRect();
+            let scaleX = this.canvas.width / rect.width, scaleY = this.canvas.height / rect.height;
+            let cx = evt.clientX !== undefined ? evt.clientX : (evt.touches && evt.touches[0] ? evt.touches[0].clientX : 0);
+            let cy = evt.clientY !== undefined ? evt.clientY : (evt.touches && evt.touches[0] ? evt.touches[0].clientY : 0);
+            let x = (cx - rect.left) * scaleX, y = (cy - rect.top) * scaleY;
+            this._place(x, y);
+        },
+        _place(x, y) {
+            if(this.tool === 'eraser') {
+                let gi = this.items.findIndex(it => x > it.x - 6 && x < it.x + 24 && y > it.y - 6 && y < it.y + 24);
+                if(gi >= 0) { this.items.splice(gi, 1); this._render(); return; }
+                let pi = this.platforms.findIndex(p => x > p.x && x < p.x + p.w && y > p.y && y < p.y + p.h);
+                if(pi >= 0) { this.platforms.splice(pi, 1); this._render(); return; }
+                if(this.spawn && x > this.spawn.x - 8 && x < this.spawn.x + 40 && y > this.spawn.y - 8 && y < this.spawn.y + 54) { this.spawn = null; this._render(); return; }
+                return;
+            }
+            if(this.tool === 'spawn') {
+                this.spawn = { x: Math.max(0, Math.min(this.ARENA_W - 32, this._snap(x - 16))), y: Math.max(0, this._snap(y - 46)) };
+                this._render(); return;
+            }
+            if(this.tool === 'gem') {
+                this.items.push({ x: this._snap(x - 9), y: this._snap(y - 9), type: 'gem' });
+                this._render(); return;
+            }
+            // Plataforma normal, de salto ou aceleradora — todas com o mesmo tamanho padrão,
+            // centralizadas no ponto clicado e presas à grade.
+            let w = 140, h = 20;
+            let px = Math.max(0, Math.min(this.ARENA_W - w, this._snap(x - w / 2)));
+            let py = Math.max(0, Math.min(this.GROUND_Y - h, this._snap(y)));
+            let kind = this.tool === 'platform' ? 'normal' : this.tool;
+            this.platforms.push({ x: px, y: py, w, h, kind });
+            this._render();
+        },
+        clearAll() {
+            if(this.platforms.length === 0 && this.items.length === 0 && !this.spawn) return;
+            if(!confirm(t('editorClearConfirm'))) return;
+            this.platforms = []; this.items = []; this.spawn = null;
+            this._status(''); this._render();
+        },
+        _render() {
+            let ctx = this.ctx; if(!ctx) return;
+            ctx.clearRect(0, 0, this.ARENA_W, this.ARENA_H);
+            ctx.strokeStyle = 'rgba(148,163,184,0.10)'; ctx.lineWidth = 1;
+            for(let gx = 0; gx <= this.ARENA_W; gx += this.GRID * 2) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, this.ARENA_H); ctx.stroke(); }
+            for(let gy = 0; gy <= this.ARENA_H; gy += this.GRID * 2) { ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(this.ARENA_W, gy); ctx.stroke(); }
+            ctx.strokeStyle = '#334155'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, this.GROUND_Y); ctx.lineTo(this.ARENA_W, this.GROUND_Y); ctx.stroke();
+            let colors = { normal: ['#0f172a', '#38bdf8'], jump: ['#052e1b', '#22c55e'], speed: ['#082032', '#facc15'] };
+            this.platforms.forEach(p => {
+                let c = colors[p.kind] || colors.normal;
+                ctx.fillStyle = c[0]; ctx.strokeStyle = c[1]; ctx.lineWidth = 2;
+                ctx.fillRect(p.x, p.y, p.w, p.h); ctx.strokeRect(p.x, p.y, p.w, p.h);
+            });
+            this.items.forEach(it => {
+                ctx.save(); ctx.translate(it.x + 9, it.y + 9); ctx.rotate(Math.PI / 4);
+                ctx.fillStyle = '#c084fc'; ctx.fillRect(-7, -7, 14, 14);
+                ctx.strokeStyle = '#f5d0fe'; ctx.lineWidth = 1.5; ctx.strokeRect(-7, -7, 14, 14);
+                ctx.restore();
+            });
+            if(this.spawn) {
+                ctx.fillStyle = '#22c55e'; ctx.fillRect(this.spawn.x, this.spawn.y, 32, 46);
+                ctx.strokeStyle = '#bbf7d0'; ctx.lineWidth = 2; ctx.strokeRect(this.spawn.x, this.spawn.y, 32, 46);
+                ctx.font = '22px sans-serif'; ctx.fillText('🚩', this.spawn.x + 3, this.spawn.y + 22);
+            }
+        },
+        _randomCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let s = '';
+            for(let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+            return s;
+        },
+        async saveAndShare() {
+            if(!this.spawn) { this._status(t('editorNeedSpawn')); return; }
+            if(this.platforms.length === 0) { this._status(t('editorNeedPlatform')); return; }
+            this._status(t('editorSaving'));
+            let data = { platforms: this.platforms, items: this.items, spawn: this.spawn };
+            let code = this._randomCode();
+            try {
+                let attempts = 0, ok = false;
+                while(attempts < 5 && !ok) {
+                    const { error } = await sb.from('custom_levels').insert({
+                        code,
+                        owner_id: Accounts.current ? Accounts.current.uid : null,
+                        owner_name: Accounts.current ? Accounts.current.name : 'Anônimo',
+                        data
+                    });
+                    if(!error) { ok = true; break; }
+                    if(error.code === '23505') { code = this._randomCode(); attempts++; continue; }
+                    throw error;
+                }
+                if(!ok) throw new Error('Não foi possível gerar uma senha única.');
+                this._status('');
+                let box = document.getElementById('editor-share-result');
+                box.classList.remove('hidden');
+                box.innerHTML = `${t('editorShareResult')} <b style="letter-spacing:3px; font-size:1.1rem; color:#6ee7b7;">${code}</b>`;
+            } catch(err) {
+                console.warn('Erro ao salvar fase:', err);
+                this._status(t('editorSaveError'));
+            }
+        },
+        async loadByCode() {
+            let input = document.getElementById('editor-load-code-input');
+            let code = (input.value || '').trim().toUpperCase();
+            let statusEl = document.getElementById('editor-load-status');
+            let playBtn = document.getElementById('btn-editor-play-loaded');
+            playBtn.classList.add('hidden'); this.loadedLevel = null;
+            if(!code) { statusEl.textContent = t('editorLoadEmpty'); return; }
+            statusEl.textContent = t('editorLoading');
+            try {
+                const { data, error } = await sb.from('custom_levels').select('*').eq('code', code).limit(1);
+                if(error) throw error;
+                let row = data && data[0];
+                if(!row) { statusEl.textContent = t('editorLoadNotFound'); return; }
+                this.loadedLevel = row;
+                let count = (row.data.platforms || []).length + (row.data.items || []).length;
+                statusEl.textContent = `${t('editorLoadFound')} ${count}`;
+                playBtn.classList.remove('hidden');
+            } catch(err) {
+                console.warn('Erro ao buscar fase:', err);
+                statusEl.textContent = t('editorLoadError');
+            }
+        },
+        playLoaded() {
+            if(!this.loadedLevel) return;
+            let data = this.loadedLevel.data;
+            this.close();
+            Engine.startCustomLevelMatch(data);
         }
     };
     window.addEventListener('contextmenu', e => e.preventDefault());
