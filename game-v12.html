@@ -307,6 +307,14 @@
         #tc-hideout.show { display:flex; }
         .auth-box, .lobby-box { background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:30px; display:flex; flex-direction:column; gap:14px; }
         .auth-box { width:400px; } .lobby-box { width:470px; }
+        /* FIX: o Editor de Fases herdava a largura fixa de 470px do .lobby-box (o max-width:900px
+           inline não tinha efeito nenhum, já que "width" sempre vence sobre "max-width" quando os
+           dois estão definidos) — no celular, com o jogo inteiro reescalado pra caber na tela, isso
+           deixava a grade de desenho da fase minúscula e difícil de usar. Aqui o editor ganha uma
+           caixa bem maior (quase a largura toda do #game-container) e pode rolar verticalmente se o
+           conteúdo não couber, em vez de estourar ou cortar a tela. */
+        #level-editor-screen { padding: 16px; }
+        #level-editor-screen .lobby-box { width: 100%; max-width: 1220px; max-height: 100%; overflow-y: auto; padding: 16px; gap: 8px; box-sizing: border-box; }
         .auth-title { font-size:2.2rem; font-weight:900; background:linear-gradient(to right,#38bdf8,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; }
         .auth-sub { text-align:center; color:#64748b; font-size:0.85rem; margin-top:-6px; }
         .auth-tabs { display:flex; gap:8px; }
@@ -654,7 +662,7 @@
          salto, aceleradoras de velocidade e coletáveis) e compartilhar a criação com uma senha
          curta, pra qualquer outro jogador carregar e jogar a mesma fase. -->
     <div id="level-editor-screen" class="screen hidden" style="justify-content:center; align-items:center;">
-        <div class="lobby-box" style="max-width:900px;">
+        <div class="lobby-box">
             <div style="display:flex; align-items:center; justify-content:space-between;">
                 <h2 style="font-size:1.35rem; color:#93c5fd; margin:0;" data-i18n="levelEditorTitle">🛠️ Editor de Fases</h2>
                 <button onclick="LevelEditor.close()" style="padding:7px 13px; font-size:0.83rem;" data-i18n="lobbyBackBtn">✕ Voltar</button>
@@ -1144,6 +1152,7 @@
             editorNeedPlatform: "Coloque pelo menos uma plataforma antes de salvar.",
             editorSaving: "Salvando fase...", editorSaveError: "Erro ao salvar a fase. Tente de novo.",
             editorShareResult: "✅ Fase salva! Senha para compartilhar:",
+            editorSavedFindHint: "Dica: você pode jogar ou apagar essa fase depois em 📂 Minhas Fases, aqui embaixo.",
             editorLoadEmpty: "Cole uma senha de fase.", editorLoading: "Buscando fase...",
             editorLoadNotFound: "Nenhuma fase encontrada com essa senha.", editorLoadError: "Erro ao buscar a fase.",
             editorLoadFound: "Fase encontrada! Elementos:", editorClearConfirm: "Isso apaga tudo o que você desenhou nesta fase. Continuar?",
@@ -1397,6 +1406,7 @@
             editorNeedPlatform: "Place at least one platform before saving.",
             editorSaving: "Saving level...", editorSaveError: "Error saving the level. Please try again.",
             editorShareResult: "✅ Level saved! Password to share:",
+            editorSavedFindHint: "Tip: you can play or delete this level later under 📂 My Levels, below.",
             editorLoadEmpty: "Paste a level password.", editorLoading: "Looking up level...",
             editorLoadNotFound: "No level found with that password.", editorLoadError: "Error looking up the level.",
             editorLoadFound: "Level found! Elements:", editorClearConfirm: "This erases everything you've drawn in this level. Continue?",
@@ -1645,6 +1655,7 @@
             editorNeedPlatform: "Platziere mindestens eine Plattform, bevor du speicherst.",
             editorSaving: "Level wird gespeichert...", editorSaveError: "Fehler beim Speichern des Levels. Bitte erneut versuchen.",
             editorShareResult: "✅ Level gespeichert! Passwort zum Teilen:",
+            editorSavedFindHint: "Tipp: Du kannst dieses Level später unter 📂 Meine Level unten spielen oder löschen.",
             editorLoadEmpty: "Füge ein Level-Passwort ein.", editorLoading: "Level wird gesucht...",
             editorLoadNotFound: "Kein Level mit diesem Passwort gefunden.", editorLoadError: "Fehler beim Suchen des Levels.",
             editorLoadFound: "Level gefunden! Elemente:", editorClearConfirm: "Dadurch wird alles gelöscht, was du in diesem Level gezeichnet hast. Fortfahren?",
@@ -1893,6 +1904,7 @@
             editorNeedPlatform: "Coloca al menos una plataforma antes de guardar.",
             editorSaving: "Guardando nivel...", editorSaveError: "Error al guardar el nivel. Inténtalo de nuevo.",
             editorShareResult: "✅ ¡Nivel guardado! Contraseña para compartir:",
+            editorSavedFindHint: "Consejo: puedes jugar o borrar este nivel más tarde en 📂 Mis Niveles, aquí abajo.",
             editorLoadEmpty: "Pega una contraseña de nivel.", editorLoading: "Buscando nivel...",
             editorLoadNotFound: "No se encontró ningún nivel con esa contraseña.", editorLoadError: "Error al buscar el nivel.",
             editorLoadFound: "¡Nivel encontrado! Elementos:", editorClearConfirm: "Esto borra todo lo que dibujaste en este nivel. ¿Continuar?",
@@ -2141,6 +2153,7 @@
             editorNeedPlatform: "Posiziona almeno una piattaforma prima di salvare.",
             editorSaving: "Salvataggio livello...", editorSaveError: "Errore durante il salvataggio del livello. Riprova.",
             editorShareResult: "✅ Livello salvato! Password da condividere:",
+            editorSavedFindHint: "Suggerimento: puoi giocare o eliminare questo livello dopo in 📂 I Miei Livelli, qui sotto.",
             editorLoadEmpty: "Incolla una password di livello.", editorLoading: "Ricerca del livello...",
             editorLoadNotFound: "Nessun livello trovato con questa password.", editorLoadError: "Errore durante la ricerca del livello.",
             editorLoadFound: "Livello trovato! Elementi:", editorClearConfirm: "Questo cancella tutto ciò che hai disegnato in questo livello. Continuare?",
@@ -2389,6 +2402,7 @@
             editorNeedPlatform: "Placez au moins une plateforme avant d'enregistrer.",
             editorSaving: "Enregistrement du niveau...", editorSaveError: "Erreur lors de l'enregistrement du niveau. Réessayez.",
             editorShareResult: "✅ Niveau enregistré ! Mot de passe à partager :",
+            editorSavedFindHint: "Astuce : vous pouvez rejouer ou supprimer ce niveau plus tard dans 📂 Mes Niveaux, ci-dessous.",
             editorLoadEmpty: "Collez un mot de passe de niveau.", editorLoading: "Recherche du niveau...",
             editorLoadNotFound: "Aucun niveau trouvé avec ce mot de passe.", editorLoadError: "Erreur lors de la recherche du niveau.",
             editorLoadFound: "Niveau trouvé ! Éléments :", editorClearConfirm: "Cela efface tout ce que vous avez dessiné dans ce niveau. Continuer ?",
@@ -2776,6 +2790,14 @@
                 osc.frequency.exponentialRampToValueAtTime(660, now + 0.3);
                 gain.gain.setValueAtTime(0.18 * Settings.volume, now); gain.gain.linearRampToValueAtTime(0, now + 0.4);
                 osc.start(now); osc.stop(now + 0.4);
+            } else if(type === 'speed') {
+                // NOVO: "whoosh" do acelerador de velocidade — antes ele não tinha nenhum som nem
+                // efeito visual, então o bônus (real, no código) passava despercebido e parecia que
+                // "não fazia nada".
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(260, now);
+                osc.frequency.exponentialRampToValueAtTime(720, now + 0.18);
+                gain.gain.setValueAtTime(0.14 * Settings.volume, now); gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
             }
         }
     };
@@ -3198,7 +3220,20 @@
             // (como as conversas) da conta que estava logada antes.
             sb.auth.signOut().catch(e => console.warn('Erro ao encerrar sessão anterior antes do modo visitante:', e));
             let data = this._defaultProfile(t('guestDisplayName'));
-            data.uid = 'LOCAL-GUEST-' + Date.now();
+            // FIX: antes o uid do visitante era gerado com Date.now() a cada entrada — ou seja, um
+            // ID novo TODA vez. Fases criadas no Editor são salvas na nuvem com owner_id = esse uid,
+            // então "📂 Minhas Fases" (que busca por owner_id = uid atual) nunca encontrava fases
+            // salvas em sessões anteriores como visitante — pareciam ter desaparecido, mesmo com a
+            // senha delas continuando válida. Agora o uid do visitante é gerado uma única vez e
+            // reaproveitado (via localStorage) nas próximas vezes, então as fases continuam
+            // aparecendo na lista mesmo depois de fechar e reabrir o jogo.
+            let guestUid = null;
+            try { guestUid = localStorage.getItem('bb-guest-uid'); } catch(e) {}
+            if(!guestUid) {
+                guestUid = 'LOCAL-GUEST-' + Date.now();
+                try { localStorage.setItem('bb-guest-uid', guestUid); } catch(e) {}
+            }
+            data.uid = guestUid;
             data.isGuest = true;
             this.current = data;
             document.getElementById('auth-screen').classList.add('hidden');
@@ -5283,8 +5318,14 @@
                 }
                 let now = Date.now();
                 let lastSeen = profile.lastSeenAt || now;
-                let offlineHours = Math.min(12, Math.max(0, (now - lastSeen) / 3600000));
-                let offlineGold = offlineHours >= 0.1 ? Math.floor(offlineHours * 300) : 0;
+                // FIX: recompensa offline estava MUITO generosa (300 ouro/hora, teto de 12h = até
+                // 3600 ouro só por abrir o jogo depois de um tempo fora, sem jogar nada) — dava pra
+                // comprar a arma mais cara da loja (Railgun) praticamente de graça, só esperando,
+                // o que tornava inútil qualquer preço definido na loja. Reduzido bastante (25
+                // ouro/hora, teto de 8h = até 200 ouro) pra funcionar como um mimo de "bem-vindo de
+                // volta", não como uma forma de pular o progresso jogando de verdade.
+                let offlineHours = Math.min(8, Math.max(0, (now - lastSeen) / 3600000));
+                let offlineGold = offlineHours >= 0.1 ? Math.floor(offlineHours * 25) : 0;
                 if(offlineGold > 0) Engine.walletP1 += offlineGold;
                 profile.lastSeenAt = now;
                 this.ensureMissionsToday(profile);
@@ -5531,19 +5572,19 @@
         mySlot: 1, myAccountName: '', rosterNames: {},
         cosmeticColors: [
             { id:'default', hex:null, price:0 },
-            { id:'gold',    hex:'#eab308', price:700 },
-            { id:'purple',  hex:'#a855f7', price:700 },
-            { id:'cyan',    hex:'#06b6d4', price:950 },
-            { id:'pink',    hex:'#ec4899', price:950 },
-            { id:'white',   hex:'#f8fafc', price:1300 },
-            { id:'obsidian',hex:'#1e293b', price:1300 }
+            { id:'gold',    hex:'#eab308', price:1000 },
+            { id:'purple',  hex:'#a855f7', price:1000 },
+            { id:'cyan',    hex:'#06b6d4', price:1400 },
+            { id:'pink',    hex:'#ec4899', price:1400 },
+            { id:'white',   hex:'#f8fafc', price:1900 },
+            { id:'obsidian',hex:'#1e293b', price:1900 }
         ],
         cosmeticSkins: [
             { id:'default', price:0 },
-            { id:'stripes', price:800 },
-            { id:'glow',    price:1100 },
-            { id:'stars',   price:1500 },
-            { id:'flame',   price:2000 },
+            { id:'stripes', price:1150 },
+            { id:'glow',    price:1600 },
+            { id:'stars',   price:2200 },
+            { id:'flame',   price:2900 },
             { id:'secret',  price:0, secret:true } // EASTER EGG: só some visível depois de desbloqueada, veja _checkEasterEggSequence
         ],
         defaultCosmetics() { return { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }; },
@@ -5633,20 +5674,23 @@
         // de "Opções" (Engine.openBoostOptions) que abre um menu pra escolher a duração; cada
         // duração tem um preço diferente. O efeito fica sempre ativo automaticamente enquanto
         // sobrar tempo comprado, e esse tempo só é descontado durante partidas (ver Engine.update).
+        // FIX: preços da loja aumentados (armas principalmente) — combinado com o conserto da
+        // recompensa offline, agora chegar na arma mais forte exige várias partidas jogadas de
+        // verdade, não só esperar ou juntar pouco ouro.
         shopCatalog: [
-            { id: 'wpn_pistol', price: 450, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.9, weaponAtkCd: 8 },
-            { id: 'wpn_smg', price: 800, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.6, weaponAtkCd: 5 },
-            { id: 'wpn_laser', price: 1400, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
-            { id: 'wpn_plasma', price: 2300, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
-            { id: 'wpn_cannon', price: 3600, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 2.0, weaponAtkCd: 34 },
-            { id: 'wpn_sniper', price: 5500, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 2.8, weaponAtkCd: 46 },
-            { id: 'wpn_railgun', price: 9000, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 3.4, weaponAtkCd: 58 },
-            { id: 'itm_pot', price: 60, type: 'item', itemKey: 'potion' },
-            { id: 'itm_pot3', price: 150, type: 'item', itemKey: 'potion', qty: 3 },
-            { id: 'itm_shd', price: 80, type: 'item', itemKey: 'shield' },
-            { id: 'itm_shd2', price: 140, type: 'item', itemKey: 'shield', qty: 2 },
-            { id: 'boost_speed', type: 'boost', statKey: 'speed', options: [ {minutes:10, price:60}, {minutes:30, price:150}, {minutes:60, price:260} ] },
-            { id: 'boost_hp', type: 'boost', statKey: 'hp', options: [ {minutes:10, price:70}, {minutes:30, price:170}, {minutes:60, price:290} ] }
+            { id: 'wpn_pistol', price: 650, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.9, weaponAtkCd: 8 },
+            { id: 'wpn_smg', price: 1200, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.6, weaponAtkCd: 5 },
+            { id: 'wpn_laser', price: 2200, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
+            { id: 'wpn_plasma', price: 3800, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
+            { id: 'wpn_cannon', price: 6000, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 2.0, weaponAtkCd: 34 },
+            { id: 'wpn_sniper', price: 9500, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 2.8, weaponAtkCd: 46 },
+            { id: 'wpn_railgun', price: 16000, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 3.4, weaponAtkCd: 58 },
+            { id: 'itm_pot', price: 75, type: 'item', itemKey: 'potion' },
+            { id: 'itm_pot3', price: 190, type: 'item', itemKey: 'potion', qty: 3 },
+            { id: 'itm_shd', price: 100, type: 'item', itemKey: 'shield' },
+            { id: 'itm_shd2', price: 180, type: 'item', itemKey: 'shield', qty: 2 },
+            { id: 'boost_speed', type: 'boost', statKey: 'speed', options: [ {minutes:10, price:75}, {minutes:30, price:190}, {minutes:60, price:320} ] },
+            { id: 'boost_hp', type: 'boost', statKey: 'hp', options: [ {minutes:10, price:90}, {minutes:30, price:210}, {minutes:60, price:350} ] }
         ],
         persistentUpgradesP1: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }, ownedWeapons:['default'], selectedWeaponKey:'default', boosts: { speed:0, hp:0 } },
         persistentUpgradesP2: { maxHp: 100, baseSpd: 4.8, weaponKey: 'default', weaponSpd: 13, weaponDmg: 1.0, atkCd: 16, potion: 0, shield: 0, cosmetics: { color:null, skin:'default', ownedColors:['default'], ownedSkins:['default'] }, progress: { xp:0, stats:{matchesPlayed:0,matchesWon:0,totalKills:0,totalGoldEarned:0}, claimed:[] }, ownedWeapons:['default'], selectedWeaponKey:'default', boosts: { speed:0, hp:0 } },
@@ -6041,12 +6085,22 @@
             // e reaparecia em partidas seguintes até a página ser recarregada.
             this.customLevelData = null;
             this._customLevelGemGoal = 0; this._customLevelWon = false;
-            if(typeof LevelEditor !== 'undefined') LevelEditor._testing = false;
             AIBrain.reset();
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
             document.getElementById('chest-alert').style.display = 'none';
             document.getElementById('gameover-screen').classList.add('hidden');
+            // FIX: sair pelo botão 🚪 durante o "Testar Fase" do Editor sempre mandava pro menu
+            // principal, mesmo quando o certo era voltar pro Editor de Fases (igual já acontecia
+            // ao morrer/perder, ver backToMenu()) — por isso o botão de voltar "não funcionava"
+            // enquanto se testava uma fase: ele voltava, só que pro lugar errado.
+            if(typeof LevelEditor !== 'undefined' && LevelEditor._testing) {
+                LevelEditor._testing = false;
+                this.state = 'MENU';
+                LevelEditor.open();
+                return;
+            }
+            if(typeof LevelEditor !== 'undefined') LevelEditor._testing = false;
             document.getElementById('menu-screen').classList.remove('hidden');
             this.updateMenu();
         },
@@ -7439,7 +7493,15 @@
             if(this.cdSpecial > 0) this.cdSpecial -= dt * 60;
             if(this.shieldTime > 0) this.shieldTime -= dt * 60;
             if(this.dashCooldown > 0) this.dashCooldown -= dt * 60;
-            if(this._speedPadTimer > 0) this._speedPadTimer -= dt * 60;
+            if(this._speedPadTimer > 0) {
+                this._speedPadTimer -= dt * 60;
+                // NOVO: rastro amarelo atrás do personagem enquanto o acelerador estiver ativo —
+                // dá um retorno visual contínuo (além do som ao ativar) de que o bônus de
+                // velocidade está de fato valendo, não só um número invisível internamente.
+                if(Math.random() < 0.5 && typeof Engine !== 'undefined' && Engine.particles) {
+                    Engine.particles.push(new Particle(this.x + this.w/2 - this.facing*10, this.y + this.h - 6, '#fde047', -this.facing*1.5 + (Math.random()-0.5), (Math.random()-0.5)*1.5, 14));
+                }
+            }
             if(this.mp < 100) this.mp += dt * 15;
             // NOVO: regeneração lenta e passiva de vida ao longo da partida — só recupera o HP
             // dentro da vida (coração) atual, nunca recupera uma vida/coração perdido.
@@ -7834,6 +7896,16 @@
                                 if(p.kind === 'speed') {
                                     // Acelerador: enquanto o timer estiver ativo, getEffectiveSpeed()
                                     // (Player) aplica um bônus de velocidade — ver classe Player.
+                                    // FIX: som + partículas amarelas só disparam quando o boost está
+                                    // REATIVANDO (timer estava zerado) — sem essa checagem, tocaria o
+                                    // som todo frame enquanto alguém ficasse parado em cima da
+                                    // plataforma. Isso também dava a falsa impressão de que o
+                                    // acelerador "não fazia nada", já que não existia nenhum retorno
+                                    // sonoro/visual antes desta correção.
+                                    if(a._speedPadTimer <= 0) {
+                                        AudioFX.play('speed');
+                                        if(typeof createFXBurst === 'function') createFXBurst(a.x + a.w/2, a.y + a.h, '#facc15', 8);
+                                    }
                                     a._speedPadTimer = 40;
                                 }
                             }
@@ -8062,7 +8134,9 @@
                 this._status('');
                 let box = document.getElementById('editor-share-result');
                 box.classList.remove('hidden');
-                box.innerHTML = `${t('editorShareResult')} <b style="letter-spacing:3px; font-size:1.1rem; color:#6ee7b7;">${code}</b>`;
+                // NOVO: reforça onde a fase salva pode ser encontrada depois (botão 📂 Minhas
+                // Fases logo abaixo), já que antes não ficava claro pra onde ela "ia" depois de salvar.
+                box.innerHTML = `${t('editorShareResult')} <b style="letter-spacing:3px; font-size:1.1rem; color:#6ee7b7;">${code}</b><div style="margin-top:6px; font-size:0.75rem; color:#94a3b8;">${t('editorSavedFindHint')}</div>`;
             } catch(err) {
                 console.warn('Erro ao salvar fase:', err);
                 this._status(t('editorSaveError'));
