@@ -678,6 +678,14 @@
                 <button onclick="LevelEditor.saveAndShare()" style="flex:1; min-width:220px; background:linear-gradient(to right,#10b981,#059669); color:#fff; font-weight:800;" data-i18n="editorSaveBtn">💾 Salvar e Gerar Senha</button>
             </div>
             <div id="editor-share-result" class="hidden" style="margin-top:6px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.4); border-radius:8px; padding:10px; font-size:0.85rem;"></div>
+            <button onclick="LevelEditor.openMyLevels()" style="width:100%; margin-top:10px; background:linear-gradient(to right,#0ea5e9,#0284c7); color:#fff; font-weight:800; padding:10px; border:none; border-radius:6px; cursor:pointer;" data-i18n="editorMyLevelsBtn">📂 Minhas Fases</button>
+            <div id="editor-my-levels-panel" class="hidden" style="margin-top:10px; border:1px solid #334155; border-radius:8px; padding:10px; background:rgba(2,6,23,0.5);">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                    <div class="section-title" data-i18n="editorMyLevelsTitle">📂 Minhas Fases Criadas</div>
+                    <button onclick="LevelEditor.closeMyLevels()" style="padding:5px 10px; font-size:0.75rem;" data-i18n="lobbyBackBtn">✕ Voltar</button>
+                </div>
+                <div id="editor-my-levels-list" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;"></div>
+            </div>
             <div style="border-top:1px solid #1e293b; margin-top:14px; padding-top:12px;">
                 <div class="section-title" style="margin-bottom:8px;" data-i18n="editorLoadTitle">Carregar Fase de Outro Jogador</div>
                 <div style="display:flex; gap:8px;">
@@ -1139,6 +1147,10 @@
             editorLoadEmpty: "Cole uma senha de fase.", editorLoading: "Buscando fase...",
             editorLoadNotFound: "Nenhuma fase encontrada com essa senha.", editorLoadError: "Erro ao buscar a fase.",
             editorLoadFound: "Fase encontrada! Elementos:", editorClearConfirm: "Isso apaga tudo o que você desenhou nesta fase. Continuar?",
+            editorMyLevelsBtn: "📂 Minhas Fases", editorMyLevelsTitle: "📂 Minhas Fases Criadas", editorMyLevelsLoading: "Buscando suas fases...",
+            editorMyLevelsEmpty: "Você ainda não salvou nenhuma fase.", editorMyLevelsError: "Erro ao buscar suas fases.",
+            editorMyLevelsPlayBtn: "▶ Jogar", editorMyLevelsCreatedLabel: "Criada em", editorMyLevelsDeleteConfirm: "Apagar esta fase para sempre?",
+            customLevelWinTitle: "🏆 Fase Concluída!", customLevelWinDesc: "Você coletou todos os coletáveis da fase!", editorMyLevelsElementsLabel: "elementos",
             lobbyFooterHint: "Requer conexão com a internet &bull; WebRTC via PeerJS &bull; Funciona no GitHub Pages",
             shop: {
                 stat_hp: { name: "Módulo de Vitalidade", desc: "+25 HP Máximo para o usuário." },
@@ -1388,6 +1400,10 @@
             editorLoadEmpty: "Paste a level password.", editorLoading: "Looking up level...",
             editorLoadNotFound: "No level found with that password.", editorLoadError: "Error looking up the level.",
             editorLoadFound: "Level found! Elements:", editorClearConfirm: "This erases everything you've drawn in this level. Continue?",
+            editorMyLevelsBtn: "📂 My Levels", editorMyLevelsTitle: "📂 My Created Levels", editorMyLevelsLoading: "Looking up your levels...",
+            editorMyLevelsEmpty: "You haven't saved any levels yet.", editorMyLevelsError: "Error looking up your levels.",
+            editorMyLevelsPlayBtn: "▶ Play", editorMyLevelsCreatedLabel: "Created on", editorMyLevelsDeleteConfirm: "Delete this level forever?",
+            customLevelWinTitle: "🏆 Level Complete!", customLevelWinDesc: "You collected every collectible in the level!", editorMyLevelsElementsLabel: "elements",
             lobbyFooterHint: "Requires internet connection &bull; WebRTC via PeerJS &bull; Works on GitHub Pages",
             shop: {
                 stat_hp: { name: "Vitality Module", desc: "+25 Max HP for the user." },
@@ -1632,6 +1648,10 @@
             editorLoadEmpty: "Füge ein Level-Passwort ein.", editorLoading: "Level wird gesucht...",
             editorLoadNotFound: "Kein Level mit diesem Passwort gefunden.", editorLoadError: "Fehler beim Suchen des Levels.",
             editorLoadFound: "Level gefunden! Elemente:", editorClearConfirm: "Dadurch wird alles gelöscht, was du in diesem Level gezeichnet hast. Fortfahren?",
+            editorMyLevelsBtn: "📂 Meine Level", editorMyLevelsTitle: "📂 Meine Erstellten Level", editorMyLevelsLoading: "Deine Level werden gesucht...",
+            editorMyLevelsEmpty: "Du hast noch keine Level gespeichert.", editorMyLevelsError: "Fehler beim Suchen deiner Level.",
+            editorMyLevelsPlayBtn: "▶ Spielen", editorMyLevelsCreatedLabel: "Erstellt am", editorMyLevelsDeleteConfirm: "Dieses Level für immer löschen?",
+            customLevelWinTitle: "🏆 Level Abgeschlossen!", customLevelWinDesc: "Du hast alle Sammelobjekte des Levels eingesammelt!", editorMyLevelsElementsLabel: "Elemente",
             lobbyFooterHint: "Erfordert Internetverbindung &bull; WebRTC über PeerJS &bull; Funktioniert auf GitHub Pages",
             shop: {
                 stat_hp: { name: "Vitalitätsmodul", desc: "+25 maximale HP." },
@@ -1876,6 +1896,10 @@
             editorLoadEmpty: "Pega una contraseña de nivel.", editorLoading: "Buscando nivel...",
             editorLoadNotFound: "No se encontró ningún nivel con esa contraseña.", editorLoadError: "Error al buscar el nivel.",
             editorLoadFound: "¡Nivel encontrado! Elementos:", editorClearConfirm: "Esto borra todo lo que dibujaste en este nivel. ¿Continuar?",
+            editorMyLevelsBtn: "📂 Mis Niveles", editorMyLevelsTitle: "📂 Mis Niveles Creados", editorMyLevelsLoading: "Buscando tus niveles...",
+            editorMyLevelsEmpty: "Todavía no has guardado ningún nivel.", editorMyLevelsError: "Error al buscar tus niveles.",
+            editorMyLevelsPlayBtn: "▶ Jugar", editorMyLevelsCreatedLabel: "Creado el", editorMyLevelsDeleteConfirm: "¿Borrar este nivel para siempre?",
+            customLevelWinTitle: "🏆 ¡Nivel Completado!", customLevelWinDesc: "¡Recogiste todos los coleccionables del nivel!", editorMyLevelsElementsLabel: "elementos",
             lobbyFooterHint: "Requiere conexión a internet &bull; WebRTC vía PeerJS &bull; Funciona en GitHub Pages",
             shop: {
                 stat_hp: { name: "Módulo de Vitalidad", desc: "+25 HP Máximo." },
@@ -2120,6 +2144,10 @@
             editorLoadEmpty: "Incolla una password di livello.", editorLoading: "Ricerca del livello...",
             editorLoadNotFound: "Nessun livello trovato con questa password.", editorLoadError: "Errore durante la ricerca del livello.",
             editorLoadFound: "Livello trovato! Elementi:", editorClearConfirm: "Questo cancella tutto ciò che hai disegnato in questo livello. Continuare?",
+            editorMyLevelsBtn: "📂 I Miei Livelli", editorMyLevelsTitle: "📂 I Miei Livelli Creati", editorMyLevelsLoading: "Ricerca dei tuoi livelli...",
+            editorMyLevelsEmpty: "Non hai ancora salvato nessun livello.", editorMyLevelsError: "Errore durante la ricerca dei tuoi livelli.",
+            editorMyLevelsPlayBtn: "▶ Gioca", editorMyLevelsCreatedLabel: "Creato il", editorMyLevelsDeleteConfirm: "Cancellare questo livello per sempre?",
+            customLevelWinTitle: "🏆 Livello Completato!", customLevelWinDesc: "Hai raccolto tutti i collezionabili del livello!", editorMyLevelsElementsLabel: "elementi",
             lobbyFooterHint: "Richiede connessione internet &bull; WebRTC via PeerJS &bull; Funziona su GitHub Pages",
             shop: {
                 stat_hp: { name: "Modulo di Vitalità", desc: "+25 HP Massimi." },
@@ -2364,6 +2392,10 @@
             editorLoadEmpty: "Collez un mot de passe de niveau.", editorLoading: "Recherche du niveau...",
             editorLoadNotFound: "Aucun niveau trouvé avec ce mot de passe.", editorLoadError: "Erreur lors de la recherche du niveau.",
             editorLoadFound: "Niveau trouvé ! Éléments :", editorClearConfirm: "Cela efface tout ce que vous avez dessiné dans ce niveau. Continuer ?",
+            editorMyLevelsBtn: "📂 Mes Niveaux", editorMyLevelsTitle: "📂 Mes Niveaux Créés", editorMyLevelsLoading: "Recherche de vos niveaux...",
+            editorMyLevelsEmpty: "Vous n'avez encore enregistré aucun niveau.", editorMyLevelsError: "Erreur lors de la recherche de vos niveaux.",
+            editorMyLevelsPlayBtn: "▶ Jouer", editorMyLevelsCreatedLabel: "Créé le", editorMyLevelsDeleteConfirm: "Supprimer ce niveau pour toujours ?",
+            customLevelWinTitle: "🏆 Niveau Terminé !", customLevelWinDesc: "Vous avez récupéré tous les objets à collectionner du niveau !", editorMyLevelsElementsLabel: "éléments",
             lobbyFooterHint: "Nécessite une connexion internet &bull; WebRTC via PeerJS &bull; Fonctionne sur GitHub Pages",
             shop: {
                 stat_hp: { name: "Module de Vitalité", desc: "+25 PV Max." },
@@ -5458,7 +5490,7 @@
 
     const Engine = {
         canvas: null, ctx: null, state: 'MENU', lastTime: 0,
-        isOpenWorld: false, gameMode: 'HORDA', customLevelData: null,
+        isOpenWorld: false, gameMode: 'HORDA', customLevelData: null, _customLevelGemGoal: 0, _customLevelWon: false,
         selectedArchP1: 'hero', selectedArchP2: 'vilan',
         currentShopBuyer: 1, walletP1: 100, walletP2: 100,
         killsCounter: 0, round: 1, spawnTimer: 0, goldSpawnTimer: 0, bossSpawnTimer: 0,
@@ -6002,6 +6034,14 @@
             // this.vsAI=true e recriava um bot pra jogar junto, mesmo em modos que não deveriam
             // ter IA nenhuma. Por isso a IA parecia "continuar jogando" depois de trocar de modo.
             this.vsAI = false;
+            // FIX: sair de uma partida (botão 🚪) enquanto se testava/jogava uma fase do Editor não
+            // limpava customLevelData nem a flag _testing — como só os pontos de entrada de partida
+            // (startNormalMatch/startVsAI/startCustomLevelMatch) zeravam customLevelData, e alguns
+            // fluxos passavam por aqui em vez de por eles, a fase customizada continuava "grudada"
+            // e reaparecia em partidas seguintes até a página ser recarregada.
+            this.customLevelData = null;
+            this._customLevelGemGoal = 0; this._customLevelWon = false;
+            if(typeof LevelEditor !== 'undefined') LevelEditor._testing = false;
             AIBrain.reset();
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
@@ -6787,12 +6827,18 @@
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
             this.platforms.push(new Platform(-1000, 680, 3280, 40));
+            this._customLevelGemGoal = 0; this._customLevelWon = false;
             if(this.customLevelData) {
                 // NOVO: fase criada no Editor de Fases — usa o layout salvo (plataformas normais,
                 // de salto e aceleradoras, além de coletáveis) em vez do layout padrão do modo Arena.
                 this.isOpenWorld = false;
                 (this.customLevelData.platforms || []).forEach(pl => this.platforms.push(new Platform(pl.x, pl.y, pl.w, pl.h, pl.kind)));
                 (this.customLevelData.items || []).forEach(it => this.items.push(new Item(it.x, it.y, it.type)));
+                // FIX: antes, coletar os itens de uma fase customizada só somava ouro "solto" que
+                // nunca era de fato creditado (só ao morrer ou depois de 5 minutos de cronômetro),
+                // dando a impressão de que os coletáveis "não faziam nada". Agora, se a fase tem
+                // coletáveis, juntar TODOS eles conclui a fase na hora — ver checkCustomLevelWin().
+                this._customLevelGemGoal = (this.customLevelData.items || []).filter(it => it.type === 'gem').length;
             } else if(!this.isOpenWorld) {
                 // NOVO: a Arena padrão agora mistura plataformas de salto (verde) e aceleradoras
                 // (amarelo) com as normais, além de coletáveis fixos pra explorar — os mesmos
@@ -7175,6 +7221,13 @@
             this.particles = this.particles.filter(pa => pa.life > 0);
             this.items = this.items.filter(it => !it.destroyed);
             this.enemies = this.enemies.filter(e => e.hp > 0);
+            // FIX: dá um objetivo real aos coletáveis de uma fase customizada — juntar todos os
+            // coletáveis termina a fase e credita o ouro na hora, em vez de exigir morrer ou
+            // esperar o cronômetro (ver comentário em startMatch()).
+            if(this.customLevelData && !this._customLevelWon && this._customLevelGemGoal > 0 && this.activeMatch) {
+                let gemsLeft = this.items.some(it => it.type === 'gem' && !it.destroyed);
+                if(!gemsLeft) { this._customLevelWon = true; this.triggerCustomLevelVictory(); }
+            }
             if(this.cameraShakeIntensity > 0) this.cameraShakeIntensity -= 0.4;
             this.updateHideoutAlert();
             if(this.activeMatch) {
@@ -7222,6 +7275,25 @@
                 `${desc}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: ${goldLines.join(' | ')}</span>`;
             let myP = this.players.find(p => p && p.id === this.mySlot);
             if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: Math.min(1000, myP.goldCollected), won: true });
+            this.saveProfile();
+        },
+        // NOVO: dispara quando o jogador coleta todos os coletáveis de uma fase criada no Editor
+        // de Fases — encerra a partida na hora com uma tela de vitória própria e credita o ouro
+        // coletado direto na carteira (mesma lógica de cap de $1000 usada nas outras vitórias).
+        triggerCustomLevelVictory() {
+            this.state = 'GAMEOVER'; this.activeMatch = false;
+            Hideout.active = false;
+            document.getElementById('hideout-hud').style.display = 'none';
+            document.getElementById('hideout-alert').style.display = 'none';
+            document.getElementById('gameover-screen').classList.remove('hidden');
+            document.getElementById('lbl-gameover-title').innerText = t('customLevelWinTitle');
+            this._lastEndInfo = { type: 'customLevel' };
+            let p = this.players[0];
+            let reward = p ? Math.min(1000, p.goldCollected) : 0;
+            this.walletP1 += reward;
+            document.getElementById('lbl-gameover-stats').innerHTML =
+                `${t('customLevelWinDesc')}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${reward}</span>`;
+            if(p) this.registerMatchStats({ kills: p.kills, goldEarned: reward, won: true });
             this.saveProfile();
         },
         triggerMatchEnd(winner, titleMsg, descMsg) {
@@ -7587,12 +7659,18 @@
                 ctx.shadowColor = '#facc15'; ctx.shadowBlur = 8;
                 ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h);
                 ctx.shadowBlur = 0; ctx.fillStyle = '#fde047';
+                // FIX: as flechas animadas "vazavam" pra fora dos dois lados da plataforma (o loop
+                // começa antes de this.x e a última seta podia ultrapassar this.x+this.w) — agora
+                // ficam presas (clip) exatamente na área da plataforma, então nunca desenham fora dela.
+                ctx.save();
+                ctx.beginPath(); ctx.rect(this.x, this.y, this.w, this.h); ctx.clip();
                 let off = (performance.now() / 9) % 26;
                 for(let cx = this.x - 26 + off; cx < this.x + this.w; cx += 26) {
                     ctx.beginPath();
                     ctx.moveTo(cx, this.y + this.h/2); ctx.lineTo(cx + 14, this.y + 4); ctx.lineTo(cx + 14, this.y + this.h - 4);
                     ctx.closePath(); ctx.fill();
                 }
+                ctx.restore();
             } else {
                 ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
                 ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h);
@@ -7864,6 +7942,7 @@
             let shareBox = document.getElementById('editor-share-result'); if(shareBox) shareBox.classList.add('hidden');
             let playBtn = document.getElementById('btn-editor-play-loaded'); if(playBtn) playBtn.classList.add('hidden');
             let loadStatus = document.getElementById('editor-load-status'); if(loadStatus) loadStatus.textContent = '';
+            let myLevelsPanel = document.getElementById('editor-my-levels-panel'); if(myLevelsPanel) myLevelsPanel.classList.add('hidden');
             this.selectTool(this.tool);
             this._status('');
             this._render();
@@ -8016,6 +8095,54 @@
             let data = this.loadedLevel.data;
             this.close();
             Engine.startCustomLevelMatch(data);
+        },
+        // NOVO: lista todas as fases que O PRÓPRIO JOGADOR já salvou (owner_id = conta atual),
+        // com opção de jogar direto ou apagar — antes só dava pra jogar uma fase colando a senha
+        // manualmente, mesmo as fases que você mesmo criou.
+        async openMyLevels() {
+            let panel = document.getElementById('editor-my-levels-panel');
+            let list = document.getElementById('editor-my-levels-list');
+            panel.classList.remove('hidden');
+            list.innerHTML = `<div style="font-size:0.8rem; color:#94a3b8;">${t('editorMyLevelsLoading')}</div>`;
+            if(!Accounts.current) { list.innerHTML = `<div style="font-size:0.8rem; color:#94a3b8;">${t('editorMyLevelsEmpty')}</div>`; return; }
+            try {
+                const { data, error } = await sb.from('custom_levels').select('*').eq('owner_id', Accounts.current.uid).order('created_at', { ascending: false });
+                if(error) throw error;
+                if(!data || data.length === 0) { list.innerHTML = `<div style="font-size:0.8rem; color:#94a3b8;">${t('editorMyLevelsEmpty')}</div>`; return; }
+                list.innerHTML = '';
+                data.forEach(row => {
+                    let count = ((row.data && row.data.platforms) || []).length + ((row.data && row.data.items) || []).length;
+                    let created = row.created_at ? new Date(row.created_at).toLocaleDateString() : '';
+                    let div = document.createElement('div');
+                    div.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(30,41,59,0.5); border:1px solid #334155; border-radius:8px; padding:8px 10px;';
+                    div.innerHTML = `<div style="flex:1; min-width:0;">
+                        <div style="font-weight:800; letter-spacing:2px; color:#6ee7b7;">${row.code}</div>
+                        <div style="font-size:0.72rem; color:#64748b;">${t('editorMyLevelsCreatedLabel')} ${created} &bull; ${count} ${t('editorMyLevelsElementsLabel')}</div>
+                    </div>
+                    <button class="btn-my-level-play" style="padding:8px 12px; background:linear-gradient(to right,#7c3aed,#a855f7); color:#fff; border:none; border-radius:6px; font-weight:700; white-space:nowrap; cursor:pointer;">${t('editorMyLevelsPlayBtn')}</button>
+                    <button class="btn-my-level-delete" style="padding:8px 10px; background:#7f1d1d; color:#fecaca; border:none; border-radius:6px; font-weight:700; cursor:pointer;">🗑️</button>`;
+                    div.querySelector('.btn-my-level-play').onclick = () => { this.close(); Engine.startCustomLevelMatch(row.data); };
+                    div.querySelector('.btn-my-level-delete').onclick = () => this.deleteMyLevel(row.id);
+                    list.appendChild(div);
+                });
+            } catch(err) {
+                console.warn('Erro ao buscar minhas fases:', err);
+                list.innerHTML = `<div style="font-size:0.8rem; color:#f87171;">${t('editorMyLevelsError')}</div>`;
+            }
+        },
+        closeMyLevels() {
+            let panel = document.getElementById('editor-my-levels-panel'); if(panel) panel.classList.add('hidden');
+        },
+        async deleteMyLevel(id) {
+            if(!confirm(t('editorMyLevelsDeleteConfirm'))) return;
+            try {
+                const { error } = await sb.from('custom_levels').delete().eq('id', id);
+                if(error) throw error;
+                this.openMyLevels();
+            } catch(err) {
+                console.warn('Erro ao apagar fase:', err);
+                this._status(t('editorMyLevelsError'));
+            }
         }
     };
     window.addEventListener('contextmenu', e => e.preventDefault());
