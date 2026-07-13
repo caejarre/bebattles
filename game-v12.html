@@ -674,6 +674,7 @@
             </div>
             <div id="editor-status" style="font-size:0.78rem; color:#94a3b8; min-height:16px; margin-top:4px;"></div>
             <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;">
+                <button onclick="LevelEditor.testPlay()" style="flex:1; min-width:180px; background:linear-gradient(to right,#7c3aed,#a855f7); color:#fff; font-weight:800;" data-i18n="editorTestPlayBtn">🎮 Testar Fase</button>
                 <button onclick="LevelEditor.saveAndShare()" style="flex:1; min-width:220px; background:linear-gradient(to right,#10b981,#059669); color:#fff; font-weight:800;" data-i18n="editorSaveBtn">💾 Salvar e Gerar Senha</button>
             </div>
             <div id="editor-share-result" class="hidden" style="margin-top:6px; background:rgba(16,185,129,0.12); border:1px solid rgba(16,185,129,0.4); border-radius:8px; padding:10px; font-size:0.85rem;"></div>
@@ -1128,7 +1129,7 @@
             levelEditorHint: "Escolha uma ferramenta e clique/toque na grade para posicionar. Defina um ponto de partida antes de salvar.",
             editorToolSpawn: "🚩 Início", editorToolPlatform: "▬ Plataforma", editorToolJump: "🟢 Salto",
             editorToolSpeed: "🟡 Acelerador", editorToolGem: "💎 Coletável", editorToolEraser: "🗑️ Apagar",
-            editorClearAllBtn: "Limpar Tudo", editorSaveBtn: "💾 Salvar e Gerar Senha",
+            editorClearAllBtn: "Limpar Tudo", editorSaveBtn: "💾 Salvar e Gerar Senha", editorTestPlayBtn: "🎮 Testar Fase",
             editorLoadTitle: "Carregar Fase de Outro Jogador", editorLoadPlaceholder: "Cole a senha da fase aqui...",
             editorLoadBtn: "CARREGAR", editorPlayLoadedBtn: "▶ JOGAR ESTA FASE",
             editorNeedSpawn: "Defina um ponto de partida (🚩 Início) antes de salvar.",
@@ -1377,7 +1378,7 @@
             levelEditorHint: "Pick a tool and click/tap the grid to place it. Set a spawn point before saving.",
             editorToolSpawn: "🚩 Start", editorToolPlatform: "▬ Platform", editorToolJump: "🟢 Jump Pad",
             editorToolSpeed: "🟡 Speed Booster", editorToolGem: "💎 Collectible", editorToolEraser: "🗑️ Eraser",
-            editorClearAllBtn: "Clear All", editorSaveBtn: "💾 Save and Generate Password",
+            editorClearAllBtn: "Clear All", editorSaveBtn: "💾 Save and Generate Password", editorTestPlayBtn: "🎮 Test Level",
             editorLoadTitle: "Load Another Player's Level", editorLoadPlaceholder: "Paste the level password here...",
             editorLoadBtn: "LOAD", editorPlayLoadedBtn: "▶ PLAY THIS LEVEL",
             editorNeedSpawn: "Set a spawn point (🚩 Start) before saving.",
@@ -1621,7 +1622,7 @@
             levelEditorHint: "Wähle ein Werkzeug und klicke/tippe auf das Raster, um es zu platzieren. Lege vor dem Speichern einen Startpunkt fest.",
             editorToolSpawn: "🚩 Start", editorToolPlatform: "▬ Plattform", editorToolJump: "🟢 Sprungplattform",
             editorToolSpeed: "🟡 Tempo-Booster", editorToolGem: "💎 Sammelobjekt", editorToolEraser: "🗑️ Radierer",
-            editorClearAllBtn: "Alles löschen", editorSaveBtn: "💾 Speichern und Passwort erzeugen",
+            editorClearAllBtn: "Alles löschen", editorSaveBtn: "💾 Speichern und Passwort erzeugen", editorTestPlayBtn: "🎮 Level Testen",
             editorLoadTitle: "Level eines anderen Spielers laden", editorLoadPlaceholder: "Level-Passwort hier einfügen...",
             editorLoadBtn: "LADEN", editorPlayLoadedBtn: "▶ DIESES LEVEL SPIELEN",
             editorNeedSpawn: "Lege vor dem Speichern einen Startpunkt (🚩 Start) fest.",
@@ -1865,7 +1866,7 @@
             levelEditorHint: "Elige una herramienta y haz clic/toca la cuadrícula para colocarla. Define un punto de partida antes de guardar.",
             editorToolSpawn: "🚩 Inicio", editorToolPlatform: "▬ Plataforma", editorToolJump: "🟢 Plataforma de Salto",
             editorToolSpeed: "🟡 Acelerador", editorToolGem: "💎 Coleccionable", editorToolEraser: "🗑️ Borrador",
-            editorClearAllBtn: "Borrar Todo", editorSaveBtn: "💾 Guardar y Generar Contraseña",
+            editorClearAllBtn: "Borrar Todo", editorSaveBtn: "💾 Guardar y Generar Contraseña", editorTestPlayBtn: "🎮 Probar Nivel",
             editorLoadTitle: "Cargar Nivel de Otro Jugador", editorLoadPlaceholder: "Pega aquí la contraseña del nivel...",
             editorLoadBtn: "CARGAR", editorPlayLoadedBtn: "▶ JUGAR ESTE NIVEL",
             editorNeedSpawn: "Define un punto de partida (🚩 Inicio) antes de guardar.",
@@ -2109,7 +2110,7 @@
             levelEditorHint: "Scegli uno strumento e clicca/tocca la griglia per posizionarlo. Imposta un punto di partenza prima di salvare.",
             editorToolSpawn: "🚩 Partenza", editorToolPlatform: "▬ Piattaforma", editorToolJump: "🟢 Piattaforma di Salto",
             editorToolSpeed: "🟡 Acceleratore", editorToolGem: "💎 Oggetto Collezionabile", editorToolEraser: "🗑️ Gomma",
-            editorClearAllBtn: "Cancella Tutto", editorSaveBtn: "💾 Salva e Genera Password",
+            editorClearAllBtn: "Cancella Tutto", editorSaveBtn: "💾 Salva e Genera Password", editorTestPlayBtn: "🎮 Prova Livello",
             editorLoadTitle: "Carica il Livello di un Altro Giocatore", editorLoadPlaceholder: "Incolla qui la password del livello...",
             editorLoadBtn: "CARICA", editorPlayLoadedBtn: "▶ GIOCA QUESTO LIVELLO",
             editorNeedSpawn: "Imposta un punto di partenza (🚩 Partenza) prima di salvare.",
@@ -2353,7 +2354,7 @@
             levelEditorHint: "Choisissez un outil et cliquez/touchez la grille pour le placer. Définissez un point de départ avant d'enregistrer.",
             editorToolSpawn: "🚩 Départ", editorToolPlatform: "▬ Plateforme", editorToolJump: "🟢 Plateforme à Rebond",
             editorToolSpeed: "🟡 Accélérateur", editorToolGem: "💎 Objet à Collectionner", editorToolEraser: "🗑️ Gomme",
-            editorClearAllBtn: "Tout Effacer", editorSaveBtn: "💾 Enregistrer et Générer un Mot de Passe",
+            editorClearAllBtn: "Tout Effacer", editorSaveBtn: "💾 Enregistrer et Générer un Mot de Passe", editorTestPlayBtn: "🎮 Tester le Niveau",
             editorLoadTitle: "Charger le Niveau d'un Autre Joueur", editorLoadPlaceholder: "Collez ici le mot de passe du niveau...",
             editorLoadBtn: "CHARGER", editorPlayLoadedBtn: "▶ JOUER À CE NIVEAU",
             editorNeedSpawn: "Définissez un point de départ (🚩 Départ) avant d'enregistrer.",
@@ -7290,8 +7291,18 @@
         backToMenu() {
             OnlineSync.disconnect();
             this.vsAI = false;
+            this.customLevelData = null;
             document.getElementById('gameover-screen').classList.add('hidden');
             document.getElementById('continue-screen').classList.add('hidden');
+            if(LevelEditor._testing) {
+                // NOVO: se a partida era um "Testar Fase" do Editor, volta pro editor em vez do menu
+                // — o layout desenhado continua intacto (LevelEditor.platforms/items/spawn não foram
+                // tocados), então dá pra ajustar e testar de novo sem perder nada.
+                LevelEditor._testing = false;
+                this.state = 'MENU';
+                LevelEditor.open();
+                return;
+            }
             document.getElementById('menu-screen').classList.remove('hidden');
             this.state = 'MENU'; this.updateMenu();
         },
@@ -7939,6 +7950,15 @@
             let s = '';
             for(let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
             return s;
+        },
+        _testing: false,
+        testPlay() {
+            if(!this.spawn) { this._status(t('editorNeedSpawn')); return; }
+            if(this.platforms.length === 0) { this._status(t('editorNeedPlatform')); return; }
+            this._testing = true;
+            document.getElementById('level-editor-screen').classList.add('hidden');
+            let data = { platforms: this.platforms, items: this.items, spawn: this.spawn };
+            Engine.startCustomLevelMatch(data);
         },
         async saveAndShare() {
             if(!this.spawn) { this._status(t('editorNeedSpawn')); return; }
