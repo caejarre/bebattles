@@ -672,6 +672,25 @@
                 <span id="ach-xp-text" style="font-size:0.72rem; color:#94a3b8; white-space:nowrap;">0/100 XP</span>
             </div>
             <p style="font-size:0.78rem; color:#64748b; margin:2px 0 0;" data-i18n="achievementsHint">Ganhe experiência jogando e completando desafios para subir de nível.</p>
+            <!-- NOVO: seção de Perfil — títulos/emblemas desbloqueados, prestígio no Modo Infinito
+                 e a melhor marca de sobrevivência, tudo num lugar só, acessível também pelas
+                 Configurações (ver botão "Meu Perfil"). -->
+            <div style="background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; display:flex; flex-direction:column; gap:8px;">
+                <h3 style="margin:0; font-size:0.95rem; color:#facc15;" data-i18n="profileSectionTitle">🎖️ Meu Perfil</h3>
+                <div id="profile-titles-list" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#94a3b8;">
+                    <span data-i18n="profilePrestigeLabel">✨ Prestígio</span>
+                    <span id="lbl-profile-prestige" style="color:#e9d5ff; font-weight:700;">0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#94a3b8;">
+                    <span data-i18n="profileInfiniteBestLabel">⏱ Melhor Marca (Infinito)</span>
+                    <span id="lbl-profile-infinite-best" style="color:#e9d5ff; font-weight:700;">--</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.78rem; color:#94a3b8;">
+                    <span data-i18n="profileBetsWonLabel">🎲 Apostas Vencidas</span>
+                    <span id="lbl-profile-bets-won" style="color:#e9d5ff; font-weight:700;">0</span>
+                </div>
+            </div>
             <div id="achievements-list" style="display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; margin-top:4px;"></div>
         </div>
     </div>
@@ -800,6 +819,10 @@
             <div class="config-section">
                 <div class="section-title" data-i18n="musicSectionTitle">Música de Fundo</div>
                 <button id="btn-toggle-music" class="active" onclick="Engine.toggleMusic()" style="width:100%;">Música: ATIVADA</button>
+            </div>
+            <div class="config-section">
+                <div class="section-title" data-i18n="profileSectionTitle2">Perfil</div>
+                <button onclick="Engine.openAchievements()" style="width:100%; background:#78350f; border-color:#b45309; color:#fcd34d;" data-i18n="openProfileBtn">🎖️ MEU PERFIL (EMBLEMAS)</button>
             </div>
             <div class="config-section">
                 <div class="section-title" data-i18n="tutorialSectionTitle">Tutorial</div>
@@ -1130,6 +1153,8 @@
             cosmeticsTitle: "Aparência do Personagem", cosmeticsColorLabel: "Cor", cosmeticsSkinLabel: "Visual",
             achievementsBtn: "🏆 Conquistas", levelBadgeLabel: "Nv.", achievementsTitle: "🏆 Conquistas",
             achievementsHint: "Ganhe experiência jogando e completando desafios para subir de nível.",
+            profileSectionTitle: "🎖️ Meu Perfil", profileSectionTitle2: "Perfil", openProfileBtn: "🎖️ MEU PERFIL (EMBLEMAS)",
+            profilePrestigeLabel: "✨ Prestígio", profileInfiniteBestLabel: "⏱ Melhor Marca (Infinito)", profileBetsWonLabel: "🎲 Apostas Vencidas",
             levelUpToast: "Você subiu para o nível {level}!", achievementUnlockedToast: "Conquista desbloqueada: {name}",
             ach_first_win_name: "Primeira Vitória", ach_first_win_desc: "Vença 1 partida.",
             ach_veteran_name: "Veterano", ach_veteran_desc: "Jogue 10 partidas.",
@@ -1292,7 +1317,7 @@
             tut9Title: "Multiplayer Online", tut9Body: "Clique em <b>🌐 Online</b> para criar ou entrar em uma sala com até 4 jogadores! Convide amigos e jogue partidas em tempo real pela internet.",
             tut10Title: "Amigos e Chat", tut10Body: "Use <b>🔎 Jogadores</b> para buscar e adicionar amigos. Converse pelo <b>chat lateral</b>, crie grupos e combine partidas com sua turma.",
             tut11Title: "Configurações", tut11Body: "No botão <b>⚙</b> você ajusta volume, som, música, idioma e pode <b>reabrir este tutorial</b> a qualquer momento. Bom jogo!",
-            tut21Title: "Power-ups", tut21Body: "Durante a partida, power-ups temporários aparecem sozinhos no mapa: <b>🛡 Escudo</b> (fica invulnerável), <b>⚡ Fúria</b> (dano dobrado) e <b>➤ Velocidade</b>. Toque neles para ativar o efeito por alguns segundos!", tut22Title: "Pausar", tut22Body: "Use o botão <b>⏸</b> do lado do botão de sair (ou a tecla <b>P</b> no PC) para pausar a partida a qualquer momento. Não é possível pausar em partidas online.", tut23Title: "Aposta Pré-Partida", tut23Body: "No modo <b>Caça ao Ouro</b>, você pode apostar parte do seu ouro antes de começar (até $200). Se vencer, sua aposta dobra — se perder, ela some. A partida fica mais difícil enquanto a aposta estiver ativa, e você só pode apostar 3 vezes por dia.", tut24Title: "Novidades: Combos, Títulos e Desafios", tut24Body: "Fique de olho nas novidades: o <b>Chefe</b> agora é bem mais forte; algumas plataformas se movem sozinhas (lados ou cima/baixo); matar vários inimigos rápido sem tomar dano dá um <b>combo de ouro</b>; bater sua própria marca no <b>Modo Infinito</b> concede um selo de <b>Prestígio</b> permanente; títulos como <b>Sobrevivente Lendário</b> (1000+ segundos no Infinito) e <b>Apostador de Sorte</b> (10 apostas vencidas) aparecem ao lado do seu nome; em partidas online de 3-4 jogadores, quem morre agora pode assistir o resto como <b>espectador</b>; e novas <b>missões diárias</b> foram adicionadas.",
+            tut21Title: "Power-ups", tut21Body: "Durante a partida, power-ups temporários aparecem sozinhos no mapa: <b>🛡 Escudo</b> (fica invulnerável), <b>⚡ Fúria</b> (dano dobrado) e <b>➤ Velocidade</b>. Toque neles para ativar o efeito por alguns segundos!", tut22Title: "Pausar", tut22Body: "Use o botão <b>⏸</b> do lado do botão de sair (ou a tecla <b>P</b> no PC) para pausar a partida a qualquer momento. Não é possível pausar em partidas online.", tut23Title: "Aposta Pré-Partida", tut23Body: "No modo <b>Caça ao Ouro</b>, você pode apostar parte do seu ouro antes de começar (até $200). Se vencer, sua aposta dobra — se perder, ela some. A partida fica mais difícil enquanto a aposta estiver ativa, e você só pode apostar 3 vezes por dia.", tut24Title: "Novidades: Combos, Títulos e Desafios", tut24Body: "Fique de olho nas novidades: o <b>Chefe</b> agora é bem mais forte; algumas plataformas se movem sozinhas (lados ou cima/baixo); matar vários inimigos rápido sem tomar dano dá um <b>combo de ouro</b>; bater sua própria marca no <b>Modo Infinito</b> concede um selo de <b>Prestígio</b> permanente; títulos como <b>Sobrevivente Lendário</b> (1000+ segundos no Infinito) e <b>Apostador de Sorte</b> (10 apostas vencidas) aparecem ao lado do seu nome; em partidas online de 3-4 jogadores, quem morre agora pode assistir o resto como <b>espectador</b>; e novas <b>missões diárias</b> foram adicionadas. Você pode ver todos os seus emblemas e recordes a qualquer momento em <b>Configurações → Meu Perfil</b>.",
 
             tut12Title: "Escolha seu Herói", tut12Body: "Antes de começar, escolha um <b>arquétipo</b>: Hero (balanceado), Vilan (tiro triplo em leque) ou Killer (veloz e letal). Cada um joga de um jeito diferente!",
             tut13Title: "Modos de Jogo", tut13Body: "Escolha entre <b>Horda Solo</b>, <b>Caça ao Ouro</b>, <b>Modo Titã</b> (inimigo super forte), <b>Modo Chefe</b> (boss) ou <b>Jogo Infinito</b> (a dificuldade sobe sem parar até você perder, e o ouro que você ganha depende de até onde sobreviveu). Também dá pra jogar <b>Duelo 1v1 Local</b>, com dois jogadores no mesmo teclado (P1 e P2). Você também pode ativar o <b>Mundo Aberto</b> para jogar em um mapa infinito no modo solo.",
@@ -1391,6 +1416,8 @@
             cosmeticsTitle: "Character Appearance", cosmeticsColorLabel: "Color", cosmeticsSkinLabel: "Look",
             achievementsBtn: "🏆 Achievements", levelBadgeLabel: "Lv.", achievementsTitle: "🏆 Achievements",
             achievementsHint: "Earn experience by playing and completing challenges to level up.",
+            profileSectionTitle: "🎖️ My Profile", profileSectionTitle2: "Profile", openProfileBtn: "🎖️ MY PROFILE (BADGES)",
+            profilePrestigeLabel: "✨ Prestige", profileInfiniteBestLabel: "⏱ Best Record (Infinite)", profileBetsWonLabel: "🎲 Bets Won",
             levelUpToast: "You leveled up to level {level}!", achievementUnlockedToast: "Achievement unlocked: {name}",
             ach_first_win_name: "First Victory", ach_first_win_desc: "Win 1 match.",
             ach_veteran_name: "Veteran", ach_veteran_desc: "Play 10 matches.",
@@ -1552,7 +1579,7 @@
             tut9Title: "Online Multiplayer", tut9Body: "Click <b>🌐 Online</b> to create or join a room with up to 4 players! Invite friends and play real-time matches over the internet.",
             tut10Title: "Friends and Chat", tut10Body: "Use <b>🔎 Players</b> to search for and add friends. Chat via the <b>side chat panel</b>, create groups, and set up matches with your crew.",
             tut11Title: "Settings", tut11Body: "In the <b>⚙</b> button you can adjust volume, sound, music, language, and <b>reopen this tutorial</b> anytime. Have fun!",
-            tut21Title: "Power-ups", tut21Body: "During the match, temporary power-ups appear randomly on the map: <b>🛡 Shield</b> (become invulnerable), <b>⚡ Fury</b> (double damage), and <b>➤ Speed</b>. Touch them to activate the effect for a few seconds!", tut22Title: "Pause", tut22Body: "Use the <b>⏸</b> button next to the exit button (or the <b>P</b> key on PC) to pause the match anytime. Pausing is not available in online matches.", tut23Title: "Pre-Match Bet", tut23Body: "In <b>Gold Rush</b> mode, you can bet part of your gold before starting (up to $200). Win and your bet doubles — lose and it’s gone. The match gets harder while a bet is active, and you can only bet 3 times per day.", tut24Title: "New: Combos, Titles & Challenges", tut24Body: "Check out what’s new: the <b>Boss</b> is now much tougher; some platforms move on their own (sideways or up/down); killing several enemies fast without taking damage gives a <b>gold combo</b>; beating your own <b>Infinite Mode</b> record grants a permanent <b>Prestige</b> badge; titles like <b>Legendary Survivor</b> (1000+ seconds in Infinite) and <b>Lucky Gambler</b> (10 bets won) show next to your name; in 3-4 player online matches, anyone who dies can now <b>spectate</b> the rest of the match; and new <b>daily missions</b> were added.",
+            tut21Title: "Power-ups", tut21Body: "During the match, temporary power-ups appear randomly on the map: <b>🛡 Shield</b> (become invulnerable), <b>⚡ Fury</b> (double damage), and <b>➤ Speed</b>. Touch them to activate the effect for a few seconds!", tut22Title: "Pause", tut22Body: "Use the <b>⏸</b> button next to the exit button (or the <b>P</b> key on PC) to pause the match anytime. Pausing is not available in online matches.", tut23Title: "Pre-Match Bet", tut23Body: "In <b>Gold Rush</b> mode, you can bet part of your gold before starting (up to $200). Win and your bet doubles — lose and it’s gone. The match gets harder while a bet is active, and you can only bet 3 times per day.", tut24Title: "New: Combos, Titles & Challenges", tut24Body: "Check out what’s new: the <b>Boss</b> is now much tougher; some platforms move on their own (sideways or up/down); killing several enemies fast without taking damage gives a <b>gold combo</b>; beating your own <b>Infinite Mode</b> record grants a permanent <b>Prestige</b> badge; titles like <b>Legendary Survivor</b> (1000+ seconds in Infinite) and <b>Lucky Gambler</b> (10 bets won) show next to your name; in 3-4 player online matches, anyone who dies can now <b>spectate</b> the rest of the match; and new <b>daily missions</b> were added. You can check all your badges and records anytime under <b>Settings → My Profile</b>.",
 
             tut12Title: "Choose Your Hero", tut12Body: "Before starting, pick an <b>archetype</b>: Hero (balanced), Vilan (triple spread shot) or Killer (fast and lethal). Each one plays differently!",
             tut13Title: "Game Modes", tut13Body: "Choose between <b>Solo Horde</b>, <b>Gold Rush</b>, <b>Titan Mode</b> (super strong enemy), <b>Boss Mode</b>, or <b>Infinite Mode</b> (difficulty keeps rising until you die, and the gold you earn depends on how far you survived). You can also play <b>Local 1v1 Duel</b>, with two players on the same keyboard (P1 and P2). You can also enable <b>Open World</b> to play on an infinite map in solo mode.",
@@ -1651,6 +1678,8 @@
             cosmeticsTitle: "Charakter-Aussehen", cosmeticsColorLabel: "Farbe", cosmeticsSkinLabel: "Look",
             achievementsBtn: "🏆 Erfolge", levelBadgeLabel: "Lv.", achievementsTitle: "🏆 Erfolge",
             achievementsHint: "Sammle Erfahrung durch Spielen und das Abschließen von Herausforderungen, um aufzusteigen.",
+            profileSectionTitle: "🎖️ Mein Profil", profileSectionTitle2: "Profil", openProfileBtn: "🎖️ MEIN PROFIL (ABZEICHEN)",
+            profilePrestigeLabel: "✨ Prestige", profileInfiniteBestLabel: "⏱ Bester Rekord (Unendlich)", profileBetsWonLabel: "🎲 Gewonnene Wetten",
             levelUpToast: "Du bist auf Level {level} aufgestiegen!", achievementUnlockedToast: "Erfolg freigeschaltet: {name}",
             ach_first_win_name: "Erster Sieg", ach_first_win_desc: "Gewinne 1 Partie.",
             ach_veteran_name: "Veteran", ach_veteran_desc: "Spiele 10 Partien.",
@@ -1807,7 +1836,7 @@
             tut9Title: "Online-Multiplayer", tut9Body: "Klicke auf <b>🌐 Online</b>, um einen Raum mit bis zu 4 Spielern zu erstellen oder ihm beizutreten! Lade Freunde ein und spiele Echtzeit-Matches übers Internet.",
             tut10Title: "Freunde und Chat", tut10Body: "Benutze <b>🔎 Spieler</b>, um Freunde zu suchen und hinzuzufügen. Chatte über die <b>Seitenleiste</b>, erstelle Gruppen und verabrede Matches mit deiner Gruppe.",
             tut11Title: "Einstellungen", tut11Body: "Über die Schaltfläche <b>⚙</b> kannst du Lautstärke, Sound, Musik, Sprache anpassen und <b>dieses Tutorial jederzeit erneut öffnen</b>. Viel Spaß!",
-            tut21Title: "Power-ups", tut21Body: "Während der Partie erscheinen zufällig temporäre Power-ups auf der Karte: <b>🛡 Schild</b> (unverwundbar werden), <b>⚡ Wut</b> (doppelter Schaden) und <b>➤ Geschwindigkeit</b>. Berühre sie, um den Effekt für ein paar Sekunden zu aktivieren!", tut22Title: "Pausieren", tut22Body: "Nutze die Schaltfläche <b>⏸</b> neben dem Verlassen-Button (oder die Taste <b>P</b> am PC), um die Partie jederzeit zu pausieren. In Online-Partien ist Pausieren nicht möglich.", tut23Title: "Wette vor dem Spiel", tut23Body: "Im Modus <b>Goldrausch</b> kannst du vor dem Start einen Teil deines Goldes setzen (bis zu $200). Gewinnst du, verdoppelt sich deine Wette — verlierst du, ist sie weg. Die Partie wird schwieriger, solange eine Wette aktiv ist, und du kannst nur 3-mal pro Tag wetten.", tut24Title: "Neu: Combos, Titel & Herausforderungen", tut24Body: "Das ist neu: Der <b>Boss</b> ist jetzt deutlich stärker; manche Plattformen bewegen sich selbstständig (seitlich oder auf/ab); mehrere Gegner schnell ohne Schaden zu besiegen gibt einen <b>Gold-Combo</b>; deinen eigenen Rekord im <b>Unendlichen Modus</b> zu schlagen bringt ein dauerhaftes <b>Prestige</b>-Abzeichen; Titel wie <b>Legendärer Überlebender</b> (1000+ Sekunden im Unendlichen Modus) und <b>Glücksspieler</b> (10 gewonnene Wetten) erscheinen neben deinem Namen; in Online-Partien mit 3-4 Spielern können Gestorbene jetzt den Rest als <b>Zuschauer</b> verfolgen; und es gibt neue <b>tägliche Missionen</b>.",
+            tut21Title: "Power-ups", tut21Body: "Während der Partie erscheinen zufällig temporäre Power-ups auf der Karte: <b>🛡 Schild</b> (unverwundbar werden), <b>⚡ Wut</b> (doppelter Schaden) und <b>➤ Geschwindigkeit</b>. Berühre sie, um den Effekt für ein paar Sekunden zu aktivieren!", tut22Title: "Pausieren", tut22Body: "Nutze die Schaltfläche <b>⏸</b> neben dem Verlassen-Button (oder die Taste <b>P</b> am PC), um die Partie jederzeit zu pausieren. In Online-Partien ist Pausieren nicht möglich.", tut23Title: "Wette vor dem Spiel", tut23Body: "Im Modus <b>Goldrausch</b> kannst du vor dem Start einen Teil deines Goldes setzen (bis zu $200). Gewinnst du, verdoppelt sich deine Wette — verlierst du, ist sie weg. Die Partie wird schwieriger, solange eine Wette aktiv ist, und du kannst nur 3-mal pro Tag wetten.", tut24Title: "Neu: Combos, Titel & Herausforderungen", tut24Body: "Das ist neu: Der <b>Boss</b> ist jetzt deutlich stärker; manche Plattformen bewegen sich selbstständig (seitlich oder auf/ab); mehrere Gegner schnell ohne Schaden zu besiegen gibt einen <b>Gold-Combo</b>; deinen eigenen Rekord im <b>Unendlichen Modus</b> zu schlagen bringt ein dauerhaftes <b>Prestige</b>-Abzeichen; Titel wie <b>Legendärer Überlebender</b> (1000+ Sekunden im Unendlichen Modus) und <b>Glücksspieler</b> (10 gewonnene Wetten) erscheinen neben deinem Namen; in Online-Partien mit 3-4 Spielern können Gestorbene jetzt den Rest als <b>Zuschauer</b> verfolgen; und es gibt neue <b>tägliche Missionen</b>. Du kannst alle deine Abzeichen und Rekorde jederzeit unter <b>Einstellungen → Mein Profil</b> einsehen.",
 
             tut12Title: "Wähle deinen Helden", tut12Body: "Bevor du startest, wähle einen <b>Archetyp</b>: Hero (ausgewogen), Vilan (dreifacher Streuschuss) oder Killer (schnell und tödlich). Jeder spielt sich anders!",
             tut13Title: "Spielmodi", tut13Body: "Wähle zwischen <b>Solo-Horde</b>, <b>Goldrausch</b>, <b>Titan-Modus</b> (super starker Gegner), <b>Boss-Modus</b> oder <b>Unendlicher Modus</b> (die Schwierigkeit steigt ständig, bis du stirbst, und das Gold hängt davon ab, wie lange du überlebt hast). Du kannst auch <b>Lokales 1v1-Duell</b> spielen, mit zwei Spielern an derselben Tastatur (P1 und P2). Du kannst auch die <b>Offene Welt</b> aktivieren, um im Solo-Modus auf einer unendlichen Karte zu spielen.",
@@ -1906,6 +1935,8 @@
             cosmeticsTitle: "Apariencia del Personaje", cosmeticsColorLabel: "Color", cosmeticsSkinLabel: "Aspecto",
             achievementsBtn: "🏆 Logros", levelBadgeLabel: "Niv.", achievementsTitle: "🏆 Logros",
             achievementsHint: "Gana experiencia jugando y completando desafíos para subir de nivel.",
+            profileSectionTitle: "🎖️ Mi Perfil", profileSectionTitle2: "Perfil", openProfileBtn: "🎖️ MI PERFIL (EMBLEMAS)",
+            profilePrestigeLabel: "✨ Prestigio", profileInfiniteBestLabel: "⏱ Mejor Marca (Infinito)", profileBetsWonLabel: "🎲 Apuestas Ganadas",
             levelUpToast: "¡Subiste al nivel {level}!", achievementUnlockedToast: "Logro desbloqueado: {name}",
             ach_first_win_name: "Primera Victoria", ach_first_win_desc: "Gana 1 partida.",
             ach_veteran_name: "Veterano", ach_veteran_desc: "Juega 10 partidas.",
@@ -2062,7 +2093,7 @@
             tut9Title: "Multijugador en Línea", tut9Body: "Haz clic en <b>🌐 Online</b> para crear o unirte a una sala con hasta 4 jugadores. ¡Invita amigos y juega partidas en tiempo real por internet!",
             tut10Title: "Amigos y Chat", tut10Body: "Usa <b>🔎 Jugadores</b> para buscar y agregar amigos. Chatea por el <b>panel lateral</b>, crea grupos y organiza partidas con tu grupo.",
             tut11Title: "Configuración", tut11Body: "En el botón <b>⚙</b> puedes ajustar volumen, sonido, música, idioma, y <b>reabrir este tutorial</b> cuando quieras. ¡Buen juego!",
-            tut21Title: "Power-ups", tut21Body: "Durante la partida, aparecen power-ups temporales al azar en el mapa: <b>🛡 Escudo</b> (te vuelves invulnerable), <b>⚡ Furia</b> (daño doblado) y <b>➤ Velocidad</b>. ¡Tócalos para activar el efecto por unos segundos!", tut22Title: "Pausar", tut22Body: "Usa el botón <b>⏸</b> junto al botón de salir (o la tecla <b>P</b> en PC) para pausar la partida en cualquier momento. No se puede pausar en partidas online.", tut23Title: "Apuesta Pre-Partida", tut23Body: "En el modo <b>Caza del Oro</b>, puedes apostar parte de tu oro antes de empezar (hasta $200). Si ganas, tu apuesta se duplica — si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa, y solo puedes apostar 3 veces al día.", tut24Title: "Novedades: Combos, Títulos y Desafíos", tut24Body: "Novedades a tener en cuenta: el <b>Jefe</b> ahora es mucho más fuerte; algunas plataformas se mueven solas (a los lados o arriba/abajo); matar varios enemigos rápido sin recibir daño da un <b>combo de oro</b>; superar tu propia marca en el <b>Modo Infinito</b> otorga una insignia permanente de <b>Prestigio</b>; títulos como <b>Superviviente Legendario</b> (1000+ segundos en Infinito) y <b>Apostador Afortunado</b> (10 apuestas ganadas) aparecen junto a tu nombre; en partidas online de 3-4 jugadores, quien muere ahora puede ver el resto como <b>espectador</b>; y se añadieron nuevas <b>misiones diarias</b>.",
+            tut21Title: "Power-ups", tut21Body: "Durante la partida, aparecen power-ups temporales al azar en el mapa: <b>🛡 Escudo</b> (te vuelves invulnerable), <b>⚡ Furia</b> (daño doblado) y <b>➤ Velocidad</b>. ¡Tócalos para activar el efecto por unos segundos!", tut22Title: "Pausar", tut22Body: "Usa el botón <b>⏸</b> junto al botón de salir (o la tecla <b>P</b> en PC) para pausar la partida en cualquier momento. No se puede pausar en partidas online.", tut23Title: "Apuesta Pre-Partida", tut23Body: "En el modo <b>Caza del Oro</b>, puedes apostar parte de tu oro antes de empezar (hasta $200). Si ganas, tu apuesta se duplica — si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa, y solo puedes apostar 3 veces al día.", tut24Title: "Novedades: Combos, Títulos y Desafíos", tut24Body: "Novedades a tener en cuenta: el <b>Jefe</b> ahora es mucho más fuerte; algunas plataformas se mueven solas (a los lados o arriba/abajo); matar varios enemigos rápido sin recibir daño da un <b>combo de oro</b>; superar tu propia marca en el <b>Modo Infinito</b> otorga una insignia permanente de <b>Prestigio</b>; títulos como <b>Superviviente Legendario</b> (1000+ segundos en Infinito) y <b>Apostador Afortunado</b> (10 apuestas ganadas) aparecen junto a tu nombre; en partidas online de 3-4 jugadores, quien muere ahora puede ver el resto como <b>espectador</b>; y se añadieron nuevas <b>misiones diarias</b>. Puedes ver todos tus emblemas y récords en cualquier momento en <b>Configuración → Mi Perfil</b>.",
 
             tut12Title: "Elige tu Héroe", tut12Body: "Antes de empezar, elige un <b>arquetipo</b>: Hero (equilibrado), Vilan (disparo triple en abanico) o Killer (veloz y letal). ¡Cada uno se juega de forma distinta!",
             tut13Title: "Modos de Juego", tut13Body: "Elige entre <b>Horda Solo</b>, <b>Caza del Oro</b>, <b>Modo Titán</b> (enemigo súper fuerte), <b>Modo Jefe</b> o <b>Modo Infinito</b> (la dificultad sube sin parar hasta que mueras, y el oro que ganas depende de hasta dónde sobreviviste). También puedes jugar <b>Duelo 1v1 Local</b>, con dos jugadores en el mismo teclado (P1 y P2). También puedes activar el <b>Mundo Abierto</b> para jugar en un mapa infinito en modo solo.",
@@ -2161,6 +2192,8 @@
             cosmeticsTitle: "Aspetto del Personaggio", cosmeticsColorLabel: "Colore", cosmeticsSkinLabel: "Aspetto Visivo",
             achievementsBtn: "🏆 Obiettivi", levelBadgeLabel: "Lv.", achievementsTitle: "🏆 Obiettivi",
             achievementsHint: "Guadagna esperienza giocando e completando le sfide per salire di livello.",
+            profileSectionTitle: "🎖️ Il Mio Profilo", profileSectionTitle2: "Profilo", openProfileBtn: "🎖️ IL MIO PROFILO (DISTINTIVI)",
+            profilePrestigeLabel: "✨ Prestigio", profileInfiniteBestLabel: "⏱ Miglior Record (Infinita)", profileBetsWonLabel: "🎲 Scommesse Vinte",
             levelUpToast: "Sei salito al livello {level}!", achievementUnlockedToast: "Obiettivo sbloccato: {name}",
             ach_first_win_name: "Prima Vittoria", ach_first_win_desc: "Vinci 1 partita.",
             ach_veteran_name: "Veterano", ach_veteran_desc: "Gioca 10 partite.",
@@ -2317,7 +2350,7 @@
             tut9Title: "Multiplayer Online", tut9Body: "Clicca su <b>🌐 Online</b> per creare o unirti a una stanza con fino a 4 giocatori! Invita amici e gioca partite in tempo reale su internet.",
             tut10Title: "Amici e Chat", tut10Body: "Usa <b>🔎 Giocatori</b> per cercare e aggiungere amici. Chatta tramite il <b>pannello laterale</b>, crea gruppi e organizza partite con la tua squadra.",
             tut11Title: "Impostazioni", tut11Body: "Nel pulsante <b>⚙</b> puoi regolare volume, suono, musica, lingua e <b>riaprire questo tutorial</b> in qualsiasi momento. Buon divertimento!",
-            tut21Title: "Power-up", tut21Body: "Durante la partita, power-up temporanei appaiono a caso sulla mappa: <b>🛡 Scudo</b> (diventi invulnerabile), <b>⚡ Furia</b> (danno raddoppiato) e <b>➤ Velocità</b>. Toccali per attivare l’effetto per qualche secondo!", tut22Title: "Pausa", tut22Body: "Usa il pulsante <b>⏸</b> accanto al pulsante di uscita (o il tasto <b>P</b> su PC) per mettere in pausa la partita in qualsiasi momento. Non è possibile mettere in pausa nelle partite online.", tut23Title: "Scommessa Pre-Partita", tut23Body: "Nella modalità <b>Caccia all’Oro</b>, puoi scommettere parte del tuo oro prima di iniziare (fino a $200). Se vinci, la tua scommessa raddoppia — se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva, e puoi scommettere solo 3 volte al giorno.", tut24Title: "Novità: Combo, Titoli e Sfide", tut24Body: "Ecco le novità: il <b>Boss</b> ora è molto più forte; alcune piattaforme si muovono da sole (lateralmente o su/giù); sconfiggere più nemici velocemente senza subire danni dà una <b>combo d’oro</b>; battere il tuo record nella <b>Modalità Infinita</b> concede un distintivo permanente di <b>Prestigio</b>; titoli come <b>Sopravvissuto Leggendario</b> (1000+ secondi in Infinita) e <b>Scommettitore Fortunato</b> (10 scommesse vinte) appaiono accanto al tuo nome; nelle partite online da 3-4 giocatori, chi muore ora può guardare il resto come <b>spettatore</b>; e sono state aggiunte nuove <b>missioni giornaliere</b>.",
+            tut21Title: "Power-up", tut21Body: "Durante la partita, power-up temporanei appaiono a caso sulla mappa: <b>🛡 Scudo</b> (diventi invulnerabile), <b>⚡ Furia</b> (danno raddoppiato) e <b>➤ Velocità</b>. Toccali per attivare l’effetto per qualche secondo!", tut22Title: "Pausa", tut22Body: "Usa il pulsante <b>⏸</b> accanto al pulsante di uscita (o il tasto <b>P</b> su PC) per mettere in pausa la partita in qualsiasi momento. Non è possibile mettere in pausa nelle partite online.", tut23Title: "Scommessa Pre-Partita", tut23Body: "Nella modalità <b>Caccia all’Oro</b>, puoi scommettere parte del tuo oro prima di iniziare (fino a $200). Se vinci, la tua scommessa raddoppia — se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva, e puoi scommettere solo 3 volte al giorno.", tut24Title: "Novità: Combo, Titoli e Sfide", tut24Body: "Ecco le novità: il <b>Boss</b> ora è molto più forte; alcune piattaforme si muovono da sole (lateralmente o su/giù); sconfiggere più nemici velocemente senza subire danni dà una <b>combo d’oro</b>; battere il tuo record nella <b>Modalità Infinita</b> concede un distintivo permanente di <b>Prestigio</b>; titoli come <b>Sopravvissuto Leggendario</b> (1000+ secondi in Infinita) e <b>Scommettitore Fortunato</b> (10 scommesse vinte) appaiono accanto al tuo nome; nelle partite online da 3-4 giocatori, chi muore ora può guardare il resto come <b>spettatore</b>; e sono state aggiunte nuove <b>missioni giornaliere</b>. Puoi controllare tutti i tuoi distintivi e record in qualsiasi momento in <b>Impostazioni → Il Mio Profilo</b>.",
 
             tut12Title: "Scegli il tuo Eroe", tut12Body: "Prima di iniziare, scegli un <b>archetipo</b>: Hero (bilanciato), Vilan (tripla raffica a ventaglio) o Killer (veloce e letale). Ognuno si gioca in modo diverso!",
             tut13Title: "Modalità di Gioco", tut13Body: "Scegli tra <b>Orda Solo</b>, <b>Caccia all'Oro</b>, <b>Modalità Titano</b> (nemico super forte), <b>Modalità Boss</b> o <b>Modalità Infinita</b> (la difficoltà continua a salire finché non muori, e l'oro che guadagni dipende da quanto sei sopravvissuto). Puoi anche giocare <b>Duello 1v1 Locale</b>, con due giocatori sulla stessa tastiera (P1 e P2). Puoi anche attivare il <b>Mondo Aperto</b> per giocare su una mappa infinita in modalità solo.",
@@ -2416,6 +2449,8 @@
             cosmeticsTitle: "Apparence du Personnage", cosmeticsColorLabel: "Couleur", cosmeticsSkinLabel: "Apparence",
             achievementsBtn: "🏆 Succès", levelBadgeLabel: "Niv.", achievementsTitle: "🏆 Succès",
             achievementsHint: "Gagnez de l'expérience en jouant et en relevant des défis pour monter de niveau.",
+            profileSectionTitle: "🎖️ Mon Profil", profileSectionTitle2: "Profil", openProfileBtn: "🎖️ MON PROFIL (INSIGNES)",
+            profilePrestigeLabel: "✨ Prestige", profileInfiniteBestLabel: "⏱ Meilleur Record (Infini)", profileBetsWonLabel: "🎲 Paris Gagnés",
             levelUpToast: "Vous êtes passé au niveau {level} !", achievementUnlockedToast: "Succès débloqué : {name}",
             ach_first_win_name: "Première Victoire", ach_first_win_desc: "Gagnez 1 partie.",
             ach_veteran_name: "Vétéran", ach_veteran_desc: "Jouez 10 parties.",
@@ -2572,7 +2607,7 @@
             tut9Title: "Multijoueur en Ligne", tut9Body: "Cliquez sur <b>🌐 Online</b> pour créer ou rejoindre une salle avec jusqu'à 4 joueurs ! Invitez des amis et jouez des parties en temps réel sur internet.",
             tut10Title: "Amis et Chat", tut10Body: "Utilisez <b>🔎 Joueurs</b> pour rechercher et ajouter des amis. Discutez via le <b>panneau latéral</b>, créez des groupes et organisez des parties avec votre équipe.",
             tut11Title: "Paramètres", tut11Body: "Dans le bouton <b>⚙</b>, vous pouvez régler le volume, le son, la musique, la langue, et <b>rouvrir ce tutoriel</b> à tout moment. Bon jeu !",
-            tut21Title: "Bonus", tut21Body: "Pendant la partie, des bonus temporaires apparaissent au hasard sur la carte : <b>🛡 Bouclier</b> (devenez invulnérable), <b>⚡ Fureur</b> (dégâts doublés) et <b>➤ Vitesse</b>. Touchez-les pour activer l’effet pendant quelques secondes !", tut22Title: "Pause", tut22Body: "Utilisez le bouton <b>⏸</b> à côté du bouton de sortie (ou la touche <b>P</b> sur PC) pour mettre la partie en pause à tout moment. La pause n’est pas disponible dans les parties en ligne.", tut23Title: "Pari Avant-Match", tut23Body: "En mode <b>Ruée vers l’Or</b>, vous pouvez parier une partie de votre or avant de commencer (jusqu’à 200 $). Si vous gagnez, votre pari double — si vous perdez, il disparaît. La partie devient plus difficile tant qu’un pari est actif, et vous ne pouvez parier que 3 fois par jour.", tut24Title: "Nouveautés : Combos, Titres et Défis", tut24Body: "À découvrir : le <b>Boss</b> est maintenant bien plus fort ; certaines plateformes se déplacent seules (latéralement ou de haut en bas) ; éliminer plusieurs ennemis rapidement sans subir de dégâts donne un <b>combo d’or</b> ; battre votre propre record en <b>Mode Infini</b> accorde un badge permanent de <b>Prestige</b> ; des titres comme <b>Survivant Légendaire</b> (1000+ secondes en Infini) et <b>Parieur Chanceux</b> (10 paris gagnés) apparaissent à côté de votre nom ; dans les parties en ligne à 3-4 joueurs, celui qui meurt peut désormais suivre la suite en <b>spectateur</b> ; et de nouvelles <b>missions quotidiennes</b> ont été ajoutées.",
+            tut21Title: "Bonus", tut21Body: "Pendant la partie, des bonus temporaires apparaissent au hasard sur la carte : <b>🛡 Bouclier</b> (devenez invulnérable), <b>⚡ Fureur</b> (dégâts doublés) et <b>➤ Vitesse</b>. Touchez-les pour activer l’effet pendant quelques secondes !", tut22Title: "Pause", tut22Body: "Utilisez le bouton <b>⏸</b> à côté du bouton de sortie (ou la touche <b>P</b> sur PC) pour mettre la partie en pause à tout moment. La pause n’est pas disponible dans les parties en ligne.", tut23Title: "Pari Avant-Match", tut23Body: "En mode <b>Ruée vers l’Or</b>, vous pouvez parier une partie de votre or avant de commencer (jusqu’à 200 $). Si vous gagnez, votre pari double — si vous perdez, il disparaît. La partie devient plus difficile tant qu’un pari est actif, et vous ne pouvez parier que 3 fois par jour.", tut24Title: "Nouveautés : Combos, Titres et Défis", tut24Body: "À découvrir : le <b>Boss</b> est maintenant bien plus fort ; certaines plateformes se déplacent seules (latéralement ou de haut en bas) ; éliminer plusieurs ennemis rapidement sans subir de dégâts donne un <b>combo d’or</b> ; battre votre propre record en <b>Mode Infini</b> accorde un badge permanent de <b>Prestige</b> ; des titres comme <b>Survivant Légendaire</b> (1000+ secondes en Infini) et <b>Parieur Chanceux</b> (10 paris gagnés) apparaissent à côté de votre nom ; dans les parties en ligne à 3-4 joueurs, celui qui meurt peut désormais suivre la suite en <b>spectateur</b> ; et de nouvelles <b>missions quotidiennes</b> ont été ajoutées. Vous pouvez consulter vos insignes et records à tout moment dans <b>Paramètres → Mon Profil</b>.",
 
             tut12Title: "Choisissez votre héros", tut12Body: "Avant de commencer, choisissez un <b>archétype</b> : Hero (équilibré), Vilan (tir triple en éventail) ou Killer (rapide et létal). Chacun se joue différemment !",
             tut13Title: "Modes de Jeu", tut13Body: "Choisissez entre <b>Horde Solo</b>, <b>Ruée vers l'Or</b>, <b>Mode Titan</b> (ennemi super fort), <b>Mode Boss</b> ou <b>Mode Infini</b> (la difficulté monte sans arrêt jusqu'à ce que vous mouriez, et l'or gagné dépend de votre temps de survie). Vous pouvez aussi jouer en <b>Duel 1v1 Local</b>, avec deux joueurs sur le même clavier (P1 et P2). Vous pouvez aussi activer le <b>Monde Ouvert</b> pour jouer sur une carte infinie en mode solo.",
@@ -6881,6 +6916,7 @@
         },
         openAchievements() {
             this.renderAchievements();
+            document.getElementById('settings-screen').classList.add('hidden');
             document.getElementById('achievements-screen').classList.remove('hidden');
         },
         closeAchievements() { document.getElementById('achievements-screen').classList.add('hidden'); },
@@ -6988,8 +7024,36 @@
             let titleBadge = document.getElementById('lbl-title-badge');
             if(titleBadge) titleBadge.textContent = this.getActiveTitleLabel();
         },
+        // NOVO: preenche a seção "Meu Perfil" da tela de Conquistas — títulos desbloqueados
+        // (com os ainda bloqueados mostrados escurecidos, pra dar uma meta clara), prestígio,
+        // melhor marca do Modo Infinito e apostas vencidas.
+        renderProfileSection() {
+            let pu = this.persistentUpgradesP1; if(!pu) return;
+            let titlesList = document.getElementById('profile-titles-list');
+            if(titlesList) {
+                let unlocked = pu.unlockedTitles || [];
+                titlesList.innerHTML = '';
+                this.titleCatalog.forEach(tt => {
+                    let has = unlocked.includes(tt.id);
+                    let chip = document.createElement('span');
+                    chip.style.cssText = `font-size:0.72rem; font-weight:700; padding:4px 10px; border-radius:14px; border:1px solid ${has ? '#facc15' : '#334155'}; color:${has ? '#facc15' : '#475569'}; background:${has ? 'rgba(250,204,21,0.1)' : 'transparent'};`;
+                    chip.textContent = t(tt.nameKey);
+                    titlesList.appendChild(chip);
+                });
+            }
+            let prestigeEl = document.getElementById('lbl-profile-prestige');
+            if(prestigeEl) prestigeEl.textContent = pu.prestige || 0;
+            let bestEl = document.getElementById('lbl-profile-infinite-best');
+            if(bestEl) {
+                let best = pu.infiniteBest;
+                bestEl.textContent = (best && best.survivedSec > 0) ? `${this.formatSurvivedTime(best.survivedSec)} (${t('modeLabelWave')} ${best.round})` : '--';
+            }
+            let betsEl = document.getElementById('lbl-profile-bets-won');
+            if(betsEl) betsEl.textContent = pu.betsWon || 0;
+        },
         renderAchievements() {
             this.refreshLevelBadge();
+            this.renderProfileSection();
             let list = document.getElementById('achievements-list'); if(!list) return;
             let prog = this.persistentUpgradesP1.progress || this.defaultProgress();
             list.innerHTML = '';
