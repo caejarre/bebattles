@@ -28,7 +28,14 @@
             --text-dim: #64748b; --radius-lg: 14px; --radius-md: 10px;
             --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+        /* NOVO: reforça o bloqueio de seleção de texto/toque-e-segure em TODO o jogo (não só nos
+           botões e no canvas), usando a mesma técnica já aplicada em .tc-btn/#ctxCanvas — evita
+           que qualquer área (nomes, HUD, telas de menu, etc.) seja acidentalmente selecionada ou
+           dispare o menu de "copiar/compartilhar" do celular ao tocar e segurar. Campos de texto
+           (input/textarea) ficam de fora dessa regra logo abaixo, senão o jogador não conseguiria
+           digitar/selecionar o próprio texto neles. */
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+        input, textarea { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; -webkit-touch-callout: default; }
         html { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -292,6 +299,7 @@
         .tc-btn * { pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
         .tc-icon { pointer-events: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
         .tc-icon-text { font-size: 0.65rem; letter-spacing: 0.5px; }
+        #ctxCanvas { touch-action: none; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; outline: none; }
         .tc-btn.tc-pressed { background: rgba(56,189,248,0.5); border-color: #38bdf8; }
         #tc-left { left: calc(16px + env(safe-area-inset-left)); bottom: calc(76px + env(safe-area-inset-bottom)); width: 64px; height: 64px; }
         #tc-right { left: calc(92px + env(safe-area-inset-left)); bottom: calc(76px + env(safe-area-inset-bottom)); width: 64px; height: 64px; }
@@ -660,9 +668,9 @@
     </div>
     <div id="achievements-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="lobby-box" style="max-width:520px;">
-            <div style="display:flex; align-items:center; justify-content:space-between;">
-                <h2 style="font-size:1.35rem; color:#fcd34d; margin:0;" data-i18n="achievementsTitle">🏆 Conquistas</h2>
-                <button onclick="Engine.closeAchievements()" style="padding:7px 13px; font-size:0.83rem;" data-i18n="lobbyBackBtn">✕ Voltar</button>
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 12px;">
+                <h2 style="font-size:1.35rem; color:#fcd34d; margin:0; min-width:0; flex:1 1 auto; word-break:break-word;" data-i18n="achievementsTitle">🏆 Conquistas</h2>
+                <button onclick="Engine.closeAchievements()" style="padding:7px 13px; font-size:0.83rem; flex-shrink:0;" data-i18n="lobbyBackBtn">✕ Voltar</button>
             </div>
             <div style="display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px;">
                 <span id="ach-level-badge" style="background:#1e293b; border:1px solid #b45309; color:#fcd34d; font-weight:800; font-size:0.85rem; padding:5px 12px; border-radius:20px;">Nv. 1</span>
