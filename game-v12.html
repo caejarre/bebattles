@@ -11,7 +11,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Be Battles - Survival Horizon</title>
+    <title>Be Battles</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
@@ -437,6 +437,7 @@
         </div>
     </div>
     <canvas id="ctxCanvas"></canvas>
+    <div id="spectator-banner" class="hidden" style="position:fixed; top:14px; left:50%; transform:translateX(-50%); background:rgba(15,23,42,0.92); border:1px solid #a855f7; color:#e9d5ff; font-weight:700; font-size:0.85rem; padding:7px 18px; border-radius:20px; z-index:60; box-shadow:0 0 14px rgba(168,85,247,0.5); pointer-events:none;"></div>
     <div id="chest-reward-popup" class="hidden"></div>
     <div id="hideout-alert" onclick="Engine.handleHideoutTap()">
         <div class="ht" data-i18n="hideoutAlertTitle">Esconderijo Secreto</div>
@@ -454,7 +455,7 @@
     <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
     <div id="auth-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
-            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.0</span></div>
+            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></div>
             <div class="auth-sub" data-i18n="authSubtitle">Horizon Survival Tournament 2026</div>
             <div class="auth-tabs" id="auth-tabs">
                 <button id="tab-login" class="active" onclick="Accounts.showTab('login')" data-i18n="authTabLogin">🔑 Entrar</button>
@@ -502,7 +503,7 @@
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.0</span></h1>
+                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button id="btn-social-players" onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
                         <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
@@ -525,6 +526,7 @@
                     <span id="lbl-logged-in-user"></span>
                     <div id="level-badge" onclick="Engine.openAchievements()" style="display:flex; align-items:center; gap:8px; cursor:pointer; margin-left:10px;">
                         <span id="lbl-level-badge" style="background:#1e293b; border:1px solid #b45309; color:#fcd34d; font-weight:800; font-size:0.75rem; padding:3px 9px; border-radius:20px;">Nv. 1</span>
+                        <span id="lbl-title-badge" style="color:#facc15; font-weight:700; font-size:0.72rem;"></span>
                         <div style="width:110px; height:7px; background:#1e293b; border-radius:4px; overflow:hidden;">
                             <div id="bar-xp" style="height:100%; width:0%; background:linear-gradient(to right,#eab308,#fbbf24);"></div>
                         </div>
@@ -1142,7 +1144,7 @@
             modeLabelOpenWorld: "MUNDO ABERTO", modeLabelBoss: "Chefe Nível", modeLabelWave: "Onda",
             hideoutAlertTitle: "Esconderijo Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Sair: E",
             exitMatchBtn: "Sair da Partida", exitMatchConfirmMsg: "Tem certeza que quer sair da partida e voltar pro menu? Seu progresso nesta partida será perdido.",
-            pauseMatchBtn: "Pausar", pauseTitle: "PARTIDA PAUSADA", pauseResumeBtn: "▶ RETOMAR", pauseExitBtn: "🚪 SAIR DA PARTIDA", modeInfinito: "Jogo Infinito", soloLabelInfinito: "Jogo Infinito", modeLabelInfinito: "Infinito - Round", infiniteSurvivedLabel: "Você sobreviveu {time} e alcançou o round {round}.", powerupPickup_shield: "Power-up: Escudo!", powerupPickup_fury: "Power-up: Fúria (dano dobrado)!", powerupPickup_speed: "Power-up: Velocidade!", betTitle: "Aposta Pré-Partida", betDesc: "Aposte parte do seu ouro antes de começar. Se vencer, dobra. Se perder, some. A partida fica mais difícil enquanto a aposta estiver ativa.", betUsageLabel: "Usadas hoje: {used}/{max}", betLimitReached: "Limite diário de apostas atingido.", betPotentialWin: "Se vencer: +${amount}", betWonLabel: "Aposta vencida: +${amount}", betLostLabel: "Aposta perdida: -${amount}", betActiveHud: "🎲 Aposta ativa: ${amount} (pode virar ${potential})",
+            pauseMatchBtn: "Pausar", pauseTitle: "PARTIDA PAUSADA", pauseResumeBtn: "▶ RETOMAR", pauseExitBtn: "🚪 SAIR DA PARTIDA", modeInfinito: "Jogo Infinito", soloLabelInfinito: "Jogo Infinito", modeLabelInfinito: "Infinito - Round", infiniteSurvivedLabel: "Você sobreviveu {time} e alcançou o round {round}.", infiniteKillsLabel: "Você derrotou {kills} inimigo(s).", betKillsLabel: "Inimigos derrotados na partida: {kills}.", powerupPickup_shield: "Power-up: Escudo!", powerupPickup_fury: "Power-up: Fúria (dano dobrado)!", powerupPickup_speed: "Power-up: Velocidade!", betTitle: "Aposta Pré-Partida", betDesc: "Aposte parte do seu ouro antes de começar. Se vencer, dobra. Se perder, some. A partida fica mais difícil enquanto a aposta estiver ativa.", betUsageLabel: "Usadas hoje: {used}/{max}", betLimitReached: "Limite diário de apostas atingido.", betPotentialWin: "Se vencer: +${amount}", betWonLabel: "Aposta vencida: +${amount}", betLostLabel: "Aposta perdida: -${amount}", betActiveHud: "🎲 Aposta ativa: ${amount} (pode virar ${potential})",
             chatOptionsBtn: "Mais opções", chatClearOption: "🗑️ Limpar conversa", chatBlockOption: "🚫 Bloquear jogador", chatUnblockOption: "✓ Desbloquear jogador", chatReportOption: "🚩 Denunciar jogador",
             chatClearConfirmMsg: "Tem certeza que quer apagar todas as mensagens desta conversa? Isso não pode ser desfeito.", chatClearedToast: "Conversa limpa.",
             chatBlockConfirmMsg: "Bloquear esse jogador? Vocês não vão mais poder trocar mensagens até você desbloquear.", chatBlockedToast: "Jogador bloqueado.", chatUnblockedToast: "Jogador desbloqueado.",
@@ -1290,7 +1292,7 @@
             tut9Title: "Multiplayer Online", tut9Body: "Clique em <b>🌐 Online</b> para criar ou entrar em uma sala com até 4 jogadores! Convide amigos e jogue partidas em tempo real pela internet.",
             tut10Title: "Amigos e Chat", tut10Body: "Use <b>🔎 Jogadores</b> para buscar e adicionar amigos. Converse pelo <b>chat lateral</b>, crie grupos e combine partidas com sua turma.",
             tut11Title: "Configurações", tut11Body: "No botão <b>⚙</b> você ajusta volume, som, música, idioma e pode <b>reabrir este tutorial</b> a qualquer momento. Bom jogo!",
-            tut21Title: "Power-ups", tut21Body: "Durante a partida, power-ups temporários aparecem sozinhos no mapa: <b>🛡 Escudo</b> (fica invulnerável), <b>⚡ Fúria</b> (dano dobrado) e <b>➤ Velocidade</b>. Toque neles para ativar o efeito por alguns segundos!", tut22Title: "Pausar", tut22Body: "Use o botão <b>⏸</b> do lado do botão de sair (ou a tecla <b>P</b> no PC) para pausar a partida a qualquer momento. Não é possível pausar em partidas online.", tut23Title: "Aposta Pré-Partida", tut23Body: "No modo <b>Caça ao Ouro</b>, você pode apostar parte do seu ouro antes de começar (até $200). Se vencer, sua aposta dobra — se perder, ela some. A partida fica mais difícil enquanto a aposta estiver ativa, e você só pode apostar 3 vezes por dia.",
+            tut21Title: "Power-ups", tut21Body: "Durante a partida, power-ups temporários aparecem sozinhos no mapa: <b>🛡 Escudo</b> (fica invulnerável), <b>⚡ Fúria</b> (dano dobrado) e <b>➤ Velocidade</b>. Toque neles para ativar o efeito por alguns segundos!", tut22Title: "Pausar", tut22Body: "Use o botão <b>⏸</b> do lado do botão de sair (ou a tecla <b>P</b> no PC) para pausar a partida a qualquer momento. Não é possível pausar em partidas online.", tut23Title: "Aposta Pré-Partida", tut23Body: "No modo <b>Caça ao Ouro</b>, você pode apostar parte do seu ouro antes de começar (até $200). Se vencer, sua aposta dobra — se perder, ela some. A partida fica mais difícil enquanto a aposta estiver ativa, e você só pode apostar 3 vezes por dia.", tut24Title: "Novidades: Combos, Títulos e Desafios", tut24Body: "Fique de olho nas novidades: o <b>Chefe</b> agora é bem mais forte; algumas plataformas se movem sozinhas (lados ou cima/baixo); matar vários inimigos rápido sem tomar dano dá um <b>combo de ouro</b>; bater sua própria marca no <b>Modo Infinito</b> concede um selo de <b>Prestígio</b> permanente; títulos como <b>Sobrevivente Lendário</b> (1000+ segundos no Infinito) e <b>Apostador de Sorte</b> (10 apostas vencidas) aparecem ao lado do seu nome; em partidas online de 3-4 jogadores, quem morre agora pode assistir o resto como <b>espectador</b>; e novas <b>missões diárias</b> foram adicionadas.",
 
             tut12Title: "Escolha seu Herói", tut12Body: "Antes de começar, escolha um <b>arquétipo</b>: Hero (balanceado), Vilan (tiro triplo em leque) ou Killer (veloz e letal). Cada um joga de um jeito diferente!",
             tut13Title: "Modos de Jogo", tut13Body: "Escolha entre <b>Horda Solo</b>, <b>Caça ao Ouro</b>, <b>Modo Titã</b> (inimigo super forte), <b>Modo Chefe</b> (boss) ou <b>Jogo Infinito</b> (a dificuldade sobe sem parar até você perder, e o ouro que você ganha depende de até onde sobreviveu). Também dá pra jogar <b>Duelo 1v1 Local</b>, com dois jogadores no mesmo teclado (P1 e P2). Você também pode ativar o <b>Mundo Aberto</b> para jogar em um mapa infinito no modo solo.",
@@ -1324,10 +1326,14 @@
             welcomeBackTitle: "👋 Bem-vindo de volta!", welcomeBackMissionsHint: "Não esqueça de conferir suas missões diárias!",
             welcomeBackCloseBtn: "VAMOS JOGAR!", welcomeBackOfflineLabel: "ganhos enquanto você estava offline",
             missionCompleteToast: "Missão concluída: {name} (+${gold})",
+            comboToast: "Combo de {streak} abates! +${gold} de ouro",
+            prestigeToast: "Prestígio nível {n}! Nova marca: {time}", titleUnlockedToast: "Título desbloqueado:{name}",
+            titleLegendarySurvivor: "🏅 Sobrevivente Lendário", titleLuckyGambler: "🎲 Apostador de Sorte", titlePrestigeMaster: "👑 Mestre do Prestígio",
+            spectatorLabel: "Assistindo", spectatorHint: "Você morreu — acompanhe o resto da partida como espectador.",
             missionPlayMatches: "Jogue {target} partidas", missionWinMatches: "Vença {target} partida",
             missionKillEnemies: "Derrote {target} inimigos", missionEarnGold: "Ganhe {target} de ouro em partidas",
             missionOpenChests: "Abra {target} baús", missionWinVsAI: "Vença {target} partida contra a IA",
-            missionKillEnemiesBig: "Derrote {target} inimigos", missionPlayMatchesBig: "Jogue {target} partidas",
+            missionKillEnemiesBig: "Derrote {target} inimigos", missionPlayMatchesBig: "Jogue {target} partidas", missionWinNoDamage: "Vença uma partida sem tomar dano", missionKillEnemiesDaily: "Derrote {target} inimigos hoje",
             easterEggFoundToast: "Você encontrou um segredo! Skin exclusiva desbloqueada (+$500)", easterEggAlreadyFound: "Você já desbloqueou esse segredo!"
         },
         'en': {
@@ -1399,7 +1405,7 @@
             modeLabelOpenWorld: "OPEN WORLD", modeLabelBoss: "Boss Level", modeLabelWave: "Wave",
             hideoutAlertTitle: "Secret Hideout", hideoutAlertEnter: "Enter: E", hideoutHudExit: "Exit: E",
             exitMatchBtn: "Exit Match", exitMatchConfirmMsg: "Are you sure you want to exit the match and return to the menu? Your progress in this match will be lost.",
-            pauseMatchBtn: "Pause", pauseTitle: "MATCH PAUSED", pauseResumeBtn: "▶ RESUME", pauseExitBtn: "🚪 EXIT MATCH", modeInfinito: "Infinite Mode", soloLabelInfinito: "Infinite Mode", modeLabelInfinito: "Infinite - Round", infiniteSurvivedLabel: "You survived {time} and reached round {round}.", powerupPickup_shield: "Power-up: Shield!", powerupPickup_fury: "Power-up: Fury (double damage)!", powerupPickup_speed: "Power-up: Speed!", betTitle: "Pre-Match Bet", betDesc: "Bet part of your gold before starting. Win and it doubles. Lose and it is gone. The match gets harder while a bet is active.", betUsageLabel: "Used today: {used}/{max}", betLimitReached: "Daily bet limit reached.", betPotentialWin: "If you win: +${amount}", betWonLabel: "Bet won: +${amount}", betLostLabel: "Bet lost: -${amount}", betActiveHud: "🎲 Active bet: ${amount} (could become ${potential})",
+            pauseMatchBtn: "Pause", pauseTitle: "MATCH PAUSED", pauseResumeBtn: "▶ RESUME", pauseExitBtn: "🚪 EXIT MATCH", modeInfinito: "Infinite Mode", soloLabelInfinito: "Infinite Mode", modeLabelInfinito: "Infinite - Round", infiniteSurvivedLabel: "You survived {time} and reached round {round}.", infiniteKillsLabel: "You defeated {kills} enemy(ies).", betKillsLabel: "Enemies defeated in the match: {kills}.", powerupPickup_shield: "Power-up: Shield!", powerupPickup_fury: "Power-up: Fury (double damage)!", powerupPickup_speed: "Power-up: Speed!", betTitle: "Pre-Match Bet", betDesc: "Bet part of your gold before starting. Win and it doubles. Lose and it is gone. The match gets harder while a bet is active.", betUsageLabel: "Used today: {used}/{max}", betLimitReached: "Daily bet limit reached.", betPotentialWin: "If you win: +${amount}", betWonLabel: "Bet won: +${amount}", betLostLabel: "Bet lost: -${amount}", betActiveHud: "🎲 Active bet: ${amount} (could become ${potential})",
             chatOptionsBtn: "More options", chatClearOption: "🗑️ Clear conversation", chatBlockOption: "🚫 Block player", chatUnblockOption: "✓ Unblock player", chatReportOption: "🚩 Report player", lobbyConnecting: "🔌 Connecting...", lobbyCodeExpired: "🚫 Expired code. Ask for a new invite.",
             chatClearConfirmMsg: "Are you sure you want to delete all messages in this conversation? This cannot be undone.", chatClearedToast: "Conversation cleared.",
             chatBlockConfirmMsg: "Block this player? You won't be able to message each other until you unblock.", chatBlockedToast: "Player blocked.", chatUnblockedToast: "Player unblocked.",
@@ -1546,7 +1552,7 @@
             tut9Title: "Online Multiplayer", tut9Body: "Click <b>🌐 Online</b> to create or join a room with up to 4 players! Invite friends and play real-time matches over the internet.",
             tut10Title: "Friends and Chat", tut10Body: "Use <b>🔎 Players</b> to search for and add friends. Chat via the <b>side chat panel</b>, create groups, and set up matches with your crew.",
             tut11Title: "Settings", tut11Body: "In the <b>⚙</b> button you can adjust volume, sound, music, language, and <b>reopen this tutorial</b> anytime. Have fun!",
-            tut21Title: "Power-ups", tut21Body: "During the match, temporary power-ups appear randomly on the map: <b>🛡 Shield</b> (become invulnerable), <b>⚡ Fury</b> (double damage), and <b>➤ Speed</b>. Touch them to activate the effect for a few seconds!", tut22Title: "Pause", tut22Body: "Use the <b>⏸</b> button next to the exit button (or the <b>P</b> key on PC) to pause the match anytime. Pausing is not available in online matches.", tut23Title: "Pre-Match Bet", tut23Body: "In <b>Gold Rush</b> mode, you can bet part of your gold before starting (up to $200). Win and your bet doubles — lose and it’s gone. The match gets harder while a bet is active, and you can only bet 3 times per day.",
+            tut21Title: "Power-ups", tut21Body: "During the match, temporary power-ups appear randomly on the map: <b>🛡 Shield</b> (become invulnerable), <b>⚡ Fury</b> (double damage), and <b>➤ Speed</b>. Touch them to activate the effect for a few seconds!", tut22Title: "Pause", tut22Body: "Use the <b>⏸</b> button next to the exit button (or the <b>P</b> key on PC) to pause the match anytime. Pausing is not available in online matches.", tut23Title: "Pre-Match Bet", tut23Body: "In <b>Gold Rush</b> mode, you can bet part of your gold before starting (up to $200). Win and your bet doubles — lose and it’s gone. The match gets harder while a bet is active, and you can only bet 3 times per day.", tut24Title: "New: Combos, Titles & Challenges", tut24Body: "Check out what’s new: the <b>Boss</b> is now much tougher; some platforms move on their own (sideways or up/down); killing several enemies fast without taking damage gives a <b>gold combo</b>; beating your own <b>Infinite Mode</b> record grants a permanent <b>Prestige</b> badge; titles like <b>Legendary Survivor</b> (1000+ seconds in Infinite) and <b>Lucky Gambler</b> (10 bets won) show next to your name; in 3-4 player online matches, anyone who dies can now <b>spectate</b> the rest of the match; and new <b>daily missions</b> were added.",
 
             tut12Title: "Choose Your Hero", tut12Body: "Before starting, pick an <b>archetype</b>: Hero (balanced), Vilan (triple spread shot) or Killer (fast and lethal). Each one plays differently!",
             tut13Title: "Game Modes", tut13Body: "Choose between <b>Solo Horde</b>, <b>Gold Rush</b>, <b>Titan Mode</b> (super strong enemy), <b>Boss Mode</b>, or <b>Infinite Mode</b> (difficulty keeps rising until you die, and the gold you earn depends on how far you survived). You can also play <b>Local 1v1 Duel</b>, with two players on the same keyboard (P1 and P2). You can also enable <b>Open World</b> to play on an infinite map in solo mode.",
@@ -1580,10 +1586,14 @@
             welcomeBackTitle: "👋 Welcome back!", welcomeBackMissionsHint: "Don't forget to check your daily missions!",
             welcomeBackCloseBtn: "LET'S PLAY!", welcomeBackOfflineLabel: "earned while you were offline",
             missionCompleteToast: "Mission complete: {name} (+${gold})",
+            comboToast: "{streak}-kill combo! +${gold} gold",
+            prestigeToast: "Prestige level {n}! New record: {time}", titleUnlockedToast: "Title unlocked:{name}",
+            titleLegendarySurvivor: "🏅 Legendary Survivor", titleLuckyGambler: "🎲 Lucky Gambler", titlePrestigeMaster: "👑 Prestige Master",
+            spectatorLabel: "Spectating", spectatorHint: "You died — watch the rest of the match as a spectator.",
             missionPlayMatches: "Play {target} matches", missionWinMatches: "Win {target} match",
             missionKillEnemies: "Defeat {target} enemies", missionEarnGold: "Earn {target} gold in matches",
             missionOpenChests: "Open {target} chests", missionWinVsAI: "Win {target} match vs AI",
-            missionKillEnemiesBig: "Defeat {target} enemies", missionPlayMatchesBig: "Play {target} matches",
+            missionKillEnemiesBig: "Defeat {target} enemies", missionPlayMatchesBig: "Play {target} matches", missionWinNoDamage: "Win a match without taking damage", missionKillEnemiesDaily: "Defeat {target} enemies today",
             easterEggFoundToast: "You found a secret! Exclusive skin unlocked (+$500)", easterEggAlreadyFound: "You already unlocked this secret!"
         },
         'de': {
@@ -1655,7 +1665,7 @@
             modeLabelOpenWorld: "OFFENE WELT", modeLabelBoss: "Boss-Level", modeLabelWave: "Welle",
             hideoutAlertTitle: "Geheimes Versteck", hideoutAlertEnter: "Eintreten: E", hideoutHudExit: "Verlassen: E",
             exitMatchBtn: "Partie verlassen", exitMatchConfirmMsg: "Bist du sicher, dass du die Partie verlassen und zum Menü zurückkehren willst? Dein Fortschritt in dieser Partie geht verloren.",
-            pauseMatchBtn: "Pausieren", pauseTitle: "PARTIE PAUSIERT", pauseResumeBtn: "▶ FORTSETZEN", pauseExitBtn: "🚪 PARTIE VERLASSEN", modeInfinito: "Unendlicher Modus", soloLabelInfinito: "Unendlicher Modus", modeLabelInfinito: "Unendlich - Runde", infiniteSurvivedLabel: "Du hast {time} überlebt und Runde {round} erreicht.", powerupPickup_shield: "Power-up: Schild!", powerupPickup_fury: "Power-up: Wut (doppelter Schaden)!", powerupPickup_speed: "Power-up: Geschwindigkeit!", betTitle: "Wette vor dem Spiel", betDesc: "Setze einen Teil deines Goldes, bevor du startest. Gewinnst du, verdoppelt es sich. Verlierst du, ist es weg. Die Partie wird schwieriger, solange eine Wette aktiv ist.", betUsageLabel: "Heute genutzt: {used}/{max}", betLimitReached: "Tägliches Wettlimit erreicht.", betPotentialWin: "Bei Sieg: +${amount}", betWonLabel: "Wette gewonnen: +${amount}", betLostLabel: "Wette verloren: -${amount}", betActiveHud: "🎲 Aktive Wette: ${amount} (könnte ${potential} werden)",
+            pauseMatchBtn: "Pausieren", pauseTitle: "PARTIE PAUSIERT", pauseResumeBtn: "▶ FORTSETZEN", pauseExitBtn: "🚪 PARTIE VERLASSEN", modeInfinito: "Unendlicher Modus", soloLabelInfinito: "Unendlicher Modus", modeLabelInfinito: "Unendlich - Runde", infiniteSurvivedLabel: "Du hast {time} überlebt und Runde {round} erreicht.", infiniteKillsLabel: "Du hast {kills} Gegner besiegt.", betKillsLabel: "Besiegte Gegner in der Partie: {kills}.", powerupPickup_shield: "Power-up: Schild!", powerupPickup_fury: "Power-up: Wut (doppelter Schaden)!", powerupPickup_speed: "Power-up: Geschwindigkeit!", betTitle: "Wette vor dem Spiel", betDesc: "Setze einen Teil deines Goldes, bevor du startest. Gewinnst du, verdoppelt es sich. Verlierst du, ist es weg. Die Partie wird schwieriger, solange eine Wette aktiv ist.", betUsageLabel: "Heute genutzt: {used}/{max}", betLimitReached: "Tägliches Wettlimit erreicht.", betPotentialWin: "Bei Sieg: +${amount}", betWonLabel: "Wette gewonnen: +${amount}", betLostLabel: "Wette verloren: -${amount}", betActiveHud: "🎲 Aktive Wette: ${amount} (könnte ${potential} werden)",
             chatOptionsBtn: "Weitere Optionen", chatClearOption: "🗑️ Unterhaltung löschen", chatBlockOption: "🚫 Spieler blockieren", chatUnblockOption: "✓ Spieler entsperren", chatReportOption: "🚩 Spieler melden", chatNewGroupBtn: "➕ Neue Gruppe erstellen", chatNewGroupTitle: "➕ Neue Gruppe", chatGroupNamePlaceholder: "Gruppenname", chatCreateGroupBtn: "GRUPPE ERSTELLEN", chatGroupNameRequired: "Gib einen Namen für die Gruppe ein.", chatGroupNeedMembers: "Wähle mindestens 1 Person aus.", chatGroupCreateError: "Fehler beim Erstellen der Gruppe.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Zum Spielen einladen", chatInviteSentToast: "Einladung im Chat gesendet!", chatInviteCreatingRoom: "Raum wird erstellt...", chatInviteCardTitle: "🎮 Spieleinladung", chatInviteJoinBtn: "Am Match teilnehmen", chatGroupNoFollowingHint: "Du musst jemandem folgen, um eine Gruppe zu erstellen.", lobbyConnecting: "🔌 Verbinde...", lobbyCodeExpired: "🚫 Code abgelaufen. Bitte eine neue Einladung anfordern.",
             chatClearConfirmMsg: "Möchtest du wirklich alle Nachrichten dieser Unterhaltung löschen? Dies kann nicht rückgängig gemacht werden.", chatClearedToast: "Unterhaltung gelöscht.",
             chatBlockConfirmMsg: "Diesen Spieler blockieren? Ihr könnt euch dann keine Nachrichten mehr schicken, bis du ihn entsperrst.", chatBlockedToast: "Spieler blockiert.", chatUnblockedToast: "Spieler entsperrt.",
@@ -1797,7 +1807,7 @@
             tut9Title: "Online-Multiplayer", tut9Body: "Klicke auf <b>🌐 Online</b>, um einen Raum mit bis zu 4 Spielern zu erstellen oder ihm beizutreten! Lade Freunde ein und spiele Echtzeit-Matches übers Internet.",
             tut10Title: "Freunde und Chat", tut10Body: "Benutze <b>🔎 Spieler</b>, um Freunde zu suchen und hinzuzufügen. Chatte über die <b>Seitenleiste</b>, erstelle Gruppen und verabrede Matches mit deiner Gruppe.",
             tut11Title: "Einstellungen", tut11Body: "Über die Schaltfläche <b>⚙</b> kannst du Lautstärke, Sound, Musik, Sprache anpassen und <b>dieses Tutorial jederzeit erneut öffnen</b>. Viel Spaß!",
-            tut21Title: "Power-ups", tut21Body: "Während der Partie erscheinen zufällig temporäre Power-ups auf der Karte: <b>🛡 Schild</b> (unverwundbar werden), <b>⚡ Wut</b> (doppelter Schaden) und <b>➤ Geschwindigkeit</b>. Berühre sie, um den Effekt für ein paar Sekunden zu aktivieren!", tut22Title: "Pausieren", tut22Body: "Nutze die Schaltfläche <b>⏸</b> neben dem Verlassen-Button (oder die Taste <b>P</b> am PC), um die Partie jederzeit zu pausieren. In Online-Partien ist Pausieren nicht möglich.", tut23Title: "Wette vor dem Spiel", tut23Body: "Im Modus <b>Goldrausch</b> kannst du vor dem Start einen Teil deines Goldes setzen (bis zu $200). Gewinnst du, verdoppelt sich deine Wette — verlierst du, ist sie weg. Die Partie wird schwieriger, solange eine Wette aktiv ist, und du kannst nur 3-mal pro Tag wetten.",
+            tut21Title: "Power-ups", tut21Body: "Während der Partie erscheinen zufällig temporäre Power-ups auf der Karte: <b>🛡 Schild</b> (unverwundbar werden), <b>⚡ Wut</b> (doppelter Schaden) und <b>➤ Geschwindigkeit</b>. Berühre sie, um den Effekt für ein paar Sekunden zu aktivieren!", tut22Title: "Pausieren", tut22Body: "Nutze die Schaltfläche <b>⏸</b> neben dem Verlassen-Button (oder die Taste <b>P</b> am PC), um die Partie jederzeit zu pausieren. In Online-Partien ist Pausieren nicht möglich.", tut23Title: "Wette vor dem Spiel", tut23Body: "Im Modus <b>Goldrausch</b> kannst du vor dem Start einen Teil deines Goldes setzen (bis zu $200). Gewinnst du, verdoppelt sich deine Wette — verlierst du, ist sie weg. Die Partie wird schwieriger, solange eine Wette aktiv ist, und du kannst nur 3-mal pro Tag wetten.", tut24Title: "Neu: Combos, Titel & Herausforderungen", tut24Body: "Das ist neu: Der <b>Boss</b> ist jetzt deutlich stärker; manche Plattformen bewegen sich selbstständig (seitlich oder auf/ab); mehrere Gegner schnell ohne Schaden zu besiegen gibt einen <b>Gold-Combo</b>; deinen eigenen Rekord im <b>Unendlichen Modus</b> zu schlagen bringt ein dauerhaftes <b>Prestige</b>-Abzeichen; Titel wie <b>Legendärer Überlebender</b> (1000+ Sekunden im Unendlichen Modus) und <b>Glücksspieler</b> (10 gewonnene Wetten) erscheinen neben deinem Namen; in Online-Partien mit 3-4 Spielern können Gestorbene jetzt den Rest als <b>Zuschauer</b> verfolgen; und es gibt neue <b>tägliche Missionen</b>.",
 
             tut12Title: "Wähle deinen Helden", tut12Body: "Bevor du startest, wähle einen <b>Archetyp</b>: Hero (ausgewogen), Vilan (dreifacher Streuschuss) oder Killer (schnell und tödlich). Jeder spielt sich anders!",
             tut13Title: "Spielmodi", tut13Body: "Wähle zwischen <b>Solo-Horde</b>, <b>Goldrausch</b>, <b>Titan-Modus</b> (super starker Gegner), <b>Boss-Modus</b> oder <b>Unendlicher Modus</b> (die Schwierigkeit steigt ständig, bis du stirbst, und das Gold hängt davon ab, wie lange du überlebt hast). Du kannst auch <b>Lokales 1v1-Duell</b> spielen, mit zwei Spielern an derselben Tastatur (P1 und P2). Du kannst auch die <b>Offene Welt</b> aktivieren, um im Solo-Modus auf einer unendlichen Karte zu spielen.",
@@ -1831,10 +1841,14 @@
             welcomeBackTitle: "👋 Willkommen zurück!", welcomeBackMissionsHint: "Vergiss nicht, deine täglichen Missionen zu checken!",
             welcomeBackCloseBtn: "LOS GEHT'S!", welcomeBackOfflineLabel: "verdient, während du offline warst",
             missionCompleteToast: "Mission abgeschlossen: {name} (+${gold})",
+            comboToast: "{streak}-Kill-Combo! +${gold} Gold",
+            prestigeToast: "Prestige-Stufe {n}! Neuer Rekord: {time}", titleUnlockedToast: "Titel freigeschaltet:{name}",
+            titleLegendarySurvivor: "🏅 Legendärer Überlebender", titleLuckyGambler: "🎲 Glücksspieler", titlePrestigeMaster: "👑 Prestige-Meister",
+            spectatorLabel: "Zuschauen", spectatorHint: "Du bist gestorben — verfolge den Rest des Matches als Zuschauer.",
             missionPlayMatches: "Spiele {target} Matches", missionWinMatches: "Gewinne {target} Match",
             missionKillEnemies: "Besiege {target} Gegner", missionEarnGold: "Verdiene {target} Gold in Matches",
             missionOpenChests: "Öffne {target} Truhen", missionWinVsAI: "Gewinne {target} Match gegen die KI",
-            missionKillEnemiesBig: "Besiege {target} Gegner", missionPlayMatchesBig: "Spiele {target} Matches",
+            missionKillEnemiesBig: "Besiege {target} Gegner", missionPlayMatchesBig: "Spiele {target} Matches", missionWinNoDamage: "Gewinne ein Match ohne Schaden zu nehmen", missionKillEnemiesDaily: "Besiege heute {target} Gegner",
             easterEggFoundToast: "Du hast ein Geheimnis gefunden! Exklusive Skin freigeschaltet (+$500)", easterEggAlreadyFound: "Du hast dieses Geheimnis schon freigeschaltet!"
         },
         'es': {
@@ -1906,7 +1920,7 @@
             modeLabelOpenWorld: "MUNDO ABIERTO", modeLabelBoss: "Nivel de Jefe", modeLabelWave: "Oleada",
             hideoutAlertTitle: "Escondite Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Salir: E",
             exitMatchBtn: "Salir de la Partida", exitMatchConfirmMsg: "¿Seguro que quieres salir de la partida y volver al menú? Tu progreso en esta partida se perderá.",
-            pauseMatchBtn: "Pausar", pauseTitle: "PARTIDA PAUSADA", pauseResumeBtn: "▶ REANUDAR", pauseExitBtn: "🚪 SALIR DE LA PARTIDA", modeInfinito: "Modo Infinito", soloLabelInfinito: "Modo Infinito", modeLabelInfinito: "Infinito - Ronda", infiniteSurvivedLabel: "Sobreviviste {time} y llegaste a la ronda {round}.", powerupPickup_shield: "¡Power-up: Escudo!", powerupPickup_fury: "¡Power-up: Furia (daño doblado)!", powerupPickup_speed: "¡Power-up: Velocidad!", betTitle: "Apuesta Pre-Partida", betDesc: "Apuesta parte de tu oro antes de empezar. Si ganas, se duplica. Si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa.", betUsageLabel: "Usadas hoy: {used}/{max}", betLimitReached: "Límite diario de apuestas alcanzado.", betPotentialWin: "Si ganas: +${amount}", betWonLabel: "Apuesta ganada: +${amount}", betLostLabel: "Apuesta perdida: -${amount}", betActiveHud: "🎲 Apuesta activa: ${amount} (puede llegar a ${potential})",
+            pauseMatchBtn: "Pausar", pauseTitle: "PARTIDA PAUSADA", pauseResumeBtn: "▶ REANUDAR", pauseExitBtn: "🚪 SALIR DE LA PARTIDA", modeInfinito: "Modo Infinito", soloLabelInfinito: "Modo Infinito", modeLabelInfinito: "Infinito - Ronda", infiniteSurvivedLabel: "Sobreviviste {time} y llegaste a la ronda {round}.", infiniteKillsLabel: "Derrotaste a {kills} enemigo(s).", betKillsLabel: "Enemigos derrotados en la partida: {kills}.", powerupPickup_shield: "¡Power-up: Escudo!", powerupPickup_fury: "¡Power-up: Furia (daño doblado)!", powerupPickup_speed: "¡Power-up: Velocidad!", betTitle: "Apuesta Pre-Partida", betDesc: "Apuesta parte de tu oro antes de empezar. Si ganas, se duplica. Si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa.", betUsageLabel: "Usadas hoy: {used}/{max}", betLimitReached: "Límite diario de apuestas alcanzado.", betPotentialWin: "Si ganas: +${amount}", betWonLabel: "Apuesta ganada: +${amount}", betLostLabel: "Apuesta perdida: -${amount}", betActiveHud: "🎲 Apuesta activa: ${amount} (puede llegar a ${potential})",
             chatOptionsBtn: "Más opciones", chatClearOption: "🗑️ Limpiar conversación", chatBlockOption: "🚫 Bloquear jugador", chatUnblockOption: "✓ Desbloquear jugador", chatReportOption: "🚩 Denunciar jugador", chatNewGroupBtn: "➕ Crear nuevo grupo", chatNewGroupTitle: "➕ Nuevo Grupo", chatGroupNamePlaceholder: "Nombre del grupo", chatCreateGroupBtn: "CREAR GRUPO", chatGroupNameRequired: "Escribe un nombre para el grupo.", chatGroupNeedMembers: "Selecciona al menos 1 persona.", chatGroupCreateError: "Error al crear el grupo.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Invitar a jugar", chatInviteSentToast: "¡Invitación enviada en la conversación!", chatInviteCreatingRoom: "Creando sala...", chatInviteCardTitle: "🎮 Invitación a jugar", chatInviteJoinBtn: "Unirse a la partida", chatGroupNoFollowingHint: "Necesitas seguir a alguien para crear un grupo.", lobbyConnecting: "🔌 Conectando...", lobbyCodeExpired: "🚫 Código caducado. Pide una nueva invitación.",
             chatClearConfirmMsg: "¿Seguro que quieres borrar todos los mensajes de esta conversación? No se puede deshacer.", chatClearedToast: "Conversación borrada.",
             chatBlockConfirmMsg: "¿Bloquear a este jugador? No podrán enviarse mensajes hasta que lo desbloquees.", chatBlockedToast: "Jugador bloqueado.", chatUnblockedToast: "Jugador desbloqueado.",
@@ -2048,7 +2062,7 @@
             tut9Title: "Multijugador en Línea", tut9Body: "Haz clic en <b>🌐 Online</b> para crear o unirte a una sala con hasta 4 jugadores. ¡Invita amigos y juega partidas en tiempo real por internet!",
             tut10Title: "Amigos y Chat", tut10Body: "Usa <b>🔎 Jugadores</b> para buscar y agregar amigos. Chatea por el <b>panel lateral</b>, crea grupos y organiza partidas con tu grupo.",
             tut11Title: "Configuración", tut11Body: "En el botón <b>⚙</b> puedes ajustar volumen, sonido, música, idioma, y <b>reabrir este tutorial</b> cuando quieras. ¡Buen juego!",
-            tut21Title: "Power-ups", tut21Body: "Durante la partida, aparecen power-ups temporales al azar en el mapa: <b>🛡 Escudo</b> (te vuelves invulnerable), <b>⚡ Furia</b> (daño doblado) y <b>➤ Velocidad</b>. ¡Tócalos para activar el efecto por unos segundos!", tut22Title: "Pausar", tut22Body: "Usa el botón <b>⏸</b> junto al botón de salir (o la tecla <b>P</b> en PC) para pausar la partida en cualquier momento. No se puede pausar en partidas online.", tut23Title: "Apuesta Pre-Partida", tut23Body: "En el modo <b>Caza del Oro</b>, puedes apostar parte de tu oro antes de empezar (hasta $200). Si ganas, tu apuesta se duplica — si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa, y solo puedes apostar 3 veces al día.",
+            tut21Title: "Power-ups", tut21Body: "Durante la partida, aparecen power-ups temporales al azar en el mapa: <b>🛡 Escudo</b> (te vuelves invulnerable), <b>⚡ Furia</b> (daño doblado) y <b>➤ Velocidad</b>. ¡Tócalos para activar el efecto por unos segundos!", tut22Title: "Pausar", tut22Body: "Usa el botón <b>⏸</b> junto al botón de salir (o la tecla <b>P</b> en PC) para pausar la partida en cualquier momento. No se puede pausar en partidas online.", tut23Title: "Apuesta Pre-Partida", tut23Body: "En el modo <b>Caza del Oro</b>, puedes apostar parte de tu oro antes de empezar (hasta $200). Si ganas, tu apuesta se duplica — si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa, y solo puedes apostar 3 veces al día.", tut24Title: "Novedades: Combos, Títulos y Desafíos", tut24Body: "Novedades a tener en cuenta: el <b>Jefe</b> ahora es mucho más fuerte; algunas plataformas se mueven solas (a los lados o arriba/abajo); matar varios enemigos rápido sin recibir daño da un <b>combo de oro</b>; superar tu propia marca en el <b>Modo Infinito</b> otorga una insignia permanente de <b>Prestigio</b>; títulos como <b>Superviviente Legendario</b> (1000+ segundos en Infinito) y <b>Apostador Afortunado</b> (10 apuestas ganadas) aparecen junto a tu nombre; en partidas online de 3-4 jugadores, quien muere ahora puede ver el resto como <b>espectador</b>; y se añadieron nuevas <b>misiones diarias</b>.",
 
             tut12Title: "Elige tu Héroe", tut12Body: "Antes de empezar, elige un <b>arquetipo</b>: Hero (equilibrado), Vilan (disparo triple en abanico) o Killer (veloz y letal). ¡Cada uno se juega de forma distinta!",
             tut13Title: "Modos de Juego", tut13Body: "Elige entre <b>Horda Solo</b>, <b>Caza del Oro</b>, <b>Modo Titán</b> (enemigo súper fuerte), <b>Modo Jefe</b> o <b>Modo Infinito</b> (la dificultad sube sin parar hasta que mueras, y el oro que ganas depende de hasta dónde sobreviviste). También puedes jugar <b>Duelo 1v1 Local</b>, con dos jugadores en el mismo teclado (P1 y P2). También puedes activar el <b>Mundo Abierto</b> para jugar en un mapa infinito en modo solo.",
@@ -2082,10 +2096,14 @@
             welcomeBackTitle: "👋 ¡Bienvenido de vuelta!", welcomeBackMissionsHint: "¡No olvides revisar tus misiones diarias!",
             welcomeBackCloseBtn: "¡A JUGAR!", welcomeBackOfflineLabel: "ganado mientras estabas desconectado",
             missionCompleteToast: "Misión completada: {name} (+${gold})",
+            comboToast: "¡Combo de {streak} bajas! +${gold} de oro",
+            prestigeToast: "¡Prestigio nivel {n}! Nueva marca: {time}", titleUnlockedToast: "Título desbloqueado:{name}",
+            titleLegendarySurvivor: "🏅 Superviviente Legendario", titleLuckyGambler: "🎲 Apostador Afortunado", titlePrestigeMaster: "👑 Maestro del Prestigio",
+            spectatorLabel: "Espectando", spectatorHint: "Moriste — sigue el resto de la partida como espectador.",
             missionPlayMatches: "Juega {target} partidas", missionWinMatches: "Gana {target} partida",
             missionKillEnemies: "Derrota a {target} enemigos", missionEarnGold: "Gana {target} de oro en partidas",
             missionOpenChests: "Abre {target} cofres", missionWinVsAI: "Gana {target} partida contra la IA",
-            missionKillEnemiesBig: "Derrota a {target} enemigos", missionPlayMatchesBig: "Juega {target} partidas",
+            missionKillEnemiesBig: "Derrota a {target} enemigos", missionPlayMatchesBig: "Juega {target} partidas", missionWinNoDamage: "Gana una partida sin recibir daño", missionKillEnemiesDaily: "Derrota a {target} enemigos hoy",
             easterEggFoundToast: "¡Encontraste un secreto! Skin exclusiva desbloqueada (+$500)", easterEggAlreadyFound: "¡Ya desbloqueaste este secreto!"
         },
         'it': {
@@ -2157,7 +2175,7 @@
             modeLabelOpenWorld: "MONDO APERTO", modeLabelBoss: "Livello Boss", modeLabelWave: "Ondata",
             hideoutAlertTitle: "Nascondiglio Segreto", hideoutAlertEnter: "Entra: E", hideoutHudExit: "Esci: E",
             exitMatchBtn: "Esci dalla Partita", exitMatchConfirmMsg: "Sei sicuro di voler uscire dalla partita e tornare al menu? I tuoi progressi in questa partita andranno persi.",
-            pauseMatchBtn: "Pausa", pauseTitle: "PARTITA IN PAUSA", pauseResumeBtn: "▶ RIPRENDI", pauseExitBtn: "🚪 ESCI DALLA PARTITA", modeInfinito: "Modalità Infinita", soloLabelInfinito: "Modalità Infinita", modeLabelInfinito: "Infinita - Round", infiniteSurvivedLabel: "Sei sopravvissuto per {time} e hai raggiunto il round {round}.", powerupPickup_shield: "Power-up: Scudo!", powerupPickup_fury: "Power-up: Furia (danno raddoppiato)!", powerupPickup_speed: "Power-up: Velocità!", betTitle: "Scommessa Pre-Partita", betDesc: "Scommetti parte del tuo oro prima di iniziare. Se vinci, raddoppia. Se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva.", betUsageLabel: "Usate oggi: {used}/{max}", betLimitReached: "Limite giornaliero di scommesse raggiunto.", betPotentialWin: "Se vinci: +${amount}", betWonLabel: "Scommessa vinta: +${amount}", betLostLabel: "Scommessa persa: -${amount}", betActiveHud: "🎲 Scommessa attiva: ${amount} (può diventare ${potential})",
+            pauseMatchBtn: "Pausa", pauseTitle: "PARTITA IN PAUSA", pauseResumeBtn: "▶ RIPRENDI", pauseExitBtn: "🚪 ESCI DALLA PARTITA", modeInfinito: "Modalità Infinita", soloLabelInfinito: "Modalità Infinita", modeLabelInfinito: "Infinita - Round", infiniteSurvivedLabel: "Sei sopravvissuto per {time} e hai raggiunto il round {round}.", infiniteKillsLabel: "Hai sconfitto {kills} nemico/i.", betKillsLabel: "Nemici sconfitti nella partita: {kills}.", powerupPickup_shield: "Power-up: Scudo!", powerupPickup_fury: "Power-up: Furia (danno raddoppiato)!", powerupPickup_speed: "Power-up: Velocità!", betTitle: "Scommessa Pre-Partita", betDesc: "Scommetti parte del tuo oro prima di iniziare. Se vinci, raddoppia. Se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva.", betUsageLabel: "Usate oggi: {used}/{max}", betLimitReached: "Limite giornaliero di scommesse raggiunto.", betPotentialWin: "Se vinci: +${amount}", betWonLabel: "Scommessa vinta: +${amount}", betLostLabel: "Scommessa persa: -${amount}", betActiveHud: "🎲 Scommessa attiva: ${amount} (può diventare ${potential})",
             chatOptionsBtn: "Altre opzioni", chatClearOption: "🗑️ Cancella conversazione", chatBlockOption: "🚫 Blocca giocatore", chatUnblockOption: "✓ Sblocca giocatore", chatReportOption: "🚩 Segnala giocatore", chatNewGroupBtn: "➕ Crea nuovo gruppo", chatNewGroupTitle: "➕ Nuovo Gruppo", chatGroupNamePlaceholder: "Nome del gruppo", chatCreateGroupBtn: "CREA GRUPPO", chatGroupNameRequired: "Inserisci un nome per il gruppo.", chatGroupNeedMembers: "Seleziona almeno 1 persona.", chatGroupCreateError: "Errore durante la creazione del gruppo.", chatEmojiBtn: "Emoji", chatInviteOption: "🎮 Invita a giocare", chatInviteSentToast: "Invito inviato nella conversazione!", chatInviteCreatingRoom: "Creazione stanza...", chatInviteCardTitle: "🎮 Invito a giocare", chatInviteJoinBtn: "Unisciti alla partita", chatGroupNoFollowingHint: "Devi seguire qualcuno per creare un gruppo.", lobbyConnecting: "🔌 Connessione...", lobbyCodeExpired: "🚫 Codice scaduto. Chiedi un nuovo invito.",
             chatClearConfirmMsg: "Sei sicuro di voler eliminare tutti i messaggi di questa conversazione? Non può essere annullato.", chatClearedToast: "Conversazione cancellata.",
             chatBlockConfirmMsg: "Bloccare questo giocatore? Non potrete più scambiarvi messaggi finché non lo sblocchi.", chatBlockedToast: "Giocatore bloccato.", chatUnblockedToast: "Giocatore sbloccato.",
@@ -2299,7 +2317,7 @@
             tut9Title: "Multiplayer Online", tut9Body: "Clicca su <b>🌐 Online</b> per creare o unirti a una stanza con fino a 4 giocatori! Invita amici e gioca partite in tempo reale su internet.",
             tut10Title: "Amici e Chat", tut10Body: "Usa <b>🔎 Giocatori</b> per cercare e aggiungere amici. Chatta tramite il <b>pannello laterale</b>, crea gruppi e organizza partite con la tua squadra.",
             tut11Title: "Impostazioni", tut11Body: "Nel pulsante <b>⚙</b> puoi regolare volume, suono, musica, lingua e <b>riaprire questo tutorial</b> in qualsiasi momento. Buon divertimento!",
-            tut21Title: "Power-up", tut21Body: "Durante la partita, power-up temporanei appaiono a caso sulla mappa: <b>🛡 Scudo</b> (diventi invulnerabile), <b>⚡ Furia</b> (danno raddoppiato) e <b>➤ Velocità</b>. Toccali per attivare l’effetto per qualche secondo!", tut22Title: "Pausa", tut22Body: "Usa il pulsante <b>⏸</b> accanto al pulsante di uscita (o il tasto <b>P</b> su PC) per mettere in pausa la partita in qualsiasi momento. Non è possibile mettere in pausa nelle partite online.", tut23Title: "Scommessa Pre-Partita", tut23Body: "Nella modalità <b>Caccia all’Oro</b>, puoi scommettere parte del tuo oro prima di iniziare (fino a $200). Se vinci, la tua scommessa raddoppia — se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva, e puoi scommettere solo 3 volte al giorno.",
+            tut21Title: "Power-up", tut21Body: "Durante la partita, power-up temporanei appaiono a caso sulla mappa: <b>🛡 Scudo</b> (diventi invulnerabile), <b>⚡ Furia</b> (danno raddoppiato) e <b>➤ Velocità</b>. Toccali per attivare l’effetto per qualche secondo!", tut22Title: "Pausa", tut22Body: "Usa il pulsante <b>⏸</b> accanto al pulsante di uscita (o il tasto <b>P</b> su PC) per mettere in pausa la partita in qualsiasi momento. Non è possibile mettere in pausa nelle partite online.", tut23Title: "Scommessa Pre-Partita", tut23Body: "Nella modalità <b>Caccia all’Oro</b>, puoi scommettere parte del tuo oro prima di iniziare (fino a $200). Se vinci, la tua scommessa raddoppia — se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva, e puoi scommettere solo 3 volte al giorno.", tut24Title: "Novità: Combo, Titoli e Sfide", tut24Body: "Ecco le novità: il <b>Boss</b> ora è molto più forte; alcune piattaforme si muovono da sole (lateralmente o su/giù); sconfiggere più nemici velocemente senza subire danni dà una <b>combo d’oro</b>; battere il tuo record nella <b>Modalità Infinita</b> concede un distintivo permanente di <b>Prestigio</b>; titoli come <b>Sopravvissuto Leggendario</b> (1000+ secondi in Infinita) e <b>Scommettitore Fortunato</b> (10 scommesse vinte) appaiono accanto al tuo nome; nelle partite online da 3-4 giocatori, chi muore ora può guardare il resto come <b>spettatore</b>; e sono state aggiunte nuove <b>missioni giornaliere</b>.",
 
             tut12Title: "Scegli il tuo Eroe", tut12Body: "Prima di iniziare, scegli un <b>archetipo</b>: Hero (bilanciato), Vilan (tripla raffica a ventaglio) o Killer (veloce e letale). Ognuno si gioca in modo diverso!",
             tut13Title: "Modalità di Gioco", tut13Body: "Scegli tra <b>Orda Solo</b>, <b>Caccia all'Oro</b>, <b>Modalità Titano</b> (nemico super forte), <b>Modalità Boss</b> o <b>Modalità Infinita</b> (la difficoltà continua a salire finché non muori, e l'oro che guadagni dipende da quanto sei sopravvissuto). Puoi anche giocare <b>Duello 1v1 Locale</b>, con due giocatori sulla stessa tastiera (P1 e P2). Puoi anche attivare il <b>Mondo Aperto</b> per giocare su una mappa infinita in modalità solo.",
@@ -2333,10 +2351,14 @@
             welcomeBackTitle: "👋 Bentornato!", welcomeBackMissionsHint: "Non dimenticare di controllare le tue missioni giornaliere!",
             welcomeBackCloseBtn: "GIOCHIAMO!", welcomeBackOfflineLabel: "guadagnato mentre eri offline",
             missionCompleteToast: "Missione completata: {name} (+${gold})",
+            comboToast: "Combo di {streak} uccisioni! +${gold} oro",
+            prestigeToast: "Prestigio livello {n}! Nuovo record: {time}", titleUnlockedToast: "Titolo sbloccato:{name}",
+            titleLegendarySurvivor: "🏅 Sopravvissuto Leggendario", titleLuckyGambler: "🎲 Scommettitore Fortunato", titlePrestigeMaster: "👑 Maestro del Prestigio",
+            spectatorLabel: "Spettatore", spectatorHint: "Sei morto — segui il resto della partita come spettatore.",
             missionPlayMatches: "Gioca {target} partite", missionWinMatches: "Vinci {target} partita",
             missionKillEnemies: "Sconfiggi {target} nemici", missionEarnGold: "Guadagna {target} di oro nelle partite",
             missionOpenChests: "Apri {target} forzieri", missionWinVsAI: "Vinci {target} partita contro l'IA",
-            missionKillEnemiesBig: "Sconfiggi {target} nemici", missionPlayMatchesBig: "Gioca {target} partite",
+            missionKillEnemiesBig: "Sconfiggi {target} nemici", missionPlayMatchesBig: "Gioca {target} partite", missionWinNoDamage: "Vinci una partita senza subire danni", missionKillEnemiesDaily: "Sconfiggi {target} nemici oggi",
             easterEggFoundToast: "Hai trovato un segreto! Skin esclusiva sbloccata (+$500)", easterEggAlreadyFound: "Hai già sbloccato questo segreto!"
         },
         'fr': {
@@ -2408,7 +2430,7 @@
             modeLabelOpenWorld: "MONDE OUVERT", modeLabelBoss: "Niveau Boss", modeLabelWave: "Vague",
             hideoutAlertTitle: "Cachette Secrète", hideoutAlertEnter: "Entrer : E", hideoutHudExit: "Sortir : E",
             exitMatchBtn: "Quitter la Partie", exitMatchConfirmMsg: "Voulez-vous vraiment quitter la partie et retourner au menu ? Votre progression dans cette partie sera perdue.",
-            pauseMatchBtn: "Pause", pauseTitle: "PARTIE EN PAUSE", pauseResumeBtn: "▶ REPRENDRE", pauseExitBtn: "🚪 QUITTER LA PARTIE", modeInfinito: "Mode Infini", soloLabelInfinito: "Mode Infini", modeLabelInfinito: "Infini - Manche", infiniteSurvivedLabel: "Vous avez survécu {time} et atteint la manche {round}.", powerupPickup_shield: "Bonus : Bouclier !", powerupPickup_fury: "Bonus : Fureur (dégâts doublés) !", powerupPickup_speed: "Bonus : Vitesse !", betTitle: "Pari Avant-Match", betDesc: "Pariez une partie de votre or avant de commencer. Si vous gagnez, il double. Si vous perdez, il disparait. La partie devient plus difficile tant qu'un pari est actif.", betUsageLabel: "Utilisés aujourd'hui : {used}/{max}", betLimitReached: "Limite quotidienne de paris atteinte.", betPotentialWin: "Si vous gagnez : +${amount}", betWonLabel: "Pari gagné : +${amount}", betLostLabel: "Pari perdu : -${amount}", betActiveHud: "🎲 Pari actif : ${amount} (peut devenir ${potential})",
+            pauseMatchBtn: "Pause", pauseTitle: "PARTIE EN PAUSE", pauseResumeBtn: "▶ REPRENDRE", pauseExitBtn: "🚪 QUITTER LA PARTIE", modeInfinito: "Mode Infini", soloLabelInfinito: "Mode Infini", modeLabelInfinito: "Infini - Manche", infiniteSurvivedLabel: "Vous avez survécu {time} et atteint la manche {round}.", infiniteKillsLabel: "Vous avez vaincu {kills} ennemi(s).", betKillsLabel: "Ennemis vaincus dans la partie : {kills}.", powerupPickup_shield: "Bonus : Bouclier !", powerupPickup_fury: "Bonus : Fureur (dégâts doublés) !", powerupPickup_speed: "Bonus : Vitesse !", betTitle: "Pari Avant-Match", betDesc: "Pariez une partie de votre or avant de commencer. Si vous gagnez, il double. Si vous perdez, il disparait. La partie devient plus difficile tant qu'un pari est actif.", betUsageLabel: "Utilisés aujourd'hui : {used}/{max}", betLimitReached: "Limite quotidienne de paris atteinte.", betPotentialWin: "Si vous gagnez : +${amount}", betWonLabel: "Pari gagné : +${amount}", betLostLabel: "Pari perdu : -${amount}", betActiveHud: "🎲 Pari actif : ${amount} (peut devenir ${potential})",
             chatOptionsBtn: "Plus d'options", chatClearOption: "🗑️ Effacer la conversation", chatBlockOption: "🚫 Bloquer le joueur", chatUnblockOption: "✓ Débloquer le joueur", chatReportOption: "🚩 Signaler le joueur", chatNewGroupBtn: "➕ Créer un nouveau groupe", chatNewGroupTitle: "➕ Nouveau Groupe", chatGroupNamePlaceholder: "Nom du groupe", chatCreateGroupBtn: "CRÉER LE GROUPE", chatGroupNameRequired: "Entrez un nom pour le groupe.", chatGroupNeedMembers: "Sélectionnez au moins 1 personne.", chatGroupCreateError: "Erreur lors de la création du groupe.", chatEmojiBtn: "Émojis", chatInviteOption: "🎮 Inviter à jouer", chatInviteSentToast: "Invitation envoyée dans la conversation !", chatInviteCreatingRoom: "Création de la salle...", chatInviteCardTitle: "🎮 Invitation à jouer", chatInviteJoinBtn: "Rejoindre la partie", chatGroupNoFollowingHint: "Vous devez suivre quelqu’un pour créer un groupe.", lobbyConnecting: "🔌 Connexion...", lobbyCodeExpired: "🚫 Code expiré. Demandez une nouvelle invitation.",
             chatClearConfirmMsg: "Voulez-vous vraiment supprimer tous les messages de cette conversation ? Cette action est irréversible.", chatClearedToast: "Conversation effacée.",
             chatBlockConfirmMsg: "Bloquer ce joueur ? Vous ne pourrez plus vous envoyer de messages tant que vous ne le débloquez pas.", chatBlockedToast: "Joueur bloqué.", chatUnblockedToast: "Joueur débloqué.",
@@ -2550,7 +2572,7 @@
             tut9Title: "Multijoueur en Ligne", tut9Body: "Cliquez sur <b>🌐 Online</b> pour créer ou rejoindre une salle avec jusqu'à 4 joueurs ! Invitez des amis et jouez des parties en temps réel sur internet.",
             tut10Title: "Amis et Chat", tut10Body: "Utilisez <b>🔎 Joueurs</b> pour rechercher et ajouter des amis. Discutez via le <b>panneau latéral</b>, créez des groupes et organisez des parties avec votre équipe.",
             tut11Title: "Paramètres", tut11Body: "Dans le bouton <b>⚙</b>, vous pouvez régler le volume, le son, la musique, la langue, et <b>rouvrir ce tutoriel</b> à tout moment. Bon jeu !",
-            tut21Title: "Bonus", tut21Body: "Pendant la partie, des bonus temporaires apparaissent au hasard sur la carte : <b>🛡 Bouclier</b> (devenez invulnérable), <b>⚡ Fureur</b> (dégâts doublés) et <b>➤ Vitesse</b>. Touchez-les pour activer l’effet pendant quelques secondes !", tut22Title: "Pause", tut22Body: "Utilisez le bouton <b>⏸</b> à côté du bouton de sortie (ou la touche <b>P</b> sur PC) pour mettre la partie en pause à tout moment. La pause n’est pas disponible dans les parties en ligne.", tut23Title: "Pari Avant-Match", tut23Body: "En mode <b>Ruée vers l’Or</b>, vous pouvez parier une partie de votre or avant de commencer (jusqu’à 200 $). Si vous gagnez, votre pari double — si vous perdez, il disparaît. La partie devient plus difficile tant qu’un pari est actif, et vous ne pouvez parier que 3 fois par jour.",
+            tut21Title: "Bonus", tut21Body: "Pendant la partie, des bonus temporaires apparaissent au hasard sur la carte : <b>🛡 Bouclier</b> (devenez invulnérable), <b>⚡ Fureur</b> (dégâts doublés) et <b>➤ Vitesse</b>. Touchez-les pour activer l’effet pendant quelques secondes !", tut22Title: "Pause", tut22Body: "Utilisez le bouton <b>⏸</b> à côté du bouton de sortie (ou la touche <b>P</b> sur PC) pour mettre la partie en pause à tout moment. La pause n’est pas disponible dans les parties en ligne.", tut23Title: "Pari Avant-Match", tut23Body: "En mode <b>Ruée vers l’Or</b>, vous pouvez parier une partie de votre or avant de commencer (jusqu’à 200 $). Si vous gagnez, votre pari double — si vous perdez, il disparaît. La partie devient plus difficile tant qu’un pari est actif, et vous ne pouvez parier que 3 fois par jour.", tut24Title: "Nouveautés : Combos, Titres et Défis", tut24Body: "À découvrir : le <b>Boss</b> est maintenant bien plus fort ; certaines plateformes se déplacent seules (latéralement ou de haut en bas) ; éliminer plusieurs ennemis rapidement sans subir de dégâts donne un <b>combo d’or</b> ; battre votre propre record en <b>Mode Infini</b> accorde un badge permanent de <b>Prestige</b> ; des titres comme <b>Survivant Légendaire</b> (1000+ secondes en Infini) et <b>Parieur Chanceux</b> (10 paris gagnés) apparaissent à côté de votre nom ; dans les parties en ligne à 3-4 joueurs, celui qui meurt peut désormais suivre la suite en <b>spectateur</b> ; et de nouvelles <b>missions quotidiennes</b> ont été ajoutées.",
 
             tut12Title: "Choisissez votre héros", tut12Body: "Avant de commencer, choisissez un <b>archétype</b> : Hero (équilibré), Vilan (tir triple en éventail) ou Killer (rapide et létal). Chacun se joue différemment !",
             tut13Title: "Modes de Jeu", tut13Body: "Choisissez entre <b>Horde Solo</b>, <b>Ruée vers l'Or</b>, <b>Mode Titan</b> (ennemi super fort), <b>Mode Boss</b> ou <b>Mode Infini</b> (la difficulté monte sans arrêt jusqu'à ce que vous mouriez, et l'or gagné dépend de votre temps de survie). Vous pouvez aussi jouer en <b>Duel 1v1 Local</b>, avec deux joueurs sur le même clavier (P1 et P2). Vous pouvez aussi activer le <b>Monde Ouvert</b> pour jouer sur une carte infinie en mode solo.",
@@ -2584,10 +2606,14 @@
             welcomeBackTitle: "👋 Content de vous revoir !", welcomeBackMissionsHint: "N'oubliez pas de consulter vos missions quotidiennes !",
             welcomeBackCloseBtn: "C'EST PARTI !", welcomeBackOfflineLabel: "gagné pendant que vous étiez hors ligne",
             missionCompleteToast: "Mission accomplie : {name} (+${gold})",
+            comboToast: "Combo de {streak} éliminations ! +${gold} or",
+            prestigeToast: "Prestige niveau {n} ! Nouveau record : {time}", titleUnlockedToast: "Titre débloqué :{name}",
+            titleLegendarySurvivor: "🏅 Survivant Légendaire", titleLuckyGambler: "🎲 Parieur Chanceux", titlePrestigeMaster: "👑 Maître du Prestige",
+            spectatorLabel: "Spectateur", spectatorHint: "Vous êtes mort — suivez la fin du match en spectateur.",
             missionPlayMatches: "Jouez {target} matchs", missionWinMatches: "Gagnez {target} match",
             missionKillEnemies: "Vainquez {target} ennemis", missionEarnGold: "Gagnez {target} d'or en match",
             missionOpenChests: "Ouvrez {target} coffres", missionWinVsAI: "Gagnez {target} match contre l'IA",
-            missionKillEnemiesBig: "Vainquez {target} ennemis", missionPlayMatchesBig: "Jouez {target} matchs",
+            missionKillEnemiesBig: "Vainquez {target} ennemis", missionPlayMatchesBig: "Jouez {target} matchs", missionWinNoDamage: "Gagnez un match sans subir de dégâts", missionKillEnemiesDaily: "Vainquez {target} ennemis aujourd'hui",
             easterEggFoundToast: "Vous avez trouvé un secret ! Skin exclusif débloqué (+$500)", easterEggAlreadyFound: "Vous avez déjà débloqué ce secret !"
         }
     };
@@ -2759,6 +2785,7 @@
                 { icon: '🛒', title: t('tut6Title'), body: t('tut6Body') },
                 { icon: '🔫', title: t('tut19Title'), body: t('tut19Body') },
                 { icon: '⭐', title: t('tut7Title'), body: t('tut7Body') },
+                { icon: '🎖️', title: t('tut24Title'), body: t('tut24Body') },
                 { icon: '🎨', title: t('tut8Title'), body: t('tut8Body') },
                 { icon: '🌐', title: t('tut9Title'), body: t('tut9Body') },
                 { icon: '💬', title: t('tut10Title'), body: t('tut10Body') },
@@ -5341,7 +5368,10 @@
                 { id:'open_chests',  type:'chestOpen',     target:2,  gold:70,  nameKey:'missionOpenChests' },
                 { id:'win_vs_ai',    type:'vsAiWin',       target:1,  gold:150, nameKey:'missionWinVsAI' },
                 { id:'kill_enemies_big', type:'kills',     target:40, gold:140, nameKey:'missionKillEnemiesBig' },
-                { id:'play_matches_big', type:'matchesPlayed', target:5, gold:100, nameKey:'missionPlayMatchesBig' }
+                { id:'play_matches_big', type:'matchesPlayed', target:5, gold:100, nameKey:'missionPlayMatchesBig' },
+                // NOVO (sugestão de usuários): vencer sem tomar dano e uma meta maior de abates no dia.
+                { id:'win_no_damage', type:'winNoDamage', target:1,  gold:160, nameKey:'missionWinNoDamage' },
+                { id:'kill_enemies_daily', type:'kills',  target:50, gold:130, nameKey:'missionKillEnemiesDaily' }
             ],
             todayStr(offsetDays) {
                 let d = new Date(); if(offsetDays) d.setDate(d.getDate() + offsetDays);
@@ -5757,6 +5787,8 @@
             // NOVO: alimenta as missões diárias com o resultado desta partida.
             DailyFeatures.registerEvent('matchesPlayed', 1);
             if(won) DailyFeatures.registerEvent('matchesWon', 1);
+            if(won && !this.matchTookDamage) DailyFeatures.registerEvent('winNoDamage', 1);
+            this.matchTookDamage = false;
             DailyFeatures.registerEvent('kills', kills||0);
             DailyFeatures.registerEvent('goldEarned', goldEarned||0);
         },
@@ -5766,7 +5798,45 @@
         recordInfiniteResult(survivedSec, round, reward) {
             if(!this.persistentUpgradesP1.infiniteBest) this.persistentUpgradesP1.infiniteBest = { survivedSec: 0, round: 0 };
             let best = this.persistentUpgradesP1.infiniteBest;
-            if(survivedSec > best.survivedSec) { best.survivedSec = survivedSec; best.round = round; }
+            if(survivedSec > best.survivedSec) {
+                best.survivedSec = survivedSec; best.round = round;
+                // NOVO: sistema de "prestígio" — cada vez que o jogador bate a própria melhor
+                // marca de sobrevivência no Infinito, o contador de prestígio sobe e ele ganha um
+                // selo permanente (visível no perfil/ranking). Não é reversível: mesmo se uma run
+                // futura for pior, o prestígio conquistado fica.
+                this.persistentUpgradesP1.prestige = (this.persistentUpgradesP1.prestige || 0) + 1;
+                this.showToast(`✨ ${t('prestigeToast').replace('{n}', this.persistentUpgradesP1.prestige).replace('{time}', this.formatSurvivedTime(survivedSec))}`);
+            }
+            this.checkTitles();
+        },
+        formatSurvivedTime(sec) { return `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`; },
+        // NOVO: Títulos/emblemas de destaque — desbloqueados por marcos específicos e exibidos ao
+        // lado do nome no chat/ranking (ver getPlayerTitle/renderização do chat e ranking).
+        titleCatalog: [
+            { id:'legendary_survivor', nameKey:'titleLegendarySurvivor', check: (pu) => (pu.infiniteBest && pu.infiniteBest.survivedSec >= 1000) },
+            { id:'lucky_gambler',      nameKey:'titleLuckyGambler',      check: (pu) => ((pu.betsWon||0) >= 10) },
+            { id:'prestige_master',    nameKey:'titlePrestigeMaster',    check: (pu) => ((pu.prestige||0) >= 5) }
+        ],
+        checkTitles() {
+            let pu = this.persistentUpgradesP1;
+            if(!pu.unlockedTitles) pu.unlockedTitles = [];
+            let changed = false;
+            this.titleCatalog.forEach(tt => {
+                if(!pu.unlockedTitles.includes(tt.id) && tt.check(pu)) {
+                    pu.unlockedTitles.push(tt.id); changed = true;
+                    this.showToast(`🎖️ ${t('titleUnlockedToast').replace('{name}', t(tt.nameKey))}`);
+                }
+            });
+            if(changed) this.saveProfile();
+        },
+        // Retorna o título ativo (o mais "alto" da lista, se houver mais de um) pra exibir junto
+        // ao nome — usado no chat e no ranking. Vazio se o jogador não tem nenhum ainda.
+        getActiveTitleLabel() {
+            let pu = this.persistentUpgradesP1;
+            let unlocked = (pu && pu.unlockedTitles) || [];
+            if(unlocked.length === 0) return '';
+            let best = this.titleCatalog.slice().reverse().find(tt => unlocked.includes(tt.id));
+            return best ? ` ${t(best.nameKey)}` : '';
         },
         modeSoloLabelKeys: { GOLDFUSH: 'soloLabelGoldfush', TITAN: 'soloLabelTitan', BOSS: 'soloLabelBoss', INFINITO: 'soloLabelInfinito' },
         // NOVO: Boost de Velocidade e Boost de HP Extra — em vez de um preço fixo, mostram um botão
@@ -5991,6 +6061,7 @@
                     if (bugReportSection) bugReportSection.classList.remove('hidden');
                     if(typeof Chat !== 'undefined') Chat.loadConversations();
                 }
+                this.checkTitles();
                 this.refreshLevelBadge();
             } catch(err) {
                 console.error('Erro ao aplicar dados da conta (seguindo mesmo assim pro menu):', err);
@@ -6061,26 +6132,34 @@
         startOnlineMatch(roster, mySlot) {
             document.getElementById('online-lobby-screen').classList.add('hidden');
             this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999; this.powerupSpawnTimer = 0; this.powerupSpawnTarget = 14 + Math.random()*10; this.isPaused = false; document.getElementById('pause-screen').classList.add('hidden');
+            this.matchTookDamage = false; this.killStreak = 0; this.killStreakTimer = 0;
+            { let sb = document.getElementById('spectator-banner'); if(sb) sb.classList.add('hidden'); }
             this.enemies = []; this.projectiles = []; this.particles = []; this.items = []; this.platforms = [];
             this.chunksLoaded = {}; this.cameraX = 0; this.secretZones = []; this.pendingSpawns = []; this.openWorldSpawnCd = 0;
             this.timeLeftSeconds = 300; this.timerTicker = 0; this.activeMatch = false; this._lastEndInfo = null;
             this.isOpenWorld = false; this.gameMode = 'DUELO';
+            // NOVO: arena do Multijogador reduzida — antes ia até x~1900 (arenaWidth 1920), o que
+            // fazia a câmera (que centraliza pela média dos jogadores vivos) afastar demais quando
+            // um jogador ia pra um lado e outro ficava longe no lado oposto, "escondendo"/empurrando
+            // quem estava mais parado. Com uma arena mais compacta, os jogadores ficam naturalmente
+            // mais próximos e a câmera não precisa se mexer tanto.
+            this.arenaWidth = 1300;
             Hideout.active = false;
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
-            this.platforms.push(new Platform(-1000,680,3280,40));
-            this.platforms.push(new Platform(150,500,320,20)); this.platforms.push(new Platform(810,500,320,20));
-            this.platforms.push(new Platform(490,350,300,20)); this.platforms.push(new Platform(200,200,250,20));
-            this.platforms.push(new Platform(830,200,250,20)); this.platforms.push(new Platform(1180,500,320,20));
-            this.platforms.push(new Platform(1300,200,280,20)); this.platforms.push(new Platform(1620,350,260,20));
+            this.platforms.push(new Platform(-1000,680,2380,40));
+            this.platforms.push(new Platform(90,500,260,20)); this.platforms.push(new Platform(560,500,260,20));
+            this.platforms.push(new Platform(340,350,220,20,null,'x',80,0.5)); this.platforms.push(new Platform(130,200,190,20));
+            this.platforms.push(new Platform(590,200,190,20,null,'y',65,0.45)); this.platforms.push(new Platform(830,500,260,20));
+            this.platforms.push(new Platform(900,200,190,20)); this.platforms.push(new Platform(1080,350,180,20,null,'x',60,0.55));
             roster = roster || [{slot:1, name:this.getProfileName(1), arch:this.selectedArchP1, col:null, skn:'default'}];
             this.mySlot = mySlot || 1;
             this.rosterNames = {}; roster.forEach(r => { this.rosterNames[r.slot] = r.name; });
-            let spawnXs = [250, 700, 1150, 1600];
+            let spawnXs = [150, 450, 750, 1050];
             this.players = roster.map((r, idx) => {
                 let upg = (r.slot === 1) ? this.persistentUpgradesP1 : this.persistentUpgradesP2;
                 let cosmetics = { color: r.col || null, skin: r.skn || 'default' };
-                return new Player(r.slot, spawnXs[idx] || (250 + idx*450), 400, r.arch || 'vilan', null, upg, r.slot, cosmetics);
+                return new Player(r.slot, spawnXs[idx] || (150 + idx*300), 400, r.arch || 'vilan', null, upg, r.slot, cosmetics);
             });
             for(let i=1; i<=4; i++) {
                 let el = document.getElementById('hud-p'+i);
@@ -6906,6 +6985,8 @@
                 let bar = document.getElementById(barId); if(bar) bar.style.width = pct + '%';
                 let txt = document.getElementById(textId); if(txt) txt.textContent = `${xpIntoLevel}/${xpForNext} XP`;
             });
+            let titleBadge = document.getElementById('lbl-title-badge');
+            if(titleBadge) titleBadge.textContent = this.getActiveTitleLabel();
         },
         renderAchievements() {
             this.refreshLevelBadge();
@@ -6940,6 +7021,7 @@
         showLevelUpToast(level) { this.showToast(`⭐ ${t('levelUpToast').replace('{level}', level)}`); },
         showAchievementToast(ach) { this.showToast(`🏆 ${t('achievementUnlockedToast').replace('{name}', t(ach.nameKey))}`); },
         showMissionCompleteToast(def) { this.showToast(`🎯 ${t('missionCompleteToast').replace('{name}', t(def.nameKey)).replace('{gold}', def.gold)}`); },
+        showComboToast(streak, bonus) { this.showToast(`🔥 ${t('comboToast').replace('{streak}', streak).replace('{gold}', bonus)}`); },
         buyItemMenu(itemId) {
             let item = this.shopCatalog.find(i => i.id === itemId); if(!item || item.type === 'boost') return;
             if(this.walletP1 < item.price) return; this.walletP1 -= item.price; this.applyUpgradeData(this.persistentUpgradesP1, item);
@@ -7032,8 +7114,11 @@
         renderRanking() {
             let container = document.getElementById('ranking-container'); container.innerHTML = '';
             if(this.ranking.length === 0) { container.innerHTML = `<div class="ranking-empty">${t('noWinsYet')}</div>`; return; }
+            let myTitle = this.getActiveTitleLabel();
+            let myNamePrefix = this.getProfileName(1);
             this.ranking.sort((a,b) => b.wins - a.wins).forEach((rk, idx) => {
-                container.innerHTML += `<div class="ranking-item"><span><b>#${idx+1}</b> ${rk.name}</span><span style="color:#22c55e; font-weight:bold;">${rk.wins} ${t('winsLabel')}</span></div>`;
+                let titleTag = (myTitle && rk.name.startsWith(myNamePrefix)) ? `<span style="color:#facc15; font-size:0.78em;">${myTitle}</span>` : '';
+                container.innerHTML += `<div class="ranking-item"><span><b>#${idx+1}</b> ${rk.name}${titleTag}</span><span style="color:#22c55e; font-weight:bold;">${rk.wins} ${t('winsLabel')}</span></div>`;
             });
         },
         // NOVO: ponto de entrada usado pelo botão genérico "INICIAR SIMULAÇÃO" do menu principal
@@ -7054,6 +7139,13 @@
         startMatch() {
             document.getElementById('menu-screen').classList.add('hidden');
             this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999; this.powerupSpawnTimer = 0; this.powerupSpawnTarget = 14 + Math.random()*10; this.isPaused = false; document.getElementById('pause-screen').classList.add('hidden');
+            this.matchTookDamage = false; this.killStreak = 0; this.killStreakTimer = 0; this.infinitoStartTime = Date.now();
+            // NOVO: arena menor também no Duelo vs IA (2 jogadores) — mesmo motivo do Multijogador
+            // online: com a arena grande, a câmera (que centraliza pela média dos jogadores vivos)
+            // afastava demais quando um dos dois ia pra um lado, "escondendo"/empurrando o outro.
+            // No modo solo puro (só 1 jogador) mantém a arena grande de sempre, sem esse problema.
+            this.arenaWidth = this.vsAI ? 1300 : 1920;
+            { let sb = document.getElementById('spectator-banner'); if(sb) sb.classList.add('hidden'); }
             this.enemies = []; this.projectiles = []; this.particles = []; this.items = []; this.platforms = [];
             this.chunksLoaded = {}; this.cameraX = 0; this.secretZones = []; this.pendingSpawns = []; this.openWorldSpawnCd = 0;
             // NOVO: Modo Infinito não tem vitória por tempo — a partida só acaba quando você
@@ -7079,7 +7171,11 @@
             Hideout.active = false;
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
-            this.platforms.push(new Platform(-1000, 680, 3280, 40));
+            if(this.vsAI) {
+                this.platforms.push(new Platform(-1000, 680, 2380, 40));
+            } else {
+                this.platforms.push(new Platform(-1000, 680, 3280, 40));
+            }
             this._customLevelGemGoal = 0; this._customLevelWon = false;
             if(this.customLevelData) {
                 // NOVO: fase criada no Editor de Fases — usa o layout salvo (plataformas normais,
@@ -7092,6 +7188,22 @@
                 // dando a impressão de que os coletáveis "não faziam nada". Agora, se a fase tem
                 // coletáveis, juntar TODOS eles conclui a fase na hora — ver checkCustomLevelWin().
                 this._customLevelGemGoal = (this.customLevelData.items || []).filter(it => it.type === 'gem').length;
+            } else if(!this.isOpenWorld && this.vsAI) {
+                // NOVO: layout compacto do Duelo vs IA — mesma ideia da Arena padrão (plataformas
+                // de salto/aceleradoras + coletáveis), só que reposicionado pra caber na arena
+                // reduzida (arenaWidth 1300) sem deixar os dois jogadores longe demais um do outro.
+                this.platforms.push(new Platform(90, 500, 260, 20, 'jump'));
+                this.platforms.push(new Platform(560, 500, 260, 20));
+                this.platforms.push(new Platform(340, 350, 220, 20, 'speed'));
+                this.platforms.push(new Platform(130, 200, 190, 20, null, 'x', 80, 0.5));
+                this.platforms.push(new Platform(590, 200, 190, 20, null, 'y', 65, 0.45));
+                this.platforms.push(new Platform(830, 500, 260, 20, 'jump'));
+                this.platforms.push(new Platform(900, 200, 190, 20, null, 'x', 60, 0.55));
+                this.platforms.push(new Platform(1080, 350, 180, 20, 'speed'));
+                this.items.push(new Item(200, 170, 'gem'));
+                this.items.push(new Item(610, 170, 'gem'));
+                this.items.push(new Item(950, 170, 'gem'));
+                this.items.push(new Item(460, 320, 'gem'));
             } else if(!this.isOpenWorld) {
                 // NOVO: a Arena padrão agora mistura plataformas de salto (verde) e aceleradoras
                 // (amarelo) com as normais, além de coletáveis fixos pra explorar — os mesmos
@@ -7099,10 +7211,10 @@
                 this.platforms.push(new Platform(150, 500, 320, 20, 'jump'));
                 this.platforms.push(new Platform(810, 500, 320, 20));
                 this.platforms.push(new Platform(490, 350, 300, 20, 'speed'));
-                this.platforms.push(new Platform(200, 200, 250, 20));
-                this.platforms.push(new Platform(830, 200, 250, 20));
+                this.platforms.push(new Platform(200, 200, 250, 20, null, 'x', 100, 0.5));
+                this.platforms.push(new Platform(830, 200, 250, 20, null, 'y', 85, 0.4));
                 this.platforms.push(new Platform(1180, 500, 320, 20, 'jump'));
-                this.platforms.push(new Platform(1300, 200, 280, 20));
+                this.platforms.push(new Platform(1300, 200, 280, 20, null, 'x', 110, 0.55));
                 this.platforms.push(new Platform(1620, 350, 260, 20, 'speed'));
                 this.items.push(new Item(300, 170, 'gem'));
                 this.items.push(new Item(930, 170, 'gem'));
@@ -7447,6 +7559,17 @@
             } else {
                 let aliveP = this.players.filter(p => p && p.lives > 0);
                 let maxCam = Math.max(0, this.arenaWidth - 1280);
+                // NOVO: espectador — se o jogador local morreu (perdeu todas as vidas) mas a
+                // partida continua porque outros jogadores (3-4p) ainda estão vivos, mostra um
+                // aviso e deixa a câmera acompanhar quem ainda está jogando (já feito abaixo, pela
+                // média dos vivos) em vez de travar numa tela de espera.
+                let myLocalP = this.players.find(p => p && p.id === this.mySlot);
+                let banner = document.getElementById('spectator-banner');
+                if(banner) {
+                    let amSpectating = this.activeMatch && this.players.length > 2 && myLocalP && myLocalP.lives <= 0 && aliveP.length > 1;
+                    if(amSpectating) { banner.textContent = `👁️ ${t('spectatorLabel')}`; banner.classList.remove('hidden'); }
+                    else banner.classList.add('hidden');
+                }
                 if(aliveP.length > 0) {
                     let avgX = aliveP.reduce((s, p) => s + p.x + p.w/2, 0) / aliveP.length;
                     this.cameraX = Math.max(0, Math.min(maxCam, avgX - 640));
@@ -7515,6 +7638,7 @@
                 let bot = this.players.find(p => p && p.isAI);
                 if(bot && bot.lives > 0) this.updateAIBot(bot, dt);
             }
+            if(this.killStreakTimer > 0) { this.killStreakTimer -= dt; if(this.killStreakTimer <= 0) this.killStreak = 0; }
             if(Hideout.active && this.players[0]) Hideout.update(dt, this.players[0]);
             this.players.forEach(p => { if(p && p.lives > 0) p.update(dt, Hideout.active && p === this.players[0]); });
             if(!Hideout.active) {
@@ -7578,18 +7702,26 @@
             });
             let desc = t('timeVictoryDesc').replace('{mins}', mins);
             let betLine = '';
+            let myP = this.players.find(p => p && p.id === this.mySlot);
             if(this.betActive && this.betAmountLocked > 0) {
                 // NOVO: sobreviver até o fim (vitória por tempo) com uma aposta ativa dobra o
                 // valor apostado — o valor já tinha sido debitado em startMatch(), então aqui só
-                // credita o dobro de volta.
-                let betPayout = this.betAmountLocked * 2;
+                // credita o dobro de volta. EXCEÇÃO: se o jogador não derrotou NENHUM inimigo
+                // durante a partida (só ficou fugindo/coletando ouro até o cronômetro zerar), o
+                // pagamento da aposta é limitado a $100 fixos, mesmo tendo "vencido" — apostar sem
+                // lutar não deveria valer o prêmio cheio.
+                let killCount = myP ? (myP.kills || 0) : 0;
+                let betPayout = killCount > 0 ? this.betAmountLocked * 2 : Math.min(100, this.betAmountLocked);
                 this.walletP1 += betPayout;
-                betLine = `<br><span style="color:#facc15; font-weight:bold;">🎲 ${t('betWonLabel').replace('{amount}', betPayout)}</span>`;
+                // NOVO: conta pro título "Apostador de Sorte" (10+ apostas vencidas) — só quando
+                // o pagamento foi o prêmio cheio (dobrado), não no caso de payout reduzido.
+                if(killCount > 0) { this.persistentUpgradesP1.betsWon = (this.persistentUpgradesP1.betsWon || 0) + 1; this.checkTitles(); }
+                let killsLabel = t('betKillsLabel').replace('{kills}', killCount);
+                betLine = `<br><span style="color:#facc15; font-weight:bold;">🎲 ${t('betWonLabel').replace('{amount}', betPayout)}</span><br><span style="color:#94a3b8;">${killsLabel}</span>`;
             }
             this.betActive = false; this.betAmountLocked = 0;
             document.getElementById('lbl-gameover-stats').innerHTML =
                 `${desc}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: ${goldLines.join(' | ')}</span>${betLine}`;
-            let myP = this.players.find(p => p && p.id === this.mySlot);
             if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: Math.min(1000, myP.goldCollected), won: true });
             this.saveProfile();
         },
@@ -7614,6 +7746,7 @@
         },
         triggerMatchEnd(winner, titleMsg, descMsg) {
             this.state = 'GAMEOVER'; this.activeMatch = false;
+            let specBanner = document.getElementById('spectator-banner'); if(specBanner) specBanner.classList.add('hidden');
             Hideout.active = false;
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
@@ -7645,15 +7778,25 @@
                 // só existe "até onde você aguentou"). A recompensa não usa o teto fixo de $1000
                 // dos outros modos: ela escala com o tempo de sobrevivência E com o round
                 // alcançado, então quanto mais longe o jogador foi, mais ouro ganha — sem teto
-                // superior, pra incentivar tentar bater a própria marca.
+                // superior, pra incentivar tentar bater a própria marca. EXCEÇÃO: se o jogador não
+                // derrotou nenhum inimigo na run inteira, a recompensa cai pra um valor fixo bem
+                // baixo ($20), mesmo que tenha sobrevivido bastante tempo só fugindo — o modo é
+                // sobre enfrentar a dificuldade crescente, não sobre corridas de esquiva.
                 let survivedSec = this.infiniteElapsed || 0;
-                let reward = Math.round(survivedSec * 4 + this.round * 60 + (myP ? myP.goldCollected : 0) * 0.5);
+                let killCount = myP ? (myP.kills || 0) : 0;
+                // NOVO: além de tempo/round/ouro, a recompensa agora soma $25 por inimigo
+                // derrotado — assim quem derrota 100 inimigos ganha bem mais do que quem derrota
+                // só 5, mesmo que os dois tenham sobrevivido o mesmo tempo (antes só tempo/round/
+                // ouro entravam na conta, e dava pra sobreviver bastante fugindo sem lutar muito).
+                let reward = killCount > 0 ? Math.round(survivedSec * 4 + this.round * 60 + killCount * 25 + (myP ? myP.goldCollected : 0) * 0.5) : 20;
                 this.walletP1 += reward;
                 this.recordInfiniteResult(survivedSec, this.round, reward);
                 let survMin = Math.floor(survivedSec/60), survSec = survivedSec%60;
                 let survivedLabel = t('infiniteSurvivedLabel').replace('{time}', `${survMin}:${String(survSec).padStart(2,'0')}`).replace('{round}', this.round);
+                let killsLabel = t('infiniteKillsLabel').replace('{kills}', killCount);
                 document.getElementById('lbl-gameover-stats').innerHTML =
                     `${descMsg}<br><span style="color:#94a3b8;">${survivedLabel}</span>` +
+                    `<br><span style="color:#94a3b8;">${killsLabel}</span>` +
                     `<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${reward}</span>`;
                 if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: reward, won: false });
                 this.saveProfile();
@@ -7910,6 +8053,7 @@
             if(this.profileId === 1 && Accounts.current && Accounts.current.isTestAccount) return; // conta de testes: vida infinita
             if(this.shieldTime > 0 || this.lives <= 0) return;
             this.hp -= amount; AudioFX.play('hit');
+            if(this.profileId === Engine.mySlot) { Engine.matchTookDamage = true; Engine.killStreak = 0; Engine.killStreakTimer = 0; }
             if(this.hp <= 0) { this.lives--; if(this.lives > 0) { this.hp = this.maxHp; this.y = 100; this.vy = 0; } }
             this.syncHUD();
         }
@@ -8033,7 +8177,21 @@
         // de salto: impulsiona quem pisa nela bem mais alto que um pulo normal) ou 'speed'
         // (acelerador: dá um boost de velocidade temporário a quem passa por cima). Ver
         // Physics.resolveAll() para o efeito de cada uma.
-        constructor(x, y, w, h, kind) { this.x = x; this.y = y; this.w = w; this.h = h; this.kind = kind || 'normal'; }
+        // moveAxis: 'x' ou 'y' (movimento lento pra lados ou pra cima/baixo); moveRange: distância
+        // percorrida a partir da posição inicial; moveSpeed: velocidade do vaivém.
+        constructor(x, y, w, h, kind, moveAxis, moveRange, moveSpeed) {
+            this.x = x; this.y = y; this.w = w; this.h = h; this.kind = kind || 'normal';
+            this.baseX = x; this.baseY = y;
+            this.moveAxis = moveAxis || null; this.moveRange = moveRange || 0; this.moveSpeed = moveSpeed || 0.6;
+            this._movePhase = Math.random() * Math.PI * 2; this.dx = 0; this.dy = 0;
+        }
+        updateMove(dt) {
+            if(!this.moveAxis) return;
+            this._movePhase += dt * this.moveSpeed;
+            let offset = Math.sin(this._movePhase) * this.moveRange;
+            if(this.moveAxis === 'x') { let nx = this.baseX + offset; this.dx = nx - this.x; this.x = nx; this.dy = 0; }
+            else { let ny = this.baseY + offset; this.dy = ny - this.y; this.y = ny; this.dx = 0; }
+        }
         draw(ctx) {
             ctx.save();
             if(this.kind === 'jump') {
@@ -8066,7 +8224,8 @@
                 }
                 ctx.restore();
             } else {
-                ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+                if(this.moveAxis) { ctx.fillStyle = '#1e1035'; ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2.5; ctx.shadowColor = '#c084fc'; ctx.shadowBlur = 6; }
+                else { ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2; }
                 ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h);
             }
             ctx.restore();
@@ -8080,8 +8239,10 @@
             let diffMult = Engine.getDifficultyMultiplier();
             let spdMult = 1 + (diffMult - 1) * 0.4;
             if(type === 'boss') {
+                // Boss bem mais difícil: HP base e por nível maiores, mais rápido e atira com
+                // mais frequência (cd menor = atira mais vezes).
                 let lvl = bossLevel || 1; this.w = 70; this.h = 70;
-                this.maxHp = Math.round((350 + (lvl - 1) * 180) * diffMult); this.color = '#dc2626'; this.speed = 1.7 * spdMult; this.cd = 90;
+                this.maxHp = Math.round((650 + (lvl - 1) * 320) * diffMult); this.color = '#dc2626'; this.speed = 2.35 * spdMult; this.cd = 55;
             } else {
                 this.w = 32; this.h = 32;
                 this.maxHp = Math.round((type === 'slime' ? 25 : (type === 'shadow' ? 55 : 40)) * diffMult);
@@ -8104,7 +8265,7 @@
                 if(this.type === 'shooter' || this.type === 'boss') {
                     this.cd -= dt * 60;
                     if(this.cd <= 0) {
-                        let projDmg = this.type === 'boss' ? 25 : 12;
+                        let projDmg = this.type === 'boss' ? 34 : 12;
                         let projY = this.type === 'boss' ? (this.y + this.h - 15) : (this.y + 10);
                         Engine.projectiles.push(new Projectile(this.x, projY, this.vx > 0 ? 7 : -7, 0, this.color, projDmg, this));
                         this.cd = this.type === 'boss' ? 95 : 130;
@@ -8136,7 +8297,22 @@
             if(this.dead) return; this.hp -= amount;
             if(this.hp <= 0) {
                 this.dead = true; Engine.killsCounter++;
-                if(source && source instanceof Player) source.kills = (source.kills||0) + 1;
+                if(source && source instanceof Player) {
+                    source.kills = (source.kills||0) + 1;
+                    // NOVO: combo/streak de kills — matar vários inimigos em sequência rápida sem
+                    // tomar dano soma o combo (só rastreado pro jogador local, profileId === mySlot).
+                    // Cada kill sem dano recente reinicia a janela de 4s; tomar dano zera o combo
+                    // (ver Player.takeDamage). Recompensa: ouro bônus crescente a partir de 3 kills.
+                    if(source.profileId === Engine.mySlot) {
+                        Engine.killStreak = (Engine.killStreak || 0) + 1;
+                        Engine.killStreakTimer = 4;
+                        if(Engine.killStreak >= 3) {
+                            let bonus = Math.min(15, Engine.killStreak) * 4;
+                            Engine.walletP1 += bonus; source.goldCollected += bonus; source.syncHUD();
+                            if(typeof Engine.showComboToast === 'function') Engine.showComboToast(Engine.killStreak, bonus);
+                        }
+                    }
+                }
                 if(this.type === 'boss') {
                     if(source && source instanceof Player) { source.goldCollected += 250; source.syncHUD(); }
                     for(let i=0; i<5; i++) Engine.items.push(new Item(this.x + i*14, this.y+10, 'coin'));
@@ -8231,6 +8407,7 @@
     }
     const Physics = {
         resolveAll(dt) {
+            Engine.platforms.forEach(p => p.updateMove(dt));
             let playersAlive = Engine.players.filter(p=>p && p.lives>0);
             let actors = [...playersAlive, ...Engine.enemies];
             actors.forEach(a => {
@@ -8239,11 +8416,12 @@
                     if(a.x + a.w > p.x && a.x < p.x + p.w && a.y + a.h >= p.y && a.y <= p.y + p.h) {
                         if(a.vy >= 0 && (a.y + a.h - a.vy * dt * 60) <= p.y + 8) {
                             a.y = p.y - a.h;
+                            if(p.moveAxis === 'x' && p.dx) a.x += p.dx;
                             if(p.kind === 'jump') {
-                                // Plataforma de salto: impulsiona bem mais forte que um pulo normal e
+                                // Plataforma de salto: impulsiona um pouco mais forte que um pulo normal
                                 // não deixa o personagem "grudado" no chão (isGrounded fica false pra
                                 // já poder pular de novo no ar, se quiser, assim que aterrissar depois).
-                                a.vy = -24; a.isGrounded = false;
+                                a.vy = -19; a.isGrounded = false;
                                 AudioFX.play('jump');
                                 if(typeof createFXBurst === 'function') createFXBurst(a.x + a.w/2, p.y, '#4ade80', 10);
                             } else {
