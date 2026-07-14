@@ -359,6 +359,11 @@
     <div id="game-hud">
         <div style="display:flex; align-items:flex-start; gap:8px;">
             <button id="btn-exit-match" onclick="Engine.confirmExitMatch()" data-i18n-title="exitMatchBtn" title="Sair da Partida" style="pointer-events:auto; cursor:pointer; width:34px; height:34px; border-radius:50%; background:rgba(15,23,42,0.85); border:1px solid rgba(51,65,85,0.6); color:#f87171; font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:0;">🚪</button>
+            <!-- NOVO: botão de pausar, ao lado do de sair. Só aparece fora de partidas online
+                 (multijogador via internet) — pausar não faz sentido quando existe outro
+                 jogador remoto em tempo real do outro lado, então o próprio togglePauseMatch()
+                 também recusa pausar se OnlineSync.isOnline por segurança (ver função). -->
+            <button id="btn-pause-match" onclick="Engine.togglePauseMatch()" data-i18n-title="pauseMatchBtn" title="Pausar" style="pointer-events:auto; cursor:pointer; width:34px; height:34px; border-radius:50%; background:rgba(15,23,42,0.85); border:1px solid rgba(51,65,85,0.6); color:#facc15; font-size:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; padding:0;">⏸</button>
             <div id="hud-p1" class="hud-player">
                 <div class="hud-meta">
                     <span id="hud-p1-name" style="color:#22c55e"></span>
@@ -380,6 +385,10 @@
         </div>
         <div id="hud-center">
             <div id="hud-timer-text">05:00 | Onda 1</div>
+            <!-- NOVO: mostra a aposta ativa (se houver) durante a partida — só um lembrete visual
+                 constante de "quanto está em jogo", pra dar aquela tensão extra pedida. Ver
+                 Engine.syncBetHud(), chamado de dentro de update(). -->
+            <div id="hud-bet-active" style="display:none; font-size:0.78rem; font-weight:800; color:#facc15; margin-top:2px;"></div>
             <div id="chest-alert" onclick="Engine.tryOpenChest()" data-i18n="chestAlert">Pressione [B] para Abrir o Baú</div>
         </div>
         <div id="hud-guests" style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
@@ -552,6 +561,31 @@
                 <div class="btn-group">
                     <button id="btn-mode-titan" onclick="Engine.setGameMode('TITAN')" data-i18n="modeTitan">Modo Titã (Super Forte)</button>
                     <button id="btn-mode-boss" onclick="Engine.setGameMode('BOSS')" data-i18n="modeBoss">Modo Chefe (Boss)</button>
+                </div>
+                <div class="btn-group">
+                    <!-- NOVO: Modo Infinito — sem cronômetro, dificuldade sobe sem parar até você
+                         perder. Ver Engine.update()/getDifficultyMultiplier() para a curva de
+                         dificuldade e triggerMatchEnd()/registerMatchStats() para a recompensa
+                         proporcional ao quanto você sobreviveu. -->
+                    <button id="btn-mode-infinito" onclick="Engine.setGameMode('INFINITO')" data-i18n="modeInfinito" style="width:100%;">Jogo Infinito</button>
+                </div>
+                <!-- NOVO: Aposta pré-partida, só disponível no modo Caça ao Ouro (Gold Rush) e só
+                     fora do multijogador online (ver Engine.updateMenu/refreshBetPanel). Aposta
+                     parte do ouro ANTES de começar; dobra se vencer, some se perder — e pra
+                     compensar a recompensa maior, a partida fica mais difícil enquanto uma aposta
+                     estiver ativa (ver Engine.startMatch/getDifficultyMultiplier). Limitado a 3
+                     partidas apostadas por dia (ver Engine.getBetUsageToday). -->
+                <div id="bet-panel" class="config-section hidden" style="margin-top:10px; padding:14px;">
+                    <div class="section-title" style="margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <span data-i18n="betTitle">Aposta Pré-Partida</span>
+                        <span id="lbl-bet-usage" style="font-size:0.75rem; color:#64748b; text-transform:none; letter-spacing:0;"></span>
+                    </div>
+                    <p style="font-size:0.8rem; color:#94a3b8; margin-bottom:10px;" data-i18n="betDesc">Aposte parte do seu ouro antes de começar. Se vencer, dobra. Se perder, some. A partida fica mais difícil enquanto a aposta estiver ativa.</p>
+                    <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+                        <input id="rng-bet" type="range" min="0" max="200" step="10" value="0" oninput="Engine.setBetAmount(this.value)" style="flex:1;">
+                        <span id="lbl-bet-amount" style="font-weight:800; color:#eab308; min-width:60px; text-align:right;">$0</span>
+                    </div>
+                    <div id="lbl-bet-hint" style="font-size:0.78rem; color:#64748b;"></div>
                 </div>
             </div>
             <div class="config-section">
@@ -737,6 +771,18 @@
             <button onclick="Engine.declineContinue()" style="padding:15px 30px; font-size:1.05rem; background:#3b82f6; border-color:#2563eb; color:white;" data-i18n="continueMenuBtn">RETORNAR AO MENU</button>
         </div>
         <p id="lbl-continue-nogold" class="hidden" style="color:#f87171; font-size:0.9rem;" data-i18n="continueNoGoldHint">Ouro insuficiente para continuar.</p>
+    </div>
+    <!-- NOVO: tela de pausa. Igual às demais overlays (.screen), fica por cima do canvas e do HUD
+         (z-index:10 via a classe .screen) — o loop principal simplesmente para de chamar
+         update()/draw() enquanto Engine.isPaused for true (ver loop()), então o jogo congela de
+         verdade, não é só um efeito visual por cima. Não existe em partidas online (ver
+         togglePauseMatch/botão que a abre, escondido nesse caso). -->
+    <div id="pause-screen" class="screen hidden" style="justify-content:center; align-items:center; text-align:center; gap:20px; background:rgba(2,6,23,0.97);">
+        <h2 style="font-size:2.6rem; font-weight:900; color:#facc15; text-shadow:0 0 30px rgba(250,204,21,0.35);" data-i18n="pauseTitle">PARTIDA PAUSADA</h2>
+        <div style="display:flex; flex-direction:column; gap:14px; margin-top:10px; width:280px;">
+            <button onclick="Engine.togglePauseMatch()" style="padding:15px 30px; font-size:1.05rem; background:#22c55e; border-color:#16a34a; color:white; font-weight:800;" data-i18n="pauseResumeBtn">▶ RETOMAR</button>
+            <button onclick="Engine.confirmExitMatch()" style="padding:15px 30px; font-size:1.05rem; background:#1e293b; border-color:#334155; color:#f87171;" data-i18n="pauseExitBtn">🚪 SAIR DA PARTIDA</button>
+        </div>
     </div>
     <div id="settings-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div style="background:#0f172a; border:1px solid #1e293b; border-radius:10px; padding:30px; width:420px; max-height:100%; overflow-y:auto; display:flex; flex-direction:column; gap:18px;">
@@ -1096,6 +1142,7 @@
             modeLabelOpenWorld: "MUNDO ABERTO", modeLabelBoss: "Chefe Nível", modeLabelWave: "Onda",
             hideoutAlertTitle: "Esconderijo Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Sair: E",
             exitMatchBtn: "Sair da Partida", exitMatchConfirmMsg: "Tem certeza que quer sair da partida e voltar pro menu? Seu progresso nesta partida será perdido.",
+            pauseMatchBtn: "Pausar", pauseTitle: "PARTIDA PAUSADA", pauseResumeBtn: "▶ RETOMAR", pauseExitBtn: "🚪 SAIR DA PARTIDA", modeInfinito: "Jogo Infinito", soloLabelInfinito: "Jogo Infinito", modeLabelInfinito: "Infinito - Round", infiniteSurvivedLabel: "Você sobreviveu {time} e alcançou o round {round}.", powerupPickup_shield: "Power-up: Escudo!", powerupPickup_fury: "Power-up: Fúria (dano dobrado)!", powerupPickup_speed: "Power-up: Velocidade!", betTitle: "Aposta Pré-Partida", betDesc: "Aposte parte do seu ouro antes de começar. Se vencer, dobra. Se perder, some. A partida fica mais difícil enquanto a aposta estiver ativa.", betUsageLabel: "Usadas hoje: {used}/{max}", betLimitReached: "Limite diário de apostas atingido.", betPotentialWin: "Se vencer: +${amount}", betWonLabel: "Aposta vencida: +${amount}", betLostLabel: "Aposta perdida: -${amount}", betActiveHud: "🎲 Aposta ativa: ${amount} (pode virar ${potential})",
             chatOptionsBtn: "Mais opções", chatClearOption: "🗑️ Limpar conversa", chatBlockOption: "🚫 Bloquear jogador", chatUnblockOption: "✓ Desbloquear jogador", chatReportOption: "🚩 Denunciar jogador",
             chatClearConfirmMsg: "Tem certeza que quer apagar todas as mensagens desta conversa? Isso não pode ser desfeito.", chatClearedToast: "Conversa limpa.",
             chatBlockConfirmMsg: "Bloquear esse jogador? Vocês não vão mais poder trocar mensagens até você desbloquear.", chatBlockedToast: "Jogador bloqueado.", chatUnblockedToast: "Jogador desbloqueado.",
@@ -1243,9 +1290,10 @@
             tut9Title: "Multiplayer Online", tut9Body: "Clique em <b>🌐 Online</b> para criar ou entrar em uma sala com até 4 jogadores! Convide amigos e jogue partidas em tempo real pela internet.",
             tut10Title: "Amigos e Chat", tut10Body: "Use <b>🔎 Jogadores</b> para buscar e adicionar amigos. Converse pelo <b>chat lateral</b>, crie grupos e combine partidas com sua turma.",
             tut11Title: "Configurações", tut11Body: "No botão <b>⚙</b> você ajusta volume, som, música, idioma e pode <b>reabrir este tutorial</b> a qualquer momento. Bom jogo!",
+            tut21Title: "Power-ups", tut21Body: "Durante a partida, power-ups temporários aparecem sozinhos no mapa: <b>🛡 Escudo</b> (fica invulnerável), <b>⚡ Fúria</b> (dano dobrado) e <b>➤ Velocidade</b>. Toque neles para ativar o efeito por alguns segundos!", tut22Title: "Pausar", tut22Body: "Use o botão <b>⏸</b> do lado do botão de sair (ou a tecla <b>P</b> no PC) para pausar a partida a qualquer momento. Não é possível pausar em partidas online.", tut23Title: "Aposta Pré-Partida", tut23Body: "No modo <b>Caça ao Ouro</b>, você pode apostar parte do seu ouro antes de começar (até $200). Se vencer, sua aposta dobra — se perder, ela some. A partida fica mais difícil enquanto a aposta estiver ativa, e você só pode apostar 3 vezes por dia.",
 
             tut12Title: "Escolha seu Herói", tut12Body: "Antes de começar, escolha um <b>arquétipo</b>: Hero (balanceado), Vilan (tiro triplo em leque) ou Killer (veloz e letal). Cada um joga de um jeito diferente!",
-            tut13Title: "Modos de Jogo", tut13Body: "Escolha entre <b>Horda Solo</b>, <b>Caça ao Ouro</b>, <b>Modo Titã</b> (inimigo super forte) ou <b>Modo Chefe</b> (boss). Também dá pra jogar <b>Duelo 1v1 Local</b>, com dois jogadores no mesmo teclado (P1 e P2). Você também pode ativar o <b>Mundo Aberto</b> para jogar em um mapa infinito no modo solo.",
+            tut13Title: "Modos de Jogo", tut13Body: "Escolha entre <b>Horda Solo</b>, <b>Caça ao Ouro</b>, <b>Modo Titã</b> (inimigo super forte), <b>Modo Chefe</b> (boss) ou <b>Jogo Infinito</b> (a dificuldade sobe sem parar até você perder, e o ouro que você ganha depende de até onde sobreviveu). Também dá pra jogar <b>Duelo 1v1 Local</b>, com dois jogadores no mesmo teclado (P1 e P2). Você também pode ativar o <b>Mundo Aberto</b> para jogar em um mapa infinito no modo solo.",
             tut20Title: "Contra Inteligência Artificial", tut20Body: "No menu, use o botão <b>🤖 Jogar Contra Inteligência Artificial</b> para enfrentar um bot em um duelo 1v1. Escolha a dificuldade (Fácil, Médio, Difícil ou Brutal): quanto mais difícil, mais esperto, rápido e preciso o bot fica, e maior a recompensa se você vencer. A partida acaba quando um dos dois for derrotado, e a recompensa final depende só do resultado (vitória ou derrota), não do ouro coletado na partida.",
             aiOpponentLabel: "IA",
             vsAiBtn: "🤖 Jogar Contra Inteligência Artificial", vsAiChooseDiff: "Escolha a Dificuldade da IA:",
@@ -1351,6 +1399,7 @@
             modeLabelOpenWorld: "OPEN WORLD", modeLabelBoss: "Boss Level", modeLabelWave: "Wave",
             hideoutAlertTitle: "Secret Hideout", hideoutAlertEnter: "Enter: E", hideoutHudExit: "Exit: E",
             exitMatchBtn: "Exit Match", exitMatchConfirmMsg: "Are you sure you want to exit the match and return to the menu? Your progress in this match will be lost.",
+            pauseMatchBtn: "Pause", pauseTitle: "MATCH PAUSED", pauseResumeBtn: "▶ RESUME", pauseExitBtn: "🚪 EXIT MATCH", modeInfinito: "Infinite Mode", soloLabelInfinito: "Infinite Mode", modeLabelInfinito: "Infinite - Round", infiniteSurvivedLabel: "You survived {time} and reached round {round}.", powerupPickup_shield: "Power-up: Shield!", powerupPickup_fury: "Power-up: Fury (double damage)!", powerupPickup_speed: "Power-up: Speed!", betTitle: "Pre-Match Bet", betDesc: "Bet part of your gold before starting. Win and it doubles. Lose and it is gone. The match gets harder while a bet is active.", betUsageLabel: "Used today: {used}/{max}", betLimitReached: "Daily bet limit reached.", betPotentialWin: "If you win: +${amount}", betWonLabel: "Bet won: +${amount}", betLostLabel: "Bet lost: -${amount}", betActiveHud: "🎲 Active bet: ${amount} (could become ${potential})",
             chatOptionsBtn: "More options", chatClearOption: "🗑️ Clear conversation", chatBlockOption: "🚫 Block player", chatUnblockOption: "✓ Unblock player", chatReportOption: "🚩 Report player", lobbyConnecting: "🔌 Connecting...", lobbyCodeExpired: "🚫 Expired code. Ask for a new invite.",
             chatClearConfirmMsg: "Are you sure you want to delete all messages in this conversation? This cannot be undone.", chatClearedToast: "Conversation cleared.",
             chatBlockConfirmMsg: "Block this player? You won't be able to message each other until you unblock.", chatBlockedToast: "Player blocked.", chatUnblockedToast: "Player unblocked.",
@@ -1497,9 +1546,10 @@
             tut9Title: "Online Multiplayer", tut9Body: "Click <b>🌐 Online</b> to create or join a room with up to 4 players! Invite friends and play real-time matches over the internet.",
             tut10Title: "Friends and Chat", tut10Body: "Use <b>🔎 Players</b> to search for and add friends. Chat via the <b>side chat panel</b>, create groups, and set up matches with your crew.",
             tut11Title: "Settings", tut11Body: "In the <b>⚙</b> button you can adjust volume, sound, music, language, and <b>reopen this tutorial</b> anytime. Have fun!",
+            tut21Title: "Power-ups", tut21Body: "During the match, temporary power-ups appear randomly on the map: <b>🛡 Shield</b> (become invulnerable), <b>⚡ Fury</b> (double damage), and <b>➤ Speed</b>. Touch them to activate the effect for a few seconds!", tut22Title: "Pause", tut22Body: "Use the <b>⏸</b> button next to the exit button (or the <b>P</b> key on PC) to pause the match anytime. Pausing is not available in online matches.", tut23Title: "Pre-Match Bet", tut23Body: "In <b>Gold Rush</b> mode, you can bet part of your gold before starting (up to $200). Win and your bet doubles — lose and it’s gone. The match gets harder while a bet is active, and you can only bet 3 times per day.",
 
             tut12Title: "Choose Your Hero", tut12Body: "Before starting, pick an <b>archetype</b>: Hero (balanced), Vilan (triple spread shot) or Killer (fast and lethal). Each one plays differently!",
-            tut13Title: "Game Modes", tut13Body: "Choose between <b>Solo Horde</b>, <b>Gold Rush</b>, <b>Titan Mode</b> (super strong enemy) or <b>Boss Mode</b>. You can also play <b>Local 1v1 Duel</b>, with two players on the same keyboard (P1 and P2). You can also enable <b>Open World</b> to play on an infinite map in solo mode.",
+            tut13Title: "Game Modes", tut13Body: "Choose between <b>Solo Horde</b>, <b>Gold Rush</b>, <b>Titan Mode</b> (super strong enemy), <b>Boss Mode</b>, or <b>Infinite Mode</b> (difficulty keeps rising until you die, and the gold you earn depends on how far you survived). You can also play <b>Local 1v1 Duel</b>, with two players on the same keyboard (P1 and P2). You can also enable <b>Open World</b> to play on an infinite map in solo mode.",
             tut20Title: "Vs Artificial Intelligence", tut20Body: "In the menu, use the <b>🤖 Play Against Artificial Intelligence</b> button to face a bot in a 1v1 duel. Pick the difficulty (Easy, Medium, Hard or Brutal): the harder it is, the smarter, faster and more accurate the bot gets, and the bigger the reward if you win. The match ends when one of you is defeated, and the final reward depends only on the result (win or loss), not on the gold collected during the match.",
             aiOpponentLabel: "AI",
             vsAiBtn: "🤖 Play Against Artificial Intelligence", vsAiChooseDiff: "Choose the AI Difficulty:",
@@ -1605,6 +1655,7 @@
             modeLabelOpenWorld: "OFFENE WELT", modeLabelBoss: "Boss-Level", modeLabelWave: "Welle",
             hideoutAlertTitle: "Geheimes Versteck", hideoutAlertEnter: "Eintreten: E", hideoutHudExit: "Verlassen: E",
             exitMatchBtn: "Partie verlassen", exitMatchConfirmMsg: "Bist du sicher, dass du die Partie verlassen und zum Menü zurückkehren willst? Dein Fortschritt in dieser Partie geht verloren.",
+            pauseMatchBtn: "Pausieren", pauseTitle: "PARTIE PAUSIERT", pauseResumeBtn: "▶ FORTSETZEN", pauseExitBtn: "🚪 PARTIE VERLASSEN", modeInfinito: "Unendlicher Modus", soloLabelInfinito: "Unendlicher Modus", modeLabelInfinito: "Unendlich - Runde", infiniteSurvivedLabel: "Du hast {time} überlebt und Runde {round} erreicht.", powerupPickup_shield: "Power-up: Schild!", powerupPickup_fury: "Power-up: Wut (doppelter Schaden)!", powerupPickup_speed: "Power-up: Geschwindigkeit!", betTitle: "Wette vor dem Spiel", betDesc: "Setze einen Teil deines Goldes, bevor du startest. Gewinnst du, verdoppelt es sich. Verlierst du, ist es weg. Die Partie wird schwieriger, solange eine Wette aktiv ist.", betUsageLabel: "Heute genutzt: {used}/{max}", betLimitReached: "Tägliches Wettlimit erreicht.", betPotentialWin: "Bei Sieg: +${amount}", betWonLabel: "Wette gewonnen: +${amount}", betLostLabel: "Wette verloren: -${amount}", betActiveHud: "🎲 Aktive Wette: ${amount} (könnte ${potential} werden)",
             chatOptionsBtn: "Weitere Optionen", chatClearOption: "🗑️ Unterhaltung löschen", chatBlockOption: "🚫 Spieler blockieren", chatUnblockOption: "✓ Spieler entsperren", chatReportOption: "🚩 Spieler melden", chatNewGroupBtn: "➕ Neue Gruppe erstellen", chatNewGroupTitle: "➕ Neue Gruppe", chatGroupNamePlaceholder: "Gruppenname", chatCreateGroupBtn: "GRUPPE ERSTELLEN", chatGroupNameRequired: "Gib einen Namen für die Gruppe ein.", chatGroupNeedMembers: "Wähle mindestens 1 Person aus.", chatGroupCreateError: "Fehler beim Erstellen der Gruppe.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Zum Spielen einladen", chatInviteSentToast: "Einladung im Chat gesendet!", chatInviteCreatingRoom: "Raum wird erstellt...", chatInviteCardTitle: "🎮 Spieleinladung", chatInviteJoinBtn: "Am Match teilnehmen", chatGroupNoFollowingHint: "Du musst jemandem folgen, um eine Gruppe zu erstellen.", lobbyConnecting: "🔌 Verbinde...", lobbyCodeExpired: "🚫 Code abgelaufen. Bitte eine neue Einladung anfordern.",
             chatClearConfirmMsg: "Möchtest du wirklich alle Nachrichten dieser Unterhaltung löschen? Dies kann nicht rückgängig gemacht werden.", chatClearedToast: "Unterhaltung gelöscht.",
             chatBlockConfirmMsg: "Diesen Spieler blockieren? Ihr könnt euch dann keine Nachrichten mehr schicken, bis du ihn entsperrst.", chatBlockedToast: "Spieler blockiert.", chatUnblockedToast: "Spieler entsperrt.",
@@ -1746,9 +1797,10 @@
             tut9Title: "Online-Multiplayer", tut9Body: "Klicke auf <b>🌐 Online</b>, um einen Raum mit bis zu 4 Spielern zu erstellen oder ihm beizutreten! Lade Freunde ein und spiele Echtzeit-Matches übers Internet.",
             tut10Title: "Freunde und Chat", tut10Body: "Benutze <b>🔎 Spieler</b>, um Freunde zu suchen und hinzuzufügen. Chatte über die <b>Seitenleiste</b>, erstelle Gruppen und verabrede Matches mit deiner Gruppe.",
             tut11Title: "Einstellungen", tut11Body: "Über die Schaltfläche <b>⚙</b> kannst du Lautstärke, Sound, Musik, Sprache anpassen und <b>dieses Tutorial jederzeit erneut öffnen</b>. Viel Spaß!",
+            tut21Title: "Power-ups", tut21Body: "Während der Partie erscheinen zufällig temporäre Power-ups auf der Karte: <b>🛡 Schild</b> (unverwundbar werden), <b>⚡ Wut</b> (doppelter Schaden) und <b>➤ Geschwindigkeit</b>. Berühre sie, um den Effekt für ein paar Sekunden zu aktivieren!", tut22Title: "Pausieren", tut22Body: "Nutze die Schaltfläche <b>⏸</b> neben dem Verlassen-Button (oder die Taste <b>P</b> am PC), um die Partie jederzeit zu pausieren. In Online-Partien ist Pausieren nicht möglich.", tut23Title: "Wette vor dem Spiel", tut23Body: "Im Modus <b>Goldrausch</b> kannst du vor dem Start einen Teil deines Goldes setzen (bis zu $200). Gewinnst du, verdoppelt sich deine Wette — verlierst du, ist sie weg. Die Partie wird schwieriger, solange eine Wette aktiv ist, und du kannst nur 3-mal pro Tag wetten.",
 
             tut12Title: "Wähle deinen Helden", tut12Body: "Bevor du startest, wähle einen <b>Archetyp</b>: Hero (ausgewogen), Vilan (dreifacher Streuschuss) oder Killer (schnell und tödlich). Jeder spielt sich anders!",
-            tut13Title: "Spielmodi", tut13Body: "Wähle zwischen <b>Solo-Horde</b>, <b>Goldrausch</b>, <b>Titan-Modus</b> (super starker Gegner) oder <b>Boss-Modus</b>. Du kannst auch <b>Lokales 1v1-Duell</b> spielen, mit zwei Spielern an derselben Tastatur (P1 und P2). Du kannst auch die <b>Offene Welt</b> aktivieren, um im Solo-Modus auf einer unendlichen Karte zu spielen.",
+            tut13Title: "Spielmodi", tut13Body: "Wähle zwischen <b>Solo-Horde</b>, <b>Goldrausch</b>, <b>Titan-Modus</b> (super starker Gegner), <b>Boss-Modus</b> oder <b>Unendlicher Modus</b> (die Schwierigkeit steigt ständig, bis du stirbst, und das Gold hängt davon ab, wie lange du überlebt hast). Du kannst auch <b>Lokales 1v1-Duell</b> spielen, mit zwei Spielern an derselben Tastatur (P1 und P2). Du kannst auch die <b>Offene Welt</b> aktivieren, um im Solo-Modus auf einer unendlichen Karte zu spielen.",
             tut20Title: "Gegen Künstliche Intelligenz", tut20Body: "Nutze im Menü die Schaltfläche <b>🤖 Gegen Künstliche Intelligenz Spielen</b>, um in einem 1v1-Duell gegen einen Bot anzutreten. Wähle die Schwierigkeit (Leicht, Mittel, Schwer oder Brutal): Je schwerer, desto klüger, schneller und präziser wird der Bot, und desto größer die Belohnung bei einem Sieg. Das Match endet, wenn einer von euch besiegt wird, und die Endbelohnung hängt nur vom Ergebnis (Sieg oder Niederlage) ab, nicht vom gesammelten Gold während des Matches.",
             aiOpponentLabel: "KI",
             vsAiBtn: "🤖 Gegen Künstliche Intelligenz Spielen", vsAiChooseDiff: "Wähle die KI-Schwierigkeit:",
@@ -1854,6 +1906,7 @@
             modeLabelOpenWorld: "MUNDO ABIERTO", modeLabelBoss: "Nivel de Jefe", modeLabelWave: "Oleada",
             hideoutAlertTitle: "Escondite Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Salir: E",
             exitMatchBtn: "Salir de la Partida", exitMatchConfirmMsg: "¿Seguro que quieres salir de la partida y volver al menú? Tu progreso en esta partida se perderá.",
+            pauseMatchBtn: "Pausar", pauseTitle: "PARTIDA PAUSADA", pauseResumeBtn: "▶ REANUDAR", pauseExitBtn: "🚪 SALIR DE LA PARTIDA", modeInfinito: "Modo Infinito", soloLabelInfinito: "Modo Infinito", modeLabelInfinito: "Infinito - Ronda", infiniteSurvivedLabel: "Sobreviviste {time} y llegaste a la ronda {round}.", powerupPickup_shield: "¡Power-up: Escudo!", powerupPickup_fury: "¡Power-up: Furia (daño doblado)!", powerupPickup_speed: "¡Power-up: Velocidad!", betTitle: "Apuesta Pre-Partida", betDesc: "Apuesta parte de tu oro antes de empezar. Si ganas, se duplica. Si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa.", betUsageLabel: "Usadas hoy: {used}/{max}", betLimitReached: "Límite diario de apuestas alcanzado.", betPotentialWin: "Si ganas: +${amount}", betWonLabel: "Apuesta ganada: +${amount}", betLostLabel: "Apuesta perdida: -${amount}", betActiveHud: "🎲 Apuesta activa: ${amount} (puede llegar a ${potential})",
             chatOptionsBtn: "Más opciones", chatClearOption: "🗑️ Limpiar conversación", chatBlockOption: "🚫 Bloquear jugador", chatUnblockOption: "✓ Desbloquear jugador", chatReportOption: "🚩 Denunciar jugador", chatNewGroupBtn: "➕ Crear nuevo grupo", chatNewGroupTitle: "➕ Nuevo Grupo", chatGroupNamePlaceholder: "Nombre del grupo", chatCreateGroupBtn: "CREAR GRUPO", chatGroupNameRequired: "Escribe un nombre para el grupo.", chatGroupNeedMembers: "Selecciona al menos 1 persona.", chatGroupCreateError: "Error al crear el grupo.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Invitar a jugar", chatInviteSentToast: "¡Invitación enviada en la conversación!", chatInviteCreatingRoom: "Creando sala...", chatInviteCardTitle: "🎮 Invitación a jugar", chatInviteJoinBtn: "Unirse a la partida", chatGroupNoFollowingHint: "Necesitas seguir a alguien para crear un grupo.", lobbyConnecting: "🔌 Conectando...", lobbyCodeExpired: "🚫 Código caducado. Pide una nueva invitación.",
             chatClearConfirmMsg: "¿Seguro que quieres borrar todos los mensajes de esta conversación? No se puede deshacer.", chatClearedToast: "Conversación borrada.",
             chatBlockConfirmMsg: "¿Bloquear a este jugador? No podrán enviarse mensajes hasta que lo desbloquees.", chatBlockedToast: "Jugador bloqueado.", chatUnblockedToast: "Jugador desbloqueado.",
@@ -1995,9 +2048,10 @@
             tut9Title: "Multijugador en Línea", tut9Body: "Haz clic en <b>🌐 Online</b> para crear o unirte a una sala con hasta 4 jugadores. ¡Invita amigos y juega partidas en tiempo real por internet!",
             tut10Title: "Amigos y Chat", tut10Body: "Usa <b>🔎 Jugadores</b> para buscar y agregar amigos. Chatea por el <b>panel lateral</b>, crea grupos y organiza partidas con tu grupo.",
             tut11Title: "Configuración", tut11Body: "En el botón <b>⚙</b> puedes ajustar volumen, sonido, música, idioma, y <b>reabrir este tutorial</b> cuando quieras. ¡Buen juego!",
+            tut21Title: "Power-ups", tut21Body: "Durante la partida, aparecen power-ups temporales al azar en el mapa: <b>🛡 Escudo</b> (te vuelves invulnerable), <b>⚡ Furia</b> (daño doblado) y <b>➤ Velocidad</b>. ¡Tócalos para activar el efecto por unos segundos!", tut22Title: "Pausar", tut22Body: "Usa el botón <b>⏸</b> junto al botón de salir (o la tecla <b>P</b> en PC) para pausar la partida en cualquier momento. No se puede pausar en partidas online.", tut23Title: "Apuesta Pre-Partida", tut23Body: "En el modo <b>Caza del Oro</b>, puedes apostar parte de tu oro antes de empezar (hasta $200). Si ganas, tu apuesta se duplica — si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa, y solo puedes apostar 3 veces al día.",
 
             tut12Title: "Elige tu Héroe", tut12Body: "Antes de empezar, elige un <b>arquetipo</b>: Hero (equilibrado), Vilan (disparo triple en abanico) o Killer (veloz y letal). ¡Cada uno se juega de forma distinta!",
-            tut13Title: "Modos de Juego", tut13Body: "Elige entre <b>Horda Solo</b>, <b>Caza del Oro</b>, <b>Modo Titán</b> (enemigo súper fuerte) o <b>Modo Jefe</b>. También puedes jugar <b>Duelo 1v1 Local</b>, con dos jugadores en el mismo teclado (P1 y P2). También puedes activar el <b>Mundo Abierto</b> para jugar en un mapa infinito en modo solo.",
+            tut13Title: "Modos de Juego", tut13Body: "Elige entre <b>Horda Solo</b>, <b>Caza del Oro</b>, <b>Modo Titán</b> (enemigo súper fuerte), <b>Modo Jefe</b> o <b>Modo Infinito</b> (la dificultad sube sin parar hasta que mueras, y el oro que ganas depende de hasta dónde sobreviviste). También puedes jugar <b>Duelo 1v1 Local</b>, con dos jugadores en el mismo teclado (P1 y P2). También puedes activar el <b>Mundo Abierto</b> para jugar en un mapa infinito en modo solo.",
             tut20Title: "Contra Inteligencia Artificial", tut20Body: "En el menú, usa el botón <b>🤖 Jugar Contra Inteligencia Artificial</b> para enfrentar a un bot en un duelo 1v1. Elige la dificultad (Fácil, Medio, Difícil o Brutal): cuanto más difícil, más inteligente, rápido y preciso será el bot, y mayor será la recompensa si ganas. La partida termina cuando uno de los dos es derrotado, y la recompensa final depende solo del resultado (victoria o derrota), no del oro recogido durante la partida.",
             aiOpponentLabel: "IA",
             vsAiBtn: "🤖 Jugar Contra Inteligencia Artificial", vsAiChooseDiff: "Elige la Dificultad de la IA:",
@@ -2103,6 +2157,7 @@
             modeLabelOpenWorld: "MONDO APERTO", modeLabelBoss: "Livello Boss", modeLabelWave: "Ondata",
             hideoutAlertTitle: "Nascondiglio Segreto", hideoutAlertEnter: "Entra: E", hideoutHudExit: "Esci: E",
             exitMatchBtn: "Esci dalla Partita", exitMatchConfirmMsg: "Sei sicuro di voler uscire dalla partita e tornare al menu? I tuoi progressi in questa partita andranno persi.",
+            pauseMatchBtn: "Pausa", pauseTitle: "PARTITA IN PAUSA", pauseResumeBtn: "▶ RIPRENDI", pauseExitBtn: "🚪 ESCI DALLA PARTITA", modeInfinito: "Modalità Infinita", soloLabelInfinito: "Modalità Infinita", modeLabelInfinito: "Infinita - Round", infiniteSurvivedLabel: "Sei sopravvissuto per {time} e hai raggiunto il round {round}.", powerupPickup_shield: "Power-up: Scudo!", powerupPickup_fury: "Power-up: Furia (danno raddoppiato)!", powerupPickup_speed: "Power-up: Velocità!", betTitle: "Scommessa Pre-Partita", betDesc: "Scommetti parte del tuo oro prima di iniziare. Se vinci, raddoppia. Se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva.", betUsageLabel: "Usate oggi: {used}/{max}", betLimitReached: "Limite giornaliero di scommesse raggiunto.", betPotentialWin: "Se vinci: +${amount}", betWonLabel: "Scommessa vinta: +${amount}", betLostLabel: "Scommessa persa: -${amount}", betActiveHud: "🎲 Scommessa attiva: ${amount} (può diventare ${potential})",
             chatOptionsBtn: "Altre opzioni", chatClearOption: "🗑️ Cancella conversazione", chatBlockOption: "🚫 Blocca giocatore", chatUnblockOption: "✓ Sblocca giocatore", chatReportOption: "🚩 Segnala giocatore", chatNewGroupBtn: "➕ Crea nuovo gruppo", chatNewGroupTitle: "➕ Nuovo Gruppo", chatGroupNamePlaceholder: "Nome del gruppo", chatCreateGroupBtn: "CREA GRUPPO", chatGroupNameRequired: "Inserisci un nome per il gruppo.", chatGroupNeedMembers: "Seleziona almeno 1 persona.", chatGroupCreateError: "Errore durante la creazione del gruppo.", chatEmojiBtn: "Emoji", chatInviteOption: "🎮 Invita a giocare", chatInviteSentToast: "Invito inviato nella conversazione!", chatInviteCreatingRoom: "Creazione stanza...", chatInviteCardTitle: "🎮 Invito a giocare", chatInviteJoinBtn: "Unisciti alla partita", chatGroupNoFollowingHint: "Devi seguire qualcuno per creare un gruppo.", lobbyConnecting: "🔌 Connessione...", lobbyCodeExpired: "🚫 Codice scaduto. Chiedi un nuovo invito.",
             chatClearConfirmMsg: "Sei sicuro di voler eliminare tutti i messaggi di questa conversazione? Non può essere annullato.", chatClearedToast: "Conversazione cancellata.",
             chatBlockConfirmMsg: "Bloccare questo giocatore? Non potrete più scambiarvi messaggi finché non lo sblocchi.", chatBlockedToast: "Giocatore bloccato.", chatUnblockedToast: "Giocatore sbloccato.",
@@ -2244,9 +2299,10 @@
             tut9Title: "Multiplayer Online", tut9Body: "Clicca su <b>🌐 Online</b> per creare o unirti a una stanza con fino a 4 giocatori! Invita amici e gioca partite in tempo reale su internet.",
             tut10Title: "Amici e Chat", tut10Body: "Usa <b>🔎 Giocatori</b> per cercare e aggiungere amici. Chatta tramite il <b>pannello laterale</b>, crea gruppi e organizza partite con la tua squadra.",
             tut11Title: "Impostazioni", tut11Body: "Nel pulsante <b>⚙</b> puoi regolare volume, suono, musica, lingua e <b>riaprire questo tutorial</b> in qualsiasi momento. Buon divertimento!",
+            tut21Title: "Power-up", tut21Body: "Durante la partita, power-up temporanei appaiono a caso sulla mappa: <b>🛡 Scudo</b> (diventi invulnerabile), <b>⚡ Furia</b> (danno raddoppiato) e <b>➤ Velocità</b>. Toccali per attivare l’effetto per qualche secondo!", tut22Title: "Pausa", tut22Body: "Usa il pulsante <b>⏸</b> accanto al pulsante di uscita (o il tasto <b>P</b> su PC) per mettere in pausa la partita in qualsiasi momento. Non è possibile mettere in pausa nelle partite online.", tut23Title: "Scommessa Pre-Partita", tut23Body: "Nella modalità <b>Caccia all’Oro</b>, puoi scommettere parte del tuo oro prima di iniziare (fino a $200). Se vinci, la tua scommessa raddoppia — se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva, e puoi scommettere solo 3 volte al giorno.",
 
             tut12Title: "Scegli il tuo Eroe", tut12Body: "Prima di iniziare, scegli un <b>archetipo</b>: Hero (bilanciato), Vilan (tripla raffica a ventaglio) o Killer (veloce e letale). Ognuno si gioca in modo diverso!",
-            tut13Title: "Modalità di Gioco", tut13Body: "Scegli tra <b>Orda Solo</b>, <b>Caccia all'Oro</b>, <b>Modalità Titano</b> (nemico super forte) o <b>Modalità Boss</b>. Puoi anche giocare <b>Duello 1v1 Locale</b>, con due giocatori sulla stessa tastiera (P1 e P2). Puoi anche attivare il <b>Mondo Aperto</b> per giocare su una mappa infinita in modalità solo.",
+            tut13Title: "Modalità di Gioco", tut13Body: "Scegli tra <b>Orda Solo</b>, <b>Caccia all'Oro</b>, <b>Modalità Titano</b> (nemico super forte), <b>Modalità Boss</b> o <b>Modalità Infinita</b> (la difficoltà continua a salire finché non muori, e l'oro che guadagni dipende da quanto sei sopravvissuto). Puoi anche giocare <b>Duello 1v1 Locale</b>, con due giocatori sulla stessa tastiera (P1 e P2). Puoi anche attivare il <b>Mondo Aperto</b> per giocare su una mappa infinita in modalità solo.",
             tut20Title: "Contro l'Intelligenza Artificiale", tut20Body: "Nel menu, usa il pulsante <b>🤖 Gioca Contro l'Intelligenza Artificiale</b> per affrontare un bot in un duello 1v1. Scegli la difficoltà (Facile, Medio, Difficile o Brutale): più è difficile, più il bot diventa intelligente, veloce e preciso, e maggiore sarà la ricompensa se vinci. La partita finisce quando uno dei due viene sconfitto, e la ricompensa finale dipende solo dal risultato (vittoria o sconfitta), non dall'oro raccolto durante la partita.",
             aiOpponentLabel: "IA",
             vsAiBtn: "🤖 Gioca Contro l'Intelligenza Artificiale", vsAiChooseDiff: "Scegli la Difficoltà dell'IA:",
@@ -2352,6 +2408,7 @@
             modeLabelOpenWorld: "MONDE OUVERT", modeLabelBoss: "Niveau Boss", modeLabelWave: "Vague",
             hideoutAlertTitle: "Cachette Secrète", hideoutAlertEnter: "Entrer : E", hideoutHudExit: "Sortir : E",
             exitMatchBtn: "Quitter la Partie", exitMatchConfirmMsg: "Voulez-vous vraiment quitter la partie et retourner au menu ? Votre progression dans cette partie sera perdue.",
+            pauseMatchBtn: "Pause", pauseTitle: "PARTIE EN PAUSE", pauseResumeBtn: "▶ REPRENDRE", pauseExitBtn: "🚪 QUITTER LA PARTIE", modeInfinito: "Mode Infini", soloLabelInfinito: "Mode Infini", modeLabelInfinito: "Infini - Manche", infiniteSurvivedLabel: "Vous avez survécu {time} et atteint la manche {round}.", powerupPickup_shield: "Bonus : Bouclier !", powerupPickup_fury: "Bonus : Fureur (dégâts doublés) !", powerupPickup_speed: "Bonus : Vitesse !", betTitle: "Pari Avant-Match", betDesc: "Pariez une partie de votre or avant de commencer. Si vous gagnez, il double. Si vous perdez, il disparait. La partie devient plus difficile tant qu'un pari est actif.", betUsageLabel: "Utilisés aujourd'hui : {used}/{max}", betLimitReached: "Limite quotidienne de paris atteinte.", betPotentialWin: "Si vous gagnez : +${amount}", betWonLabel: "Pari gagné : +${amount}", betLostLabel: "Pari perdu : -${amount}", betActiveHud: "🎲 Pari actif : ${amount} (peut devenir ${potential})",
             chatOptionsBtn: "Plus d'options", chatClearOption: "🗑️ Effacer la conversation", chatBlockOption: "🚫 Bloquer le joueur", chatUnblockOption: "✓ Débloquer le joueur", chatReportOption: "🚩 Signaler le joueur", chatNewGroupBtn: "➕ Créer un nouveau groupe", chatNewGroupTitle: "➕ Nouveau Groupe", chatGroupNamePlaceholder: "Nom du groupe", chatCreateGroupBtn: "CRÉER LE GROUPE", chatGroupNameRequired: "Entrez un nom pour le groupe.", chatGroupNeedMembers: "Sélectionnez au moins 1 personne.", chatGroupCreateError: "Erreur lors de la création du groupe.", chatEmojiBtn: "Émojis", chatInviteOption: "🎮 Inviter à jouer", chatInviteSentToast: "Invitation envoyée dans la conversation !", chatInviteCreatingRoom: "Création de la salle...", chatInviteCardTitle: "🎮 Invitation à jouer", chatInviteJoinBtn: "Rejoindre la partie", chatGroupNoFollowingHint: "Vous devez suivre quelqu’un pour créer un groupe.", lobbyConnecting: "🔌 Connexion...", lobbyCodeExpired: "🚫 Code expiré. Demandez une nouvelle invitation.",
             chatClearConfirmMsg: "Voulez-vous vraiment supprimer tous les messages de cette conversation ? Cette action est irréversible.", chatClearedToast: "Conversation effacée.",
             chatBlockConfirmMsg: "Bloquer ce joueur ? Vous ne pourrez plus vous envoyer de messages tant que vous ne le débloquez pas.", chatBlockedToast: "Joueur bloqué.", chatUnblockedToast: "Joueur débloqué.",
@@ -2493,9 +2550,10 @@
             tut9Title: "Multijoueur en Ligne", tut9Body: "Cliquez sur <b>🌐 Online</b> pour créer ou rejoindre une salle avec jusqu'à 4 joueurs ! Invitez des amis et jouez des parties en temps réel sur internet.",
             tut10Title: "Amis et Chat", tut10Body: "Utilisez <b>🔎 Joueurs</b> pour rechercher et ajouter des amis. Discutez via le <b>panneau latéral</b>, créez des groupes et organisez des parties avec votre équipe.",
             tut11Title: "Paramètres", tut11Body: "Dans le bouton <b>⚙</b>, vous pouvez régler le volume, le son, la musique, la langue, et <b>rouvrir ce tutoriel</b> à tout moment. Bon jeu !",
+            tut21Title: "Bonus", tut21Body: "Pendant la partie, des bonus temporaires apparaissent au hasard sur la carte : <b>🛡 Bouclier</b> (devenez invulnérable), <b>⚡ Fureur</b> (dégâts doublés) et <b>➤ Vitesse</b>. Touchez-les pour activer l’effet pendant quelques secondes !", tut22Title: "Pause", tut22Body: "Utilisez le bouton <b>⏸</b> à côté du bouton de sortie (ou la touche <b>P</b> sur PC) pour mettre la partie en pause à tout moment. La pause n’est pas disponible dans les parties en ligne.", tut23Title: "Pari Avant-Match", tut23Body: "En mode <b>Ruée vers l’Or</b>, vous pouvez parier une partie de votre or avant de commencer (jusqu’à 200 $). Si vous gagnez, votre pari double — si vous perdez, il disparaît. La partie devient plus difficile tant qu’un pari est actif, et vous ne pouvez parier que 3 fois par jour.",
 
             tut12Title: "Choisissez votre héros", tut12Body: "Avant de commencer, choisissez un <b>archétype</b> : Hero (équilibré), Vilan (tir triple en éventail) ou Killer (rapide et létal). Chacun se joue différemment !",
-            tut13Title: "Modes de Jeu", tut13Body: "Choisissez entre <b>Horde Solo</b>, <b>Ruée vers l'Or</b>, <b>Mode Titan</b> (ennemi super fort) ou <b>Mode Boss</b>. Vous pouvez aussi jouer en <b>Duel 1v1 Local</b>, avec deux joueurs sur le même clavier (P1 et P2). Vous pouvez aussi activer le <b>Monde Ouvert</b> pour jouer sur une carte infinie en mode solo.",
+            tut13Title: "Modes de Jeu", tut13Body: "Choisissez entre <b>Horde Solo</b>, <b>Ruée vers l'Or</b>, <b>Mode Titan</b> (ennemi super fort), <b>Mode Boss</b> ou <b>Mode Infini</b> (la difficulté monte sans arrêt jusqu'à ce que vous mouriez, et l'or gagné dépend de votre temps de survie). Vous pouvez aussi jouer en <b>Duel 1v1 Local</b>, avec deux joueurs sur le même clavier (P1 et P2). Vous pouvez aussi activer le <b>Monde Ouvert</b> pour jouer sur une carte infinie en mode solo.",
             tut20Title: "Contre l'Intelligence Artificielle", tut20Body: "Dans le menu, utilisez le bouton <b>🤖 Jouer Contre l'Intelligence Artificielle</b> pour affronter un bot dans un duel 1v1. Choisissez la difficulté (Facile, Moyen, Difficile ou Brutal) : plus c'est difficile, plus le bot devient intelligent, rapide et précis, et plus la récompense est grande si vous gagnez. Le match se termine quand l'un de vous est vaincu, et la récompense finale dépend uniquement du résultat (victoire ou défaite), pas de l'or collecté pendant le match.",
             aiOpponentLabel: "IA",
             vsAiBtn: "🤖 Jouer Contre l'Intelligence Artificielle", vsAiChooseDiff: "Choisissez la Difficulté de l'IA :",
@@ -2678,6 +2736,10 @@
                 { icon: '👋', title: t('tut1Title'), body: t('tut1Body') },
                 { icon: '🦸', title: t('tut12Title'), body: t('tut12Body') },
                 { icon: '🏆', title: t('tut13Title'), body: t('tut13Body') },
+                // NOVO: aposta pré-partida entra logo depois de "Modos de Jogo", já que só
+                // funciona no Caça ao Ouro (Gold Rush) — faz sentido explicar isso enquanto o
+                // jogador ainda está lendo sobre os modos disponíveis.
+                { icon: '🎲', title: t('tut23Title'), body: t('tut23Body') },
                 { icon: '🤖', title: t('tut20Title'), body: t('tut20Body'), visual: this.visualVsAI() },
                 { icon: '🕹️', title: t('tut2Title'), body: isMobile ? t('tut2BodyMobile') : t('tut2BodyPc'), visual: isMobile ? this.visualControlsMobile() : this.visualControlsPc() }
             ];
@@ -2686,7 +2748,14 @@
                 { icon: '⚔️', title: t('tut3Title'), body: isMobile ? t('tut3BodyMobile') : t('tut3BodyPc'), visual: this.visualCombat() },
                 { icon: '❤️', title: t('tut4Title'), body: t('tut4Body'), visual: this.visualLives() },
                 { icon: '🎁', title: t('tut5Title'), body: t('tut5Body'), visual: this.visualChest() },
+                // NOVO: power-ups do mapa logo depois de baús/ouro — mesma "categoria" de coisas
+                // que aparecem espalhadas pelo cenário durante a partida.
+                { icon: '✨', title: t('tut21Title'), body: t('tut21Body') },
                 { icon: '🚪', title: t('tut16Title'), body: t('tut16Body'), visual: this.visualHideout() },
+                // NOVO: pausar é um controle de partida, então entra perto dos outros passos de
+                // controle/combate — mais fácil de lembrar do que se estivesse lá no final junto
+                // com configurações.
+                { icon: '⏸️', title: t('tut22Title'), body: t('tut22Body') },
                 { icon: '🛒', title: t('tut6Title'), body: t('tut6Body') },
                 { icon: '🔫', title: t('tut19Title'), body: t('tut19Body') },
                 { icon: '⭐', title: t('tut7Title'), body: t('tut7Body') },
@@ -5142,11 +5211,17 @@
                 pl:Engine.players.map(p=>p?{
                     x:p.x|0,y:p.y|0,hp:p.hp|0,mhp:p.maxHp,mp:p.mp|0,
                     lv:p.lives,fa:p.facing,sh:p.shieldTime>0,
+                    // NOVO: flags booleanas (não o timer exato, pra economizar payload) pros
+                    // convidados também verem o ícone de fúria/velocidade sobre a cabeça de
+                    // outros jogadores — o efeito de dano/velocidade em si já funciona certo pro
+                    // convidado independente disso, porque quem calcula dano e física é sempre o
+                    // host (ver isHost em loop()); isso é só o retorno visual.
+                    fu:p.powerupFuryTimer>0,sp:p.powerupSpeedTimer>0,
                     inv:p.inventory,gc:p.goldCollected,wk:p.weaponKey,kl:p.kills||0
                 }:null),
                 en:Engine.enemies.map(e=>({x:e.x|0,y:e.y|0,hp:e.hp,mhp:e.maxHp,t:e.type,w:e.w,h:e.h,c:e.color})),
                 pr:Engine.projectiles.filter(p=>!p.destroyed).map(p=>({x:p.x|0,y:p.y|0,vx:p.vx,vy:p.vy,c:p.color})),
-                it:Engine.items.filter(i=>!i.destroyed).map(i=>({x:i.x|0,y:i.y|0,t:i.type})),
+                it:Engine.items.filter(i=>!i.destroyed).map(i=>({x:i.x|0,y:i.y|0,t:i.type,k:i.kind||null})),
                 cx:Engine.cameraX|0,tl:Engine.timeLeftSeconds,rn:Engine.round,
                 gs:Engine.state==='GAMEOVER', ei:Engine._lastEndInfo||null
             };
@@ -5180,6 +5255,10 @@
                 if(p&&pd){
                     p.x=pd.x; p.y=pd.y; p.hp=pd.hp; p.maxHp=pd.mhp; p.mp=pd.mp;
                     p.lives=pd.lv; p.facing=pd.fa; p.shieldTime=pd.sh?20:0;
+                    // NOVO: só liga/desliga a flag pro ícone aparecer (ver draw() do Player) — o
+                    // convidado não precisa do valor exato do timer, só de saber "está ativo ou
+                    // não" pra desenhar o ícone certo.
+                    p.powerupFuryTimer=pd.fu?20:0; p.powerupSpeedTimer=pd.sp?20:0;
                     if(pd.inv) p.inventory=pd.inv;
                     p.goldCollected=pd.gc; p.weaponKey=pd.wk; p.kills=pd.kl||0; p.syncHUD();
                 }
@@ -5189,7 +5268,7 @@
                 e.hp=ed.hp; e.maxHp=ed.mhp; e.w=ed.w; e.h=ed.h; e.color=ed.c; return e;
             });
             if(data.pr) Engine.projectiles=data.pr.map(pd=>new Projectile(pd.x,pd.y,pd.vx,pd.vy,pd.c,0,null));
-            if(data.it) Engine.items=data.it.map(id=>new Item(id.x,id.y,id.t));
+            if(data.it) Engine.items=data.it.map(id=>new Item(id.x,id.y,id.t,id.k));
             Engine.cameraX=data.cx; Engine.timeLeftSeconds=data.tl; Engine.round=data.rn;
             let mn=String(Math.floor(Engine.timeLeftSeconds/60)).padStart(2,'0');
             let sc=String(Engine.timeLeftSeconds%60).padStart(2,'0');
@@ -5530,15 +5609,27 @@
 
 
     const Engine = {
-        canvas: null, ctx: null, state: 'MENU', lastTime: 0,
+        canvas: null, ctx: null, state: 'MENU', lastTime: 0, isPaused: false,
         isOpenWorld: false, gameMode: 'HORDA', customLevelData: null, _customLevelGemGoal: 0, _customLevelWon: false,
         selectedArchP1: 'hero', selectedArchP2: 'vilan',
         currentShopBuyer: 1, walletP1: 100, walletP2: 100,
         killsCounter: 0, round: 1, spawnTimer: 0, goldSpawnTimer: 0, bossSpawnTimer: 0,
         cameraX: 0, cameraShakeIntensity: 0, timeLeftSeconds: 300, timerTicker: 0, activeMatch: false,
         arenaWidth: 1920, MAX_PLAYER_SPEED: 9, BOOST_SPEED_BONUS: 1.4, BOOST_HP_BONUS: 50,
+        // NOVO: power-ups temporários do mapa — duram 12s (720 frames a 60fps) e um novo pode
+        // aparecer a cada 14-24s (variação aleatória pra não virar previsível), sorteado entre um
+        // ponto aleatório sobre alguma plataforma existente. powerupSpawnTimer é reiniciado em
+        // startMatch() igual aos outros timers de spawn (goldSpawnTimer, etc.).
+        POWERUP_DURATION_FRAMES: 720, powerupSpawnTimer: 0, powerupSpawnTarget: 18,
         modeSolo: false, soloActivePlayer: 1, device: 'pc',
         vsAI: false, aiDifficulty: 'medium',
+        // NOVO: estado da aposta pré-partida do Gold Rush (Caça ao Ouro). betAmount é só o valor
+        // escolhido no menu (0 = sem aposta); betActive é setado em startMatch() quando a partida
+        // realmente começa com aposta valendo, e só é lido a partir daí (mudar o slider durante a
+        // partida não faz nada). BET_MAX_AMOUNT e BET_MAX_PER_DAY são os limites pedidos: no
+        // máximo $200 por aposta e no máximo 3 partidas apostadas por dia.
+        betAmount: 0, betActive: false, betAmountLocked: 0,
+        BET_MAX_AMOUNT: 200, BET_MAX_PER_DAY: 3,
         aiDiffConfig: {
             // REBALANCEADO: a dificuldade "fácil" estava quase imbatível porque a esquiva de
             // projéteis usava o mesmo valor de "accuracy" (0.45) e era testada A CADA FRAME
@@ -5669,7 +5760,15 @@
             DailyFeatures.registerEvent('kills', kills||0);
             DailyFeatures.registerEvent('goldEarned', goldEarned||0);
         },
-        modeSoloLabelKeys: { GOLDFUSH: 'soloLabelGoldfush', TITAN: 'soloLabelTitan', BOSS: 'soloLabelBoss' },
+        // NOVO: guarda a melhor marca de sobrevivência do Modo Infinito (tempo e round), salva
+        // junto do resto do progresso persistente — usada só pra mostrar "seu recorde" no fim da
+        // partida, se essa run bateu a marca anterior.
+        recordInfiniteResult(survivedSec, round, reward) {
+            if(!this.persistentUpgradesP1.infiniteBest) this.persistentUpgradesP1.infiniteBest = { survivedSec: 0, round: 0 };
+            let best = this.persistentUpgradesP1.infiniteBest;
+            if(survivedSec > best.survivedSec) { best.survivedSec = survivedSec; best.round = round; }
+        },
+        modeSoloLabelKeys: { GOLDFUSH: 'soloLabelGoldfush', TITAN: 'soloLabelTitan', BOSS: 'soloLabelBoss', INFINITO: 'soloLabelInfinito' },
         // NOVO: Boost de Velocidade e Boost de HP Extra — em vez de um preço fixo, mostram um botão
         // de "Opções" (Engine.openBoostOptions) que abre um menu pra escolher a duração; cada
         // duração tem um preço diferente. O efeito fica sempre ativo automaticamente enquanto
@@ -5723,6 +5822,8 @@
                 if(k === '1') this.useItemViaClick(this.mySlot, 'potion');
                 if(k === '2') this.useItemViaClick(this.mySlot, 'shield');
                 if(k === 'b') this.tryOpenChest();
+                // NOVO: tecla [P] pausa/retoma a partida no PC (mesma função do botão ⏸ no HUD).
+                if(k === 'p') this.togglePauseMatch();
                 if(k === 'e') {
                     if(!Hideout.active) this.tryEnterHideout();
                 }
@@ -5959,7 +6060,7 @@
         },
         startOnlineMatch(roster, mySlot) {
             document.getElementById('online-lobby-screen').classList.add('hidden');
-            this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999;
+            this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999; this.powerupSpawnTimer = 0; this.powerupSpawnTarget = 14 + Math.random()*10; this.isPaused = false; document.getElementById('pause-screen').classList.add('hidden');
             this.enemies = []; this.projectiles = []; this.particles = []; this.items = []; this.platforms = [];
             this.chunksLoaded = {}; this.cameraX = 0; this.secretZones = []; this.pendingSpawns = []; this.openWorldSpawnCd = 0;
             this.timeLeftSeconds = 300; this.timerTicker = 0; this.activeMatch = false; this._lastEndInfo = null;
@@ -6063,11 +6164,26 @@
             }
         },
         // NOVO: botão de sair da partida (canto superior esquerdo do HUD), com confirmação.
+        // NOVO: pausa/retoma a partida. Só funciona fora do modo online (multijogador via
+        // internet) — pausar não faz sentido ali porque o outro jogador (remoto) continuaria
+        // jogando normalmente do lado dele, então a pausa fica só "de mentira" e confusa. O
+        // congelamento de verdade acontece em loop(): enquanto isPaused for true, update()/draw()
+        // simplesmente não são chamados, então física, timers, spawns e o cronômetro da partida
+        // realmente param (não é só uma tela por cima continuando a processar por trás).
+        togglePauseMatch() {
+            if(OnlineSync.isOnline) return;
+            if(this.state !== 'IN_GAME' && !this.isPaused) return;
+            this.isPaused = !this.isPaused;
+            document.getElementById('pause-screen').classList.toggle('hidden', !this.isPaused);
+            if(this.isPaused) AudioFX.play('jump'); else this.lastTime = performance.now();
+        },
         confirmExitMatch() {
             if(this.state !== 'IN_GAME') return;
             if(window.confirm(t('exitMatchConfirmMsg'))) this.exitMatch();
         },
         exitMatch() {
+            this.isPaused = false;
+            document.getElementById('pause-screen').classList.add('hidden');
             OnlineSync.disconnect();
             this.state = 'MENU';
             this.activeMatch = false;
@@ -6078,6 +6194,10 @@
             // this.vsAI=true e recriava um bot pra jogar junto, mesmo em modos que não deveriam
             // ter IA nenhuma. Por isso a IA parecia "continuar jogando" depois de trocar de modo.
             this.vsAI = false;
+            // NOVO: sair no meio de uma partida apostada NÃO devolve a aposta (já foi debitada em
+            // startMatch() e a tentativa diária já foi consumida) — só limpa a flag pra não
+            // "vazar" pra próxima partida.
+            this.betActive = false; this.betAmountLocked = 0;
             // FIX: sair de uma partida (botão 🚪) enquanto se testava/jogava uma fase do Editor não
             // limpava customLevelData nem a flag _testing — como só os pontos de entrada de partida
             // (startNormalMatch/startVsAI/startCustomLevelMatch) zeravam customLevelData, e alguns
@@ -6165,12 +6285,72 @@
             event.preventDefault();
             this.selectArch(1, arch);
         },
+        // NOVO: quantas partidas apostadas o jogador já usou HOJE (reseta à meia-noite local,
+        // mesmo esquema de data usado pelas missões diárias — ver DailyFeatures.todayStr).
+        getBetUsageToday() {
+            let u = this.persistentUpgradesP1.betUsage;
+            if(!u || u.date !== DailyFeatures.todayStr()) return 0;
+            return u.count || 0;
+        },
+        registerBetUsage() {
+            let today = DailyFeatures.todayStr();
+            if(!this.persistentUpgradesP1.betUsage || this.persistentUpgradesP1.betUsage.date !== today) {
+                this.persistentUpgradesP1.betUsage = { date: today, count: 0 };
+            }
+            this.persistentUpgradesP1.betUsage.count++;
+            this.saveProfile();
+        },
+        setBetAmount(val) {
+            let usesLeft = this.BET_MAX_PER_DAY - this.getBetUsageToday();
+            let max = Math.min(this.BET_MAX_AMOUNT, this.walletP1);
+            let amount = usesLeft > 0 ? Math.max(0, Math.min(max, Math.round(Number(val) / 10) * 10)) : 0;
+            this.betAmount = amount;
+            this.refreshBetPanel();
+        },
+        // NOVO: mostra/esconde o painel de aposta (só faz sentido no Gold Rush, solo, fora do
+        // online) e mantém o slider/labels sincronizados com a carteira atual e o limite diário.
+        refreshBetPanel() {
+            let panel = document.getElementById('bet-panel');
+            if(!panel) return;
+            let eligible = this.gameMode === 'GOLDFUSH' && !this.vsAI;
+            panel.classList.toggle('hidden', !eligible);
+            if(!eligible) return;
+            let usesLeft = Math.max(0, this.BET_MAX_PER_DAY - this.getBetUsageToday());
+            let max = Math.min(this.BET_MAX_AMOUNT, this.walletP1);
+            let slider = document.getElementById('rng-bet');
+            let usageLbl = document.getElementById('lbl-bet-usage');
+            let amountLbl = document.getElementById('lbl-bet-amount');
+            let hintLbl = document.getElementById('lbl-bet-hint');
+            if(usesLeft <= 0) this.betAmount = 0;
+            if(this.betAmount > max) this.betAmount = max;
+            if(slider) { slider.max = max; slider.value = this.betAmount; slider.disabled = usesLeft <= 0; }
+            if(amountLbl) amountLbl.innerText = `$${this.betAmount}`;
+            if(usageLbl) usageLbl.innerText = t('betUsageLabel').replace('{used}', this.getBetUsageToday()).replace('{max}', this.BET_MAX_PER_DAY);
+            if(hintLbl) {
+                if(usesLeft <= 0) hintLbl.innerHTML = `<span style="color:#f87171;">${t('betLimitReached')}</span>`;
+                else if(this.betAmount > 0) hintLbl.innerHTML = `<span style="color:#facc15;">${t('betPotentialWin').replace('{amount}', this.betAmount*2)}</span>`;
+                else hintLbl.innerText = '';
+            }
+        },
+        // NOVO: atualiza o aviso de aposta ativa no HUD central durante a partida (ver elemento
+        // #hud-bet-active). Chamado uma vez por segundo de dentro de update(), então é barato.
+        syncBetHud() {
+            let el = document.getElementById('hud-bet-active');
+            if(!el) return;
+            if(this.betActive && this.betAmountLocked > 0) {
+                el.style.display = 'block';
+                el.innerText = t('betActiveHud').replace('{amount}', this.betAmountLocked).replace('{potential}', this.betAmountLocked*2);
+            } else {
+                el.style.display = 'none';
+            }
+        },
         setGameMode(mode) {
             this.gameMode = mode;
             document.getElementById('btn-mode-horda').classList.toggle('active', mode === 'HORDA');
             document.getElementById('btn-mode-ouro').classList.toggle('active', mode === 'GOLDFUSH');
             document.getElementById('btn-mode-titan').classList.toggle('active', mode === 'TITAN');
             document.getElementById('btn-mode-boss').classList.toggle('active', mode === 'BOSS');
+            document.getElementById('btn-mode-infinito').classList.toggle('active', mode === 'INFINITO');
             this.modeSolo = true;
             this.updateMenu();
         },
@@ -6536,6 +6716,7 @@
             }
             this.refreshArchSelectionDisplay();
             this.renderShop(); this.renderWeaponSelect(); this.renderRanking(); this.refreshSoloPlayerSelector();
+            this.refreshBetPanel();
         },
         renderShop() {
             let activeWallet = this.walletP1;
@@ -6872,11 +7053,29 @@
         },
         startMatch() {
             document.getElementById('menu-screen').classList.add('hidden');
-            this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999;
+            this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999; this.powerupSpawnTimer = 0; this.powerupSpawnTarget = 14 + Math.random()*10; this.isPaused = false; document.getElementById('pause-screen').classList.add('hidden');
             this.enemies = []; this.projectiles = []; this.particles = []; this.items = []; this.platforms = [];
             this.chunksLoaded = {}; this.cameraX = 0; this.secretZones = []; this.pendingSpawns = []; this.openWorldSpawnCd = 0;
-            this.timeLeftSeconds = (this.gameMode === 'BOSS') ? 600 : 300; this.timerTicker = 0; this.activeMatch = false;
+            // NOVO: Modo Infinito não tem vitória por tempo — a partida só acaba quando você
+            // morre (ou desiste). Usamos um timer bem longo (99h) só pro relógio do HUD continuar
+            // subindo normalmente sem nunca bater o gatilho de triggerTimeVictory().
+            this.timeLeftSeconds = (this.gameMode === 'BOSS') ? 600 : (this.gameMode === 'INFINITO' ? 356400 : 300); this.timerTicker = 0; this.activeMatch = false;
+            this.infiniteElapsed = 0;
             this.continueUsedThisMatch = false;
+            // NOVO: ativa a aposta pré-partida se o jogador escolheu um valor > 0 no painel do
+            // menu (só disponível pro Gold Rush, solo, fora do online — ver refreshBetPanel). O
+            // valor é debitado da carteira JÁ AQUI, antes da partida começar (se perder, o ouro
+            // já era; se vencer, triggerMatchEnd() credita o dobro). Isso também consome uma das
+            // 3 tentativas diárias na hora, então nem sair no meio da partida devolve a tentativa.
+            this.betActive = this.gameMode === 'GOLDFUSH' && !this.vsAI && this.betAmount > 0 && this.getBetUsageToday() < this.BET_MAX_PER_DAY && this.walletP1 >= this.betAmount;
+            if(this.betActive) {
+                this.betAmountLocked = this.betAmount;
+                this.walletP1 -= this.betAmountLocked;
+                this.registerBetUsage();
+            } else {
+                this.betAmountLocked = 0;
+            }
+            this.betAmount = 0;
             Hideout.active = false;
             document.getElementById('hideout-hud').style.display = 'none';
             document.getElementById('hideout-alert').style.display = 'none';
@@ -6977,6 +7176,28 @@
                 if(type === 'shield') { p.shieldTime = 120; createFXBurst(p.x+p.w/2, p.y+p.h/2, '#38bdf8', 12); }
                 AudioFX.play('jump'); p.syncHUD();
             }
+        },
+        // NOVO: sorteia e spawna power-ups temporários (escudo, fúria, velocidade) durante a
+        // partida — chamado a cada frame de update() tanto no modo Arena quanto no Mundo Aberto,
+        // recebendo a lista de plataformas "relevantes" (perto do jogador, no mundo aberto; todas,
+        // na arena) pra escolher um ponto de spawn razoável. Não spawna dentro do Esconderijo nem
+        // enquanto uma fase customizada do Editor estiver rolando (mantém o layout autoral limpo).
+        updatePowerupSpawns(dt, candidatePlatforms) {
+            if(this.customLevelData || Hideout.active) return;
+            this.powerupSpawnTimer = (this.powerupSpawnTimer || 0) + dt;
+            if(this.powerupSpawnTimer < this.powerupSpawnTarget) return;
+            this.powerupSpawnTimer = 0;
+            this.powerupSpawnTarget = 14 + Math.random() * 10;
+            let plats = (candidatePlatforms || []).filter(pl => pl.w >= 40);
+            if(plats.length === 0) return;
+            // Limita a no máximo 2 power-ups simultâneos no mapa, pra não poluir a tela.
+            let activeCount = this.items.filter(it => it.type === 'powerup' && !it.destroyed).length;
+            if(activeCount >= 2) return;
+            let plat = plats[Math.floor(Math.random() * plats.length)];
+            let cx = plat.x + 20 + Math.random() * Math.max(10, plat.w - 40);
+            let kinds = ['shield', 'fury', 'speed'];
+            let kind = kinds[Math.floor(Math.random() * kinds.length)];
+            this.items.push(new Item(cx, plat.y - 26, 'powerup', kind));
         },
         tryOpenChest() {
             let p = this.players.find(pl => pl && pl.id === this.mySlot) || this.players[0];
@@ -7115,6 +7336,7 @@
                     }
                 }
             }
+            this.updatePowerupSpawns(dt, this.platforms.filter(pl => Math.abs(pl.x - p.x) < 900));
             if(aliveP.length > 1) {
                 let avgX = aliveP.reduce((s, pl) => s + pl.x + pl.w/2, 0) / aliveP.length;
                 this.cameraX = avgX - 640;
@@ -7146,11 +7368,18 @@
                     tcHideout: document.getElementById('tc-hideout'),
                     chestAlert: document.getElementById('chest-alert'),
                     hideoutAlert: document.getElementById('hideout-alert'),
-                    hideoutHud: document.getElementById('hideout-hud')
+                    hideoutHud: document.getElementById('hideout-hud'),
+                    pauseBtn: document.getElementById('btn-pause-match')
                 };
                 this._loopDomLast = {};
             }
             let ld = this._loopDom, ldl = this._loopDomLast;
+            // NOVO: o botão de pausa some em partidas online (multijogador via internet) — ver
+            // comentário em togglePauseMatch() sobre o porquê.
+            if (ld.pauseBtn) {
+                let showPause = this.state === 'IN_GAME' && !OnlineSync.isOnline;
+                if (ldl.showPause !== showPause) { ld.pauseBtn.style.display = showPause ? 'flex' : 'none'; ldl.showPause = showPause; }
+            }
             let touchActive = this.device !== 'pc' && this.state === 'IN_GAME';
             if (ld.touchControls && ldl.touchActive !== touchActive) { ld.touchControls.classList.toggle('active', touchActive); ldl.touchActive = touchActive; }
             // NOVO: mantém os botões de toque de baú e esconderijo sincronizados com os avisos de
@@ -7164,7 +7393,7 @@
                 let hOn = ld.hideoutAlert.style.display === 'block' || ld.hideoutHud.style.display === 'block';
                 if (ldl.hOn !== hOn) { ld.tcHideout.classList.toggle('show', hOn); ldl.hOn = hOn; }
             }
-            if(this.state === 'IN_GAME') {
+            if(this.state === 'IN_GAME' && !this.isPaused) {
                 if(OnlineSync.isOnline) {
                     if(OnlineSync.isHost) { this.update(dt); this.draw(); OnlineSync.sendState(); }
                     else { this.draw(); OnlineSync.sendKeys(); }
@@ -7179,11 +7408,23 @@
             if(this.timerTicker >= 1) {
                 this.timerTicker = 0;
                 if(this.timeLeftSeconds > 0) this.timeLeftSeconds--;
-                let min = String(Math.floor(this.timeLeftSeconds/60)).padStart(2,'0');
-                let sec = String(this.timeLeftSeconds%60).padStart(2,'0');
-                let modeLabel = this.isOpenWorld ? t('modeLabelOpenWorld') : (this.gameMode === 'BOSS' ? `${t('modeLabelBoss')} ${this.round}` : `${t('modeLabelWave')} ${this.round}`);
+                if(this.gameMode === 'INFINITO' && this.activeMatch) this.infiniteElapsed = (this.infiniteElapsed || 0) + 1;
+                let min, sec, modeLabel;
+                if(this.gameMode === 'INFINITO') {
+                    // NOVO: Modo Infinito mostra o tempo de SOBREVIVÊNCIA subindo (não uma
+                    // contagem regressiva) — é esse número que determina a recompensa final,
+                    // então faz sentido o jogador acompanhar em tempo real.
+                    min = String(Math.floor((this.infiniteElapsed||0)/60)).padStart(2,'0');
+                    sec = String((this.infiniteElapsed||0)%60).padStart(2,'0');
+                    modeLabel = `${t('modeLabelInfinito')} ${this.round}`;
+                } else {
+                    min = String(Math.floor(this.timeLeftSeconds/60)).padStart(2,'0');
+                    sec = String(this.timeLeftSeconds%60).padStart(2,'0');
+                    modeLabel = this.isOpenWorld ? t('modeLabelOpenWorld') : (this.gameMode === 'BOSS' ? `${t('modeLabelBoss')} ${this.round}` : `${t('modeLabelWave')} ${this.round}`);
+                }
                 document.getElementById('hud-timer-text').innerText = `${min}:${sec} | ${modeLabel}`;
-                if(this.timeLeftSeconds <= 0 && this.activeMatch) {
+                this.syncBetHud();
+                if(this.timeLeftSeconds <= 0 && this.activeMatch && this.gameMode !== 'INFINITO') {
                     let mins = this.gameMode === 'BOSS' ? '10' : '5';
                     this.triggerTimeVictory(mins);
                     return;
@@ -7230,9 +7471,19 @@
                 } else {
                     this.spawnTimer += dt * 60;
                     let diffMult = this.getDifficultyMultiplier();
+                    // NOVO: Modo Infinito soma uma rampa própria de dificuldade em cima do
+                    // multiplicador normal, crescendo continuamente com o tempo de sobrevivência
+                    // (não só com rounds vencidos) — é isso que faz esse modo "ir ficando difícil
+                    // e difícil" mesmo se o jogador ficar preso no mesmo round por um tempo.
+                    // +6% a cada 20s sobrevividos, sem teto (a run só termina quando você morre).
+                    if(this.gameMode === 'INFINITO') diffMult *= 1 + Math.floor((this.infiniteElapsed||0) / 20) * 0.06;
+                    // NOVO: partidas com aposta ativa (ver startMatch/betActive) ficam mais
+                    // difíceis — compensa a chance de dobrar o ouro apostado. +35% fixo.
+                    if(this.betActive) diffMult *= 1.35;
                     let targetKills = Math.round((4 + (this.round * 3)) * diffMult), maxEnemiesOnScreen = Math.round((4 + this.round) * diffMult);
                     let spawnCooldown = Math.max(30, (140 - this.round * 8) / diffMult);
                     if(this.gameMode === 'TITAN') { targetKills = Math.round(targetKills * 2); maxEnemiesOnScreen = Math.round(maxEnemiesOnScreen * 2.5); spawnCooldown = Math.max(25, spawnCooldown * 0.45); }
+                    else if(this.gameMode === 'INFINITO') { maxEnemiesOnScreen = Math.min(maxEnemiesOnScreen, 16); spawnCooldown = Math.max(18, spawnCooldown); }
                     else if(this.gameMode !== 'HORDA') { spawnCooldown += 40; }
                     // Modo Contra IA: bem poucos inimigos comuns, só pra dar clima de arena —
                     // o duelo real é contra o bot.
@@ -7258,6 +7509,7 @@
                         this.items.push(new Item(cx, plat.y - 32, 'coin'));
                     }
                 }
+                this.updatePowerupSpawns(dt, this.platforms);
             }
             if(this.vsAI) {
                 let bot = this.players.find(p => p && p.isAI);
@@ -7325,8 +7577,18 @@
                 if(record) record.wins++; else this.ranking.push({ name: nameLabel, wins: 1 });
             });
             let desc = t('timeVictoryDesc').replace('{mins}', mins);
+            let betLine = '';
+            if(this.betActive && this.betAmountLocked > 0) {
+                // NOVO: sobreviver até o fim (vitória por tempo) com uma aposta ativa dobra o
+                // valor apostado — o valor já tinha sido debitado em startMatch(), então aqui só
+                // credita o dobro de volta.
+                let betPayout = this.betAmountLocked * 2;
+                this.walletP1 += betPayout;
+                betLine = `<br><span style="color:#facc15; font-weight:bold;">🎲 ${t('betWonLabel').replace('{amount}', betPayout)}</span>`;
+            }
+            this.betActive = false; this.betAmountLocked = 0;
             document.getElementById('lbl-gameover-stats').innerHTML =
-                `${desc}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: ${goldLines.join(' | ')}</span>`;
+                `${desc}<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: ${goldLines.join(' | ')}</span>${betLine}`;
             let myP = this.players.find(p => p && p.id === this.mySlot);
             if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: Math.min(1000, myP.goldCollected), won: true });
             this.saveProfile();
@@ -7378,6 +7640,25 @@
                 this.vsAI = false;
                 return;
             }
+            if(this.gameMode === 'INFINITO' && !winner) {
+                // NOVO: no Modo Infinito, morrer é o fim NORMAL da run (não existe "vitória" —
+                // só existe "até onde você aguentou"). A recompensa não usa o teto fixo de $1000
+                // dos outros modos: ela escala com o tempo de sobrevivência E com o round
+                // alcançado, então quanto mais longe o jogador foi, mais ouro ganha — sem teto
+                // superior, pra incentivar tentar bater a própria marca.
+                let survivedSec = this.infiniteElapsed || 0;
+                let reward = Math.round(survivedSec * 4 + this.round * 60 + (myP ? myP.goldCollected : 0) * 0.5);
+                this.walletP1 += reward;
+                this.recordInfiniteResult(survivedSec, this.round, reward);
+                let survMin = Math.floor(survivedSec/60), survSec = survivedSec%60;
+                let survivedLabel = t('infiniteSurvivedLabel').replace('{time}', `${survMin}:${String(survSec).padStart(2,'0')}`).replace('{round}', this.round);
+                document.getElementById('lbl-gameover-stats').innerHTML =
+                    `${descMsg}<br><span style="color:#94a3b8;">${survivedLabel}</span>` +
+                    `<br><span style="color:#eab308; font-weight:bold;">${t('netRewardLabel')}: +$${reward}</span>`;
+                if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: reward, won: false });
+                this.saveProfile();
+                return;
+            }
             if(winner) {
                 let reward = Math.min(1000, winner.goldCollected);
                 if(winner.profileId === 1) this.walletP1 += reward;
@@ -7386,7 +7667,14 @@
                 let nameLabel = `${this.getProfileName(winner.profileId)} (${winner.archetype.toUpperCase()})`;
                 let record = this.ranking.find(r => r.name === nameLabel);
                 if(record) record.wins++; else this.ranking.push({ name: nameLabel, wins: 1 });
-            } else { document.getElementById('lbl-gameover-stats').innerText = descMsg; }
+            } else {
+                // NOVO: se essa era uma partida com aposta ativa e o jogador morreu (não venceu),
+                // o valor apostado já tinha sido debitado em startMatch() — aqui só avisamos que
+                // ele foi perdido, sem devolver nada.
+                let betLine = (this.betActive && this.betAmountLocked > 0) ? `<br><span style="color:#f87171; font-weight:bold;">🎲 ${t('betLostLabel').replace('{amount}', this.betAmountLocked)}</span>` : '';
+                document.getElementById('lbl-gameover-stats').innerHTML = `${descMsg}${betLine}`;
+            }
+            this.betActive = false; this.betAmountLocked = 0;
             if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: iWon ? Math.min(1000, myP.goldCollected) : 0, won: iWon });
             this.saveProfile();
         },
@@ -7469,6 +7757,10 @@
             this.inventory = { potion: upg.potion, shield: upg.shield };
             this.mp = 100; this.cdAttack = 0; this.cdSpecial = 0; this.shieldTime = 0; this.dashCooldown = 0; this.kills = 0;
             this._hpBoostActive = false; this._speedPadTimer = 0;
+            // NOVO: power-ups temporários coletados no mapa durante a partida (escudo, fúria/dano
+            // dobrado, velocidade) — só duram enquanto o timer (em frames a 60fps) estiver > 0 e
+            // são zerados no fim da partida junto com o resto do estado do Player (nunca persistem).
+            this.powerupFuryTimer = 0; this.powerupSpeedTimer = 0;
             let archColor = archetype === 'hero' ? '#22c55e' : (archetype === 'vilan' ? '#ef4444' : '#38bdf8');
             this.color = (cosmetics && cosmetics.color) ? cosmetics.color : archColor;
             this.skin = (cosmetics && cosmetics.skin) ? cosmetics.skin : 'default';
@@ -7485,7 +7777,10 @@
             // NOVO: acelerador de velocidade (plataforma 'speed') — bônus temporário que decai
             // sozinho em Player.update(), independente de quem pisou nele.
             if(this._speedPadTimer > 0) spd += 3.2;
-            return Math.min(spd, Engine.MAX_PLAYER_SPEED + 3.2);
+            // NOVO: power-up de velocidade coletado no mapa — mesmo bônus do acelerador de
+            // plataforma, mas vindo de um item que aparece aleatoriamente durante a partida.
+            if(this.powerupSpeedTimer > 0) spd += 3.2;
+            return Math.min(spd, Engine.MAX_PLAYER_SPEED + 6.4);
         }
         update(dt, inHideout) {
             if(OnlineSync.isOnline && !OnlineSync.isHost) { this.syncHUD(); return; }
@@ -7500,6 +7795,23 @@
                 // velocidade está de fato valendo, não só um número invisível internamente.
                 if(Math.random() < 0.5 && typeof Engine !== 'undefined' && Engine.particles) {
                     Engine.particles.push(new Particle(this.x + this.w/2 - this.facing*10, this.y + this.h - 6, '#fde047', -this.facing*1.5 + (Math.random()-0.5), (Math.random()-0.5)*1.5, 14));
+                }
+            }
+            // NOVO: power-ups temporários do mapa (escudo/fúria/velocidade) — os timers correm
+            // em frames (60 = 1s) e zeram sozinhos; o efeito de escudo reaproveita shieldTime
+            // (mesmo campo do item de escudo do inventário) e o de fúria dobra o dano em
+            // castAttack()/castSpecial() via getDamageMultiplier(). Cada um solta partículas
+            // periódicas só pra dar retorno visual claro de "isso está ativo agora".
+            if(this.powerupFuryTimer > 0) {
+                this.powerupFuryTimer -= dt * 60;
+                if(Math.random() < 0.4 && typeof Engine !== 'undefined' && Engine.particles) {
+                    Engine.particles.push(new Particle(this.x + this.w/2 + (Math.random()-0.5)*20, this.y + (Math.random()-0.5)*20, '#f97316', (Math.random()-0.5)*2, (Math.random()-0.5)*2, 16));
+                }
+            }
+            if(this.powerupSpeedTimer > 0) {
+                this.powerupSpeedTimer -= dt * 60;
+                if(Math.random() < 0.4 && typeof Engine !== 'undefined' && Engine.particles) {
+                    Engine.particles.push(new Particle(this.x + this.w/2 - this.facing*10, this.y + this.h - 6, '#38bdf8', -this.facing*1.5 + (Math.random()-0.5), (Math.random()-0.5)*1.5, 14));
                 }
             }
             if(this.mp < 100) this.mp += dt * 15;
@@ -7565,26 +7877,33 @@
             });
             if(!Hideout.active) document.getElementById('chest-alert').style.display = near ? 'block' : 'none';
         }
+        // NOVO: multiplicador de dano aplicado a TODO ataque (tiro normal e especial) enquanto o
+        // power-up de Fúria estiver ativo — dano dobrado, ver powerupFuryTimer em update().
+        getDamageMultiplier() {
+            return this.powerupFuryTimer > 0 ? 2 : 1;
+        }
         castAttack() {
             this.cdAttack = this.atkCd;
             let px = this.facing === 1 ? this.x + this.w : this.x - 12;
-            if(!Hideout.active) Engine.projectiles.push(new Projectile(px, this.y+14, this.facing * this.projSpd, 0, this.color, 12*this.dmgMod, this));
+            let dm = this.dmgMod * this.getDamageMultiplier();
+            if(!Hideout.active) Engine.projectiles.push(new Projectile(px, this.y+14, this.facing * this.projSpd, 0, this.color, 12*dm, this));
             AudioFX.play('hit');
         }
         castSpecial() {
             this.mp -= 40; this.cdSpecial = 110;
+            let dm = this.dmgMod * this.getDamageMultiplier();
             if(this.archetype === 'hero') {
                 Engine.cameraShakeIntensity = 10;
                 createFXBurst(this.x+this.w/2, this.y+this.h/2, '#eab308', 20);
                 if(!Hideout.active) {
                     [...Engine.enemies, ...Engine.players].forEach(e => {
-                        if(e && e !== this && e.hp > 0 && Math.hypot(e.x-this.x, e.y-this.y) < 180) { e.vy = -8; e.takeDamage(25*this.dmgMod, this); }
+                        if(e && e !== this && e.hp > 0 && Math.hypot(e.x-this.x, e.y-this.y) < 180) { e.vy = -8; e.takeDamage(25*dm, this); }
                     });
                 }
             } else if(this.archetype === 'vilan') {
-                if(!Hideout.active) for(let i=-1; i<=1; i++) Engine.projectiles.push(new Projectile(this.x, this.y+14, this.facing*11, i*2, '#ef4444', 12*this.dmgMod, this));
+                if(!Hideout.active) for(let i=-1; i<=1; i++) Engine.projectiles.push(new Projectile(this.x, this.y+14, this.facing*11, i*2, '#ef4444', 12*dm, this));
             } else if(this.archetype === 'killer') {
-                if(!Hideout.active) for(let i=0; i<3; i++) setTimeout(() => { if(this.lives>0) Engine.projectiles.push(new Projectile(this.x, this.y+12, this.facing*17, 0, '#38bdf8', 8*this.dmgMod, this)); }, i*80);
+                if(!Hideout.active) for(let i=0; i<3; i++) setTimeout(() => { if(this.lives>0) Engine.projectiles.push(new Projectile(this.x, this.y+12, this.facing*17, 0, '#38bdf8', 8*dm, this)); }, i*80);
             }
         }
         takeDamage(amount, source) {
@@ -7635,12 +7954,15 @@
                 if(slots[1]){ slots[1].className = `hud-slot ${this.inventory.shield<=0?'empty':''}`; slots[1].innerHTML = this.inventory.shield>0?`E<span class="count">${this.inventory.shield}</span>`:''; }
                 last.potion = this.inventory.potion; last.shield = this.inventory.shield;
             }
-            // NOVO: mostra os boosts ativos (velocidade/HP) e o tempo restante de cada, só no HUD do P1.
+            // NOVO: mostra os boosts ativos (velocidade/HP comprados na loja + power-ups do mapa
+            // coletados nesta partida) e o tempo restante de cada, só no HUD do P1.
             if(this.id === 1 && h.boosts) {
                 let boosts = Engine.persistentUpgradesP1.boosts || {};
                 let parts = [];
                 if(boosts.speed > 0) parts.push(`⚡ ${Engine.formatBoostTime(boosts.speed)}`);
                 if(boosts.hp > 0) parts.push(`❤+ ${Engine.formatBoostTime(boosts.hp)}`);
+                if(this.powerupFuryTimer > 0) parts.push(`🔥 ${Math.ceil(this.powerupFuryTimer/60)}s`);
+                if(this.powerupSpeedTimer > 0) parts.push(`💨 ${Math.ceil(this.powerupSpeedTimer/60)}s`);
                 let boostStr = parts.join('   ');
                 if(last.boostStr !== boostStr) {
                     h.boosts.textContent = boostStr;
@@ -7694,6 +8016,16 @@
             }
             ctx.fillStyle = '#000'; ctx.fillRect(this.facing===1?this.x+20:this.x+6, this.y+10, 6, 6);
             ctx.restore();
+            // NOVO: ícone flutuante acima da cabeça enquanto um power-up de mapa (fúria ou
+            // velocidade) estiver ativo — dá retorno visual pra TODOS os jogadores na tela (não só
+            // pro P1, que já vê o texto no HUD), inclusive pro P2 local e pra IA/adversário.
+            if(this.powerupFuryTimer > 0 || this.powerupSpeedTimer > 0) {
+                ctx.save();
+                ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+                let icon = this.powerupFuryTimer > 0 ? '🔥' : '💨';
+                ctx.fillText(icon, this.x + this.w/2, this.y - 8);
+                ctx.restore();
+            }
         }
     }
     class Platform {
@@ -7835,7 +8167,12 @@
         draw(ctx) { ctx.save(); ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.w, this.h); ctx.restore(); }
     }
     class Item {
-        constructor(x, y, type) { this.x = x; this.y = y; this.type = type; this.w = type==='chest'?36:18; this.h = type==='chest'?28:18; this.destroyed = false; }
+        // NOVO: `kind` só é usado quando type==='powerup' — identifica qual power-up temporário
+        // este item concede ao ser coletado: 'shield' (fica invulnerável um tempo), 'fury' (dano
+        // dobrado) ou 'speed' (velocidade extra). Reaproveita o mesmo esqueleto de Item já usado
+        // por moedas/gemas/baús, então não precisa de nenhuma classe nova nem de mudanças em
+        // Physics.resolveAll além da checagem de colisão feita em Player.checkPowerupPickup().
+        constructor(x, y, type, kind) { this.x = x; this.y = y; this.type = type; this.kind = kind || null; this.w = type==='chest'?36:18; this.h = type==='chest'?28:18; this.destroyed = false; this.spawnT = performance.now(); }
         draw(ctx) {
             ctx.save();
             if(this.type === 'chest') {
@@ -7858,6 +8195,24 @@
                 ctx.shadowColor = '#a855f7'; ctx.shadowBlur = 6 + pulse * 8;
                 ctx.fillStyle = '#c084fc'; ctx.fillRect(-7, -7, 14, 14);
                 ctx.strokeStyle = '#f5d0fe'; ctx.lineWidth = 1.5; ctx.strokeRect(-7, -7, 14, 14);
+            } else if(this.type === 'powerup') {
+                // NOVO: cápsula flutuante colorida por tipo de power-up — escudo (azul), fúria
+                // (laranja) e velocidade (amarelo) — com um ícone simples desenhado dentro pra
+                // dar pra identificar de longe qual bônus é, igual já acontece com baús/gemas.
+                let bob = Math.sin(performance.now() / 260 + this.x) * 3;
+                let cy = this.y + 9 + bob;
+                let colorMap = { shield: '#38bdf8', fury: '#f97316', speed: '#facc15' };
+                let col = colorMap[this.kind] || '#38bdf8';
+                let pulse = (Math.sin(performance.now() / 200 + this.x) + 1) / 2;
+                ctx.shadowColor = col; ctx.shadowBlur = 8 + pulse * 10;
+                ctx.beginPath(); ctx.arc(this.x + 9, cy, 10, 0, Math.PI*2);
+                ctx.fillStyle = 'rgba(15,23,42,0.85)'; ctx.fill();
+                ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+                ctx.shadowBlur = 0; ctx.fillStyle = col; ctx.font = 'bold 11px sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                let icon = this.kind === 'shield' ? '🛡' : (this.kind === 'fury' ? '⚡' : '➤');
+                ctx.fillText(icon, this.x + 9, cy + 1);
+                ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
             } else {
                 ctx.fillStyle = '#eab308'; ctx.beginPath(); ctx.arc(this.x+9, this.y+9, 8, 0, Math.PI*2); ctx.fill();
             }
@@ -7985,6 +8340,25 @@
                         if(!it.destroyed && p && p.lives > 0 && it.x < p.x+p.w && it.x+it.w > p.x && it.y < p.y+p.h && it.y+it.h > p.y) {
                             p.goldCollected += 90; AudioFX.play('coin'); it.destroyed = true; p.syncHUD();
                             if(typeof createFXBurst === 'function') createFXBurst(it.x+9, it.y+9, '#c084fc', 12);
+                        }
+                    });
+                } else if(it.type === 'powerup' && !it.destroyed) {
+                    // NOVO: power-up temporário do mapa — aparece sozinho de tempos em tempos (ver
+                    // Engine.update/powerupSpawnTimer) e some ao ser tocado por qualquer jogador
+                    // vivo, aplicando o efeito correspondente por um tempo fixo (ver
+                    // Engine.POWERUP_DURATION_FRAMES).
+                    Engine.players.forEach(p => {
+                        if(!it.destroyed && p && p.lives > 0 && it.x < p.x+p.w && it.x+it.w > p.x && it.y < p.y+p.h && it.y+it.h > p.y) {
+                            it.destroyed = true;
+                            let dur = Engine.POWERUP_DURATION_FRAMES;
+                            let col = it.kind === 'shield' ? '#38bdf8' : (it.kind === 'fury' ? '#f97316' : '#facc15');
+                            if(it.kind === 'shield') { p.shieldTime = Math.max(p.shieldTime, dur); }
+                            else if(it.kind === 'fury') { p.powerupFuryTimer = dur; }
+                            else if(it.kind === 'speed') { p.powerupSpeedTimer = dur; }
+                            AudioFX.play('coin');
+                            if(typeof createFXBurst === 'function') createFXBurst(it.x+9, it.y+9, col, 18);
+                            if(p.id === Engine.mySlot) Engine.showChestReward(t('powerupPickup_' + it.kind));
+                            p.syncHUD();
                         }
                     });
                 }
