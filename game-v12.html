@@ -514,7 +514,7 @@
             <div style="display:flex; flex-direction:column; gap:10px;">
                 <input class="auth-input" id="recovery-new-password" type="password" placeholder="Nova senha (mínimo 6 caracteres)" data-i18n-placeholder="newPasswordPlaceholder" maxlength="32" autocomplete="new-password">
                 <input class="auth-input" id="recovery-new-password2" type="password" placeholder="Confirmar nova senha" data-i18n-placeholder="confirmNewPasswordPlaceholder" maxlength="32" autocomplete="new-password">
-                <button onclick="Accounts.doRecoverySetPassword()" style="background:linear-gradient(to right,#3b82f6,#6366f1); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;" data-i18n="recoverySaveBtn">SALVAR NOVA SENHA E ENTRAR</button>
+                <button id="btn-recovery-submit" onclick="Accounts.doRecoverySetPassword()" style="background:linear-gradient(to right,#3b82f6,#6366f1); color:white; padding:13px; border:none; font-size:1rem; font-weight:700; border-radius:6px; cursor:pointer;" data-i18n="recoverySaveBtn">SALVAR NOVA SENHA E ENTRAR</button>
             </div>
             <div id="recovery-error" class="auth-error hidden"></div>
         </div>
@@ -1365,7 +1365,7 @@
             sendResetLinkBtn: "ENVIAR LINK DE REDEFINIÇÃO", backToLoginLink: "← Voltar para o login",
             authCloudInfo: "☁️ Sua conta funciona em qualquer dispositivo.",
             recoveryTitle: "Nova Senha", recoverySubtitle: "Digite sua nova senha para continuar",
-            recoverySaveBtn: "SALVAR NOVA SENHA E ENTRAR",
+            recoverySaveBtn: "SALVAR NOVA SENHA E ENTRAR", recoveryPreparingBtn: "PREPARANDO...",
             errFillAllFields: "Preencha todos os campos.",
             errValidEmail: "Digite um e-mail válido.",
             errValidUsername: "Nome deve ter 3-20 caracteres: letras, números ou _.",
@@ -1631,7 +1631,7 @@
             sendResetLinkBtn: "SEND RESET LINK", backToLoginLink: "← Back to login",
             authCloudInfo: "☁️ Your account works on any device.",
             recoveryTitle: "New Password", recoverySubtitle: "Enter your new password to continue",
-            recoverySaveBtn: "SAVE NEW PASSWORD AND LOG IN",
+            recoverySaveBtn: "SAVE NEW PASSWORD AND LOG IN", recoveryPreparingBtn: "PREPARING...",
             errFillAllFields: "Fill in all fields.",
             errValidEmail: "Enter a valid email.",
             errValidUsername: "Name must be 3-20 characters: letters, numbers or _.",
@@ -1892,7 +1892,7 @@
             sendResetLinkBtn: "RESET-LINK SENDEN", backToLoginLink: "← Zurück zur Anmeldung",
             authCloudInfo: "☁️ Dein Konto funktioniert auf jedem Gerät.",
             recoveryTitle: "Neues Passwort", recoverySubtitle: "Gib dein neues Passwort ein, um fortzufahren",
-            recoverySaveBtn: "NEUES PASSWORT SPEICHERN UND ANMELDEN",
+            recoverySaveBtn: "NEUES PASSWORT SPEICHERN UND ANMELDEN", recoveryPreparingBtn: "WIRD VORBEREITET...",
             errFillAllFields: "Bitte alle Felder ausfüllen.",
             errValidEmail: "Gib eine gültige E-Mail-Adresse ein.",
             errValidUsername: "Name muss 3-20 Zeichen haben: Buchstaben, Zahlen oder _.",
@@ -2153,7 +2153,7 @@
             sendResetLinkBtn: "ENVIAR ENLACE DE RESTABLECIMIENTO", backToLoginLink: "← Volver al inicio de sesión",
             authCloudInfo: "☁️ Tu cuenta funciona en cualquier dispositivo.",
             recoveryTitle: "Nueva Contraseña", recoverySubtitle: "Escribe tu nueva contraseña para continuar",
-            recoverySaveBtn: "GUARDAR NUEVA CONTRASEÑA Y ENTRAR",
+            recoverySaveBtn: "GUARDAR NUEVA CONTRASEÑA Y ENTRAR", recoveryPreparingBtn: "PREPARANDO...",
             errFillAllFields: "Completa todos los campos.",
             errValidEmail: "Introduce un correo válido.",
             errValidUsername: "El nombre debe tener 3-20 caracteres: letras, números o _.",
@@ -2414,7 +2414,7 @@
             sendResetLinkBtn: "INVIA LINK DI RESET", backToLoginLink: "← Torna al login",
             authCloudInfo: "☁️ Il tuo account funziona su qualsiasi dispositivo.",
             recoveryTitle: "Nuova Password", recoverySubtitle: "Inserisci la nuova password per continuare",
-            recoverySaveBtn: "SALVA NUOVA PASSWORD E ACCEDI",
+            recoverySaveBtn: "SALVA NUOVA PASSWORD E ACCEDI", recoveryPreparingBtn: "PREPARAZIONE...",
             errFillAllFields: "Compila tutti i campi.",
             errValidEmail: "Inserisci un'email valida.",
             errValidUsername: "Il nome deve avere 3-20 caratteri: lettere, numeri o _.",
@@ -2675,7 +2675,7 @@
             sendResetLinkBtn: "ENVOYER LE LIEN DE RÉINITIALISATION", backToLoginLink: "← Retour à la connexion",
             authCloudInfo: "☁️ Votre compte fonctionne sur n'importe quel appareil.",
             recoveryTitle: "Nouveau Mot de Passe", recoverySubtitle: "Entrez votre nouveau mot de passe pour continuer",
-            recoverySaveBtn: "ENREGISTRER ET SE CONNECTER",
+            recoverySaveBtn: "ENREGISTRER ET SE CONNECTER", recoveryPreparingBtn: "PRÉPARATION...",
             errFillAllFields: "Remplissez tous les champs.",
             errValidEmail: "Entrez un e-mail valide.",
             errValidUsername: "Le nom doit contenir 3-20 caractères : lettres, chiffres ou _.",
@@ -3306,6 +3306,12 @@
         auth: { lock: noOpLock },
         global: { fetch: fetchWithTimeout }
     });
+    // FIX (pedido de usuário): antes, ao clicar no link de "esqueci a senha" do e-mail, a tela
+    // ficava travada numa "Carregando..." genérica até o evento assíncrono PASSWORD_RECOVERY do
+    // SDK do Supabase disparar — o que podia demorar visivelmente. O Supabase inclui
+    // "type=recovery" no hash da URL de recuperação ANTES mesmo do SDK processar o token, então
+    // detectamos isso direto na URL, na hora, sem esperar o SDK — ver uso em Accounts.init().
+    const isPasswordRecoveryLink = /type=recovery/.test(window.location.hash) || /type=recovery/.test(window.location.search);
     function getCachedAccessToken() {
         try {
             const projectRef = SUPABASE_URL.match(/https:\/\/([^.]+)\./)[1];
@@ -3646,6 +3652,23 @@
         },
         init() {
             let bootLoadingResolved = false;
+            // FIX (pedido de usuário): se a URL já indica um link de recuperação de senha, mostra
+            // a tela de "nova senha" IMEDIATAMENTE — sem esperar o evento PASSWORD_RECOVERY do
+            // SDK, que só dispara depois de uma chamada de rede (troca do token da URL pela
+            // sessão). O formulário fica com o botão desabilitado (via _recoveryFormReady) até a
+            // sessão real terminar de carregar, evitando erro se o usuário tentar enviar antes da
+            // hora — mas visualmente a demora de rede não fica mais "escondida" atrás de uma tela
+            // de carregamento genérica sem contexto.
+            if (isPasswordRecoveryLink) {
+                this._inRecovery = true;
+                this._recoveryFormReady = false;
+                document.getElementById('boot-loading-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('menu-screen').classList.add('hidden');
+                document.getElementById('recovery-screen').classList.remove('hidden');
+                let btn = document.getElementById('btn-recovery-submit');
+                if (btn) { btn.disabled = true; btn.dataset.originalText = btn.textContent; btn.textContent = t('recoveryPreparingBtn'); }
+            }
             let bootLoadingWatchdog = setTimeout(() => {
                 if (bootLoadingResolved) return;
                 console.warn('onAuthStateChange demorou demais — liberando a tela de login manualmente.');
@@ -3657,10 +3680,13 @@
                 resolveBootLoading();
                 if(event === 'PASSWORD_RECOVERY') {
                     this._inRecovery = true;
+                    this._recoveryFormReady = true;
                     document.getElementById('auth-screen').classList.add('hidden');
                     document.getElementById('menu-screen').classList.add('hidden');
                     document.getElementById('recovery-screen').classList.remove('hidden');
                     document.getElementById('boot-loading-screen').classList.add('hidden');
+                    let btn = document.getElementById('btn-recovery-submit');
+                    if (btn) { btn.disabled = false; if (btn.dataset.originalText) btn.textContent = btn.dataset.originalText; }
                     return;
                 }
                 if(this._inRecovery) {
@@ -6435,7 +6461,10 @@
                 let hadStreakBefore = !!(this.persistentUpgradesP1.streak && this.persistentUpgradesP1.streak.lastDate);
                 let summary = DailyFeatures.checkInOnLogin(this.persistentUpgradesP1);
                 if (hadStreakBefore && (summary.streakChanged || summary.offlineGold > 0)) {
-                    setTimeout(() => this.showWelcomeBackModal(summary), Tutorial.shouldOpenFirstTime() ? 600 : 300);
+                    // FIX: segunda camada de proteção — mesmo que bootWithAccount() tenha rodado
+                    // por algum motivo inesperado, este modal (z-index bem alto) nunca deve
+                    // aparecer por cima da tela de recuperação de senha.
+                    setTimeout(() => { if(!Accounts._inRecovery) this.showWelcomeBackModal(summary); }, Tutorial.shouldOpenFirstTime() ? 600 : 300);
                 }
                 this.renderMissions();
                 this.refreshStreakBadge();
