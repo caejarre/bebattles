@@ -3782,7 +3782,18 @@
             if(!term) { results.innerHTML = ''; return; }
             results.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
             try {
-                const { data, error } = await sb.from('players').select('id, name, wallet, is_online').ilike('name', `%${term}%`).limit(15);
+                // NOVO: se o texto digitado parecer um UUID (formato do ID de jogador), busca por
+                // ID exato em vez de nome — permite localizar a conta certa mesmo que o nome de
+                // exibição tenha mudado ou tenha acentuação/emoji difícil de digitar.
+                // OBS: busca por E-MAIL não está disponível aqui porque o e-mail fica na tabela
+                // interna auth.users do Supabase, que o app não consegue consultar diretamente por
+                // segurança — precisaria de uma função no banco com permissão elevada pra isso
+                // (posso te passar o SQL se quiser habilitar).
+                const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(term);
+                const query = isUuid
+                    ? sb.from('players').select('id, name, wallet, is_online').eq('id', term).limit(15)
+                    : sb.from('players').select('id, name, wallet, is_online').ilike('name', `%${term}%`).limit(15);
+                const { data, error } = await query;
                 if(error) throw error;
                 if(!data || data.length === 0) { results.innerHTML = `<div class="social-empty">${t('adminNoResults')}</div>`; return; }
                 results.innerHTML = '';
@@ -3793,7 +3804,8 @@
                     // está jogando arrisca o autosave dele sobrescrever o ajuste (ver comentário
                     // em adjust()), então um aviso visual aqui ajuda a evitar essa armadilha.
                     let onlineTag = p.is_online ? `<span style="color:#fbbf24; font-size:0.68rem; margin-left:6px;" title="${t('adminOnlineWarning')}">🟢 ${t('adminOnlineTag')}</span>` : '';
-                    row.innerHTML = `<span>${p.name || '(sem nome)'}${onlineTag}</span><span style="color:#facc15; font-weight:700;">$${p.wallet||0}</span>`;
+                    let idTag = `<div style="font-size:0.62rem; color:#64748b; font-family:monospace;">${p.id}</div>`;
+                    row.innerHTML = `<div><span>${p.name || '(sem nome)'}${onlineTag}</span>${idTag}</div><span style="color:#facc15; font-weight:700;">$${p.wallet||0}</span>`;
                     row.onclick = () => this.select(p);
                     results.appendChild(row);
                 });
@@ -7170,6 +7182,13 @@
             this.refreshLevelBadge();
             this.refreshStreakBadge();
             this.renderMissions();
+            // FIX: refreshVisibility() do painel admin dependia só de bootWithAccount()/
+            // openSettings() rodarem no momento certo — se a tela de Configurações já estava
+            // "pronta" no DOM antes do e-mail da conta terminar de carregar, o botão ficava
+            // escondido até a próxima chamada manual, dando a impressão de aparecer "só às
+            // vezes". Reforçando aqui, updateMenu() já roda toda vez que o menu principal é
+            // exibido/atualizado, então a visibilidade fica sempre sincronizada com a conta atual.
+            if(typeof AdminPanel !== 'undefined') AdminPanel.refreshVisibility();
             let desc = document.getElementById('lbl-arch-desc');
             let solo = this.isSoloMatch();
             if(solo) {
