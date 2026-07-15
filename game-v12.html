@@ -3628,7 +3628,12 @@
                     const { error: insertErr } = await sb.from('players').insert({ id: user.id, ...data });
                     if (insertErr) throw insertErr;
                 }
-                this.current = { uid: user.id, email: user.email, ...data };
+                // FIX: email precisa vir DEPOIS de ...data, não antes — se a tabela `players`
+                // tiver uma coluna chamada "email" (mesmo vazia/null, por engano ou de uma
+                // migração antiga), o spread ...data sobrescrevia o e-mail certo (vindo de
+                // user.email, do Supabase Auth) com esse valor errado, fazendo o painel admin
+                // nunca reconhecer a conta corretamente mesmo com o e-mail certo.
+                this.current = { uid: user.id, ...data, email: user.email };
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('recovery-screen').classList.add('hidden');
                 this._setBusy(false);
@@ -3681,7 +3686,10 @@
                             const { error: insertErr } = await sb.from('players').insert({ id: user.id, ...data });
                             if (insertErr) throw insertErr;
                         }
-                        this.current = { uid: user.id, email: user.email, ...data };
+                        // FIX (mesma correção da outra ocorrência): email por último no spread,
+                        // pra nunca ser sobrescrito por uma eventual coluna "email" da tabela
+                        // players.
+                        this.current = { uid: user.id, ...data, email: user.email };
                         document.getElementById('auth-screen').classList.add('hidden');
                         this._setBusy(false);
                         Engine.bootWithAccount(this.current);
