@@ -447,6 +447,18 @@
     <canvas id="ctxCanvas"></canvas>
     <div id="spectator-banner" class="hidden" style="position:fixed; top:14px; left:50%; transform:translateX(-50%); background:rgba(15,23,42,0.92); border:1px solid #a855f7; color:#e9d5ff; font-weight:700; font-size:0.85rem; padding:7px 18px; border-radius:20px; z-index:60; box-shadow:0 0 14px rgba(168,85,247,0.5); pointer-events:none;"></div>
     <div id="chest-reward-popup" class="hidden"></div>
+    <!-- NOVO: modal de reembolso — aparece pro jogador (em qualquer tela, inclusive fora de
+         partida) quando o admin ajusta o ouro da conta dele, mostrando o valor e a mensagem
+         opcional escrita pelo admin. Fica por cima de tudo (z-index alto) até ser fechado. -->
+    <div id="refund-modal-overlay" class="hidden" style="position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:200; display:flex; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#0f172a; border:2px solid #facc15; border-radius:14px; padding:26px; max-width:400px; width:100%; display:flex; flex-direction:column; gap:14px; align-items:center; text-align:center; box-shadow:0 0 40px rgba(250,204,21,0.25);">
+            <div style="font-size:2.6rem;">💰</div>
+            <h3 id="refund-modal-title" style="margin:0; color:#facc15; font-size:1.15rem;"></h3>
+            <p id="refund-modal-amount" style="margin:0; font-size:1.6rem; font-weight:800; color:#4ade80;"></p>
+            <p id="refund-modal-message" class="hidden" style="margin:0; font-size:0.85rem; color:#cbd5e1; background:rgba(255,255,255,0.05); padding:10px 14px; border-radius:8px; font-style:italic;"></p>
+            <button onclick="RefundNotifier.dismiss()" style="width:100%; background:#78350f; border-color:#b45309; color:#fcd34d;" data-i18n="refundModalOkBtn">OK, entendi!</button>
+        </div>
+    </div>
     <div id="hideout-alert" onclick="Engine.handleHideoutTap()">
         <div class="ht" data-i18n="hideoutAlertTitle">Esconderijo Secreto</div>
         <div class="hs" data-i18n="hideoutAlertEnter">Entrar: E</div>
@@ -702,6 +714,39 @@
             <div id="achievements-list" style="display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; margin-top:4px;"></div>
         </div>
     </div>
+    <!-- NOVO: Painel de Administração — só acessível pela conta de desenvolvedor (checagem por
+         e-mail em AdminPanel.open()). Permite buscar um jogador pelo nome e ajustar o ouro dele
+         diretamente (reembolso ou correção), sem precisar editar o banco de dados na mão. -->
+    <div id="admin-panel-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="lobby-box" style="max-width:520px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 12px;">
+                <h2 style="font-size:1.35rem; color:#fda4af; margin:0; min-width:0; flex:1 1 auto; word-break:break-word;" data-i18n="adminPanelTitle">🛠️ Painel de Reembolso</h2>
+                <button onclick="AdminPanel.close()" style="padding:7px 13px; font-size:0.83rem; flex-shrink:0;" data-i18n="lobbyBackBtn">✕ Voltar</button>
+            </div>
+            <p style="font-size:0.78rem; color:#64748b; margin:2px 0 0;" data-i18n="adminPanelHint">Busque um jogador pelo nome exato de exibição e ajuste o ouro da conta dele. Essa ação é permanente e afeta o saldo salvo na nuvem.</p>
+            <div style="display:flex; gap:8px;">
+                <input id="admin-search-input" class="auth-input" type="text" placeholder="Nome do jogador..." data-i18n-placeholder="adminSearchPlaceholder" style="flex:1; min-width:0;">
+                <button onclick="AdminPanel.search()" style="flex-shrink:0;" data-i18n="adminSearchBtn">🔎 Buscar</button>
+            </div>
+            <div id="admin-search-results" style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto;"></div>
+            <div id="admin-selected-player" class="hidden" style="background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; display:flex; flex-direction:column; gap:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span id="admin-selected-name" style="font-weight:700; color:#f1f5f9;"></span>
+                    <span data-i18n="adminCurrentBalanceLabel" style="font-size:0.75rem; color:#94a3b8;">Saldo atual:</span>
+                    <span id="admin-selected-balance" style="font-weight:800; color:#facc15;"></span>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <input id="admin-amount-input" class="auth-input" type="number" placeholder="Valor (ex: 500)" style="flex:1; min-width:0;">
+                    <button onclick="AdminPanel.adjust(1)" style="flex-shrink:0; background:#14532d; border-color:#166534; color:#86efac;" data-i18n="adminAddBtn">➕ Adicionar</button>
+                    <button onclick="AdminPanel.adjust(-1)" style="flex-shrink:0; background:#7f1d1d; border-color:#991b1b; color:#fca5a5;" data-i18n="adminRemoveBtn">➖ Remover</button>
+                </div>
+                <!-- NOVO: mensagem opcional que acompanha o reembolso — o jogador vê essa
+                     mensagem junto do valor num popup na próxima vez que abrir o jogo. -->
+                <textarea id="admin-message-input" class="auth-input" maxlength="200" rows="2" placeholder="Mensagem para o jogador (opcional)..." data-i18n-placeholder="adminMessagePlaceholder" style="resize:vertical; font-family:inherit;"></textarea>
+                <div id="admin-panel-msg" style="font-size:0.78rem; min-height:1em;"></div>
+            </div>
+        </div>
+    </div>
     <!-- NOVO: Missões Diárias — 3 objetivos sorteados por dia, dando OURO direto (não só XP),
          pra dar um motivo concreto de voltar toda vez que o jogo é aberto. -->
     <div id="missions-screen" class="screen hidden" style="justify-content:center; align-items:center;">
@@ -832,6 +877,13 @@
                 <div class="section-title" data-i18n="profileSectionTitle2">Perfil</div>
                 <button onclick="Engine.openAchievements()" style="width:100%; background:#78350f; border-color:#b45309; color:#fcd34d;" data-i18n="openProfileBtn">🎖️ MEU PERFIL (EMBLEMAS)</button>
             </div>
+            <!-- NOVO: painel administrativo — só fica visível (via JS, checando o e-mail logado)
+                 para a conta de desenvolvedor, e permite ajustar/reembolsar o ouro de qualquer
+                 jogador sem precisar editar o banco de dados manualmente a cada pedido. -->
+            <div id="admin-settings-section" class="config-section hidden">
+                <div class="section-title" data-i18n="adminSectionTitle">🛠️ Administração</div>
+                <button onclick="AdminPanel.open()" style="width:100%; background:#4c0519; border-color:#9f1239; color:#fda4af;" data-i18n="openAdminBtn">🛠️ PAINEL DE REEMBOLSO</button>
+            </div>
             <div class="config-section">
                 <div class="section-title" data-i18n="tutorialSectionTitle">Tutorial</div>
                 <button onclick="Tutorial.open()" style="width:100%; background:#0c4a6e; border-color:#0369a1; color:#bae6fd;" data-i18n="openTutorialBtn">📖 COMO JOGAR</button>
@@ -863,6 +915,10 @@
             <div class="config-section" id="config-bugreport-section">
                 <div class="section-title" data-i18n="bugReportSectionTitle">Encontrou um Erro?</div>
                 <button onclick="Engine.openBugReport()" style="width:100%; background:#78350f; border-color:#92400e; color:#fde68a;" data-i18n="bugReportBtn">🐞 REPORTAR UM ERRO</button>
+            </div>
+            <div class="config-section" id="config-refund-request-section">
+                <div class="section-title" data-i18n="refundRequestSectionTitle">Precisa de Ajuda com Ouro?</div>
+                <button onclick="Engine.openRefundRequest()" style="width:100%; background:#713f12; border-color:#a16207; color:#fde68a;" data-i18n="refundRequestBtn">💰 PEDIR REEMBOLSO</button>
             </div>
             <div class="config-section" id="delete-account-confirm-box" style="border-color:#7f1d1d;">
                 <div class="section-title" style="color:#fca5a5;" data-i18n="dangerZoneTitle">Zona de Perigo</div>
@@ -1043,6 +1099,24 @@
             <button onclick="Engine.submitBugReport()" id="btn-submit-bug-report" style="background:linear-gradient(to right,#d97706,#b45309); color:white; border:none; padding:13px; font-weight:800; border-radius:6px; cursor:pointer;" data-i18n="bugReportSendBtn">ENVIAR RELATÓRIO</button>
         </div>
     </div>
+    <!-- NOVO: pedido de reembolso pelo jogador — usa a mesma Edge Function de e-mail que o
+         Reportar Erro (report-user), com um campo novo (is_gold_request:true) pra diferenciar.
+         Sempre deixa claro que é um PEDIDO, não uma garantia, e envia o idioma atual da
+         interface do jogador junto no e-mail, pra o admin responder no idioma certo. -->
+    <div id="refund-request-screen" class="screen hidden" style="justify-content:center; align-items:center;">
+        <div class="social-box" style="width:440px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 style="font-size:1.2rem; color:#facc15; margin:0;" data-i18n="refundRequestTitle">💰 Pedir Reembolso</h2>
+                <button onclick="Engine.closeRefundRequest()" data-i18n="socialBackBtn">✕ Voltar</button>
+            </div>
+            <p style="font-size:0.78rem; color:#94a3b8; margin:0;" data-i18n="refundRequestHint">Este é um PEDIDO — não uma garantia. O valor final pode ser diferente do solicitado, e o pedido também pode ser recusado, dependendo da análise.</p>
+            <input id="refund-request-amount-input" class="auth-input" type="number" placeholder="Valor desejado (ex: 500)" data-i18n-placeholder="refundRequestAmountPlaceholder">
+            <textarea id="refund-request-reason-input" rows="4" maxlength="1000" placeholder="Explique o motivo do pedido..." data-i18n-placeholder="refundRequestReasonPlaceholder" style="width:100%; background:#1e293b; border:1px solid #334155; border-radius:8px; padding:10px; color:#f8fafc; font-size:0.9rem; resize:vertical; font-family:inherit;"></textarea>
+            <div id="refund-request-error" class="auth-error hidden"></div>
+            <div id="refund-request-success" class="auth-error hidden" style="color:#10b981; background:rgba(16,185,129,0.15);"></div>
+            <button onclick="Engine.submitRefundRequest()" id="btn-submit-refund-request" style="background:linear-gradient(to right,#ca8a04,#a16207); color:white; border:none; padding:13px; font-weight:800; border-radius:6px; cursor:pointer;" data-i18n="refundRequestSendBtn">ENVIAR PEDIDO</button>
+        </div>
+    </div>
     <!-- NOVO: tela de opções de duração do Boost (velocidade / HP extra) -->
     <div id="boost-options-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="lobby-box" style="max-width:380px;">
@@ -1163,6 +1237,7 @@
             achievementsHint: "Ganhe experiência jogando e completando desafios para subir de nível.",
             profileSectionTitle: "🎖️ Meu Perfil", profileSectionTitle2: "Perfil", openProfileBtn: "🎖️ MEU PERFIL (EMBLEMAS)",
             profilePrestigeLabel: "✨ Prestígio", profileInfiniteBestLabel: "⏱ Melhor Marca (Infinito)", profileBetsWonLabel: "🎲 Apostas Vencidas",
+            adminSectionTitle: "🛠️ Administração", openAdminBtn: "🛠️ PAINEL DE REEMBOLSO", adminPanelTitle: "🛠️ Painel de Reembolso", adminPanelHint: "Busque um jogador pelo nome exato de exibição e ajuste o ouro da conta dele. Essa ação é permanente e afeta o saldo salvo na nuvem.", adminSearchPlaceholder: "Nome do jogador...", adminSearchBtn: "🔎 Buscar", adminCurrentBalanceLabel: "Saldo atual:", adminAddBtn: "➕ Adicionar", adminRemoveBtn: "➖ Remover", adminNoResults: "Nenhum jogador encontrado.", adminSearchError: "Erro ao buscar. Tente novamente.", adminInvalidAmount: "Digite um valor válido maior que zero.", adminAdjustSuccess: "Ajuste de ${amount} aplicado. Novo saldo: ${balance}.", adminAdjustError: "Erro ao ajustar o saldo. Tente novamente.", adminOnlineTag: "online agora", adminOnlineWarning: "Jogador online: ele vai receber o reembolso em tempo real (popup na tela). Risco de sobrescrita é bem baixo, mas existe numa janela muito curta.", adminMessagePlaceholder: "Mensagem para o jogador (opcional)...", refundModalOkBtn: "OK, entendi!", refundModalTitleAdded: "Você recebeu um reembolso!", refundModalTitleRemoved: "Seu saldo foi ajustado",
             levelUpToast: "Você subiu para o nível {level}!", achievementUnlockedToast: "Conquista desbloqueada: {name}",
             ach_first_win_name: "Primeira Vitória", ach_first_win_desc: "Vença 1 partida.",
             ach_veteran_name: "Veterano", ach_veteran_desc: "Jogue 10 partidas.",
@@ -1177,6 +1252,7 @@
             modeLabelOpenWorld: "MUNDO ABERTO", modeLabelBoss: "Chefe Nível", modeLabelWave: "Onda",
             hideoutAlertTitle: "Esconderijo Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Sair: E",
             exitMatchBtn: "Sair da Partida", exitMatchConfirmMsg: "Tem certeza que quer sair da partida e voltar pro menu? Seu progresso nesta partida será perdido.",
+            exitInfiniteConfirmMsg: "No Modo Infinito o ouro só é creditado na sua conta quando você MORRE (fim da run) — sair agora pelo menu descarta todo o ouro que você já juntou nesta tentativa. Quer sair mesmo assim?",
             pauseMatchBtn: "Pausar", pauseTitle: "PARTIDA PAUSADA", pauseResumeBtn: "▶ RETOMAR", pauseExitBtn: "🚪 SAIR DA PARTIDA", modeInfinito: "Jogo Infinito", soloLabelInfinito: "Jogo Infinito", modeLabelInfinito: "Infinito - Round", infiniteSurvivedLabel: "Você sobreviveu {time} e alcançou o round {round}.", infiniteKillsLabel: "Você derrotou {kills} inimigo(s).", betKillsLabel: "Inimigos derrotados na partida: {kills}.", powerupPickup_shield: "Power-up: Escudo!", powerupPickup_fury: "Power-up: Fúria (dano dobrado)!", powerupPickup_speed: "Power-up: Velocidade!", betTitle: "Aposta Pré-Partida", betDesc: "Aposte parte do seu ouro antes de começar. Se vencer, dobra. Se perder, some. A partida fica mais difícil enquanto a aposta estiver ativa.", betUsageLabel: "Usadas hoje: {used}/{max}", betLimitReached: "Limite diário de apostas atingido.", betPotentialWin: "Se vencer: +${amount}", betWonLabel: "Aposta vencida: +${amount}", betLostLabel: "Aposta perdida: -${amount}", betActiveHud: "🎲 Aposta ativa: ${amount} (pode virar ${potential})",
             chatOptionsBtn: "Mais opções", chatClearOption: "🗑️ Limpar conversa", chatBlockOption: "🚫 Bloquear jogador", chatUnblockOption: "✓ Desbloquear jogador", chatReportOption: "🚩 Denunciar jogador",
             chatClearConfirmMsg: "Tem certeza que quer apagar todas as mensagens desta conversa? Isso não pode ser desfeito.", chatClearedToast: "Conversa limpa.",
@@ -1192,6 +1268,7 @@
             reportSendBtn: "ENVIAR DENÚNCIA", reportSentMsg: "Denúncia enviada. Obrigado por ajudar a manter o jogo seguro!", reportSendErrorMsg: "Erro ao enviar denúncia. Tente de novo.",
             bugReportSectionTitle: "Encontrou um Erro?", bugReportBtn: "🐞 REPORTAR UM ERRO", bugReportTitle: "🐞 Reportar um Erro", bugReportDescPlaceholder: "Descreva o erro que você encontrou...", bugReportDescRequired: "Descreva o erro antes de enviar.",
             bugReportSendBtn: "ENVIAR RELATÓRIO", bugReportSentMsg: "Relatório de erro enviado. Obrigado por ajudar a melhorar o jogo!", bugReportSendErrorMsg: "Erro ao enviar o relatório. Tente de novo.",
+            refundRequestSectionTitle: "Precisa de Ajuda com Ouro?", refundRequestBtn: "💰 PEDIR REEMBOLSO", refundRequestTitle: "💰 Pedir Reembolso", refundRequestHint: "Este é um PEDIDO — não uma garantia. O valor final pode ser diferente do solicitado, e o pedido também pode ser recusado, dependendo da análise.", refundRequestAmountPlaceholder: "Valor desejado (ex: 500)", refundRequestReasonPlaceholder: "Explique o motivo do pedido...", refundRequestAmountRequired: "Digite o valor que você gostaria de receber.", refundRequestReasonRequired: "Explique o motivo do pedido antes de enviar.", refundRequestSendBtn: "ENVIAR PEDIDO", refundRequestSentMsg: "Pedido de reembolso enviado! Você será avisado por aqui se ele for aceito.", refundRequestSendErrorMsg: "Erro ao enviar o pedido. Tente de novo.",
             boostOptionsBtn: "Opções", boostRemainingLabel: "Restante", boostNoneActiveLabel: "Nenhum boost ativo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Jogadores",
             socialSearchTitle: "🔎 Jogadores", socialBackBtn: "✕ Voltar",
@@ -1248,13 +1325,13 @@
                 stat_hp2: { name: "Blindagem Reforçada", desc: "+40 HP Máximo para o usuário." },
                 stat_spd: { name: "Propulsor Cinético", desc: "+0.5 Velocidade de movimento." },
                 stat_spd2: { name: "Botas Quânticas", desc: "+0.8 Velocidade de movimento." },
-                wpn_pistol: { name: "Pistola Veloz", desc: "Disparos rapidíssimos com dano x0.9." },
-                wpn_laser: { name: "Canhão Laser Bolt", desc: "Disparos mais velozes e dano x1.3." },
-                wpn_plasma: { name: "Blaster de Plasma", desc: "Disparos lentos com dano devastador x1.6." },
-                wpn_cannon: { name: "Cano Devastador", desc: "Disparos muito lentos com dano brutal x2.0." },
-                wpn_smg: { name: "Submetralhadora Fúria", desc: "Disparos extremamente rápidos com dano x0.6." },
-                wpn_sniper: { name: "Rifle Sniper Órbita", desc: "Disparos muito lentos e precisos com dano x2.8." },
-                wpn_railgun: { name: "Railgun Singularidade", desc: "Disparos raríssimos com dano devastador x3.4." },
+                wpn_pistol: { name: "Pistola Veloz", desc: "Disparos rapidíssimos com dano x0.87." },
+                wpn_laser: { name: "Canhão Laser Bolt", desc: "Disparos mais velozes e dano x1.8." },
+                wpn_plasma: { name: "Blaster de Plasma", desc: "Disparos lentos com dano devastador x4.4." },
+                wpn_cannon: { name: "Cano Devastador", desc: "Disparos muito lentos com dano brutal x7.65." },
+                wpn_smg: { name: "Submetralhadora Fúria", desc: "Disparos extremamente rápidos com dano x0.62." },
+                wpn_sniper: { name: "Rifle Sniper Órbita", desc: "Disparos muito lentos e precisos com dano x13." },
+                wpn_railgun: { name: "Railgun Singularidade", desc: "Disparos raríssimos com o maior dano do jogo, x21." },
                 itm_pot: { name: "Nanocápsula de Cura", desc: "Usa em jogo para recuperar 50 de vida." },
                 itm_pot3: { name: "Pacote de Cura (x3)", desc: "Usa em jogo: 3 Nanocápsulas de uma vez, +50 de vida cada." },
                 itm_shd: { name: "Bateria de Escudo", desc: "Usa em jogo para ficar invulnerável por 2s." },
@@ -1328,7 +1405,7 @@
             tut21Title: "Power-ups", tut21Body: "Durante a partida, power-ups temporários aparecem sozinhos no mapa: <b>🛡 Escudo</b> (fica invulnerável), <b>⚡ Fúria</b> (dano dobrado) e <b>➤ Velocidade</b>. Toque neles para ativar o efeito por alguns segundos!", tut22Title: "Pausar", tut22Body: "Use o botão <b>⏸</b> do lado do botão de sair (ou a tecla <b>P</b> no PC) para pausar a partida a qualquer momento. Não é possível pausar em partidas online.", tut23Title: "Aposta Pré-Partida", tut23Body: "No modo <b>Caça ao Ouro</b>, você pode apostar parte do seu ouro antes de começar (até $200). Se vencer, sua aposta dobra — se perder, ela some. A partida fica mais difícil enquanto a aposta estiver ativa, e você só pode apostar 3 vezes por dia.", tut24Title: "Novidades: Combos, Títulos e Desafios", tut24Body: "Fique de olho nas novidades: o <b>Chefe</b> agora é bem mais forte; algumas plataformas se movem sozinhas (lados ou cima/baixo); matar vários inimigos rápido sem tomar dano dá um <b>combo de ouro</b>; bater sua própria marca no <b>Modo Infinito</b> concede um selo de <b>Prestígio</b> permanente; títulos como <b>Sobrevivente Lendário</b> (1000+ segundos no Infinito) e <b>Apostador de Sorte</b> (10 apostas vencidas) aparecem ao lado do seu nome; em partidas online de 3-4 jogadores, quem morre agora pode assistir o resto como <b>espectador</b>; e novas <b>missões diárias</b> foram adicionadas. Você pode ver todos os seus emblemas e recordes a qualquer momento em <b>Configurações → Meu Perfil</b>.",
 
             tut12Title: "Escolha seu Herói", tut12Body: "Antes de começar, escolha um <b>arquétipo</b>: Hero (balanceado), Vilan (tiro triplo em leque) ou Killer (veloz e letal). Cada um joga de um jeito diferente!",
-            tut13Title: "Modos de Jogo", tut13Body: "Escolha entre <b>Horda Solo</b>, <b>Caça ao Ouro</b>, <b>Modo Titã</b> (inimigo super forte), <b>Modo Chefe</b> (boss) ou <b>Jogo Infinito</b> (a dificuldade sobe sem parar até você perder, e o ouro que você ganha depende de até onde sobreviveu). Também dá pra jogar <b>Duelo 1v1 Local</b>, com dois jogadores no mesmo teclado (P1 e P2). Você também pode ativar o <b>Mundo Aberto</b> para jogar em um mapa infinito no modo solo.",
+            tut13Title: "Modos de Jogo", tut13Body: "Escolha entre <b>Horda Solo</b>, <b>Caça ao Ouro</b>, <b>Modo Titã</b> (inimigo super forte), <b>Modo Chefe</b> (boss) ou <b>Jogo Infinito</b>. No <b>Jogo Infinito</b>, a dificuldade sobe sem parar e <b>o ouro só é creditado na sua conta quando você morre</b> — se você sair da partida antes disso, perde todo o ouro coletado na tentativa. Você também pode ativar o <b>Mundo Aberto</b> para jogar em um mapa infinito no modo solo, ou desafiar um <b>Bot (IA)</b> num duelo.",
             tut20Title: "Contra Inteligência Artificial", tut20Body: "No menu, use o botão <b>🤖 Jogar Contra Inteligência Artificial</b> para enfrentar um bot em um duelo 1v1. Escolha a dificuldade (Fácil, Médio, Difícil ou Brutal): quanto mais difícil, mais esperto, rápido e preciso o bot fica, e maior a recompensa se você vencer. A partida acaba quando um dos dois for derrotado, e a recompensa final depende só do resultado (vitória ou derrota), não do ouro coletado na partida.",
             aiOpponentLabel: "IA",
             vsAiBtn: "🤖 Jogar Contra Inteligência Artificial", vsAiChooseDiff: "Escolha a Dificuldade da IA:",
@@ -1345,6 +1422,7 @@
             tut16Title: "Esconderijo Secreto", tut16Body: "Encontre o esconderijo escondido no mapa e pressione <b>E</b> para entrar (no celular, toque no botão <b>🚪</b>). É um bom lugar pra se proteger dos inimigos.",
             tut17Title: "Seguir Jogadores", tut17Body: "Além de conversar, você pode <b>seguir</b> outros jogadores na aba <b>⭐ Seguindo</b> da busca de jogadores, pra acompanhar quem você mais gosta de jogar junto.",
             tut18Title: "Reportar um Erro", tut18Body: "Encontrou algum bug? Vá em Configurações e use o botão <b>🐞 REPORTAR UM ERRO</b> para nos avisar. Isso ajuda a melhorar o jogo!",
+            tut25Title: "Pedir Reembolso de Ouro", tut25Body: "Perdeu ouro por algum bug ou situação injusta? Em Configurações, use o botão <b>💰 PEDIR REEMBOLSO</b> pra explicar o motivo e informar quanto gostaria de receber. É um pedido, não uma garantia — o valor final e a aprovação dependem de análise.",
             tut19Title: "Comprando e Equipando Armas", tut19Body: "Compre armas na loja com seu ouro — quanto mais forte, mais cara! Depois de comprar, vá em <b>Arma Equipada</b> na tela inicial e selecione qual arma comprada você quer usar na partida.",
             tutSvgMove: "mover", tutSvgJump: "pular", tutSvgAttack: "atacar", tutSvgSpecial: "especial",
             tutSvgMobileMove1: "arraste o dedo", tutSvgMobileMove2: "pra mover",
@@ -1426,6 +1504,7 @@
             achievementsHint: "Earn experience by playing and completing challenges to level up.",
             profileSectionTitle: "🎖️ My Profile", profileSectionTitle2: "Profile", openProfileBtn: "🎖️ MY PROFILE (BADGES)",
             profilePrestigeLabel: "✨ Prestige", profileInfiniteBestLabel: "⏱ Best Record (Infinite)", profileBetsWonLabel: "🎲 Bets Won",
+            adminSectionTitle: "🛠️ Administration", openAdminBtn: "🛠️ REFUND PANEL", adminPanelTitle: "🛠️ Refund Panel", adminPanelHint: "Search for a player by their exact display name and adjust their account gold. This action is permanent and affects the balance saved in the cloud.", adminSearchPlaceholder: "Player name...", adminSearchBtn: "🔎 Search", adminCurrentBalanceLabel: "Current balance:", adminAddBtn: "➕ Add", adminRemoveBtn: "➖ Remove", adminNoResults: "No players found.", adminSearchError: "Search error. Try again.", adminInvalidAmount: "Enter a valid amount greater than zero.", adminAdjustSuccess: "Adjustment of ${amount} applied. New balance: ${balance}.", adminAdjustError: "Error adjusting balance. Try again.", adminOnlineTag: "online now", adminOnlineWarning: "Player online: they'll receive the refund in real time (popup on screen). Overwrite risk is very low, but exists in a very short window.", adminMessagePlaceholder: "Message for the player (optional)...", refundModalOkBtn: "OK, got it!", refundModalTitleAdded: "You received a refund!", refundModalTitleRemoved: "Your balance was adjusted",
             levelUpToast: "You leveled up to level {level}!", achievementUnlockedToast: "Achievement unlocked: {name}",
             ach_first_win_name: "First Victory", ach_first_win_desc: "Win 1 match.",
             ach_veteran_name: "Veteran", ach_veteran_desc: "Play 10 matches.",
@@ -1440,6 +1519,7 @@
             modeLabelOpenWorld: "OPEN WORLD", modeLabelBoss: "Boss Level", modeLabelWave: "Wave",
             hideoutAlertTitle: "Secret Hideout", hideoutAlertEnter: "Enter: E", hideoutHudExit: "Exit: E",
             exitMatchBtn: "Exit Match", exitMatchConfirmMsg: "Are you sure you want to exit the match and return to the menu? Your progress in this match will be lost.",
+            exitInfiniteConfirmMsg: "In Infinite Mode, gold is only credited to your account when you DIE (end of run) — leaving now through the menu discards all the gold you've collected this attempt. Exit anyway?",
             pauseMatchBtn: "Pause", pauseTitle: "MATCH PAUSED", pauseResumeBtn: "▶ RESUME", pauseExitBtn: "🚪 EXIT MATCH", modeInfinito: "Infinite Mode", soloLabelInfinito: "Infinite Mode", modeLabelInfinito: "Infinite - Round", infiniteSurvivedLabel: "You survived {time} and reached round {round}.", infiniteKillsLabel: "You defeated {kills} enemy(ies).", betKillsLabel: "Enemies defeated in the match: {kills}.", powerupPickup_shield: "Power-up: Shield!", powerupPickup_fury: "Power-up: Fury (double damage)!", powerupPickup_speed: "Power-up: Speed!", betTitle: "Pre-Match Bet", betDesc: "Bet part of your gold before starting. Win and it doubles. Lose and it is gone. The match gets harder while a bet is active.", betUsageLabel: "Used today: {used}/{max}", betLimitReached: "Daily bet limit reached.", betPotentialWin: "If you win: +${amount}", betWonLabel: "Bet won: +${amount}", betLostLabel: "Bet lost: -${amount}", betActiveHud: "🎲 Active bet: ${amount} (could become ${potential})",
             chatOptionsBtn: "More options", chatClearOption: "🗑️ Clear conversation", chatBlockOption: "🚫 Block player", chatUnblockOption: "✓ Unblock player", chatReportOption: "🚩 Report player", lobbyConnecting: "🔌 Connecting...", lobbyCodeExpired: "🚫 Expired code. Ask for a new invite.",
             chatClearConfirmMsg: "Are you sure you want to delete all messages in this conversation? This cannot be undone.", chatClearedToast: "Conversation cleared.",
@@ -1455,6 +1535,7 @@
             reportSendBtn: "SEND REPORT", reportSentMsg: "Report sent. Thanks for helping keep the game safe!", reportSendErrorMsg: "Error sending report. Try again.",
             bugReportSectionTitle: "Found a Bug?", bugReportBtn: "🐞 REPORT A BUG", bugReportTitle: "🐞 Report a Bug", bugReportDescPlaceholder: "Describe the bug you found...", bugReportDescRequired: "Describe the bug before sending.",
             bugReportSendBtn: "SEND REPORT", bugReportSentMsg: "Bug report sent. Thanks for helping improve the game!", bugReportSendErrorMsg: "Error sending the report. Try again.",
+            refundRequestSectionTitle: "Need Help With Gold?", refundRequestBtn: "💰 REQUEST REFUND", refundRequestTitle: "💰 Request Refund", refundRequestHint: "This is a REQUEST — not a guarantee. The final amount may differ from what you asked for, and the request may also be denied, depending on the review.", refundRequestAmountPlaceholder: "Desired amount (e.g. 500)", refundRequestReasonPlaceholder: "Explain the reason for the request...", refundRequestAmountRequired: "Enter the amount you'd like to receive.", refundRequestReasonRequired: "Explain the reason for the request before sending.", refundRequestSendBtn: "SEND REQUEST", refundRequestSentMsg: "Refund request sent! You'll be notified here if it's accepted.", refundRequestSendErrorMsg: "Error sending the request. Try again.",
             boostOptionsBtn: "Options", boostRemainingLabel: "Remaining", boostNoneActiveLabel: "No active boost", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Players",
             socialSearchTitle: "🔎 Players", socialBackBtn: "✕ Back",
@@ -1510,13 +1591,13 @@
                 stat_hp2: { name: "Reinforced Armor", desc: "+40 Max HP for the user." },
                 stat_spd: { name: "Kinetic Booster", desc: "+0.5 Movement speed." },
                 stat_spd2: { name: "Quantum Boots", desc: "+0.8 Movement speed." },
-                wpn_pistol: { name: "Swift Pistol", desc: "Very fast shots with x0.9 damage." },
-                wpn_laser: { name: "Laser Bolt Cannon", desc: "Faster shots with x1.3 damage." },
-                wpn_plasma: { name: "Plasma Blaster", desc: "Slow shots with devastating x1.6 damage." },
-                wpn_cannon: { name: "Devastator Cannon", desc: "Very slow shots with brutal x2.0 damage." },
-                wpn_smg: { name: "Fury SMG", desc: "Extremely fast shots with x0.6 damage." },
-                wpn_sniper: { name: "Orbit Sniper Rifle", desc: "Very slow, precise shots with x2.8 damage." },
-                wpn_railgun: { name: "Singularity Railgun", desc: "Very rare shots with devastating x3.4 damage." },
+                wpn_pistol: { name: "Swift Pistol", desc: "Very fast shots with x0.87 damage." },
+                wpn_laser: { name: "Laser Bolt Cannon", desc: "Faster shots with x1.8 damage." },
+                wpn_plasma: { name: "Plasma Blaster", desc: "Slow shots with devastating x4.4 damage." },
+                wpn_cannon: { name: "Devastator Cannon", desc: "Very slow shots with brutal x7.65 damage." },
+                wpn_smg: { name: "Fury SMG", desc: "Extremely fast shots with x0.62 damage." },
+                wpn_sniper: { name: "Orbit Sniper Rifle", desc: "Very slow, precise shots with x13 damage." },
+                wpn_railgun: { name: "Singularity Railgun", desc: "Very rare shots with the highest damage in the game, x21." },
                 itm_pot: { name: "Healing Nanocapsule", desc: "Use in-game to restore 50 HP." },
                 itm_pot3: { name: "Healing Pack (x3)", desc: "Use in-game: 3 Nanocapsules at once, +50 HP each." },
                 itm_shd: { name: "Shield Battery", desc: "Use in-game to become invulnerable for 2s." },
@@ -1590,7 +1671,7 @@
             tut21Title: "Power-ups", tut21Body: "During the match, temporary power-ups appear randomly on the map: <b>🛡 Shield</b> (become invulnerable), <b>⚡ Fury</b> (double damage), and <b>➤ Speed</b>. Touch them to activate the effect for a few seconds!", tut22Title: "Pause", tut22Body: "Use the <b>⏸</b> button next to the exit button (or the <b>P</b> key on PC) to pause the match anytime. Pausing is not available in online matches.", tut23Title: "Pre-Match Bet", tut23Body: "In <b>Gold Rush</b> mode, you can bet part of your gold before starting (up to $200). Win and your bet doubles — lose and it’s gone. The match gets harder while a bet is active, and you can only bet 3 times per day.", tut24Title: "New: Combos, Titles & Challenges", tut24Body: "Check out what’s new: the <b>Boss</b> is now much tougher; some platforms move on their own (sideways or up/down); killing several enemies fast without taking damage gives a <b>gold combo</b>; beating your own <b>Infinite Mode</b> record grants a permanent <b>Prestige</b> badge; titles like <b>Legendary Survivor</b> (1000+ seconds in Infinite) and <b>Lucky Gambler</b> (10 bets won) show next to your name; in 3-4 player online matches, anyone who dies can now <b>spectate</b> the rest of the match; and new <b>daily missions</b> were added. You can check all your badges and records anytime under <b>Settings → My Profile</b>.",
 
             tut12Title: "Choose Your Hero", tut12Body: "Before starting, pick an <b>archetype</b>: Hero (balanced), Vilan (triple spread shot) or Killer (fast and lethal). Each one plays differently!",
-            tut13Title: "Game Modes", tut13Body: "Choose between <b>Solo Horde</b>, <b>Gold Rush</b>, <b>Titan Mode</b> (super strong enemy), <b>Boss Mode</b>, or <b>Infinite Mode</b> (difficulty keeps rising until you die, and the gold you earn depends on how far you survived). You can also play <b>Local 1v1 Duel</b>, with two players on the same keyboard (P1 and P2). You can also enable <b>Open World</b> to play on an infinite map in solo mode.",
+            tut13Title: "Game Modes", tut13Body: "Choose between <b>Solo Horde</b>, <b>Gold Rush</b>, <b>Titan Mode</b> (super strong enemy), <b>Boss Mode</b>, or <b>Infinite Mode</b>. In <b>Infinite Mode</b>, difficulty keeps rising and <b>gold is only credited to your account when you die</b> — if you exit the match before that, you lose all the gold collected in that attempt. You can also enable <b>Open World</b> to play on an infinite map in solo mode, or challenge a <b>Bot (AI)</b> in a duel.",
             tut20Title: "Vs Artificial Intelligence", tut20Body: "In the menu, use the <b>🤖 Play Against Artificial Intelligence</b> button to face a bot in a 1v1 duel. Pick the difficulty (Easy, Medium, Hard or Brutal): the harder it is, the smarter, faster and more accurate the bot gets, and the bigger the reward if you win. The match ends when one of you is defeated, and the final reward depends only on the result (win or loss), not on the gold collected during the match.",
             aiOpponentLabel: "AI",
             vsAiBtn: "🤖 Play Against Artificial Intelligence", vsAiChooseDiff: "Choose the AI Difficulty:",
@@ -1607,6 +1688,7 @@
             tut16Title: "Secret Hideout", tut16Body: "Find the hidden hideout on the map and press <b>E</b> to enter it (on mobile, tap the <b>🚪</b> button). It's a good spot to take cover from enemies.",
             tut17Title: "Following Players", tut17Body: "Besides chatting, you can <b>follow</b> other players from the <b>⭐ Following</b> tab in player search, to keep track of who you like playing with.",
             tut18Title: "Report a Bug", tut18Body: "Found a bug? Go to Settings and use the <b>🐞 REPORT A BUG</b> button to let us know. It helps improve the game!",
+            tut25Title: "Request a Gold Refund", tut25Body: "Lost gold due to a bug or unfair situation? In Settings, use the <b>💰 REQUEST REFUND</b> button to explain why and how much you'd like to receive. It's a request, not a guarantee — the final amount and approval depend on review.",
             tut19Title: "Buying and Equipping Weapons", tut19Body: "Buy weapons in the shop with your gold — the stronger, the pricier! After buying, go to <b>Equipped Weapon</b> on the main screen and select which purchased weapon you want to use in the match.",
             tutSvgMove: "move", tutSvgJump: "jump", tutSvgAttack: "attack", tutSvgSpecial: "special",
             tutSvgMobileMove1: "drag your finger", tutSvgMobileMove2: "to move",
@@ -1688,6 +1770,7 @@
             achievementsHint: "Sammle Erfahrung durch Spielen und das Abschließen von Herausforderungen, um aufzusteigen.",
             profileSectionTitle: "🎖️ Mein Profil", profileSectionTitle2: "Profil", openProfileBtn: "🎖️ MEIN PROFIL (ABZEICHEN)",
             profilePrestigeLabel: "✨ Prestige", profileInfiniteBestLabel: "⏱ Bester Rekord (Unendlich)", profileBetsWonLabel: "🎲 Gewonnene Wetten",
+            adminSectionTitle: "🛠️ Verwaltung", openAdminBtn: "🛠️ ERSTATTUNGSPANEL", adminPanelTitle: "🛠️ Erstattungspanel", adminPanelHint: "Suche einen Spieler anhand seines genauen Anzeigenamens und passe sein Gold-Guthaben an. Diese Aktion ist dauerhaft und wirkt sich auf den in der Cloud gespeicherten Kontostand aus.", adminSearchPlaceholder: "Spielername...", adminSearchBtn: "🔎 Suchen", adminCurrentBalanceLabel: "Aktueller Kontostand:", adminAddBtn: "➕ Hinzufügen", adminRemoveBtn: "➖ Entfernen", adminNoResults: "Keine Spieler gefunden.", adminSearchError: "Suchfehler. Versuche es erneut.", adminInvalidAmount: "Gib einen gültigen Betrag größer als null ein.", adminAdjustSuccess: "Anpassung von ${amount} angewendet. Neuer Kontostand: ${balance}.", adminAdjustError: "Fehler beim Anpassen des Kontostands. Versuche es erneut.", adminOnlineTag: "gerade online", adminOnlineWarning: "Spieler online: Er erhält die Erstattung in Echtzeit (Popup am Bildschirm). Das Überschreibungsrisiko ist sehr gering, besteht aber in einem sehr kurzen Zeitfenster.", adminMessagePlaceholder: "Nachricht an den Spieler (optional)...", refundModalOkBtn: "OK, verstanden!", refundModalTitleAdded: "Du hast eine Erstattung erhalten!", refundModalTitleRemoved: "Dein Kontostand wurde angepasst",
             levelUpToast: "Du bist auf Level {level} aufgestiegen!", achievementUnlockedToast: "Erfolg freigeschaltet: {name}",
             ach_first_win_name: "Erster Sieg", ach_first_win_desc: "Gewinne 1 Partie.",
             ach_veteran_name: "Veteran", ach_veteran_desc: "Spiele 10 Partien.",
@@ -1702,6 +1785,7 @@
             modeLabelOpenWorld: "OFFENE WELT", modeLabelBoss: "Boss-Level", modeLabelWave: "Welle",
             hideoutAlertTitle: "Geheimes Versteck", hideoutAlertEnter: "Eintreten: E", hideoutHudExit: "Verlassen: E",
             exitMatchBtn: "Partie verlassen", exitMatchConfirmMsg: "Bist du sicher, dass du die Partie verlassen und zum Menü zurückkehren willst? Dein Fortschritt in dieser Partie geht verloren.",
+            exitInfiniteConfirmMsg: "Im Unendlichen Modus wird Gold erst deinem Konto gutgeschrieben, wenn du STIRBST (Ende des Laufs) — jetzt über das Menü zu verlassen verwirft das gesamte Gold dieses Versuchs. Trotzdem verlassen?",
             pauseMatchBtn: "Pausieren", pauseTitle: "PARTIE PAUSIERT", pauseResumeBtn: "▶ FORTSETZEN", pauseExitBtn: "🚪 PARTIE VERLASSEN", modeInfinito: "Unendlicher Modus", soloLabelInfinito: "Unendlicher Modus", modeLabelInfinito: "Unendlich - Runde", infiniteSurvivedLabel: "Du hast {time} überlebt und Runde {round} erreicht.", infiniteKillsLabel: "Du hast {kills} Gegner besiegt.", betKillsLabel: "Besiegte Gegner in der Partie: {kills}.", powerupPickup_shield: "Power-up: Schild!", powerupPickup_fury: "Power-up: Wut (doppelter Schaden)!", powerupPickup_speed: "Power-up: Geschwindigkeit!", betTitle: "Wette vor dem Spiel", betDesc: "Setze einen Teil deines Goldes, bevor du startest. Gewinnst du, verdoppelt es sich. Verlierst du, ist es weg. Die Partie wird schwieriger, solange eine Wette aktiv ist.", betUsageLabel: "Heute genutzt: {used}/{max}", betLimitReached: "Tägliches Wettlimit erreicht.", betPotentialWin: "Bei Sieg: +${amount}", betWonLabel: "Wette gewonnen: +${amount}", betLostLabel: "Wette verloren: -${amount}", betActiveHud: "🎲 Aktive Wette: ${amount} (könnte ${potential} werden)",
             chatOptionsBtn: "Weitere Optionen", chatClearOption: "🗑️ Unterhaltung löschen", chatBlockOption: "🚫 Spieler blockieren", chatUnblockOption: "✓ Spieler entsperren", chatReportOption: "🚩 Spieler melden", chatNewGroupBtn: "➕ Neue Gruppe erstellen", chatNewGroupTitle: "➕ Neue Gruppe", chatGroupNamePlaceholder: "Gruppenname", chatCreateGroupBtn: "GRUPPE ERSTELLEN", chatGroupNameRequired: "Gib einen Namen für die Gruppe ein.", chatGroupNeedMembers: "Wähle mindestens 1 Person aus.", chatGroupCreateError: "Fehler beim Erstellen der Gruppe.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Zum Spielen einladen", chatInviteSentToast: "Einladung im Chat gesendet!", chatInviteCreatingRoom: "Raum wird erstellt...", chatInviteCardTitle: "🎮 Spieleinladung", chatInviteJoinBtn: "Am Match teilnehmen", chatGroupNoFollowingHint: "Du musst jemandem folgen, um eine Gruppe zu erstellen.", lobbyConnecting: "🔌 Verbinde...", lobbyCodeExpired: "🚫 Code abgelaufen. Bitte eine neue Einladung anfordern.",
             chatClearConfirmMsg: "Möchtest du wirklich alle Nachrichten dieser Unterhaltung löschen? Dies kann nicht rückgängig gemacht werden.", chatClearedToast: "Unterhaltung gelöscht.",
@@ -1712,6 +1796,7 @@
             reportSendBtn: "MELDUNG SENDEN", reportSentMsg: "Meldung gesendet. Danke, dass du hilfst, das Spiel sicher zu halten!", reportSendErrorMsg: "Fehler beim Senden der Meldung. Versuch es erneut.",
             bugReportSectionTitle: "Einen Fehler gefunden?", bugReportBtn: "🐞 FEHLER MELDEN", bugReportTitle: "🐞 Fehler melden", bugReportDescPlaceholder: "Beschreibe den gefundenen Fehler...", bugReportDescRequired: "Beschreibe den Fehler, bevor du sendest.",
             bugReportSendBtn: "BERICHT SENDEN", bugReportSentMsg: "Fehlerbericht gesendet. Danke, dass du hilfst, das Spiel zu verbessern!", bugReportSendErrorMsg: "Fehler beim Senden des Berichts. Versuch es erneut.",
+            refundRequestSectionTitle: "Brauchst du Hilfe mit Gold?", refundRequestBtn: "💰 ERSTATTUNG ANFORDERN", refundRequestTitle: "💰 Erstattung Anfordern", refundRequestHint: "Dies ist eine ANFRAGE — keine Garantie. Der endgültige Betrag kann vom angeforderten abweichen, und die Anfrage kann je nach Prüfung auch abgelehnt werden.", refundRequestAmountPlaceholder: "Gewünschter Betrag (z. B. 500)", refundRequestReasonPlaceholder: "Erkläre den Grund für die Anfrage...", refundRequestAmountRequired: "Gib den Betrag ein, den du erhalten möchtest.", refundRequestReasonRequired: "Erkläre den Grund für die Anfrage, bevor du sendest.", refundRequestSendBtn: "ANFRAGE SENDEN", refundRequestSentMsg: "Erstattungsanfrage gesendet! Du wirst hier benachrichtigt, falls sie akzeptiert wird.", refundRequestSendErrorMsg: "Fehler beim Senden der Anfrage. Versuch es erneut.",
             boostOptionsBtn: "Optionen", boostRemainingLabel: "Verbleibend", boostNoneActiveLabel: "Kein aktiver Boost", boostMinutesLabel: "Min",
             socialPlayersBtn: "🔎 Spieler",
             socialSearchTitle: "🔎 Spieler", socialBackBtn: "✕ Zurück",
@@ -1767,13 +1852,13 @@
                 stat_hp2: { name: "Verstärkte Panzerung", desc: "+40 maximale HP." },
                 stat_spd: { name: "Kinetischer Antrieb", desc: "+0.5 Bewegungsgeschwindigkeit." },
                 stat_spd2: { name: "Quantenstiefel", desc: "+0.8 Bewegungsgeschwindigkeit." },
-                wpn_pistol: { name: "Schnelle Pistole", desc: "Sehr schnelle Schüsse mit x0.9 Schaden." },
-                wpn_laser: { name: "Laser-Bolzen-Kanone", desc: "Schnellere Schüsse mit x1.3 Schaden." },
-                wpn_plasma: { name: "Plasma-Blaster", desc: "Langsame Schüsse mit x1.6 Schaden." },
-                wpn_cannon: { name: "Verwüster-Kanone", desc: "Sehr langsame Schüsse mit x2.0 Schaden." },
-                wpn_smg: { name: "Fury-MP", desc: "Extrem schnelle Schüsse mit x0.6 Schaden." },
-                wpn_sniper: { name: "Orbit-Scharfschützengewehr", desc: "Sehr langsame, präzise Schüsse mit x2.8 Schaden." },
-                wpn_railgun: { name: "Singularitäts-Railgun", desc: "Sehr seltene Schüsse mit verheerendem x3.4 Schaden." },
+                wpn_pistol: { name: "Schnelle Pistole", desc: "Sehr schnelle Schüsse mit x0.87 Schaden." },
+                wpn_laser: { name: "Laser-Bolzen-Kanone", desc: "Schnellere Schüsse mit x1.8 Schaden." },
+                wpn_plasma: { name: "Plasma-Blaster", desc: "Langsame Schüsse mit x4.4 Schaden." },
+                wpn_cannon: { name: "Verwüster-Kanone", desc: "Sehr langsame Schüsse mit x7.65 Schaden." },
+                wpn_smg: { name: "Fury-MP", desc: "Extrem schnelle Schüsse mit x0.62 Schaden." },
+                wpn_sniper: { name: "Orbit-Scharfschützengewehr", desc: "Sehr langsame, präzise Schüsse mit x13 Schaden." },
+                wpn_railgun: { name: "Singularitäts-Railgun", desc: "Sehr seltene Schüsse mit dem höchsten Schaden im Spiel, x21." },
                 itm_pot: { name: "Heil-Nanokapsel", desc: "Im Spiel verwenden, 50 Leben wiederherstellen." },
                 itm_pot3: { name: "Heilpaket (x3)", desc: "3 Nanokapseln auf einmal, je +50 Leben." },
                 itm_shd: { name: "Schildbatterie", desc: "2s unverwundbar werden." },
@@ -1847,7 +1932,7 @@
             tut21Title: "Power-ups", tut21Body: "Während der Partie erscheinen zufällig temporäre Power-ups auf der Karte: <b>🛡 Schild</b> (unverwundbar werden), <b>⚡ Wut</b> (doppelter Schaden) und <b>➤ Geschwindigkeit</b>. Berühre sie, um den Effekt für ein paar Sekunden zu aktivieren!", tut22Title: "Pausieren", tut22Body: "Nutze die Schaltfläche <b>⏸</b> neben dem Verlassen-Button (oder die Taste <b>P</b> am PC), um die Partie jederzeit zu pausieren. In Online-Partien ist Pausieren nicht möglich.", tut23Title: "Wette vor dem Spiel", tut23Body: "Im Modus <b>Goldrausch</b> kannst du vor dem Start einen Teil deines Goldes setzen (bis zu $200). Gewinnst du, verdoppelt sich deine Wette — verlierst du, ist sie weg. Die Partie wird schwieriger, solange eine Wette aktiv ist, und du kannst nur 3-mal pro Tag wetten.", tut24Title: "Neu: Combos, Titel & Herausforderungen", tut24Body: "Das ist neu: Der <b>Boss</b> ist jetzt deutlich stärker; manche Plattformen bewegen sich selbstständig (seitlich oder auf/ab); mehrere Gegner schnell ohne Schaden zu besiegen gibt einen <b>Gold-Combo</b>; deinen eigenen Rekord im <b>Unendlichen Modus</b> zu schlagen bringt ein dauerhaftes <b>Prestige</b>-Abzeichen; Titel wie <b>Legendärer Überlebender</b> (1000+ Sekunden im Unendlichen Modus) und <b>Glücksspieler</b> (10 gewonnene Wetten) erscheinen neben deinem Namen; in Online-Partien mit 3-4 Spielern können Gestorbene jetzt den Rest als <b>Zuschauer</b> verfolgen; und es gibt neue <b>tägliche Missionen</b>. Du kannst alle deine Abzeichen und Rekorde jederzeit unter <b>Einstellungen → Mein Profil</b> einsehen.",
 
             tut12Title: "Wähle deinen Helden", tut12Body: "Bevor du startest, wähle einen <b>Archetyp</b>: Hero (ausgewogen), Vilan (dreifacher Streuschuss) oder Killer (schnell und tödlich). Jeder spielt sich anders!",
-            tut13Title: "Spielmodi", tut13Body: "Wähle zwischen <b>Solo-Horde</b>, <b>Goldrausch</b>, <b>Titan-Modus</b> (super starker Gegner), <b>Boss-Modus</b> oder <b>Unendlicher Modus</b> (die Schwierigkeit steigt ständig, bis du stirbst, und das Gold hängt davon ab, wie lange du überlebt hast). Du kannst auch <b>Lokales 1v1-Duell</b> spielen, mit zwei Spielern an derselben Tastatur (P1 und P2). Du kannst auch die <b>Offene Welt</b> aktivieren, um im Solo-Modus auf einer unendlichen Karte zu spielen.",
+            tut13Title: "Spielmodi", tut13Body: "Wähle zwischen <b>Solo-Horde</b>, <b>Goldrausch</b>, <b>Titan-Modus</b> (super starker Gegner), <b>Boss-Modus</b> oder <b>Unendlicher Modus</b>. Im <b>Unendlichen Modus</b> steigt die Schwierigkeit ständig, und <b>Gold wird deinem Konto erst gutgeschrieben, wenn du stirbst</b> — verlässt du die Partie vorher, verlierst du das gesamte in diesem Versuch gesammelte Gold. Du kannst auch die <b>Offene Welt</b> aktivieren, um im Solo-Modus auf einer unendlichen Karte zu spielen, oder einen <b>Bot (KI)</b> in einem Duell herausfordern.",
             tut20Title: "Gegen Künstliche Intelligenz", tut20Body: "Nutze im Menü die Schaltfläche <b>🤖 Gegen Künstliche Intelligenz Spielen</b>, um in einem 1v1-Duell gegen einen Bot anzutreten. Wähle die Schwierigkeit (Leicht, Mittel, Schwer oder Brutal): Je schwerer, desto klüger, schneller und präziser wird der Bot, und desto größer die Belohnung bei einem Sieg. Das Match endet, wenn einer von euch besiegt wird, und die Endbelohnung hängt nur vom Ergebnis (Sieg oder Niederlage) ab, nicht vom gesammelten Gold während des Matches.",
             aiOpponentLabel: "KI",
             vsAiBtn: "🤖 Gegen Künstliche Intelligenz Spielen", vsAiChooseDiff: "Wähle die KI-Schwierigkeit:",
@@ -1864,6 +1949,7 @@
             tut16Title: "Geheimes Versteck", tut16Body: "Finde das versteckte Versteck auf der Karte und drücke <b>E</b>, um es zu betreten (auf dem Handy die Schaltfläche <b>🚪</b> antippen). Ein guter Ort, um sich vor Gegnern zu schützen.",
             tut17Title: "Spielern folgen", tut17Body: "Neben dem Chatten kannst du anderen Spielern über den Tab <b>⭐ Folge ich</b> in der Spielersuche <b>folgen</b>, um im Blick zu behalten, mit wem du gerne spielst.",
             tut18Title: "Fehler melden", tut18Body: "Einen Fehler gefunden? Gehe zu den Einstellungen und nutze die Schaltfläche <b>🐞 FEHLER MELDEN</b>, um uns Bescheid zu geben. Das hilft, das Spiel zu verbessern!",
+            tut25Title: "Gold-Erstattung Anfordern", tut25Body: "Gold durch einen Fehler oder eine unfaire Situation verloren? Nutze in den Einstellungen die Schaltfläche <b>💰 ERSTATTUNG ANFORDERN</b>, um den Grund zu erklären und anzugeben, wie viel du erhalten möchtest. Es ist eine Anfrage, keine Garantie — der endgültige Betrag und die Genehmigung hängen von der Prüfung ab.",
             tut19Title: "Waffen kaufen und ausrüsten", tut19Body: "Kaufe Waffen im Laden mit deinem Gold — je stärker, desto teurer! Wähle nach dem Kauf unter <b>Ausgerüstete Waffe</b> auf dem Hauptbildschirm, welche gekaufte Waffe du im Match nutzen möchtest.",
             tutSvgMove: "bewegen", tutSvgJump: "springen", tutSvgAttack: "angreifen", tutSvgSpecial: "spezial",
             tutSvgMobileMove1: "Finger ziehen,", tutSvgMobileMove2: "um dich zu bewegen",
@@ -1945,6 +2031,7 @@
             achievementsHint: "Gana experiencia jugando y completando desafíos para subir de nivel.",
             profileSectionTitle: "🎖️ Mi Perfil", profileSectionTitle2: "Perfil", openProfileBtn: "🎖️ MI PERFIL (EMBLEMAS)",
             profilePrestigeLabel: "✨ Prestigio", profileInfiniteBestLabel: "⏱ Mejor Marca (Infinito)", profileBetsWonLabel: "🎲 Apuestas Ganadas",
+            adminSectionTitle: "🛠️ Administración", openAdminBtn: "🛠️ PANEL DE REEMBOLSO", adminPanelTitle: "🛠️ Panel de Reembolso", adminPanelHint: "Busca un jugador por su nombre exacto de perfil y ajusta el oro de su cuenta. Esta acción es permanente y afecta el saldo guardado en la nube.", adminSearchPlaceholder: "Nombre del jugador...", adminSearchBtn: "🔎 Buscar", adminCurrentBalanceLabel: "Saldo actual:", adminAddBtn: "➕ Añadir", adminRemoveBtn: "➖ Quitar", adminNoResults: "No se encontraron jugadores.", adminSearchError: "Error al buscar. Intenta de nuevo.", adminInvalidAmount: "Introduce un valor válido mayor que cero.", adminAdjustSuccess: "Ajuste de ${amount} aplicado. Nuevo saldo: ${balance}.", adminAdjustError: "Error al ajustar el saldo. Intenta de nuevo.", adminOnlineTag: "en línea ahora", adminOnlineWarning: "Jugador en línea: recibirá el reembolso en tiempo real (ventana emergente en pantalla). El riesgo de sobrescritura es muy bajo, pero existe en una ventana muy corta.", adminMessagePlaceholder: "Mensaje para el jugador (opcional)...", refundModalOkBtn: "¡OK, entendido!", refundModalTitleAdded: "¡Recibiste un reembolso!", refundModalTitleRemoved: "Tu saldo fue ajustado",
             levelUpToast: "¡Subiste al nivel {level}!", achievementUnlockedToast: "Logro desbloqueado: {name}",
             ach_first_win_name: "Primera Victoria", ach_first_win_desc: "Gana 1 partida.",
             ach_veteran_name: "Veterano", ach_veteran_desc: "Juega 10 partidas.",
@@ -1959,6 +2046,7 @@
             modeLabelOpenWorld: "MUNDO ABIERTO", modeLabelBoss: "Nivel de Jefe", modeLabelWave: "Oleada",
             hideoutAlertTitle: "Escondite Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Salir: E",
             exitMatchBtn: "Salir de la Partida", exitMatchConfirmMsg: "¿Seguro que quieres salir de la partida y volver al menú? Tu progreso en esta partida se perderá.",
+            exitInfiniteConfirmMsg: "En el Modo Infinito, el oro solo se acredita en tu cuenta cuando MUERES (fin de la partida) — salir ahora por el menú descarta todo el oro reunido en este intento. ¿Salir de todos modos?",
             pauseMatchBtn: "Pausar", pauseTitle: "PARTIDA PAUSADA", pauseResumeBtn: "▶ REANUDAR", pauseExitBtn: "🚪 SALIR DE LA PARTIDA", modeInfinito: "Modo Infinito", soloLabelInfinito: "Modo Infinito", modeLabelInfinito: "Infinito - Ronda", infiniteSurvivedLabel: "Sobreviviste {time} y llegaste a la ronda {round}.", infiniteKillsLabel: "Derrotaste a {kills} enemigo(s).", betKillsLabel: "Enemigos derrotados en la partida: {kills}.", powerupPickup_shield: "¡Power-up: Escudo!", powerupPickup_fury: "¡Power-up: Furia (daño doblado)!", powerupPickup_speed: "¡Power-up: Velocidad!", betTitle: "Apuesta Pre-Partida", betDesc: "Apuesta parte de tu oro antes de empezar. Si ganas, se duplica. Si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa.", betUsageLabel: "Usadas hoy: {used}/{max}", betLimitReached: "Límite diario de apuestas alcanzado.", betPotentialWin: "Si ganas: +${amount}", betWonLabel: "Apuesta ganada: +${amount}", betLostLabel: "Apuesta perdida: -${amount}", betActiveHud: "🎲 Apuesta activa: ${amount} (puede llegar a ${potential})",
             chatOptionsBtn: "Más opciones", chatClearOption: "🗑️ Limpiar conversación", chatBlockOption: "🚫 Bloquear jugador", chatUnblockOption: "✓ Desbloquear jugador", chatReportOption: "🚩 Denunciar jugador", chatNewGroupBtn: "➕ Crear nuevo grupo", chatNewGroupTitle: "➕ Nuevo Grupo", chatGroupNamePlaceholder: "Nombre del grupo", chatCreateGroupBtn: "CREAR GRUPO", chatGroupNameRequired: "Escribe un nombre para el grupo.", chatGroupNeedMembers: "Selecciona al menos 1 persona.", chatGroupCreateError: "Error al crear el grupo.", chatEmojiBtn: "Emojis", chatInviteOption: "🎮 Invitar a jugar", chatInviteSentToast: "¡Invitación enviada en la conversación!", chatInviteCreatingRoom: "Creando sala...", chatInviteCardTitle: "🎮 Invitación a jugar", chatInviteJoinBtn: "Unirse a la partida", chatGroupNoFollowingHint: "Necesitas seguir a alguien para crear un grupo.", lobbyConnecting: "🔌 Conectando...", lobbyCodeExpired: "🚫 Código caducado. Pide una nueva invitación.",
             chatClearConfirmMsg: "¿Seguro que quieres borrar todos los mensajes de esta conversación? No se puede deshacer.", chatClearedToast: "Conversación borrada.",
@@ -1969,6 +2057,7 @@
             reportSendBtn: "ENVIAR DENUNCIA", reportSentMsg: "Denuncia enviada. ¡Gracias por ayudar a mantener el juego seguro!", reportSendErrorMsg: "Error al enviar la denuncia. Intenta de nuevo.",
             bugReportSectionTitle: "¿Encontraste un Error?", bugReportBtn: "🐞 REPORTAR UN ERROR", bugReportTitle: "🐞 Reportar un Error", bugReportDescPlaceholder: "Describe el error que encontraste...", bugReportDescRequired: "Describe el error antes de enviar.",
             bugReportSendBtn: "ENVIAR REPORTE", bugReportSentMsg: "Reporte de error enviado. ¡Gracias por ayudar a mejorar el juego!", bugReportSendErrorMsg: "Error al enviar el reporte. Intenta de nuevo.",
+            refundRequestSectionTitle: "¿Necesitas Ayuda con el Oro?", refundRequestBtn: "💰 PEDIR REEMBOLSO", refundRequestTitle: "💰 Pedir Reembolso", refundRequestHint: "Esto es una SOLICITUD — no una garantía. El monto final puede ser diferente al solicitado, y la solicitud también puede ser rechazada, según la revisión.", refundRequestAmountPlaceholder: "Monto deseado (ej: 500)", refundRequestReasonPlaceholder: "Explica el motivo de la solicitud...", refundRequestAmountRequired: "Introduce el monto que te gustaría recibir.", refundRequestReasonRequired: "Explica el motivo de la solicitud antes de enviar.", refundRequestSendBtn: "ENVIAR SOLICITUD", refundRequestSentMsg: "¡Solicitud de reembolso enviada! Se te notificará aquí si es aceptada.", refundRequestSendErrorMsg: "Error al enviar la solicitud. Intenta de nuevo.",
             boostOptionsBtn: "Opciones", boostRemainingLabel: "Restante", boostNoneActiveLabel: "Ningún boost activo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Jugadores",
             socialSearchTitle: "🔎 Jugadores", socialBackBtn: "✕ Volver",
@@ -2024,13 +2113,13 @@
                 stat_hp2: { name: "Blindaje Reforzado", desc: "+40 HP Máximo." },
                 stat_spd: { name: "Propulsor Cinético", desc: "+0.5 Velocidad." },
                 stat_spd2: { name: "Botas Cuánticas", desc: "+0.8 Velocidad." },
-                wpn_pistol: { name: "Pistola Veloz", desc: "Disparos rápidos x0.9 daño." },
-                wpn_laser: { name: "Cañón Láser", desc: "Disparos rápidos x1.3 daño." },
-                wpn_plasma: { name: "Blaster de Plasma", desc: "Disparos lentos x1.6 daño." },
-                wpn_cannon: { name: "Cañón Devastador", desc: "Disparos muy lentos x2.0 daño." },
-                wpn_smg: { name: "Subfusil Furia", desc: "Disparos extremadamente rápidos x0.6 daño." },
-                wpn_sniper: { name: "Rifle Francotirador Órbita", desc: "Disparos muy lentos y precisos x2.8 daño." },
-                wpn_railgun: { name: "Railgun Singularidad", desc: "Disparos rarísimos con daño devastador x3.4." },
+                wpn_pistol: { name: "Pistola Veloz", desc: "Disparos rápidos x0.87 daño." },
+                wpn_laser: { name: "Cañón Láser", desc: "Disparos rápidos x1.8 daño." },
+                wpn_plasma: { name: "Blaster de Plasma", desc: "Disparos lentos x4.4 daño." },
+                wpn_cannon: { name: "Cañón Devastador", desc: "Disparos muy lentos x7.65 daño." },
+                wpn_smg: { name: "Subfusil Furia", desc: "Disparos extremadamente rápidos x0.62 daño." },
+                wpn_sniper: { name: "Rifle Francotirador Órbita", desc: "Disparos muy lentos y precisos x13 daño." },
+                wpn_railgun: { name: "Railgun Singularidad", desc: "Disparos rarísimos con el mayor daño del juego, x21." },
                 itm_pot: { name: "Nanocápsula de Curación", desc: "+50 de vida en juego." },
                 itm_pot3: { name: "Paquete de Curación (x3)", desc: "3 Nanocápsulas, +50 cada una." },
                 itm_shd: { name: "Batería de Escudo", desc: "2s invulnerable." },
@@ -2104,7 +2193,7 @@
             tut21Title: "Power-ups", tut21Body: "Durante la partida, aparecen power-ups temporales al azar en el mapa: <b>🛡 Escudo</b> (te vuelves invulnerable), <b>⚡ Furia</b> (daño doblado) y <b>➤ Velocidad</b>. ¡Tócalos para activar el efecto por unos segundos!", tut22Title: "Pausar", tut22Body: "Usa el botón <b>⏸</b> junto al botón de salir (o la tecla <b>P</b> en PC) para pausar la partida en cualquier momento. No se puede pausar en partidas online.", tut23Title: "Apuesta Pre-Partida", tut23Body: "En el modo <b>Caza del Oro</b>, puedes apostar parte de tu oro antes de empezar (hasta $200). Si ganas, tu apuesta se duplica — si pierdes, desaparece. La partida se vuelve más difícil mientras la apuesta esté activa, y solo puedes apostar 3 veces al día.", tut24Title: "Novedades: Combos, Títulos y Desafíos", tut24Body: "Novedades a tener en cuenta: el <b>Jefe</b> ahora es mucho más fuerte; algunas plataformas se mueven solas (a los lados o arriba/abajo); matar varios enemigos rápido sin recibir daño da un <b>combo de oro</b>; superar tu propia marca en el <b>Modo Infinito</b> otorga una insignia permanente de <b>Prestigio</b>; títulos como <b>Superviviente Legendario</b> (1000+ segundos en Infinito) y <b>Apostador Afortunado</b> (10 apuestas ganadas) aparecen junto a tu nombre; en partidas online de 3-4 jugadores, quien muere ahora puede ver el resto como <b>espectador</b>; y se añadieron nuevas <b>misiones diarias</b>. Puedes ver todos tus emblemas y récords en cualquier momento en <b>Configuración → Mi Perfil</b>.",
 
             tut12Title: "Elige tu Héroe", tut12Body: "Antes de empezar, elige un <b>arquetipo</b>: Hero (equilibrado), Vilan (disparo triple en abanico) o Killer (veloz y letal). ¡Cada uno se juega de forma distinta!",
-            tut13Title: "Modos de Juego", tut13Body: "Elige entre <b>Horda Solo</b>, <b>Caza del Oro</b>, <b>Modo Titán</b> (enemigo súper fuerte), <b>Modo Jefe</b> o <b>Modo Infinito</b> (la dificultad sube sin parar hasta que mueras, y el oro que ganas depende de hasta dónde sobreviviste). También puedes jugar <b>Duelo 1v1 Local</b>, con dos jugadores en el mismo teclado (P1 y P2). También puedes activar el <b>Mundo Abierto</b> para jugar en un mapa infinito en modo solo.",
+            tut13Title: "Modos de Juego", tut13Body: "Elige entre <b>Horda Solo</b>, <b>Caza del Oro</b>, <b>Modo Titán</b> (enemigo súper fuerte), <b>Modo Jefe</b> o <b>Modo Infinito</b>. En el <b>Modo Infinito</b> la dificultad sube sin parar y <b>el oro solo se acredita en tu cuenta cuando mueres</b> — si sales de la partida antes, pierdes todo el oro reunido en ese intento. También puedes activar el <b>Mundo Abierto</b> para jugar en un mapa infinito en modo solo, o desafiar a un <b>Bot (IA)</b> en un duelo.",
             tut20Title: "Contra Inteligencia Artificial", tut20Body: "En el menú, usa el botón <b>🤖 Jugar Contra Inteligencia Artificial</b> para enfrentar a un bot en un duelo 1v1. Elige la dificultad (Fácil, Medio, Difícil o Brutal): cuanto más difícil, más inteligente, rápido y preciso será el bot, y mayor será la recompensa si ganas. La partida termina cuando uno de los dos es derrotado, y la recompensa final depende solo del resultado (victoria o derrota), no del oro recogido durante la partida.",
             aiOpponentLabel: "IA",
             vsAiBtn: "🤖 Jugar Contra Inteligencia Artificial", vsAiChooseDiff: "Elige la Dificultad de la IA:",
@@ -2121,6 +2210,7 @@
             tut16Title: "Escondite Secreto", tut16Body: "Encuentra el escondite oculto en el mapa y presiona <b>E</b> para entrar (en móvil, toca el botón <b>🚪</b>). Es un buen lugar para protegerte de los enemigos.",
             tut17Title: "Seguir Jugadores", tut17Body: "Además de chatear, puedes <b>seguir</b> a otros jugadores desde la pestaña <b>⭐ Siguiendo</b> en la búsqueda de jugadores, para llevar registro de con quién te gusta jugar.",
             tut18Title: "Reportar un Error", tut18Body: "¿Encontraste un error? Ve a Configuración y usa el botón <b>🐞 REPORTAR UN ERROR</b> para avisarnos. ¡Esto ayuda a mejorar el juego!",
+            tut25Title: "Pedir Reembolso de Oro", tut25Body: "¿Perdiste oro por un error o una situación injusta? En Configuración, usa el botón <b>💰 PEDIR REEMBOLSO</b> para explicar el motivo y cuánto te gustaría recibir. Es una solicitud, no una garantía — el monto final y la aprobación dependen de la revisión.",
             tut19Title: "Comprar y Equipar Armas", tut19Body: "Compra armas en la tienda con tu oro — ¡cuanto más fuerte, más cara! Después de comprar, ve a <b>Arma Equipada</b> en la pantalla principal y selecciona qué arma comprada quieres usar en la partida.",
             tutSvgMove: "mover", tutSvgJump: "saltar", tutSvgAttack: "atacar", tutSvgSpecial: "especial",
             tutSvgMobileMove1: "arrastra el dedo", tutSvgMobileMove2: "para mover",
@@ -2202,6 +2292,7 @@
             achievementsHint: "Guadagna esperienza giocando e completando le sfide per salire di livello.",
             profileSectionTitle: "🎖️ Il Mio Profilo", profileSectionTitle2: "Profilo", openProfileBtn: "🎖️ IL MIO PROFILO (DISTINTIVI)",
             profilePrestigeLabel: "✨ Prestigio", profileInfiniteBestLabel: "⏱ Miglior Record (Infinita)", profileBetsWonLabel: "🎲 Scommesse Vinte",
+            adminSectionTitle: "🛠️ Amministrazione", openAdminBtn: "🛠️ PANNELLO RIMBORSI", adminPanelTitle: "🛠️ Pannello Rimborsi", adminPanelHint: "Cerca un giocatore per il suo nome visualizzato esatto e regola l'oro del suo account. Questa azione è permanente e influisce sul saldo salvato nel cloud.", adminSearchPlaceholder: "Nome del giocatore...", adminSearchBtn: "🔎 Cerca", adminCurrentBalanceLabel: "Saldo attuale:", adminAddBtn: "➕ Aggiungi", adminRemoveBtn: "➖ Rimuovi", adminNoResults: "Nessun giocatore trovato.", adminSearchError: "Errore nella ricerca. Riprova.", adminInvalidAmount: "Inserisci un valore valido maggiore di zero.", adminAdjustSuccess: "Regolazione di ${amount} applicata. Nuovo saldo: ${balance}.", adminAdjustError: "Errore nella regolazione del saldo. Riprova.", adminOnlineTag: "online ora", adminOnlineWarning: "Giocatore online: riceverà il rimborso in tempo reale (popup a schermo). Il rischio di sovrascrittura è molto basso, ma esiste in una finestra molto breve.", adminMessagePlaceholder: "Messaggio per il giocatore (opzionale)...", refundModalOkBtn: "OK, capito!", refundModalTitleAdded: "Hai ricevuto un rimborso!", refundModalTitleRemoved: "Il tuo saldo è stato modificato",
             levelUpToast: "Sei salito al livello {level}!", achievementUnlockedToast: "Obiettivo sbloccato: {name}",
             ach_first_win_name: "Prima Vittoria", ach_first_win_desc: "Vinci 1 partita.",
             ach_veteran_name: "Veterano", ach_veteran_desc: "Gioca 10 partite.",
@@ -2216,6 +2307,7 @@
             modeLabelOpenWorld: "MONDO APERTO", modeLabelBoss: "Livello Boss", modeLabelWave: "Ondata",
             hideoutAlertTitle: "Nascondiglio Segreto", hideoutAlertEnter: "Entra: E", hideoutHudExit: "Esci: E",
             exitMatchBtn: "Esci dalla Partita", exitMatchConfirmMsg: "Sei sicuro di voler uscire dalla partita e tornare al menu? I tuoi progressi in questa partita andranno persi.",
+            exitInfiniteConfirmMsg: "Nella Modalità Infinita, l'oro viene accreditato sul tuo account solo quando MUORI (fine della run) — uscire ora dal menu farà perdere tutto l'oro raccolto in questo tentativo. Uscire comunque?",
             pauseMatchBtn: "Pausa", pauseTitle: "PARTITA IN PAUSA", pauseResumeBtn: "▶ RIPRENDI", pauseExitBtn: "🚪 ESCI DALLA PARTITA", modeInfinito: "Modalità Infinita", soloLabelInfinito: "Modalità Infinita", modeLabelInfinito: "Infinita - Round", infiniteSurvivedLabel: "Sei sopravvissuto per {time} e hai raggiunto il round {round}.", infiniteKillsLabel: "Hai sconfitto {kills} nemico/i.", betKillsLabel: "Nemici sconfitti nella partita: {kills}.", powerupPickup_shield: "Power-up: Scudo!", powerupPickup_fury: "Power-up: Furia (danno raddoppiato)!", powerupPickup_speed: "Power-up: Velocità!", betTitle: "Scommessa Pre-Partita", betDesc: "Scommetti parte del tuo oro prima di iniziare. Se vinci, raddoppia. Se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva.", betUsageLabel: "Usate oggi: {used}/{max}", betLimitReached: "Limite giornaliero di scommesse raggiunto.", betPotentialWin: "Se vinci: +${amount}", betWonLabel: "Scommessa vinta: +${amount}", betLostLabel: "Scommessa persa: -${amount}", betActiveHud: "🎲 Scommessa attiva: ${amount} (può diventare ${potential})",
             chatOptionsBtn: "Altre opzioni", chatClearOption: "🗑️ Cancella conversazione", chatBlockOption: "🚫 Blocca giocatore", chatUnblockOption: "✓ Sblocca giocatore", chatReportOption: "🚩 Segnala giocatore", chatNewGroupBtn: "➕ Crea nuovo gruppo", chatNewGroupTitle: "➕ Nuovo Gruppo", chatGroupNamePlaceholder: "Nome del gruppo", chatCreateGroupBtn: "CREA GRUPPO", chatGroupNameRequired: "Inserisci un nome per il gruppo.", chatGroupNeedMembers: "Seleziona almeno 1 persona.", chatGroupCreateError: "Errore durante la creazione del gruppo.", chatEmojiBtn: "Emoji", chatInviteOption: "🎮 Invita a giocare", chatInviteSentToast: "Invito inviato nella conversazione!", chatInviteCreatingRoom: "Creazione stanza...", chatInviteCardTitle: "🎮 Invito a giocare", chatInviteJoinBtn: "Unisciti alla partita", chatGroupNoFollowingHint: "Devi seguire qualcuno per creare un gruppo.", lobbyConnecting: "🔌 Connessione...", lobbyCodeExpired: "🚫 Codice scaduto. Chiedi un nuovo invito.",
             chatClearConfirmMsg: "Sei sicuro di voler eliminare tutti i messaggi di questa conversazione? Non può essere annullato.", chatClearedToast: "Conversazione cancellata.",
@@ -2226,6 +2318,7 @@
             reportSendBtn: "INVIA SEGNALAZIONE", reportSentMsg: "Segnalazione inviata. Grazie per aiutare a mantenere il gioco sicuro!", reportSendErrorMsg: "Errore nell'invio della segnalazione. Riprova.",
             bugReportSectionTitle: "Hai Trovato un Errore?", bugReportBtn: "🐞 SEGNALA UN ERRORE", bugReportTitle: "🐞 Segnala un Errore", bugReportDescPlaceholder: "Descrivi l'errore che hai trovato...", bugReportDescRequired: "Descrivi l'errore prima di inviare.",
             bugReportSendBtn: "INVIA SEGNALAZIONE", bugReportSentMsg: "Segnalazione di errore inviata. Grazie per aiutare a migliorare il gioco!", bugReportSendErrorMsg: "Errore nell'invio della segnalazione. Riprova.",
+            refundRequestSectionTitle: "Hai Bisogno di Aiuto con l'Oro?", refundRequestBtn: "💰 RICHIEDI RIMBORSO", refundRequestTitle: "💰 Richiedi Rimborso", refundRequestHint: "Questa è una RICHIESTA — non una garanzia. L'importo finale può essere diverso da quello richiesto, e la richiesta può anche essere rifiutata, a seconda della valutazione.", refundRequestAmountPlaceholder: "Importo desiderato (es: 500)", refundRequestReasonPlaceholder: "Spiega il motivo della richiesta...", refundRequestAmountRequired: "Inserisci l'importo che vorresti ricevere.", refundRequestReasonRequired: "Spiega il motivo della richiesta prima di inviare.", refundRequestSendBtn: "INVIA RICHIESTA", refundRequestSentMsg: "Richiesta di rimborso inviata! Sarai avvisato qui se viene accettata.", refundRequestSendErrorMsg: "Errore nell'invio della richiesta. Riprova.",
             boostOptionsBtn: "Opzioni", boostRemainingLabel: "Rimanente", boostNoneActiveLabel: "Nessun boost attivo", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Giocatori",
             socialSearchTitle: "🔎 Giocatori", socialBackBtn: "✕ Indietro",
@@ -2281,13 +2374,13 @@
                 stat_hp2: { name: "Blindatura Rinforzata", desc: "+40 HP Massimi." },
                 stat_spd: { name: "Propulsore Cinetico", desc: "+0.5 Velocità." },
                 stat_spd2: { name: "Stivali Quantici", desc: "+0.8 Velocità." },
-                wpn_pistol: { name: "Pistola Veloce", desc: "Colpi rapidi x0.9 danno." },
-                wpn_laser: { name: "Cannone Laser", desc: "Colpi veloci x1.3 danno." },
-                wpn_plasma: { name: "Blaster al Plasma", desc: "Colpi lenti x1.6 danno." },
-                wpn_cannon: { name: "Cannone Devastatore", desc: "Colpi molto lenti x2.0 danno." },
-                wpn_smg: { name: "Mitragliatrice Furia", desc: "Colpi estremamente rapidi x0.6 danno." },
-                wpn_sniper: { name: "Fucile da Cecchino Orbita", desc: "Colpi molto lenti e precisi x2.8 danno." },
-                wpn_railgun: { name: "Railgun Singolarità", desc: "Colpi rarissimi con danno devastante x3.4." },
+                wpn_pistol: { name: "Pistola Veloce", desc: "Colpi rapidi x0.87 danno." },
+                wpn_laser: { name: "Cannone Laser", desc: "Colpi veloci x1.8 danno." },
+                wpn_plasma: { name: "Blaster al Plasma", desc: "Colpi lenti x4.4 danno." },
+                wpn_cannon: { name: "Cannone Devastatore", desc: "Colpi molto lenti x7.65 danno." },
+                wpn_smg: { name: "Mitragliatrice Furia", desc: "Colpi estremamente rapidi x0.62 danno." },
+                wpn_sniper: { name: "Fucile da Cecchino Orbita", desc: "Colpi molto lenti e precisi x13 danno." },
+                wpn_railgun: { name: "Railgun Singolarità", desc: "Colpi rarissimi con il danno più alto del gioco, x21." },
                 itm_pot: { name: "Nanocapsula Curativa", desc: "+50 vita in gioco." },
                 itm_pot3: { name: "Pacchetto Curativo (x3)", desc: "3 Nanocapsule, +50 ciascuna." },
                 itm_shd: { name: "Batteria Scudo", desc: "2s invulnerabile." },
@@ -2361,7 +2454,7 @@
             tut21Title: "Power-up", tut21Body: "Durante la partita, power-up temporanei appaiono a caso sulla mappa: <b>🛡 Scudo</b> (diventi invulnerabile), <b>⚡ Furia</b> (danno raddoppiato) e <b>➤ Velocità</b>. Toccali per attivare l’effetto per qualche secondo!", tut22Title: "Pausa", tut22Body: "Usa il pulsante <b>⏸</b> accanto al pulsante di uscita (o il tasto <b>P</b> su PC) per mettere in pausa la partita in qualsiasi momento. Non è possibile mettere in pausa nelle partite online.", tut23Title: "Scommessa Pre-Partita", tut23Body: "Nella modalità <b>Caccia all’Oro</b>, puoi scommettere parte del tuo oro prima di iniziare (fino a $200). Se vinci, la tua scommessa raddoppia — se perdi, sparisce. La partita diventa più difficile finché la scommessa è attiva, e puoi scommettere solo 3 volte al giorno.", tut24Title: "Novità: Combo, Titoli e Sfide", tut24Body: "Ecco le novità: il <b>Boss</b> ora è molto più forte; alcune piattaforme si muovono da sole (lateralmente o su/giù); sconfiggere più nemici velocemente senza subire danni dà una <b>combo d’oro</b>; battere il tuo record nella <b>Modalità Infinita</b> concede un distintivo permanente di <b>Prestigio</b>; titoli come <b>Sopravvissuto Leggendario</b> (1000+ secondi in Infinita) e <b>Scommettitore Fortunato</b> (10 scommesse vinte) appaiono accanto al tuo nome; nelle partite online da 3-4 giocatori, chi muore ora può guardare il resto come <b>spettatore</b>; e sono state aggiunte nuove <b>missioni giornaliere</b>. Puoi controllare tutti i tuoi distintivi e record in qualsiasi momento in <b>Impostazioni → Il Mio Profilo</b>.",
 
             tut12Title: "Scegli il tuo Eroe", tut12Body: "Prima di iniziare, scegli un <b>archetipo</b>: Hero (bilanciato), Vilan (tripla raffica a ventaglio) o Killer (veloce e letale). Ognuno si gioca in modo diverso!",
-            tut13Title: "Modalità di Gioco", tut13Body: "Scegli tra <b>Orda Solo</b>, <b>Caccia all'Oro</b>, <b>Modalità Titano</b> (nemico super forte), <b>Modalità Boss</b> o <b>Modalità Infinita</b> (la difficoltà continua a salire finché non muori, e l'oro che guadagni dipende da quanto sei sopravvissuto). Puoi anche giocare <b>Duello 1v1 Locale</b>, con due giocatori sulla stessa tastiera (P1 e P2). Puoi anche attivare il <b>Mondo Aperto</b> per giocare su una mappa infinita in modalità solo.",
+            tut13Title: "Modalità di Gioco", tut13Body: "Scegli tra <b>Orda Solo</b>, <b>Caccia all'Oro</b>, <b>Modalità Titano</b> (nemico super forte), <b>Modalità Boss</b> o <b>Modalità Infinita</b>. Nella <b>Modalità Infinita</b> la difficoltà continua a salire e <b>l'oro viene accreditato sul tuo account solo quando muori</b> — se esci dalla partita prima, perdi tutto l'oro raccolto in quel tentativo. Puoi anche attivare il <b>Mondo Aperto</b> per giocare su una mappa infinita in modalità solo, o sfidare un <b>Bot (IA)</b> in un duello.",
             tut20Title: "Contro l'Intelligenza Artificiale", tut20Body: "Nel menu, usa il pulsante <b>🤖 Gioca Contro l'Intelligenza Artificiale</b> per affrontare un bot in un duello 1v1. Scegli la difficoltà (Facile, Medio, Difficile o Brutale): più è difficile, più il bot diventa intelligente, veloce e preciso, e maggiore sarà la ricompensa se vinci. La partita finisce quando uno dei due viene sconfitto, e la ricompensa finale dipende solo dal risultato (vittoria o sconfitta), non dall'oro raccolto durante la partita.",
             aiOpponentLabel: "IA",
             vsAiBtn: "🤖 Gioca Contro l'Intelligenza Artificiale", vsAiChooseDiff: "Scegli la Difficoltà dell'IA:",
@@ -2378,6 +2471,7 @@
             tut16Title: "Nascondiglio Segreto", tut16Body: "Trova il nascondiglio segreto sulla mappa e premi <b>E</b> per entrare (su mobile, tocca il pulsante <b>🚪</b>). È un buon posto per ripararsi dai nemici.",
             tut17Title: "Seguire i Giocatori", tut17Body: "Oltre a chattare, puoi <b>seguire</b> altri giocatori dalla scheda <b>⭐ Seguiti</b> nella ricerca giocatori, per tenere traccia di con chi ti piace giocare.",
             tut18Title: "Segnala un Errore", tut18Body: "Hai trovato un errore? Vai su Impostazioni e usa il pulsante <b>🐞 SEGNALA UN ERRORE</b> per avvisarci. Questo aiuta a migliorare il gioco!",
+            tut25Title: "Richiedi un Rimborso in Oro", tut25Body: "Hai perso oro a causa di un bug o di una situazione ingiusta? In Impostazioni, usa il pulsante <b>💰 RICHIEDI RIMBORSO</b> per spiegare il motivo e quanto vorresti ricevere. È una richiesta, non una garanzia — l'importo finale e l'approvazione dipendono dalla valutazione.",
             tut19Title: "Acquistare ed Equipaggiare Armi", tut19Body: "Compra armi nel negozio con il tuo oro — più sono forti, più costano! Dopo l'acquisto, vai su <b>Arma Equipaggiata</b> nella schermata principale e seleziona quale arma acquistata vuoi usare nella partita.",
             tutSvgMove: "muovi", tutSvgJump: "salta", tutSvgAttack: "attacca", tutSvgSpecial: "speciale",
             tutSvgMobileMove1: "trascina il dito", tutSvgMobileMove2: "per muoverti",
@@ -2459,6 +2553,7 @@
             achievementsHint: "Gagnez de l'expérience en jouant et en relevant des défis pour monter de niveau.",
             profileSectionTitle: "🎖️ Mon Profil", profileSectionTitle2: "Profil", openProfileBtn: "🎖️ MON PROFIL (INSIGNES)",
             profilePrestigeLabel: "✨ Prestige", profileInfiniteBestLabel: "⏱ Meilleur Record (Infini)", profileBetsWonLabel: "🎲 Paris Gagnés",
+            adminSectionTitle: "🛠️ Administration", openAdminBtn: "🛠️ PANNEAU DE REMBOURSEMENT", adminPanelTitle: "🛠️ Panneau de Remboursement", adminPanelHint: "Recherchez un joueur par son nom d'affichage exact et ajustez l'or de son compte. Cette action est permanente et affecte le solde enregistré dans le cloud.", adminSearchPlaceholder: "Nom du joueur...", adminSearchBtn: "🔎 Rechercher", adminCurrentBalanceLabel: "Solde actuel :", adminAddBtn: "➕ Ajouter", adminRemoveBtn: "➖ Retirer", adminNoResults: "Aucun joueur trouvé.", adminSearchError: "Erreur de recherche. Réessayez.", adminInvalidAmount: "Entrez une valeur valide supérieure à zéro.", adminAdjustSuccess: "Ajustement de ${amount} appliqué. Nouveau solde : ${balance}.", adminAdjustError: "Erreur lors de l'ajustement du solde. Réessayez.", adminOnlineTag: "en ligne actuellement", adminOnlineWarning: "Joueur en ligne : il recevra le remboursement en temps réel (popup à l'écran). Le risque d'écrasement est très faible, mais existe dans une fenêtre très courte.", adminMessagePlaceholder: "Message pour le joueur (facultatif)...", refundModalOkBtn: "OK, compris !", refundModalTitleAdded: "Vous avez reçu un remboursement !", refundModalTitleRemoved: "Votre solde a été ajusté",
             levelUpToast: "Vous êtes passé au niveau {level} !", achievementUnlockedToast: "Succès débloqué : {name}",
             ach_first_win_name: "Première Victoire", ach_first_win_desc: "Gagnez 1 partie.",
             ach_veteran_name: "Vétéran", ach_veteran_desc: "Jouez 10 parties.",
@@ -2473,6 +2568,7 @@
             modeLabelOpenWorld: "MONDE OUVERT", modeLabelBoss: "Niveau Boss", modeLabelWave: "Vague",
             hideoutAlertTitle: "Cachette Secrète", hideoutAlertEnter: "Entrer : E", hideoutHudExit: "Sortir : E",
             exitMatchBtn: "Quitter la Partie", exitMatchConfirmMsg: "Voulez-vous vraiment quitter la partie et retourner au menu ? Votre progression dans cette partie sera perdue.",
+            exitInfiniteConfirmMsg: "En Mode Infini, l'or n'est crédité sur votre compte que lorsque vous MOUREZ (fin de la run) — quitter maintenant via le menu fait perdre tout l'or accumulé pendant cette tentative. Quitter quand même ?",
             pauseMatchBtn: "Pause", pauseTitle: "PARTIE EN PAUSE", pauseResumeBtn: "▶ REPRENDRE", pauseExitBtn: "🚪 QUITTER LA PARTIE", modeInfinito: "Mode Infini", soloLabelInfinito: "Mode Infini", modeLabelInfinito: "Infini - Manche", infiniteSurvivedLabel: "Vous avez survécu {time} et atteint la manche {round}.", infiniteKillsLabel: "Vous avez vaincu {kills} ennemi(s).", betKillsLabel: "Ennemis vaincus dans la partie : {kills}.", powerupPickup_shield: "Bonus : Bouclier !", powerupPickup_fury: "Bonus : Fureur (dégâts doublés) !", powerupPickup_speed: "Bonus : Vitesse !", betTitle: "Pari Avant-Match", betDesc: "Pariez une partie de votre or avant de commencer. Si vous gagnez, il double. Si vous perdez, il disparait. La partie devient plus difficile tant qu'un pari est actif.", betUsageLabel: "Utilisés aujourd'hui : {used}/{max}", betLimitReached: "Limite quotidienne de paris atteinte.", betPotentialWin: "Si vous gagnez : +${amount}", betWonLabel: "Pari gagné : +${amount}", betLostLabel: "Pari perdu : -${amount}", betActiveHud: "🎲 Pari actif : ${amount} (peut devenir ${potential})",
             chatOptionsBtn: "Plus d'options", chatClearOption: "🗑️ Effacer la conversation", chatBlockOption: "🚫 Bloquer le joueur", chatUnblockOption: "✓ Débloquer le joueur", chatReportOption: "🚩 Signaler le joueur", chatNewGroupBtn: "➕ Créer un nouveau groupe", chatNewGroupTitle: "➕ Nouveau Groupe", chatGroupNamePlaceholder: "Nom du groupe", chatCreateGroupBtn: "CRÉER LE GROUPE", chatGroupNameRequired: "Entrez un nom pour le groupe.", chatGroupNeedMembers: "Sélectionnez au moins 1 personne.", chatGroupCreateError: "Erreur lors de la création du groupe.", chatEmojiBtn: "Émojis", chatInviteOption: "🎮 Inviter à jouer", chatInviteSentToast: "Invitation envoyée dans la conversation !", chatInviteCreatingRoom: "Création de la salle...", chatInviteCardTitle: "🎮 Invitation à jouer", chatInviteJoinBtn: "Rejoindre la partie", chatGroupNoFollowingHint: "Vous devez suivre quelqu’un pour créer un groupe.", lobbyConnecting: "🔌 Connexion...", lobbyCodeExpired: "🚫 Code expiré. Demandez une nouvelle invitation.",
             chatClearConfirmMsg: "Voulez-vous vraiment supprimer tous les messages de cette conversation ? Cette action est irréversible.", chatClearedToast: "Conversation effacée.",
@@ -2483,6 +2579,7 @@
             reportSendBtn: "ENVOYER LE SIGNALEMENT", reportSentMsg: "Signalement envoyé. Merci de nous aider à garder le jeu sûr !", reportSendErrorMsg: "Erreur lors de l'envoi du signalement. Réessayez.",
             bugReportSectionTitle: "Trouvé un Bug ?", bugReportBtn: "🐞 SIGNALER UN BUG", bugReportTitle: "🐞 Signaler un Bug", bugReportDescPlaceholder: "Décrivez le bug que vous avez trouvé...", bugReportDescRequired: "Décrivez le bug avant d'envoyer.",
             bugReportSendBtn: "ENVOYER LE RAPPORT", bugReportSentMsg: "Rapport de bug envoyé. Merci de nous aider à améliorer le jeu !", bugReportSendErrorMsg: "Erreur lors de l'envoi du rapport. Réessayez.",
+            refundRequestSectionTitle: "Besoin d'Aide avec l'Or ?", refundRequestBtn: "💰 DEMANDER UN REMBOURSEMENT", refundRequestTitle: "💰 Demander un Remboursement", refundRequestHint: "Ceci est une DEMANDE — pas une garantie. Le montant final peut différer de celui demandé, et la demande peut aussi être refusée, selon l'examen.", refundRequestAmountPlaceholder: "Montant souhaité (ex : 500)", refundRequestReasonPlaceholder: "Expliquez la raison de la demande...", refundRequestAmountRequired: "Entrez le montant que vous aimeriez recevoir.", refundRequestReasonRequired: "Expliquez la raison de la demande avant d'envoyer.", refundRequestSendBtn: "ENVOYER LA DEMANDE", refundRequestSentMsg: "Demande de remboursement envoyée ! Vous serez averti ici si elle est acceptée.", refundRequestSendErrorMsg: "Erreur lors de l'envoi de la demande. Réessayez.",
             boostOptionsBtn: "Options", boostRemainingLabel: "Restant", boostNoneActiveLabel: "Aucun boost actif", boostMinutesLabel: "min",
             socialPlayersBtn: "🔎 Joueurs",
             socialSearchTitle: "🔎 Joueurs", socialBackBtn: "✕ Retour",
@@ -2538,13 +2635,13 @@
                 stat_hp2: { name: "Blindage Renforcé", desc: "+40 PV Max." },
                 stat_spd: { name: "Propulseur Cinétique", desc: "+0.5 Vitesse." },
                 stat_spd2: { name: "Bottes Quantiques", desc: "+0.8 Vitesse." },
-                wpn_pistol: { name: "Pistolet Rapide", desc: "Tirs rapides x0.9 dégâts." },
-                wpn_laser: { name: "Canon Laser", desc: "Tirs rapides x1.3 dégâts." },
-                wpn_plasma: { name: "Blaster à Plasma", desc: "Tirs lents x1.6 dégâts." },
-                wpn_cannon: { name: "Canon Dévastateur", desc: "Tirs très lents x2.0 dégâts." },
-                wpn_smg: { name: "Mitraillette Fureur", desc: "Tirs extrêmement rapides x0.6 dégâts." },
-                wpn_sniper: { name: "Fusil de Sniper Orbite", desc: "Tirs très lents et précis x2.8 dégâts." },
-                wpn_railgun: { name: "Railgun Singularité", desc: "Tirs très rares avec des dégâts dévastateurs x3.4." },
+                wpn_pistol: { name: "Pistolet Rapide", desc: "Tirs rapides x0.87 dégâts." },
+                wpn_laser: { name: "Canon Laser", desc: "Tirs rapides x1.8 dégâts." },
+                wpn_plasma: { name: "Blaster à Plasma", desc: "Tirs lents x4.4 dégâts." },
+                wpn_cannon: { name: "Canon Dévastateur", desc: "Tirs très lents x7.65 dégâts." },
+                wpn_smg: { name: "Mitraillette Fureur", desc: "Tirs extrêmement rapides x0.62 dégâts." },
+                wpn_sniper: { name: "Fusil de Sniper Orbite", desc: "Tirs très lents et précis x13 dégâts." },
+                wpn_railgun: { name: "Railgun Singularité", desc: "Tirs très rares avec les plus gros dégâts du jeu, x21." },
                 itm_pot: { name: "Nanocapsule de Soin", desc: "+50 de vie en jeu." },
                 itm_pot3: { name: "Pack de Soin (x3)", desc: "3 Nanocapsules, +50 chacune." },
                 itm_shd: { name: "Batterie de Bouclier", desc: "2s invulnérable." },
@@ -2618,7 +2715,7 @@
             tut21Title: "Bonus", tut21Body: "Pendant la partie, des bonus temporaires apparaissent au hasard sur la carte : <b>🛡 Bouclier</b> (devenez invulnérable), <b>⚡ Fureur</b> (dégâts doublés) et <b>➤ Vitesse</b>. Touchez-les pour activer l’effet pendant quelques secondes !", tut22Title: "Pause", tut22Body: "Utilisez le bouton <b>⏸</b> à côté du bouton de sortie (ou la touche <b>P</b> sur PC) pour mettre la partie en pause à tout moment. La pause n’est pas disponible dans les parties en ligne.", tut23Title: "Pari Avant-Match", tut23Body: "En mode <b>Ruée vers l’Or</b>, vous pouvez parier une partie de votre or avant de commencer (jusqu’à 200 $). Si vous gagnez, votre pari double — si vous perdez, il disparaît. La partie devient plus difficile tant qu’un pari est actif, et vous ne pouvez parier que 3 fois par jour.", tut24Title: "Nouveautés : Combos, Titres et Défis", tut24Body: "À découvrir : le <b>Boss</b> est maintenant bien plus fort ; certaines plateformes se déplacent seules (latéralement ou de haut en bas) ; éliminer plusieurs ennemis rapidement sans subir de dégâts donne un <b>combo d’or</b> ; battre votre propre record en <b>Mode Infini</b> accorde un badge permanent de <b>Prestige</b> ; des titres comme <b>Survivant Légendaire</b> (1000+ secondes en Infini) et <b>Parieur Chanceux</b> (10 paris gagnés) apparaissent à côté de votre nom ; dans les parties en ligne à 3-4 joueurs, celui qui meurt peut désormais suivre la suite en <b>spectateur</b> ; et de nouvelles <b>missions quotidiennes</b> ont été ajoutées. Vous pouvez consulter vos insignes et records à tout moment dans <b>Paramètres → Mon Profil</b>.",
 
             tut12Title: "Choisissez votre héros", tut12Body: "Avant de commencer, choisissez un <b>archétype</b> : Hero (équilibré), Vilan (tir triple en éventail) ou Killer (rapide et létal). Chacun se joue différemment !",
-            tut13Title: "Modes de Jeu", tut13Body: "Choisissez entre <b>Horde Solo</b>, <b>Ruée vers l'Or</b>, <b>Mode Titan</b> (ennemi super fort), <b>Mode Boss</b> ou <b>Mode Infini</b> (la difficulté monte sans arrêt jusqu'à ce que vous mouriez, et l'or gagné dépend de votre temps de survie). Vous pouvez aussi jouer en <b>Duel 1v1 Local</b>, avec deux joueurs sur le même clavier (P1 et P2). Vous pouvez aussi activer le <b>Monde Ouvert</b> pour jouer sur une carte infinie en mode solo.",
+            tut13Title: "Modes de Jeu", tut13Body: "Choisissez entre <b>Horde Solo</b>, <b>Ruée vers l'Or</b>, <b>Mode Titan</b> (ennemi super fort), <b>Mode Boss</b> ou <b>Mode Infini</b>. En <b>Mode Infini</b>, la difficulté monte sans arrêt et <b>l'or n'est crédité sur votre compte que lorsque vous mourez</b> — si vous quittez la partie avant, vous perdez tout l'or récolté durant cette tentative. Vous pouvez aussi activer le <b>Monde Ouvert</b> pour jouer sur une carte infinie en mode solo, ou défier un <b>Bot (IA)</b> en duel.",
             tut20Title: "Contre l'Intelligence Artificielle", tut20Body: "Dans le menu, utilisez le bouton <b>🤖 Jouer Contre l'Intelligence Artificielle</b> pour affronter un bot dans un duel 1v1. Choisissez la difficulté (Facile, Moyen, Difficile ou Brutal) : plus c'est difficile, plus le bot devient intelligent, rapide et précis, et plus la récompense est grande si vous gagnez. Le match se termine quand l'un de vous est vaincu, et la récompense finale dépend uniquement du résultat (victoire ou défaite), pas de l'or collecté pendant le match.",
             aiOpponentLabel: "IA",
             vsAiBtn: "🤖 Jouer Contre l'Intelligence Artificielle", vsAiChooseDiff: "Choisissez la Difficulté de l'IA :",
@@ -2635,6 +2732,7 @@
             tut16Title: "Cachette Secrète", tut16Body: "Trouvez la cachette secrète sur la carte et appuyez sur <b>E</b> pour y entrer (sur mobile, appuyez sur le bouton <b>🚪</b>). C'est un bon endroit pour se protéger des ennemis.",
             tut17Title: "Suivre des Joueurs", tut17Body: "En plus de discuter, vous pouvez <b>suivre</b> d'autres joueurs depuis l'onglet <b>⭐ Abonnements</b> dans la recherche de joueurs, pour garder une trace de ceux avec qui vous aimez jouer.",
             tut18Title: "Signaler un Bug", tut18Body: "Vous avez trouvé un bug ? Allez dans Paramètres et utilisez le bouton <b>🐞 SIGNALER UN BUG</b> pour nous le faire savoir. Cela aide à améliorer le jeu !",
+            tut25Title: "Demander un Remboursement d'Or", tut25Body: "Vous avez perdu de l'or à cause d'un bug ou d'une situation injuste ? Dans Paramètres, utilisez le bouton <b>💰 DEMANDER UN REMBOURSEMENT</b> pour expliquer la raison et le montant souhaité. C'est une demande, pas une garantie — le montant final et l'approbation dépendent de l'examen.",
             tut19Title: "Acheter et Équiper des Armes", tut19Body: "Achetez des armes dans la boutique avec votre or — plus elles sont puissantes, plus elles coûtent cher ! Après l'achat, allez dans <b>Arme Équipée</b> sur l'écran principal et choisissez quelle arme achetée utiliser en match.",
             tutSvgMove: "bouger", tutSvgJump: "sauter", tutSvgAttack: "attaquer", tutSvgSpecial: "spécial",
             tutSvgMobileMove1: "glissez le doigt", tutSvgMobileMove2: "pour bouger",
@@ -2835,6 +2933,7 @@
                 { icon: '👥', title: t('tut15Title'), body: t('tut15Body') },
                 { icon: '➕', title: t('tut17Title'), body: t('tut17Body') },
                 { icon: '🐞', title: t('tut18Title'), body: t('tut18Body') },
+                { icon: '💰', title: t('tut25Title'), body: t('tut25Body') },
                 { icon: '⚙️', title: t('tut11Title'), body: t('tut11Body') }
             );
             return list;
@@ -3529,7 +3628,7 @@
                     const { error: insertErr } = await sb.from('players').insert({ id: user.id, ...data });
                     if (insertErr) throw insertErr;
                 }
-                this.current = { uid: user.id, ...data };
+                this.current = { uid: user.id, email: user.email, ...data };
                 document.getElementById('auth-screen').classList.add('hidden');
                 document.getElementById('recovery-screen').classList.add('hidden');
                 this._setBusy(false);
@@ -3582,7 +3681,7 @@
                             const { error: insertErr } = await sb.from('players').insert({ id: user.id, ...data });
                             if (insertErr) throw insertErr;
                         }
-                        this.current = { uid: user.id, ...data };
+                        this.current = { uid: user.id, email: user.email, ...data };
                         document.getElementById('auth-screen').classList.add('hidden');
                         this._setBusy(false);
                         Engine.bootWithAccount(this.current);
@@ -3614,7 +3713,7 @@
                 if(error) console.warn('Falha ao salvar na nuvem:', error);
             });
         },
-        logout() { let was=this.current; this.current=null; this._inRecovery=false; if(was && (was.isTestAccount || was.isGuest)) return; sb.auth.signOut().catch(e=>console.warn(e)); },
+        logout() { let was=this.current; this.current=null; this._inRecovery=false; if(typeof AdminPanel !== 'undefined') AdminPanel.refreshVisibility(); if(was && (was.isTestAccount || was.isGuest)) return; sb.auth.signOut().catch(e=>console.warn(e)); },
         async deleteAccountForever() {
             if (!this.current) throw new Error('Você precisa estar logado.');
             const { data: sessionData } = await sb.auth.getSession();
@@ -3649,6 +3748,190 @@
             document.getElementById('auth-email').value = '';
             document.getElementById('auth-password').value = '';
             await sb.auth.signOut().catch(e => console.warn(e));
+        }
+    };
+    // NOVO: Painel de Administração — permite ao desenvolvedor (e só ele, checado pelo e-mail
+    // logado) buscar qualquer jogador pelo nome e ajustar/reembolsar o ouro salvo na nuvem
+    // diretamente pela interface do jogo, sem precisar pedir uma edição manual a cada vez.
+    // SEGURANÇA: a checagem de e-mail aqui é só uma conveniência de UI (esconde o botão pra
+    // quem não é admin) — a defesa de verdade tem que estar nas regras de RLS da tabela
+    // `players` no Supabase, restringindo quem pode fazer UPDATE de saldo de outras contas.
+    const ADMIN_EMAIL = 'jaron.n.ackermann@gmail.com';
+    const AdminPanel = {
+        _selected: null,
+        isAdmin() { return !!(Accounts.current && Accounts.current.email && Accounts.current.email.toLowerCase() === ADMIN_EMAIL); },
+        refreshVisibility() {
+            let sec = document.getElementById('admin-settings-section');
+            if(sec) sec.classList.toggle('hidden', !this.isAdmin());
+        },
+        open() {
+            if(!this.isAdmin()) return;
+            this._selected = null;
+            document.getElementById('admin-search-input').value = '';
+            document.getElementById('admin-search-results').innerHTML = '';
+            document.getElementById('admin-selected-player').classList.add('hidden');
+            document.getElementById('admin-panel-msg').textContent = '';
+            document.getElementById('settings-screen').classList.add('hidden');
+            document.getElementById('admin-panel-screen').classList.remove('hidden');
+        },
+        close() { document.getElementById('admin-panel-screen').classList.add('hidden'); },
+        async search() {
+            if(!this.isAdmin()) return;
+            let term = document.getElementById('admin-search-input').value.trim();
+            let results = document.getElementById('admin-search-results');
+            if(!term) { results.innerHTML = ''; return; }
+            results.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
+            try {
+                const { data, error } = await sb.from('players').select('id, name, wallet, is_online').ilike('name', `%${term}%`).limit(15);
+                if(error) throw error;
+                if(!data || data.length === 0) { results.innerHTML = `<div class="social-empty">${t('adminNoResults')}</div>`; return; }
+                results.innerHTML = '';
+                data.forEach(p => {
+                    let row = document.createElement('div');
+                    row.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.04); padding:8px 10px; border-radius:6px; cursor:pointer;';
+                    // NOVO: mostra se o jogador está online agora — reembolsar alguém enquanto
+                    // está jogando arrisca o autosave dele sobrescrever o ajuste (ver comentário
+                    // em adjust()), então um aviso visual aqui ajuda a evitar essa armadilha.
+                    let onlineTag = p.is_online ? `<span style="color:#fbbf24; font-size:0.68rem; margin-left:6px;" title="${t('adminOnlineWarning')}">🟢 ${t('adminOnlineTag')}</span>` : '';
+                    row.innerHTML = `<span>${p.name || '(sem nome)'}${onlineTag}</span><span style="color:#facc15; font-weight:700;">$${p.wallet||0}</span>`;
+                    row.onclick = () => this.select(p);
+                    results.appendChild(row);
+                });
+            } catch(err) {
+                results.innerHTML = `<div class="social-empty">${t('adminSearchError')}</div>`;
+                console.warn('Erro na busca do painel admin:', err);
+            }
+        },
+        select(p) {
+            this._selected = p;
+            document.getElementById('admin-selected-player').classList.remove('hidden');
+            document.getElementById('admin-selected-name').textContent = p.name || '(sem nome)';
+            document.getElementById('admin-selected-balance').textContent = `$${p.wallet||0}`;
+            document.getElementById('admin-panel-msg').textContent = '';
+            document.getElementById('admin-amount-input').value = '';
+        },
+        // direction: 1 para adicionar, -1 para remover. Sempre relê o saldo mais recente do banco
+        // antes de aplicar o ajuste, pra evitar sobrescrever com um valor desatualizado caso o
+        // próprio jogador tenha jogado e mudado o saldo entre a busca e o clique do admin.
+        // FIX (era LIMITAÇÃO CONHECIDA): se o jogador estiver online no momento do reembolso, o
+        // RefundNotifier (ver mais abaixo) recebe o evento em tempo real via Supabase Realtime e
+        // aplica o delta em Engine.walletP1 imediatamente — antes mesmo do popup aparecer — então
+        // o autosave dele (Accounts.saveProgress()) já grava o valor correto a partir daí. A
+        // única janela de risco residual é bem pequena: se o autosave disparar nos milissegundos
+        // entre o INSERT no banco e o evento realtime chegar no cliente do jogador. Reembolsar
+        // com o jogador offline (sem o selo "🟢 online agora") continua sendo o cenário mais
+        // seguro, mas não é mais estritamente necessário.
+        async adjust(direction) {
+            if(!this.isAdmin() || !this._selected) return;
+            let raw = document.getElementById('admin-amount-input').value;
+            let amount = Math.round(Number(raw));
+            let msgEl = document.getElementById('admin-panel-msg');
+            if(!amount || amount <= 0 || !isFinite(amount)) { msgEl.style.color = '#f87171'; msgEl.textContent = t('adminInvalidAmount'); return; }
+            let customMsg = (document.getElementById('admin-message-input').value || '').trim().slice(0, 200);
+            msgEl.style.color = '#94a3b8'; msgEl.textContent = t('socialLoading');
+            try {
+                const { data: fresh, error: readErr } = await sb.from('players').select('wallet').eq('id', this._selected.id).single();
+                if(readErr) throw readErr;
+                let delta = direction * amount;
+                let newBalance = Math.max(0, (fresh.wallet || 0) + delta);
+                const { error: writeErr } = await sb.from('players').update({ wallet: newBalance }).eq('id', this._selected.id);
+                if(writeErr) throw writeErr;
+                this._selected.wallet = newBalance;
+                document.getElementById('admin-selected-balance').textContent = `$${newBalance}`;
+                msgEl.style.color = '#86efac'; msgEl.textContent = t('adminAdjustSuccess').replace('{amount}', amount).replace('{balance}', newBalance);
+                document.getElementById('admin-amount-input').value = '';
+                document.getElementById('admin-message-input').value = '';
+                // NOVO: registra o reembolso na tabela `gold_refunds` pra notificar o jogador com
+                // um popup (valor + mensagem opcional) na próxima vez que o jogo dele carregar —
+                // ver RefundNotifier. Isso também serve como aviso pro jogador recarregar/reabrir
+                // o jogo, o que evita o autosave dele sobrescrever o saldo (ver limitação acima).
+                const { error: notifyErr } = await sb.from('gold_refunds').insert({
+                    player_id: this._selected.id, amount: delta, message: customMsg || null, seen: false
+                });
+                if(notifyErr) console.warn('Reembolso aplicado, mas falhou ao criar notificação:', notifyErr);
+            } catch(err) {
+                msgEl.style.color = '#f87171'; msgEl.textContent = t('adminAdjustError');
+                console.warn('Erro ao ajustar saldo via painel admin:', err);
+            }
+        }
+    };
+    // NOVO: escuta/busca reembolsos de ouro pendentes (tabela `gold_refunds`, criada pelo
+    // AdminPanel.adjust()) e mostra um popup pro jogador com o valor e a mensagem opcional do
+    // admin. Usa o mesmo padrão já existente pra convites de partida (Social.subscribeToIncoming
+    // Invites): assinatura em tempo real pra quem está com o jogo aberto, mais uma busca no boot
+    // pra pegar reembolsos feitos enquanto o jogador estava offline.
+    const RefundNotifier = {
+        _queue: [], _channel: null, _processedIds: new Set(),
+        subscribe() {
+            if(!Accounts.current || Accounts.current.isTestAccount || Accounts.current.isGuest) return;
+            if(this._channel) sb.removeChannel(this._channel);
+            this._channel = sb.channel('gold-refunds-' + Accounts.current.uid)
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gold_refunds', filter: `player_id=eq.${Accounts.current.uid}` }, payload => {
+                    this._enqueue(payload.new);
+                })
+                .subscribe();
+            sb.from('gold_refunds').select('*').eq('player_id', Accounts.current.uid).eq('seen', false)
+                .then(({ data, error }) => {
+                    if(error) { console.warn('Erro ao buscar reembolsos pendentes:', error); return; }
+                    if(data && data.length) data.forEach(r => this._enqueue(r));
+                });
+        },
+        // FIX: tanto o evento realtime (INSERT) quanto a busca de pendências no boot podem trazer
+        // o MESMO registro (ex.: o admin reembolsa enquanto o jogador está online — o evento
+        // realtime chega, e se o boot ainda não tiver marcado `seen` a tempo, a busca de
+        // pendências pega o mesmo registro de novo). _enqueue() garante que cada `id` de
+        // reembolso só é aplicado uma única vez, mesmo vindo dos dois caminhos.
+        _enqueue(refund) {
+            if(!refund || refund.id == null || this._processedIds.has(refund.id)) return;
+            this._processedIds.add(refund.id);
+            this._queue.push(refund);
+            this._maybeShowNext();
+        },
+        _maybeShowNext() {
+            let overlay = document.getElementById('refund-modal-overlay');
+            if(!overlay || !overlay.classList.contains('hidden')) return; // já tem um popup aberto — espera fechar
+            let next = this._queue.shift();
+            if(!next) return;
+            // FIX: em vez de esperar um round-trip de rede pra reler o saldo (o que ainda deixava
+            // uma pequena janela de corrida com o autosave), aplicamos o delta do reembolso
+            // (payload.new.amount, que já veio no evento/registro) diretamente em Engine.walletP1
+            // na hora — antes até de mostrar o popup. Isso deixa a memória local sempre correta
+            // desde o primeiro instante, e qualquer autosave que dispare depois disso já grava o
+            // valor certo. Ainda assim confirmamos com o banco em seguida (fire-and-forget) só
+            // pra corrigir qualquer drift, sem bloquear a exibição do popup nisso.
+            let amount = next.amount || 0;
+            Engine.walletP1 = Math.max(0, (Engine.walletP1 || 0) + amount);
+            if(Accounts.current) Accounts.current.wallet = Engine.walletP1;
+            if(typeof Engine.renderShop === 'function') Engine.renderShop();
+            let isPositive = amount >= 0;
+            document.getElementById('refund-modal-title').textContent = t(isPositive ? 'refundModalTitleAdded' : 'refundModalTitleRemoved');
+            document.getElementById('refund-modal-amount').textContent = `${isPositive ? '+' : '-'}$${Math.abs(amount)}`;
+            document.getElementById('refund-modal-amount').style.color = isPositive ? '#4ade80' : '#f87171';
+            let msgEl = document.getElementById('refund-modal-message');
+            if(next.message) { msgEl.textContent = `"${next.message}"`; msgEl.classList.remove('hidden'); }
+            else msgEl.classList.add('hidden');
+            overlay.classList.remove('hidden');
+            this._current = next;
+            // Confirmação em segundo plano: relê o saldo real do banco pra corrigir qualquer
+            // pequena divergência (ex.: o jogador tinha comprado algo bem no instante do
+            // reembolso), sem atrasar a exibição do popup.
+            sb.from('players').select('wallet').eq('id', Accounts.current.uid).single().then(({ data }) => {
+                if(data && typeof data.wallet === 'number' && data.wallet !== Engine.walletP1) {
+                    Engine.walletP1 = data.wallet;
+                    if(Accounts.current) Accounts.current.wallet = data.wallet;
+                    if(typeof Engine.renderShop === 'function') Engine.renderShop();
+                }
+            });
+        },
+        dismiss() {
+            document.getElementById('refund-modal-overlay').classList.add('hidden');
+            if(this._current && this._current.id) {
+                sb.from('gold_refunds').update({ seen: true }).eq('id', this._current.id).then(({error}) => {
+                    if(error) console.warn('Erro ao marcar reembolso como visto:', error);
+                });
+            }
+            this._current = null;
+            setTimeout(() => this._maybeShowNext(), 300);
         }
     };
     const Social = {
@@ -5889,14 +6172,20 @@
         // FIX: preços da loja aumentados (armas principalmente) — combinado com o conserto da
         // recompensa offline, agora chegar na arma mais forte exige várias partidas jogadas de
         // verdade, não só esperar ou juntar pouco ouro.
+        // FIX (pedido de usuários): as armas mais caras tinham DPS pior que a pistola inicial —
+        // o dano por tiro subia, mas o cooldown crescia proporcionalmente mais, então na prática
+        // atiravam devagar demais pra compensar (ex.: railgun tinha DPS ~3.5, pistola ~6.75).
+        // Os valores de dano abaixo foram recalculados pra garantir DPS realmente crescente com
+        // o preço: pistol/smg ficam parecidas (armas iniciais baratas), e a partir do laser cada
+        // arma mais cara é sempre mais forte de verdade, culminando na railgun como a mais letal.
         shopCatalog: [
-            { id: 'wpn_pistol', price: 650, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.9, weaponAtkCd: 8 },
-            { id: 'wpn_smg', price: 1200, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.6, weaponAtkCd: 5 },
-            { id: 'wpn_laser', price: 2200, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.3, weaponAtkCd: 12 },
-            { id: 'wpn_plasma', price: 3800, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 1.6, weaponAtkCd: 24 },
-            { id: 'wpn_cannon', price: 6000, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 2.0, weaponAtkCd: 34 },
-            { id: 'wpn_sniper', price: 9500, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 2.8, weaponAtkCd: 46 },
-            { id: 'wpn_railgun', price: 16000, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 3.4, weaponAtkCd: 58 },
+            { id: 'wpn_pistol', price: 650, type: 'weapon', weaponKey: 'pistol', weaponSpd: 25, weaponDmg: 0.87, weaponAtkCd: 8 },
+            { id: 'wpn_smg', price: 1200, type: 'weapon', weaponKey: 'smg', weaponSpd: 22, weaponDmg: 0.62, weaponAtkCd: 5 },
+            { id: 'wpn_laser', price: 2200, type: 'weapon', weaponKey: 'laser', weaponSpd: 18, weaponDmg: 1.8, weaponAtkCd: 12 },
+            { id: 'wpn_plasma', price: 3800, type: 'weapon', weaponKey: 'plasma', weaponSpd: 11, weaponDmg: 4.4, weaponAtkCd: 24 },
+            { id: 'wpn_cannon', price: 6000, type: 'weapon', weaponKey: 'cannon', weaponSpd: 9, weaponDmg: 7.65, weaponAtkCd: 34 },
+            { id: 'wpn_sniper', price: 9500, type: 'weapon', weaponKey: 'sniper', weaponSpd: 42, weaponDmg: 13.03, weaponAtkCd: 46 },
+            { id: 'wpn_railgun', price: 16000, type: 'weapon', weaponKey: 'railgun', weaponSpd: 50, weaponDmg: 21.27, weaponAtkCd: 58 },
             { id: 'itm_pot', price: 75, type: 'item', itemKey: 'potion' },
             { id: 'itm_pot3', price: 190, type: 'item', itemKey: 'potion', qty: 3 },
             { id: 'itm_shd', price: 100, type: 'item', itemKey: 'shield' },
@@ -6047,6 +6336,7 @@
         },
         bootWithAccount(acc) {
             try {
+                if(typeof AdminPanel !== 'undefined') AdminPanel.refreshVisibility();
                 this.walletP1 = (typeof acc.wallet === 'number') ? acc.wallet : 100;
                 if(acc.upg) this.persistentUpgradesP1 = {...acc.upg};
                 if(!this.persistentUpgradesP1.cosmetics) this.persistentUpgradesP1.cosmetics = this.defaultCosmetics();
@@ -6113,6 +6403,7 @@
             document.getElementById('menu-screen').classList.remove('hidden');
             try { this.updateMenu(); } catch(err) { console.error('Erro em updateMenu:', err); }
             try { Social.subscribeToIncomingInvites(); } catch(err) { console.error('Erro em subscribeToIncomingInvites:', err); }
+            try { RefundNotifier.subscribe(); } catch(err) { console.error('Erro em RefundNotifier.subscribe:', err); }
             try { Social.startPresenceHeartbeat(); } catch(err) { console.error('Erro em startPresenceHeartbeat:', err); }
             if (typeof fitGameContainer === 'function') fitGameContainer();
             // NOVO: sequência diária + recompensa offline + missões — roda uma vez ao entrar.
@@ -6243,7 +6534,7 @@
             let volSlider = document.getElementById('rng-volume'); if(volSlider) volSlider.value = 70;
             this.applyLanguage(); this.saveProfile(); this.closeSettings(); this.updateMenu(); this.refreshLevelBadge();
         },
-        openSettings() { document.getElementById('settings-screen').classList.remove('hidden'); },
+        openSettings() { if(typeof AdminPanel !== 'undefined') AdminPanel.refreshVisibility(); document.getElementById('settings-screen').classList.remove('hidden'); },
         closeSettings() { document.getElementById('settings-screen').classList.add('hidden'); },
         // NOVO: reportar erro — reaproveita o mesmo sistema/edge function da denúncia de jogador
         // ('report-user'), mas manda um campo is_bug:true para a Edge Function identificar que
@@ -6285,6 +6576,54 @@
                 btn.disabled = false;
             }
         },
+        // NOVO: pedido de reembolso feito pelo próprio jogador — grava um registro na tabela
+        // `refund_requests`; um TRIGGER configurado via SQL no Supabase dispara o envio do e-mail
+        // automaticamente (usando a extensão pg_net direto do Postgres), sem precisar de Edge
+        // Function nenhuma. O e-mail inclui o motivo, o valor pedido e o idioma da interface do
+        // jogador, pra poder responder no idioma certo. Isso NÃO credita ouro automaticamente —
+        // é só o envio do pedido; a decisão e o ajuste em si continuam manuais, pelo Painel de
+        // Reembolso (AdminPanel).
+        openRefundRequest() {
+            document.getElementById('refund-request-amount-input').value = '';
+            document.getElementById('refund-request-reason-input').value = '';
+            document.getElementById('refund-request-error').classList.add('hidden');
+            document.getElementById('refund-request-success').classList.add('hidden');
+            document.getElementById('refund-request-screen').classList.remove('hidden');
+        },
+        closeRefundRequest() { document.getElementById('refund-request-screen').classList.add('hidden'); },
+        async submitRefundRequest() {
+            let amountRaw = document.getElementById('refund-request-amount-input').value;
+            let amount = Math.round(Number(amountRaw));
+            let reason = (document.getElementById('refund-request-reason-input').value || '').trim();
+            let errEl = document.getElementById('refund-request-error'), okEl = document.getElementById('refund-request-success');
+            errEl.classList.add('hidden'); okEl.classList.add('hidden');
+            if (!amount || amount <= 0 || !isFinite(amount)) { errEl.textContent = t('refundRequestAmountRequired'); errEl.classList.remove('hidden'); return; }
+            if (!reason) { errEl.textContent = t('refundRequestReasonRequired'); errEl.classList.remove('hidden'); return; }
+            let btn = document.getElementById('btn-submit-refund-request'); btn.disabled = true;
+            try {
+                // NOVO: em vez de chamar uma Edge Function (que exigiria criar/colar código no
+                // editor de funções do Supabase, difícil de fazer pelo celular), o pedido é só um
+                // INSERT direto na tabela `refund_requests`. Um TRIGGER no banco (configurado via
+                // SQL) dispara o envio do e-mail automaticamente sempre que uma linha nova entra
+                // nessa tabela — nenhum código de servidor extra precisa ser criado/colado.
+                const { error } = await sb.from('refund_requests').insert({
+                    reporter_id: Accounts.current ? Accounts.current.uid : null,
+                    reporter_name: Accounts.current ? Accounts.current.name : 'Anônimo',
+                    reason: reason,
+                    amount_requested: amount,
+                    requester_language: Settings.language
+                });
+                if (error) throw error;
+                okEl.textContent = t('refundRequestSentMsg'); okEl.classList.remove('hidden');
+                setTimeout(() => this.closeRefundRequest(), 1800);
+            } catch (err) {
+                errEl.textContent = t('refundRequestSendErrorMsg');
+                errEl.classList.remove('hidden');
+                console.warn('Erro ao enviar pedido de reembolso (a tabela "refund_requests" e o trigger foram criados no Supabase?):', err);
+            } finally {
+                btn.disabled = false;
+            }
+        },
         // NOVO: botão de sair da partida (canto superior esquerdo do HUD), com confirmação.
         // NOVO: pausa/retoma a partida. Só funciona fora do modo online (multijogador via
         // internet) — pausar não faz sentido ali porque o outro jogador (remoto) continuaria
@@ -6301,7 +6640,12 @@
         },
         confirmExitMatch() {
             if(this.state !== 'IN_GAME') return;
-            if(window.confirm(t('exitMatchConfirmMsg'))) this.exitMatch();
+            // NOVO (pedido de usuários): no Modo Infinito o ouro visto na HUD durante a run só é
+            // creditado na conta quando a run termina (ao morrer) — sair pelo botão de saída antes
+            // disso perde esse ouro por completo, o que pegou gente de surpresa. Agora esse aviso
+            // é bem mais específico e explícito nesse modo.
+            let msg = this.gameMode === 'INFINITO' ? t('exitInfiniteConfirmMsg') : t('exitMatchConfirmMsg');
+            if(window.confirm(msg)) this.exitMatch();
         },
         exitMatch() {
             this.isPaused = false;
