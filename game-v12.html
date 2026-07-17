@@ -523,7 +523,7 @@
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <h1 style="margin:0;">BE BATTLES <span style="font-size:0.45em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></h1>
+                    <h1 style="margin:0; display:flex; align-items:center; gap:10px;"><img src="logobebattles.png" alt="BE BATTLES" style="height:56px; width:auto; display:block;"><span style="font-size:0.6em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button id="btn-social-players" onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
                         <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
@@ -6072,6 +6072,34 @@
             { id:'white',   hex:'#f8fafc', price:1900 },
             { id:'obsidian',hex:'#1e293b', price:1900 }
         ],
+        // NOVO: mapeia cada hex/arquétipo pra um prefixo de arquivo de sprite (frente/esquerda/
+        // direita). Cobre tanto as cores padrão dos arquétipos (verde=hero, vermelho=vilan,
+        // azul=default) quanto os cosméticos compráveis na loja (gold->amarelo, purple->roxo,
+        // cyan->ciano, pink->rosa, white->branco, obsidian->obsidiana).
+        spriteColorMap: {
+            '#22c55e': 'verde', '#ef4444': 'vermelho', '#38bdf8': 'azul',
+            '#eab308': 'amarelo', '#a855f7': 'roxo', '#06b6d4': 'ciano',
+            '#ec4899': 'rosa', '#f8fafc': 'branco', '#1e293b': 'obsidiana'
+        },
+        spriteCache: {},
+        // Pré-carrega todas as imagens de personagens/inimigos/boss uma única vez no boot.
+        // Guarda em spriteCache[prefixo][direcao] = Image já pronta pro draw usar direto.
+        preloadSprites() {
+            let prefixes = ['azul','amarelo','branco','ciano','roxo','verde','vermelho','rosa','obsidiana',
+                             'inimigocinza','inimigolaranja','inimigoroxo','boss'];
+            let dirs = { frente:'frente', esquerda:'esquerda', direita:'direita' };
+            prefixes.forEach(pfx => {
+                this.spriteCache[pfx] = {};
+                Object.keys(dirs).forEach(dKey => {
+                    let img = new Image();
+                    let isPng = pfx === 'boss' || pfx.startsWith('inimigo');
+                    let sep = isPng ? '' : '_';
+                    let ext = isPng ? 'png' : 'gif';
+                    img.src = `${pfx}${sep}${dirs[dKey]}.${ext}`;
+                    this.spriteCache[pfx][dKey] = img;
+                });
+            });
+        },
         cosmeticSkins: [
             { id:'default', price:0 },
             { id:'stripes', price:1150 },
@@ -6251,6 +6279,7 @@
             this.canvas = document.getElementById('ctxCanvas');
             this.ctx = this.canvas.getContext('2d');
             this.canvas.width = 1280; this.canvas.height = 720;
+            this.preloadSprites();
             let menuScreenEl = document.getElementById('menu-screen');
             let chatSidebarEl = document.getElementById('chat-sidebar');
             if(menuScreenEl && chatSidebarEl) {
@@ -8599,7 +8628,17 @@
             let needsGlow = this.shieldTime > 0 || this.skin === 'glow';
             ctx.shadowBlur = needsGlow ? ((this.shieldTime > 0 ? 15 : 0) + (this.skin === 'glow' ? 10 : 0)) : 0;
             ctx.shadowColor = this.color;
-            ctx.fillRect(this.x, this.y, this.w, this.h);
+            // NOVO: personagem agora é desenhado com sprite (imagem) em vez de retângulo sólido.
+            // O prefixo do sprite vem do hex da cor equipada (spriteColorMap); cai pro azul se a
+            // cor não tiver sprite mapeado, pra nunca sumir o personagem da tela.
+            let sPfx = Engine.spriteColorMap[this.color] || 'azul';
+            let sDir = this.facing === 1 ? 'direita' : 'esquerda';
+            let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][sDir];
+            if(sImg && sImg.complete && sImg.naturalWidth > 0) {
+                ctx.drawImage(sImg, this.x, this.y, this.w, this.h);
+            } else {
+                ctx.fillRect(this.x, this.y, this.w, this.h);
+            }
             if(this.skin === 'stripes') {
                 ctx.save(); ctx.beginPath(); ctx.rect(this.x, this.y, this.w, this.h); ctx.clip();
                 ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 4;
@@ -8630,7 +8669,6 @@
                 ctx.strokeRect(this.x-3, this.y-3, this.w+6, this.h+6);
                 ctx.restore();
             }
-            ctx.fillStyle = '#000'; ctx.fillRect(this.facing===1?this.x+20:this.x+6, this.y+10, 6, 6);
             ctx.restore();
             // NOVO: ícone flutuante acima da cabeça enquanto um power-up de mapa (fúria ou
             // velocidade) estiver ativo — dá retorno visual pra TODOS os jogadores na tela (não só
@@ -8795,8 +8833,22 @@
             }
         }
         draw(ctx) {
-            ctx.save(); ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.w, this.h);
-            if(this.type === 'boss') { ctx.fillStyle = '#000'; ctx.fillRect(this.x + this.w/2 - 14, this.y + 20, 28, 10); }
+            ctx.save();
+            // NOVO: inimigos comuns e boss agora usam sprite de imagem em vez de retângulo sólido.
+            // slime->inimigoroxo, shadow->inimigocinza, shooter->inimigolaranja, boss->boss.
+            // Direção escolhida pela velocidade horizontal atual (vx); se parado, mantém a última
+            // direção guardada em this._lastDir (default 'frente').
+            let sPfxMap = { slime: 'inimigoroxo', shadow: 'inimigocinza', shooter: 'inimigolaranja', boss: 'boss' };
+            let sPfx = sPfxMap[this.type] || 'inimigocinza';
+            if(this.vx > 0.05) this._lastDir = 'direita';
+            else if(this.vx < -0.05) this._lastDir = 'esquerda';
+            else if(!this._lastDir) this._lastDir = 'frente';
+            let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][this._lastDir];
+            if(sImg && sImg.complete && sImg.naturalWidth > 0) {
+                ctx.drawImage(sImg, this.x, this.y, this.w, this.h);
+            } else {
+                ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.w, this.h);
+            }
             let barW = this.type === 'boss' ? 70 : 36, barH = 5, bx = this.x + (this.w - barW)/2, by = this.y - 12;
             ctx.fillStyle = '#ef4444'; ctx.fillRect(bx, by, barW, barH);
             ctx.fillStyle = '#22c55e'; ctx.fillRect(bx, by, Math.max(0, (this.hp / this.maxHp) * barW), barH);
