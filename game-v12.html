@@ -475,7 +475,7 @@
     <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
     <div id="auth-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="auth-box">
-            <div class="auth-title">BE BATTLES <span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></div>
+            <div class="auth-title" style="display:flex; align-items:center; justify-content:center; gap:10px;"><img src="logobebattles.png" alt="BE BATTLES" style="height:clamp(64px, 14vw, 100px); width:auto; max-width:80vw; display:block;"><span style="font-size:0.4em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></div>
             <div class="auth-sub" data-i18n="authSubtitle">Horizon Survival Tournament 2026</div>
             <div class="auth-tabs" id="auth-tabs">
                 <button id="tab-login" class="active" onclick="Accounts.showTab('login')" data-i18n="authTabLogin">🔑 Entrar</button>
@@ -523,7 +523,7 @@
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <h1 style="margin:0; display:flex; align-items:center; gap:10px;"><img src="logobebattles.png" alt="BE BATTLES" style="height:56px; width:auto; display:block;"><span style="font-size:0.6em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></h1>
+                    <h1 style="margin:0; display:flex; align-items:center; gap:10px;"><img src="logobebattles.png" alt="BE BATTLES" style="height:clamp(72px, 12vw, 110px); width:auto; max-width:70vw; display:block;"><span style="font-size:0.6em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button id="btn-social-players" onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
                         <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
@@ -8635,7 +8635,9 @@
             let sDir = this.facing === 1 ? 'direita' : 'esquerda';
             let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][sDir];
             if(sImg && sImg.complete && sImg.naturalWidth > 0) {
-                ctx.drawImage(sImg, this.x, this.y, this.w, this.h);
+                let scale = 1.7; let dw = this.w * scale, dh = this.h * scale;
+                let dx = this.x - (dw - this.w) / 2, dy = this.y - (dh - this.h);
+                ctx.drawImage(sImg, dx, dy, dw, dh);
             } else {
                 ctx.fillRect(this.x, this.y, this.w, this.h);
             }
@@ -8845,7 +8847,10 @@
             else if(!this._lastDir) this._lastDir = 'frente';
             let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][this._lastDir];
             if(sImg && sImg.complete && sImg.naturalWidth > 0) {
-                ctx.drawImage(sImg, this.x, this.y, this.w, this.h);
+                let scale = this.type === 'boss' ? 1.35 : 1.6;
+                let dw = this.w * scale, dh = this.h * scale;
+                let dx = this.x - (dw - this.w) / 2, dy = this.y - (dh - this.h);
+                ctx.drawImage(sImg, dx, dy, dw, dh);
             } else {
                 ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, this.w, this.h);
             }
