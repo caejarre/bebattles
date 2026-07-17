@@ -3909,14 +3909,20 @@
     const RefundNotifier = {
         _queue: [], _channel: null, _processedIds: new Set(),
         subscribe() {
-            if(!Accounts.current || Accounts.current.isTestAccount || Accounts.current.isGuest) return;
+            if(!Accounts.current || Accounts.current.isTestAccount || Accounts.current.isGuest) return Promise.resolve();
             if(this._channel) sb.removeChannel(this._channel);
             this._channel = sb.channel('gold-refunds-' + Accounts.current.uid)
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'gold_refunds', filter: `player_id=eq.${Accounts.current.uid}` }, payload => {
                     this._enqueue(payload.new);
                 })
                 .subscribe();
-            sb.from('gold_refunds').select('*').eq('player_id', Accounts.current.uid).eq('seen', false)
+            // FIX: essa busca é assíncrona — se algo (ex.: check-in diário/recompensa offline)
+            // chamar Accounts.saveProgress() ANTES dela terminar, o saveProgress grava
+            // Engine.walletP1 desatualizado (sem o reembolso pendente) direto no banco,
+            // apagando o reembolso que o admin aplicou enquanto o jogador estava offline.
+            // Retornamos a Promise pra quem chama subscribe() poder esperar os reembolsos
+            // pendentes serem aplicados antes de disparar qualquer save.
+            return sb.from('gold_refunds').select('*').eq('player_id', Accounts.current.uid).eq('seen', false)
                 .then(({ data, error }) => {
                     if(error) { console.warn('Erro ao buscar reembolsos pendentes:', error); return; }
                     if(data && data.length) data.forEach(r => this._enqueue(r));
@@ -3949,6 +3955,11 @@
             Engine.walletP1 = Math.max(0, (Engine.walletP1 || 0) + amount);
             if(Accounts.current) Accounts.current.wallet = Engine.walletP1;
             if(typeof Engine.renderShop === 'function') Engine.renderShop();
+            // FIX: sem isso, o reembolso só existia na memória local até o próximo save
+            // disparar por outro motivo — se o jogador fechasse o navegador antes disso, o
+            // banco nunca recebia a correção e o reembolso "sumia" na próxima vez que
+            // qualquer outra ação salvasse o wallet antigo por cima.
+            Accounts.saveProgress();
             let isPositive = amount >= 0;
             document.getElementById('refund-modal-title').textContent = t(isPositive ? 'refundModalTitleAdded' : 'refundModalTitleRemoved');
             document.getElementById('refund-modal-amount').textContent = `${isPositive ? '+' : '-'}$${Math.abs(amount)}`;
@@ -6478,7 +6489,11 @@
             document.getElementById('menu-screen').classList.remove('hidden');
             try { this.updateMenu(); } catch(err) { console.error('Erro em updateMenu:', err); }
             try { Social.subscribeToIncomingInvites(); } catch(err) { console.error('Erro em subscribeToIncomingInvites:', err); }
-            try { RefundNotifier.subscribe(); } catch(err) { console.error('Erro em RefundNotifier.subscribe:', err); }
+            // FIX: guardamos a Promise do subscribe (que só resolve depois de aplicar qualquer
+            // reembolso pendente em Engine.walletP1) pra esperar ela antes do check-in diário
+            // abaixo, que pode chamar saveProfile() e sobrescrever o wallet no banco.
+            let refundNotifierReady = Promise.resolve();
+            try { refundNotifierReady = RefundNotifier.subscribe() || Promise.resolve(); } catch(err) { console.error('Erro em RefundNotifier.subscribe:', err); }
             try { Social.startPresenceHeartbeat(); } catch(err) { console.error('Erro em startPresenceHeartbeat:', err); }
             if (typeof fitGameContainer === 'function') fitGameContainer();
             // NOVO: sequência diária + recompensa offline + missões — roda uma vez ao entrar.
@@ -6487,16 +6502,18 @@
             // volta" pra quem nunca saiu). O tutorial de primeira vez continua tendo prioridade
             // visual — o modal de boas-vindas só aparece depois dele, se aplicável.
             try {
-                let hadStreakBefore = !!(this.persistentUpgradesP1.streak && this.persistentUpgradesP1.streak.lastDate);
-                let summary = DailyFeatures.checkInOnLogin(this.persistentUpgradesP1);
-                if (hadStreakBefore && (summary.streakChanged || summary.offlineGold > 0)) {
-                    // FIX: segunda camada de proteção — mesmo que bootWithAccount() tenha rodado
-                    // por algum motivo inesperado, este modal (z-index bem alto) nunca deve
-                    // aparecer por cima da tela de recuperação de senha.
-                    setTimeout(() => { if(!Accounts._inRecovery) this.showWelcomeBackModal(summary); }, Tutorial.shouldOpenFirstTime() ? 600 : 300);
-                }
-                this.renderMissions();
-                this.refreshStreakBadge();
+                refundNotifierReady.finally(() => {
+                    let hadStreakBefore = !!(this.persistentUpgradesP1.streak && this.persistentUpgradesP1.streak.lastDate);
+                    let summary = DailyFeatures.checkInOnLogin(this.persistentUpgradesP1);
+                    if (hadStreakBefore && (summary.streakChanged || summary.offlineGold > 0)) {
+                        // FIX: segunda camada de proteção — mesmo que bootWithAccount() tenha rodado
+                        // por algum motivo inesperado, este modal (z-index bem alto) nunca deve
+                        // aparecer por cima da tela de recuperação de senha.
+                        setTimeout(() => { if(!Accounts._inRecovery) this.showWelcomeBackModal(summary); }, Tutorial.shouldOpenFirstTime() ? 600 : 300);
+                    }
+                    this.renderMissions();
+                    this.refreshStreakBadge();
+                });
             } catch(err) { console.error('Erro no check-in diário:', err); }
             try { Tutorial.openIfFirstTime(); } catch(err) { console.error('Erro ao abrir tutorial:', err); }
         },
