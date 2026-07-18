@@ -6106,7 +6106,12 @@
             if(!holder) {
                 holder = document.createElement('div');
                 holder.id = 'sprite-anim-holder';
-                holder.style.cssText = 'position:absolute; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none;';
+                // FIX: alguns navegadores pausam a animação de um <img src="*.gif"> quando o
+                // elemento tem tamanho zero (width:0/height:0) ou display:none — tratam como
+                // "não visível de verdade" e economizam CPU não decodificando os frames
+                // seguintes. Por isso usamos tamanho real (1px) e posicionamos bem longe da
+                // área visível, em vez de zerar as dimensões.
+                holder.style.cssText = 'position:fixed; left:-99999px; top:-99999px; width:1px; height:1px; overflow:hidden; pointer-events:none;';
                 document.body.appendChild(holder);
             }
             playableColors.forEach(pfx => {
@@ -6114,6 +6119,7 @@
                 dirs.forEach(dKey => {
                     let img = new Image();
                     img.src = `${pfx}_${dKey}.gif`;
+                    img.style.cssText = 'width:2px; height:2px; display:block;';
                     holder.appendChild(img);
                     this.spriteCache[pfx][dKey] = img;
                 });
@@ -8669,6 +8675,29 @@
             // sumir o personagem da tela.
             let sPfx = Engine.spriteColorMap[this.color] || 'azul';
             let sDir = Math.abs(this.vx) > 0.05 ? (this.facing === 1 ? 'direita' : 'esquerda') : 'frente';
+            // NOVO: efeito puramente visual (sem sincronizar o sprite em si) — quando o
+            // personagem está com algum boost de velocidade ativo (upgrade comprado,
+            // plataforma aceleradora ou power-up) E realmente se movendo, desenha "linhas de
+            // velocidade" atrás dele, na direção oposta ao movimento, dando sensação de
+            // rapidez mesmo sem poder acelerar a animação do gif em si.
+            if(Math.abs(this.vx) > 0.05 && this.getEffectiveSpeed() > this.baseSpd + 0.1) {
+                ctx.save();
+                let dirSign = this.facing === 1 ? -1 : 1; // linhas ficam atrás, oposto ao facing
+                let baseX = this.facing === 1 ? this.x : this.x + this.w;
+                let midY = this.y + this.h * 0.45;
+                ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+                ctx.lineWidth = 3; ctx.lineCap = 'round';
+                for(let i=0; i<3; i++) {
+                    let ly = midY + (i - 1) * 9;
+                    let len = 14 - i * 2;
+                    let offset = 4 + i * 5;
+                    ctx.beginPath();
+                    ctx.moveTo(baseX + dirSign * offset, ly);
+                    ctx.lineTo(baseX + dirSign * (offset + len), ly);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            }
             let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][sDir];
             if(sImg && sImg.complete && sImg.naturalWidth > 0) {
                 let scale = 2.2; let dw = this.w * scale, dh = this.h * scale;
