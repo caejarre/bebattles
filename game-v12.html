@@ -6096,17 +6096,35 @@
         // Pré-carrega todas as imagens de personagens/inimigos/boss uma única vez no boot.
         // Guarda em spriteCache[prefixo][direcao] = Image já pronta pro draw usar direto.
         preloadSprites() {
-            let prefixes = ['azul','amarelo','branco','ciano','roxo','verde','vermelho','rosa','obsidiana',
-                             'inimigocinza','inimigolaranja','inimigoroxo','boss'];
-            let dirs = { frente:'frente', esquerda:'esquerda', direita:'direita' };
-            prefixes.forEach(pfx => {
+            // Cores jogáveis: usa <img src="..."> normal, do jeito que qualquer site carrega
+            // imagens — sem fetch manual nem decodificação em JS (isso podia parecer
+            // "suspeito" no painel de rede pra quem desconfia do site). O navegador anima o
+            // GIF sozinho, no ritmo fixo do arquivo (sem sincronizar com boost de velocidade).
+            let playableColors = ['azul','amarelo','branco','ciano','roxo','verde','vermelho','rosa','obsidiana'];
+            let dirs = ['frente','esquerda','direita'];
+            let holder = document.getElementById('sprite-anim-holder');
+            if(!holder) {
+                holder = document.createElement('div');
+                holder.id = 'sprite-anim-holder';
+                holder.style.cssText = 'position:absolute; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none;';
+                document.body.appendChild(holder);
+            }
+            playableColors.forEach(pfx => {
                 this.spriteCache[pfx] = {};
-                Object.keys(dirs).forEach(dKey => {
+                dirs.forEach(dKey => {
                     let img = new Image();
-                    let isPng = pfx === 'boss' || pfx.startsWith('inimigo');
-                    let sep = isPng ? '' : '_';
-                    let ext = isPng ? 'png' : 'gif';
-                    img.src = `${pfx}${sep}${dirs[dKey]}.${ext}`;
+                    img.src = `${pfx}_${dKey}.gif`;
+                    holder.appendChild(img);
+                    this.spriteCache[pfx][dKey] = img;
+                });
+            });
+            // Inimigos e boss: sprite único por direção (sem frames de caminhada fornecidos).
+            let staticPrefixes = ['inimigocinza','inimigolaranja','inimigoroxo','boss'];
+            staticPrefixes.forEach(pfx => {
+                this.spriteCache[pfx] = {};
+                dirs.forEach(dKey => {
+                    let img = new Image();
+                    img.src = `${pfx}${dKey}.png`;
                     this.spriteCache[pfx][dKey] = img;
                 });
             });
@@ -8645,14 +8663,15 @@
             let needsGlow = this.shieldTime > 0 || this.skin === 'glow';
             ctx.shadowBlur = needsGlow ? ((this.shieldTime > 0 ? 15 : 0) + (this.skin === 'glow' ? 10 : 0)) : 0;
             ctx.shadowColor = this.color;
-            // NOVO: personagem agora é desenhado com sprite (imagem) em vez de retângulo sólido.
-            // O prefixo do sprite vem do hex da cor equipada (spriteColorMap); cai pro azul se a
-            // cor não tiver sprite mapeado, pra nunca sumir o personagem da tela.
+            // NOVO: personagem agora é desenhado com sprite animado (frame a frame) em vez de
+            // retângulo sólido. O prefixo do sprite vem do hex da cor equipada
+            // (spriteColorMap); cai pro azul se a cor não tiver sprite mapeado, pra nunca
+            // sumir o personagem da tela.
             let sPfx = Engine.spriteColorMap[this.color] || 'azul';
-            let sDir = this.facing === 1 ? 'direita' : 'esquerda';
+            let sDir = Math.abs(this.vx) > 0.05 ? (this.facing === 1 ? 'direita' : 'esquerda') : 'frente';
             let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][sDir];
             if(sImg && sImg.complete && sImg.naturalWidth > 0) {
-                let scale = 1.7; let dw = this.w * scale, dh = this.h * scale;
+                let scale = 2.2; let dw = this.w * scale, dh = this.h * scale;
                 let dx = this.x - (dw - this.w) / 2, dy = this.y - (dh - this.h);
                 ctx.drawImage(sImg, dx, dy, dw, dh);
             } else {
@@ -8861,10 +8880,10 @@
             let sPfx = sPfxMap[this.type] || 'inimigocinza';
             if(this.vx > 0.05) this._lastDir = 'direita';
             else if(this.vx < -0.05) this._lastDir = 'esquerda';
-            else if(!this._lastDir) this._lastDir = 'frente';
+            else this._lastDir = 'frente';
             let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][this._lastDir];
             if(sImg && sImg.complete && sImg.naturalWidth > 0) {
-                let scale = this.type === 'boss' ? 1.35 : 1.6;
+                let scale = this.type === 'boss' ? 1.7 : 2.1;
                 let dw = this.w * scale, dh = this.h * scale;
                 let dx = this.x - (dw - this.w) / 2, dy = this.y - (dh - this.h);
                 ctx.drawImage(sImg, dx, dy, dw, dh);
