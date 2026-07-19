@@ -6619,7 +6619,6 @@
             // abaixo, que pode chamar saveProfile() e sobrescrever o wallet no banco.
             let refundNotifierReady = Promise.resolve();
             try { refundNotifierReady = RefundNotifier.subscribe() || Promise.resolve(); } catch(err) { console.error('Erro em RefundNotifier.subscribe:', err); }
-            try { Social.startPresenceHeartbeat(); } catch(err) { console.error('Erro em startPresenceHeartbeat:', err); }
             if (typeof fitGameContainer === 'function') fitGameContainer();
             // NOVO: sequência diária + recompensa offline + missões — roda uma vez ao entrar.
             // Se for a primeira vez jogando (streak não existia ainda) ou não tiver nada de
@@ -6638,6 +6637,18 @@
                     }
                     this.renderMissions();
                     this.refreshStreakBadge();
+                    // FIX: startPresenceHeartbeat() dispara um saveProgress() IMEDIATO assim que
+                    // chamado (correção de outra sessão, pro problema do "ouro offline sempre
+                    // 200"). Se ele rodasse antes daqui (como estava antes), esse save
+                    // imediato gravava o streak/missions ANTIGOS por cima — porque
+                    // checkInOnLogin() ainda não tinha atualizado a memória local ainda. Isso
+                    // fazia o streak.lastDate salvo no banco nunca avançar de verdade (ficava
+                    // sempre um dia atrás), e por consequência o próximo login sempre calculava
+                    // "st.lastDate !== today" como true — dando a impressão de "todo login é um
+                    // novo dia" mesmo entrando de novo minutos depois. Agora só iniciamos o
+                    // heartbeat (e o save imediato dele) depois que checkInOnLogin() já
+                    // terminou de atualizar streak/missions/lastSeenAt na memória.
+                    try { Social.startPresenceHeartbeat(); } catch(err) { console.error('Erro em startPresenceHeartbeat:', err); }
                 });
             } catch(err) { console.error('Erro no check-in diário:', err); }
             try { Tutorial.openIfFirstTime(); } catch(err) { console.error('Erro ao abrir tutorial:', err); }
