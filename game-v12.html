@@ -3772,6 +3772,17 @@
         },
         saveProgress() {
             if(!this.current) return;
+            // FIX: a coluna 'wallet' no banco é do tipo integer do Postgres, que tem um teto de
+            // 2.147.483.647. Se o saldo passar disso (por qualquer motivo — reembolsos
+            // acumulados, testes, bug futuro), o UPDATE inteiro é rejeitado pelo banco, e isso
+            // silenciosamente trava TUDO que essa função tentava salvar junto (não só o ouro:
+            // streak, missões, cosméticos, upgrades — a linha inteira nem grava). Isso já
+            // aconteceu e quebrou o cálculo de "dia novo"/recompensa offline, porque
+            // streak.lastDate nunca conseguia ser persistido. Travamos aqui num teto bem
+            // abaixo do limite (1 bilhão), o que já é mais dinheiro do que qualquer jogador
+            // precisaria acumular, pra nunca mais deixar isso quebrar o save inteiro de novo.
+            const WALLET_SAFE_CAP = 1000000000;
+            if(Engine.walletP1 > WALLET_SAFE_CAP) Engine.walletP1 = WALLET_SAFE_CAP;
             let data = {
                 name: this.current.name, wallet: Engine.walletP1,
                 upg: {...Engine.persistentUpgradesP1}, ranking: Engine.ranking,
@@ -3782,13 +3793,6 @@
             if(this.current.isTestAccount || this.current.isGuest) return; // conta de testes/visitante é 100% local, nunca vai pra nuvem
             sb.from('players').update(data).eq('id', this.current.uid).then(({error}) => {
                 if(error) console.warn('Falha ao salvar na nuvem:', error);
-                // DEBUG TEMPORÁRIO — remover depois de confirmado.
-                try {
-                    let dbg = document.createElement('div');
-                    dbg.style.cssText = 'position:fixed; top:60px; left:0; right:0; z-index:999999; background:' + (error ? '#450a0a' : '#052e16') + '; color:' + (error ? '#fecaca' : '#bbf7d0') + '; font-family:monospace; font-size:11px; padding:8px; white-space:pre-wrap;';
-                    dbg.textContent = `DEBUG saveProgress result\nerror=${error ? JSON.stringify(error) : 'nenhum'}\nstreak.lastDate salvo=${data.upg && data.upg.streak ? data.upg.streak.lastDate : '(sem streak)'}`;
-                    document.body.appendChild(dbg);
-                } catch(e) {}
             });
         },
         logout() { let was=this.current; this.current=null; this._inRecovery=false; if(typeof AdminPanel !== 'undefined') AdminPanel.refreshVisibility(); if(was && (was.isTestAccount || was.isGuest)) return; sb.auth.signOut().catch(e=>console.warn(e)); },
@@ -5890,14 +5894,6 @@
                 if(!profile.streak) profile.streak = { count: 0, lastDate: null, bestCount: 0 };
                 let st = profile.streak;
                 let streakChanged = false, streakGoldBonus = 0;
-                // DEBUG TEMPORÁRIO — remover depois de confirmado. Mostra na tela o que essa
-                // função está calculando, pra confirmar se ela roda e com quais valores.
-                try {
-                    let dbg = document.createElement('div');
-                    dbg.style.cssText = 'position:fixed; top:0; left:0; right:0; z-index:999999; background:#052e16; color:#bbf7d0; font-family:monospace; font-size:11px; padding:8px; white-space:pre-wrap;';
-                    dbg.textContent = `DEBUG checkInOnLogin\ntoday=${today}\nst.lastDate(antes)=${st.lastDate}\nprofile===Engine.persistentUpgradesP1: ${profile === Engine.persistentUpgradesP1}`;
-                    document.body.appendChild(dbg);
-                } catch(e) {}
                 if(st.lastDate !== today) {
                     let yStr = this.todayStr(-1);
                     st.count = (st.lastDate === yStr) ? (st.count + 1) : 1;
