@@ -3306,6 +3306,25 @@
         auth: { lock: noOpLock },
         global: { fetch: fetchWithTimeout }
     });
+    // FIX: quando a aba fica em segundo plano por um tempo (troca de app/aba) e volta, duas
+    // coisas podem já ter ficado desatualizadas: a conexão de rede (pode estar "morta" sem o
+    // navegador perceber ainda) e o token de autenticação (o SDK do Supabase renova o token
+    // sozinho usando timers internos, que os navegadores costumam pausar/atrasar quando a aba
+    // está em segundo plano — então o token pode ter expirado enquanto a aba estava escondida,
+    // e a primeira consulta real feita ao voltar falha porque ainda está usando o token
+    // vencido). Chamamos getSession() ao voltar o foco — o próprio SDK já detecta e renova o
+    // token internamente quando necessário como parte dessa chamada — antes de qualquer tela
+    // (Conversas, Seguindo, etc.) fazer sua consulta de verdade.
+    let _lastVisibleAt = Date.now();
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { _lastVisibleAt = Date.now(); return; }
+        let awayMs = Date.now() - _lastVisibleAt;
+        // Só vale a pena reaquecer se ficou fora tempo suficiente pra sessão/conexão terem
+        // risco de ficar desatualizadas — evita disparar isso a troco de nada em trocas
+        // rápidas de foco.
+        if (awayMs < 2000) return;
+        sb.auth.getSession().catch(() => {});
+    });
     // FIX (pedido de usuário): antes, ao clicar no link de "esqueci a senha" do e-mail, a tela
     // ficava travada numa "Carregando..." genérica até o evento assíncrono PASSWORD_RECOVERY do
     // SDK do Supabase disparar — o que podia demorar visivelmente. O Supabase inclui
@@ -3703,6 +3722,24 @@
                 }
                 const user = session ? session.user : null;
                 if(user) {
+                    // FIX: o SDK do Supabase costuma disparar onAuthStateChange de novo (evento
+                    // de re-sincronização de sessão/token) quando a aba volta a ficar em
+                    // primeiro plano depois de um tempo em segundo plano — mesmo sem o usuário
+                    // ter feito login de novo. Antes, isso rodava Engine.bootWithAccount() do
+                    // zero toda vez, o que recarrega conversas, seguidores e reabre os canais
+                    // realtime (RefundNotifier, lista de conversas, convites) por cima dos que
+                    // já estavam ativos. Se uma tela como "Conversas" ou "Seguindo" estivesse no
+                    // meio de uma consulta anterior nesse instante, ela podia ficar travada em
+                    // "Carregando..." pra sempre, porque a consulta antiga nunca atualiza mais a
+                    // UI (o usuário já saiu daquela tela mentalmente) e a nova só roda se a
+                    // pessoa tentar de novo manualmente. Agora, se já é a mesma conta já
+                    // carregada, pulamos o re-boot completo — só garantimos que o menu е o
+                    // heartbeat de presença continuem ativos.
+                    if(this.current && this.current.uid === user.id && !this.current.isGuest && !this.current.isTestAccount) {
+                        document.getElementById('boot-loading-screen').classList.add('hidden');
+                        this._setBusy(false);
+                        return;
+                    }
                     try {
                         let { data, error } = await sb.from('players').select('*').eq('id', user.id).single();
                         if (error && error.code !== 'PGRST116') throw error;
@@ -4033,25 +4070,39 @@
                 this._setFollowBtn(followBtn.classList.contains('following'));
             }
         },
-        async loadFollowing() {
+        async loadFollowing(_isRetry) {
             let container = document.getElementById('following-results');
             if (!Accounts.current) { container.innerHTML = `<div class="social-empty">${t('socialLoginToSeeFollowing')}</div>`; return; }
-            container.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
+            if (!_isRetry) container.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
+            // FIX: sem timeout, se a aba for pra segundo plano (trocar de aba/app) enquanto essa
+            // consulta está pendente, muitos navegadores pausam/descartam a conexão de rede em
+            // segundo plano — a promise nunca resolve nem rejeita, e a tela fica travada em
+            // "Carregando..." pra sempre, mesmo depois de voltar e tentar de novo (porque cada
+            // nova tentativa também pode ficar pendurada do mesmo jeito). withTimeout garante
+            // que, depois de 8s sem resposta, a função segue em frente com um erro tratado,
+            // permitindo tentar de novo.
             try {
-                const { data: followRows, error: followErr } = await sb
-                    .from('follows')
-                    .select('followed_id')
-                    .eq('follower_id', Accounts.current.uid);
+                const { data: followRows, error: followErr } = await withTimeout(
+                    sb.from('follows').select('followed_id').eq('follower_id', Accounts.current.uid),
+                    8000, 'carregar seguidos'
+                );
+                // FIX: a causa mais comum de falha aqui é a conexão de rede ter ficado "morta"
+                // depois de a aba passar um tempo em segundo plano — a primeira tentativa
+                // depois de voltar o foco costuma falhar sozinha, mas a segunda (com a conexão
+                // já renovada) geralmente funciona sem o usuário precisar fazer nada.
+                if (followErr && !_isRetry && /timeout|network|fetch/i.test(String(followErr.message || ''))) {
+                    return this.loadFollowing(true);
+                }
                 if (followErr) throw followErr;
                 if (!followRows || followRows.length === 0) {
                     container.innerHTML = `<div class="social-empty">${t('socialNoFollowing')}</div>`;
                     return;
                 }
                 const ids = followRows.map(r => r.followed_id);
-                const { data: players, error: playersErr } = await sb
-                    .from('players')
-                    .select('id, name, is_online, last_seen')
-                    .in('id', ids);
+                const { data: players, error: playersErr } = await withTimeout(
+                    sb.from('players').select('id, name, is_online, last_seen').in('id', ids),
+                    8000, 'carregar jogadores seguidos'
+                );
                 if (playersErr) throw playersErr;
                 if (!players || players.length === 0) {
                     container.innerHTML = `<div class="social-empty">${t('socialNoFollowing')}</div>`;
@@ -4083,7 +4134,7 @@
             if (!q) { container.innerHTML = `<div class="social-empty">${t('socialSearchTypeHint')}</div>`; return; }
             container.innerHTML = `<div class="social-empty">${t('socialSearching')}</div>`;
             try {
-                const { data, error } = await sb.rpc('search_players', { query: q });
+                const { data, error } = await withTimeout(sb.rpc('search_players', { query: q }), 8000, 'buscar jogadores');
                 if (error) throw error;
                 if (!data || data.length === 0) {
                     container.innerHTML = `<div class="social-empty">${t('socialNoResults')}</div>`;
@@ -4386,11 +4437,37 @@
         startPresenceHeartbeat() {
             this.setOnline(true);
             this.stopPresenceHeartbeat();
+            // FIX: o setInterval abaixo só dispara o primeiro heartbeat depois de 20s — se o
+            // jogador fechar antes disso, lastSeenAt ainda dependeria só do check-in do login
+            // (que é assíncrono e pode não terminar a tempo). Por isso mandamos uma atualização
+            // de lastSeenAt logo de cara também, sem esperar o primeiro intervalo.
+            if (Engine.persistentUpgradesP1) {
+                Engine.persistentUpgradesP1.lastSeenAt = Date.now();
+                Accounts.saveProgress();
+            }
             this._heartbeatInt = setInterval(() => {
                 // NOVO: evita mandar heartbeat com a aba em segundo plano há muito tempo sem
                 // necessidade — se ela ficou hidden, o próximo listener de visibilitychange já
                 // reenvia "online" assim que voltar ao primeiro plano.
-                if (!document.hidden) this.setOnline(true);
+                if (!document.hidden) {
+                    this.setOnline(true);
+                    // FIX: sem isto, o único ponto que atualizava profile.lastSeenAt era o
+                    // check-in do login — e o saveProfile() disparado ali é assíncrono
+                    // (chamada de rede pro Supabase). Se o jogador fechasse o app/aba rápido
+                    // demais (poucos segundos/minutos depois de abrir), essa gravação podia não
+                    // terminar a tempo, e o banco ficava com um lastSeenAt bem mais antigo. No
+                    // próximo login, "agora - lastSeenAt (antigo)" dava várias horas, batendo
+                    // sempre no teto de recompensa offline (200 ouro) mesmo tendo saído há
+                    // poucos minutos. Atualizando lastSeenAt a cada heartbeat (a cada 20s,
+                    // enquanto o jogo está de fato aberto e em primeiro plano), o valor salvo
+                    // no banco fica sempre quase em dia, então mesmo que o save de fechamento
+                    // falhe, a diferença calculada no próximo login é a correta (poucos
+                    // minutos), não um resquício de horas atrás.
+                    if (Engine.persistentUpgradesP1) {
+                        Engine.persistentUpgradesP1.lastSeenAt = Date.now();
+                        Accounts.saveProgress();
+                    }
+                }
             }, 20000);
             window.addEventListener('beforeunload', () => { this._setOfflineBeacon(); });
             window.addEventListener('pagehide', () => { this._setOfflineBeacon(); });
@@ -5148,7 +5225,7 @@
                 btn.disabled = false;
             }
         },
-        async loadConversations() {
+        async loadConversations(_isRetry) {
             let container = document.getElementById('chats-results');
             let sidebarContainer = document.getElementById('sidebar-chats-list');
             let targets = [container, sidebarContainer].filter(Boolean);
@@ -5156,12 +5233,21 @@
                 targets.forEach(el => el.innerHTML = `<div class="social-empty">${t('socialLoginToSeeFollowing')}</div>`);
                 return;
             }
-            if (container) container.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
+            if (container && !_isRetry) container.innerHTML = `<div class="social-empty">${t('socialLoading')}</div>`;
             try {
                 const { data: followRows, error: followErr } = await withTimeout(
                     sb.from('follows').select('followed_id').eq('follower_id', Accounts.current.uid),
                     8000, 'carregar seguidos'
                 );
+                // FIX: a causa mais comum de falha aqui é a conexão de rede ter ficado "morta"
+                // depois de a aba passar um tempo em segundo plano — a primeira tentativa
+                // depois de voltar o foco costuma falhar sozinha, mas uma segunda tentativa
+                // (com a conexão já renovada) geralmente funciona sem o usuário precisar fazer
+                // nada. Por isso, se for a primeira tentativa e o erro parecer de timeout/rede,
+                // tentamos automaticamente mais uma vez antes de mostrar erro pra pessoa.
+                if (followErr && !_isRetry && /timeout|network|fetch/i.test(String(followErr.message || ''))) {
+                    return this.loadConversations(true);
+                }
                 if (followErr) throw followErr;
                 let players = [];
                 if (followRows && followRows.length > 0) {
