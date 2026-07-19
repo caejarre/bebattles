@@ -8814,11 +8814,40 @@
                 }
                 ctx.restore();
             }
-            let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][sDir];
-            if(sImg && sImg.complete && sImg.naturalWidth > 0) {
+            let sImg = null, frameW = 0, frameH = 0, frameIdx = 0;
+            let sheet = Engine.spriteSheets[sPfx] && Engine.spriteSheets[sPfx][sDir];
+            if(sheet && sheet.frames > 0) {
+                if(sDir === 'frente') {
+                    // Parado: animação lenta (respiração/idle), sempre no mesmo ritmo, não
+                    // depende de velocidade porque o personagem não está andando.
+                    if(this._animTimer == null) this._animTimer = 0;
+                    this._animTimer += 1;
+                    frameIdx = Math.floor(this._animTimer / 15) % sheet.frames;
+                } else {
+                    // Andando: a passada das pernas acompanha a velocidade real (inclui
+                    // qualquer boost — upgrade permanente, plataforma aceleradora ou power-up
+                    // de velocidade), usando getEffectiveSpeed() como referência de "andar no
+                    // máximo". Quanto mais rápido o personagem se move, mais rápido os frames
+                    // avançam, então a passada das pernas nunca destoa da velocidade visual.
+                    let curSpd = Math.abs(this.vx);
+                    let maxSpd = this.getEffectiveSpeed() || 1;
+                    let speedRatio = Math.min(1.6, Math.max(0.35, curSpd / maxSpd));
+                    if(this._animTimer == null) this._animTimer = 0;
+                    this._animTimer += speedRatio;
+                    // Base: 1 frame a cada ~2.2 ticks de jogo na velocidade máxima (equivale
+                    // aproximadamente ao ritmo original de 50ms/frame a 60fps).
+                    frameIdx = Math.floor(this._animTimer / 2.2) % sheet.frames;
+                }
+                if(sheet.img.complete && sheet.img.naturalWidth > 0) {
+                    frameW = sheet.img.naturalWidth / sheet.frames;
+                    frameH = sheet.img.naturalHeight;
+                    sImg = sheet.img;
+                }
+            }
+            if(sImg) {
                 let scale = 2.2; let dw = this.w * scale, dh = this.h * scale;
                 let dx = this.x - (dw - this.w) / 2, dy = this.y - (dh - this.h);
-                ctx.drawImage(sImg, dx, dy, dw, dh);
+                ctx.drawImage(sImg, frameIdx * frameW, 0, frameW, frameH, dx, dy, dw, dh);
             } else {
                 ctx.fillRect(this.x, this.y, this.w, this.h);
             }
