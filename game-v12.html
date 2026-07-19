@@ -6114,11 +6114,26 @@
                 holder.style.cssText = 'position:fixed; left:-99999px; top:-99999px; width:1px; height:1px; overflow:hidden; pointer-events:none;';
                 document.body.appendChild(holder);
             }
+            // FIX: uploads manuais pelo site do GitHub às vezes salvam o nome do arquivo com
+            // espaço em vez de underline (ex.: "azul direita.gif" em vez de "azul_direita.gif"),
+            // dependendo de como o arquivo chegou até o computador de quem subiu. Em vez de
+            // depender de o nome estar exatamente certo, tentamos a variante com "_" primeiro
+            // e, se ela falhar ao carregar (evento 'error'), tentamos automaticamente a
+            // variante com espaço — assim funciona nos dois casos sem precisar renomear nada
+            // no repositório.
+            let loadWithFallback = (img, nameUnderscore, nameSpace) => {
+                img.addEventListener('error', () => {
+                    if(img.src.indexOf(encodeURIComponent(nameUnderscore)) !== -1 || img.src.indexOf(nameUnderscore) !== -1) {
+                        img.src = nameSpace;
+                    }
+                }, { once: true });
+                img.src = nameUnderscore;
+            };
             playableColors.forEach(pfx => {
                 this.spriteCache[pfx] = {};
                 dirs.forEach(dKey => {
                     let img = new Image();
-                    img.src = `${pfx}_${dKey}.gif`;
+                    loadWithFallback(img, `${pfx}_${dKey}.gif`, `${pfx} ${dKey}.gif`);
                     img.style.cssText = 'width:2px; height:2px; display:block;';
                     holder.appendChild(img);
                     this.spriteCache[pfx][dKey] = img;
@@ -6130,7 +6145,7 @@
                 this.spriteCache[pfx] = {};
                 dirs.forEach(dKey => {
                     let img = new Image();
-                    img.src = `${pfx}${dKey}.png`;
+                    loadWithFallback(img, `${pfx}${dKey}.png`, `${pfx} ${dKey}.png`);
                     this.spriteCache[pfx][dKey] = img;
                 });
             });
