@@ -3298,7 +3298,11 @@
     const noOpLock = async (name, acquireTimeout, fn) => { return await fn(); };
     const fetchWithTimeout = (url, options = {}) => {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        // FIX: 8s era curto demais em conexões mais lentas (especialmente mobile), fazendo o
+        // login abortar (AbortError) mesmo quando a rede só estava um pouco mais devagar, não
+        // parada de verdade. 15s dá mais margem sem deixar travado pra sempre num caso real de
+        // falha de rede.
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
         const opts = { ...options, signal: controller.signal };
         return fetch(url, opts).finally(() => clearTimeout(timeoutId));
     };
