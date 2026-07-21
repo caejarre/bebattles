@@ -8548,7 +8548,13 @@
     };
     class Player {
         constructor(id, x, y, archetype, controls, upg, profileId, cosmetics) {
-            this.id = id; this.x = x; this.y = y; this.w = 32; this.h = 46; this.vx = 0; this.vy = 0;
+            // FIX: o sprite é desenhado 2.2x maior que o corpo original (32x46) pra ficar mais
+            // visível, mas a colisão (tiros, itens, plataformas) sempre usou w/h reais nesse
+            // tamanho pequeno — resultado: a parte de cima do personagem (cabeça) ficava fora
+            // da área que de fato coletava itens ou tomava tiro, porque o sprite "vazava" pra
+            // cima da hitbox antiga. Aumentamos w/h reais também, então a colisão passa a
+            // cobrir o corpo inteiro como ele aparece na tela.
+            this.id = id; this.x = x; this.y = y; this.w = 50; this.h = 72; this.vx = 0; this.vy = 0;
             this.archetype = archetype; this.controls = controls; this.isGrounded = false; this.facing = id === 1 ? 1 : -1;
             this.lives = 3; this.goldCollected = 0; this.profileId = (profileId !== undefined) ? profileId : id;
             this.maxHp = upg.maxHp; this.hp = upg.maxHp;
@@ -8835,13 +8841,21 @@
                     // (curSpd > baseSpd) gera speedRatio > 1, e a animação acelera visivelmente.
                     let curSpd = Math.abs(this.vx);
                     let baseline = this.baseSpd || 1;
-                    let speedRatio = Math.min(2.2, Math.max(0.35, curSpd / baseline));
+                    // FIX: ritmo base estava um pouco rápido demais; e o efeito do boost
+                    // (curSpd/baseline) ficava perto de 1 mesmo com boost ativo porque a
+                    // diferença real entre baseSpd (4.8) e baseSpd+boost de plataforma (8.0) é
+                    // proporcional mas sutil num ciclo curto de 12 frames. Elevamos a razão a
+                    // uma potência >1 pra exagerar visualmente a diferença entre "andando
+                    // normal" e "andando com boost", mantendo 1.0 (sem boost) como ponto fixo.
+                    let rawRatio = curSpd / baseline;
+                    let speedRatio = Math.min(2.4, Math.max(0.35, Math.pow(rawRatio, 1.8)));
                     if(this._animTimer == null) this._animTimer = 0;
                     this._animTimer += speedRatio;
-                    // Base: 1 frame a cada ~2.2 ticks de jogo na velocidade base (equivale
-                    // aproximadamente ao ritmo original de 50ms/frame a 60fps). Com boost,
-                    // speedRatio > 1 faz os frames avançarem mais rápido que isso.
-                    frameIdx = Math.floor(this._animTimer / 2.2) % sheet.frames;
+                    // Base: 1 frame a cada ~2.6 ticks de jogo na velocidade base (um pouco mais
+                    // lento que antes, pra não parecer "correndo" quando o personagem só está
+                    // andando normal). Com boost, speedRatio > 1 faz os frames avançarem mais
+                    // rápido que isso, de forma bem mais perceptível que antes.
+                    frameIdx = Math.floor(this._animTimer / 2.6) % sheet.frames;
                 }
                 if(sheet.img.complete && sheet.img.naturalWidth > 0) {
                     frameW = sheet.img.naturalWidth / sheet.frames;
@@ -8850,7 +8864,7 @@
                 }
             }
             if(sImg) {
-                let scale = 2.2; let dw = this.w * scale, dh = this.h * scale;
+                let scale = 1.4; let dw = this.w * scale, dh = this.h * scale;
                 let dx = this.x - (dw - this.w) / 2, dy = this.y - (dh - this.h);
                 ctx.drawImage(sImg, frameIdx * frameW, 0, frameW, frameH, dx, dy, dw, dh);
             } else {
@@ -8968,10 +8982,14 @@
             if(type === 'boss') {
                 // Boss bem mais difícil: HP base e por nível maiores, mais rápido e atira com
                 // mais frequência (cd menor = atira mais vezes).
-                let lvl = bossLevel || 1; this.w = 70; this.h = 70;
+                let lvl = bossLevel || 1;
+                // FIX (mesmo motivo do Player): hitbox real aumentada pra bater com o sprite
+                // visual maior, senão a parte de cima do boss não colide/toma tiro de verdade.
+                this.w = 95; this.h = 95;
                 this.maxHp = Math.round((650 + (lvl - 1) * 320) * diffMult); this.color = '#dc2626'; this.speed = 2.35 * spdMult; this.cd = 55;
             } else {
-                this.w = 32; this.h = 32;
+                // FIX: mesmo ajuste de hitbox pros inimigos comuns.
+                this.w = 55; this.h = 55;
                 this.maxHp = Math.round((type === 'slime' ? 25 : (type === 'shadow' ? 55 : 40)) * diffMult);
                 this.color = type === 'slime' ? '#a855f7' : (type === 'shadow' ? '#64748b' : '#f97316');
                 this.speed = (type === 'slime' ? 1.4 : 2.0) * spdMult; this.cd = 60;
@@ -9062,7 +9080,7 @@
             else this._lastDir = 'frente';
             let sImg = Engine.spriteCache[sPfx] && Engine.spriteCache[sPfx][this._lastDir];
             if(sImg && sImg.complete && sImg.naturalWidth > 0) {
-                let scale = this.type === 'boss' ? 1.7 : 2.1;
+                let scale = this.type === 'boss' ? 1.25 : 1.35;
                 let dw = this.w * scale, dh = this.h * scale;
                 let dx = this.x - (dw - this.w) / 2, dy = this.y - (dh - this.h);
                 ctx.drawImage(sImg, dx, dy, dw, dh);
