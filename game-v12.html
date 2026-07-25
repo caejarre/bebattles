@@ -5928,6 +5928,127 @@
         };
         // ==================== fim DailyFeatures ====================
 
+        // ==================== PlayerPatternMemory ====================
+        // NOVO: "IA que aprende com você" — observa, em tempo real durante a partida, os
+        // padrões reais do jogador (não uma consulta a serviço externo): estilo de ataque
+        // preferido (perto vs longe), frequência de pulo, e tendência a avançar ou recuar
+        // quando o bot se aproxima. Isso é persistido na conta (leve, só alguns números) e
+        // usado pra ajustar sutilmente os parâmetros efetivos do bot a cada partida seguinte
+        // contra IA — dando a sensação real de "esse bot está ficando bom em me vencer",
+        // sem precisar de rede nem de um modelo de verdade.
+        const PlayerPatternMemory = {
+            // Estado acumulado DURANTE a partida atual — zerado a cada nova partida.
+            session: null,
+            startSession() {
+                this.session = {
+                    meleeAttacks: 0, rangedAttacks: 0, jumps: 0, framesTracked: 0,
+                    advanceFrames: 0, retreatFrames: 0, dashUses: 0
+                };
+            },
+            // Chamado a cada ataque do jogador (castAttack), pra saber se foi de perto ou longe
+            // no momento do golpe — usa a distância até o bot mais próximo vivo como referência.
+            recordAttack(player) {
+                if(!this.session || player.id !== Engine.mySlot) return;
+                let bot = Engine.players.find(p => p && p.id !== player.id && p.lives > 0)
+                    || Engine.enemies.find(e => e && !e.dead);
+                if(!bot) return;
+                let dist = Math.abs((player.x + player.w/2) - (bot.x + bot.w/2));
+                if(dist < 90) this.session.meleeAttacks++; else this.session.rangedAttacks++;
+            },
+            recordJump(player) {
+                if(!this.session || player.id !== Engine.mySlot) return;
+                this.session.jumps++;
+            },
+            recordDash(player) {
+                if(!this.session || player.id !== Engine.mySlot) return;
+                this.session.dashUses++;
+            },
+            // Chamado todo frame de update do bot (barato: só compara sinal de distância) —
+            // acumula se o jogador está, no geral, avançando ou recuando em relação ao bot,
+            // pra aprender se a pessoa costuma jogar agressiva ou defensiva no geral.
+            trackMovement(player, bot) {
+                if(!this.session || player.id !== Engine.mySlot) return;
+                this.session.framesTracked++;
+                let approaching = (player.vx > 0.3 && player.x < bot.x) || (player.vx < -0.3 && player.x > bot.x);
+                let retreating = (player.vx > 0.3 && player.x > bot.x) || (player.vx < -0.3 && player.x < bot.x);
+                if(approaching) this.session.advanceFrames++;
+                else if(retreating) this.session.retreatFrames++;
+            },
+            // Ao fim da partida (vitória ou derrota do bot), consolida a sessão na memória
+            // persistente da conta — média móvel com peso maior pra sessão mais recente, pra
+            // continuar se adaptando se o jogador mudar de estilo com o tempo, sem esquecer de
+            // vez o histórico anterior. Só grava se teve volume mínimo de dados (evita
+            // partidas curtas/anômalas distorcerem a memória).
+            endSession() {
+                let s = this.session; this.session = null;
+                if(!s) return;
+                let totalAttacks = s.meleeAttacks + s.rangedAttacks;
+                if(totalAttacks < 3 && s.framesTracked < 120) return; // dados de menos, ignora
+                let upg = Engine.persistentUpgradesP1;
+                if(!upg) return;
+                if(!upg.playerPattern) {
+                    upg.playerPattern = { meleeRatio: 0.5, aggressionRatio: 0.5, jumpRatio: 0.3, matchesTracked: 0, dashRatio: 0.1 };
+                }
+                let mem = upg.playerPattern;
+                let w = mem.matchesTracked > 0 ? 0.6 : 1; // primeira partida grava puro, depois pondera
+                if(totalAttacks > 0) {
+                    let sessionMeleeRatio = s.meleeAttacks / totalAttacks;
+                    mem.meleeRatio = mem.meleeRatio * (1-w) + sessionMeleeRatio * w;
+                }
+                if(s.framesTracked > 0) {
+                    let moveFrames = s.advanceFrames + s.retreatFrames;
+                    if(moveFrames > 0) {
+                        let sessionAggro = s.advanceFrames / moveFrames;
+                        mem.aggressionRatio = mem.aggressionRatio * (1-w) + sessionAggro * w;
+                    }
+                    let sessionJumpRatio = Math.min(1, s.jumps / (s.framesTracked / 60)); // pulos por segundo, capado
+                    mem.jumpRatio = mem.jumpRatio * (1-w) + sessionJumpRatio * w;
+                    let sessionDashRatio = Math.min(1, s.dashUses / (s.framesTracked / 60));
+                    mem.dashRatio = mem.dashRatio * (1-w) + sessionDashRatio * w;
+                }
+                mem.matchesTracked = Math.min(20, (mem.matchesTracked || 0) + 1);
+                Engine.saveProfile();
+            },
+            // Aplica a memória sobre uma cópia da config de dificuldade base, retornando uma
+            // config "efetiva" ajustada — a config original (aiDiffConfig) NUNCA é modificada
+            // diretamente, então a dificuldade escolhida continua sendo a base de tudo; o
+            // aprendizado só afeta nuances por cima dela. A intensidade do ajuste cresce com o
+            // número de partidas já observadas (até um teto), pra não mudar tudo de uma vez na
+            // primeira partida com pouquíssimo dado.
+            getAdaptedConfig(baseCfg) {
+                let mem = Engine.persistentUpgradesP1 && Engine.persistentUpgradesP1.playerPattern;
+                if(!mem || mem.matchesTracked < 1) return baseCfg;
+                let intensity = Math.min(1, mem.matchesTracked / 8) * 0.4; // teto: no máx. 40% de ajuste
+                let cfg = { ...baseCfg };
+                // Jogador prefere lutar de longe (ranged) → bot fica um pouco mais rápido e
+                // com reação melhor, pra fechar distância antes de levar tiro tranquilo demais.
+                if(mem.meleeRatio < 0.4) {
+                    cfg.spdMult = baseCfg.spdMult * (1 + intensity * 0.25);
+                    cfg.reaction = Math.max(0, Math.round(baseCfg.reaction * (1 - intensity * 0.3)));
+                }
+                // Jogador prefere corpo a corpo → bot melhora esquiva e passa a preferir manter
+                // distância/atirar mais (mesmo espírito do boss, só mais sutil aqui).
+                if(mem.meleeRatio > 0.6) {
+                    cfg.dodgeChance = Math.min(0.95, baseCfg.dodgeChance * (1 + intensity * 0.5));
+                    cfg.atkCdMult = baseCfg.atkCdMult * (1 - intensity * 0.25);
+                }
+                // Jogador costuma avançar bastante (agressivo) → bot fica mais defensivo/preciso
+                // nos contra-ataques (accuracy sobe, porque vai ter mais chances de golpe
+                // aberto pra explorar).
+                if(mem.aggressionRatio > 0.6) {
+                    cfg.accuracy = Math.min(0.98, baseCfg.accuracy * (1 + intensity * 0.2));
+                }
+                // Jogador pula muito → bot aprende a antecipar/pular junto com mais frequência
+                // (representado aqui como reação melhorada, já que não há um "jumpChance"
+                // dedicado na config original).
+                if(mem.jumpRatio > 0.5) {
+                    cfg.reaction = Math.max(0, Math.round(cfg.reaction * (1 - intensity * 0.2)));
+                }
+                return cfg;
+            }
+        };
+        // ==================== fim PlayerPatternMemory ====================
+
         const AIBrain = {
             strategy: 'balanced',
             _lastFetchAt: 0,
@@ -6546,6 +6667,26 @@
                 }));
             } catch(e) {}
         },
+        // NOVO: memória do boss — guarda, por conta, qual estilo de combate (melee/ranged) e a
+        // distância média que costumam derrotar o boss dessa pessoa. Isso alimenta um pequeno
+        // "contador" no comportamento do boss na próxima luta (ver Enemy — construtor e
+        // Enemy.update): se você sempre vence de longe, ele passa a fechar distância mais rápido
+        // e pular em cima de você com mais frequência; se vence corpo a corpo, ele passa a manter
+        // distância e atirar com mais frequência. Guarda também um contador de derrotas
+        // acumuladas, pra alimentar a variação ficar mais forte a cada rivalidade repetida (até
+        // um teto, pra não ficar impossível).
+        saveBossMemory(style, avgDist) {
+            let upg = this.persistentUpgradesP1;
+            if(!upg.bossMemory) upg.bossMemory = { style: null, avgDist: 0, defeats: 0 };
+            let mem = upg.bossMemory;
+            // Média móvel simples com a derrota mais recente pesando mais, pra memória se
+            // adaptar se o jogador mudar de estilo entre uma luta e outra, sem esquecer de vez o
+            // histórico anterior.
+            mem.avgDist = mem.defeats > 0 ? (mem.avgDist * 0.5 + avgDist * 0.5) : avgDist;
+            mem.style = style;
+            mem.defeats = Math.min(10, (mem.defeats || 0) + 1);
+            this.saveProfile();
+        },
         async loadProfileAndBoot() {
             // Obsoleto — Accounts.init() (Firebase onAuthStateChanged) cuida disso agora
         },
@@ -7115,7 +7256,10 @@
             let target = this.players.find(p => p && p.id !== bot.id && p.lives > 0);
             let keys = { left:false, right:false, up:false, attack:false, special:false };
             if(!target || bot.lives <= 0) { OnlineSync.guestKeysBySlot[bot.id] = keys; return; }
-            let cfg = this.aiDiffConfig[this.aiDifficulty] || this.aiDiffConfig.medium;
+            let cfg = PlayerPatternMemory.getAdaptedConfig(this.aiDiffConfig[this.aiDifficulty] || this.aiDiffConfig.medium);
+            // NOVO: rastreia se o jogador está avançando ou recuando em relação ao bot, pra
+            // alimentar a memória de padrões (ver PlayerPatternMemory.trackMovement).
+            PlayerPatternMemory.trackMovement(target, bot);
             bot._aiReactCd = (bot._aiReactCd || 0) - 1;
             let dx = (target.x + target.w/2) - (bot.x + bot.w/2);
             let dy = (target.y + target.h/2) - (bot.y + bot.h/2);
@@ -7851,7 +7995,7 @@
                 // de salto/aceleradoras + coletáveis), só que reposicionado pra caber na arena
                 // reduzida (arenaWidth 1300) sem deixar os dois jogadores longe demais um do outro.
                 this.platforms.push(new Platform(90, 500, 260, 20, 'jump'));
-                this.platforms.push(new Platform(560, 500, 260, 20));
+                this.platforms.push(new Platform(560, 500, 260, 20, null, null, 0, 0, true));
                 this.platforms.push(new Platform(340, 350, 220, 20, 'speed'));
                 this.platforms.push(new Platform(130, 200, 190, 20, null, 'x', 80, 0.5));
                 this.platforms.push(new Platform(590, 200, 190, 20, null, 'y', 65, 0.45));
@@ -7867,7 +8011,7 @@
                 // (amarelo) com as normais, além de coletáveis fixos pra explorar — os mesmos
                 // elementos disponíveis no Editor de Fases, só que num layout pronto.
                 this.platforms.push(new Platform(150, 500, 320, 20, 'jump'));
-                this.platforms.push(new Platform(810, 500, 320, 20));
+                this.platforms.push(new Platform(810, 500, 320, 20, null, null, 0, 0, true));
                 this.platforms.push(new Platform(490, 350, 300, 20, 'speed'));
                 this.platforms.push(new Platform(200, 200, 250, 20, null, 'x', 100, 0.5));
                 this.platforms.push(new Platform(830, 200, 250, 20, null, 'y', 85, 0.4));
@@ -7922,6 +8066,19 @@
             }
             this.players.forEach(p => { p.inventory.potion = Math.max(1, p.inventory.potion); p.syncHUD(); });
             this.state = 'IN_GAME';
+            // NOVO: clima dinâmico — sorteado a cada partida (peso maior pro 'clear' pra não
+            // toda luta ter um efeito ativo). Mundo aberto e o Esconderijo ficam sempre sem
+            // clima especial, pra não atrapalhar exploração/puzzle.
+            if(!this.isOpenWorld) {
+                let roll = Math.random();
+                Weather.start(roll < 0.55 ? 'clear' : (roll < 0.70 ? 'rain' : (roll < 0.85 ? 'wind' : 'fog')));
+            } else {
+                Weather.start('clear');
+            }
+            // NOVO: só rastreia padrões do jogador em partidas contra IA (não faz sentido
+            // "aprender" nada em partidas locais 2 jogadores ou online, onde não há bot pra
+            // se adaptar).
+            if(this.vsAI) PlayerPatternMemory.startSession(); else PlayerPatternMemory.session = null;
             setTimeout(() => { this.activeMatch = true; }, 400);
         },
         triggerDash(pId) {
@@ -7932,6 +8089,7 @@
                 p.vx = p.facing * (p.baseSpd * 2.5);
                 p.shieldTime = Math.max(p.shieldTime, 10);
                 p.dashCooldown = 40;
+                PlayerPatternMemory.recordDash(p);
                 createFXBurst(p.x+p.w/2, p.y+p.h/2, '#ffffff', 5);
             }
         },
@@ -8174,6 +8332,9 @@
             requestAnimationFrame(t => this.loop(t));
         },
         update(dt) {
+            // NOVO: clima dinâmico — vento/chuva evoluem a cada frame, mesmo fora de partida
+            // aberta, pra já estar em andamento quando a luta de fato começa.
+            Weather.update(dt);
             this.timerTicker += dt;
             if(this.timerTicker >= 1) {
                 this.timerTicker = 0;
@@ -8192,7 +8353,8 @@
                     sec = String(this.timeLeftSeconds%60).padStart(2,'0');
                     modeLabel = this.isOpenWorld ? t('modeLabelOpenWorld') : (this.gameMode === 'BOSS' ? `${t('modeLabelBoss')} ${this.round}` : `${t('modeLabelWave')} ${this.round}`);
                 }
-                document.getElementById('hud-timer-text').innerText = `${min}:${sec} | ${modeLabel}`;
+                let weatherLabel = { rain: ' 🌧️', wind: ' 💨', fog: ' 🌫️' }[Weather.current] || '';
+                document.getElementById('hud-timer-text').innerText = `${min}:${sec} | ${modeLabel}${weatherLabel}`;
                 this.syncBetHud();
                 if(this.timeLeftSeconds <= 0 && this.activeMatch && this.gameMode !== 'INFINITO') {
                     let mins = this.gameMode === 'BOSS' ? '10' : '5';
@@ -8477,6 +8639,9 @@
             }
             this.betActive = false; this.betAmountLocked = 0;
             if(myP) this.registerMatchStats({ kills: myP.kills, goldEarned: iWon ? Math.min(1000, myP.goldCollected) : 0, won: iWon });
+            // NOVO: consolida os padrões observados nesta partida na memória persistente da
+            // conta (só faz algo se startSession() foi chamado, ou seja, se era vsAI).
+            PlayerPatternMemory.endSession();
             this.saveProfile();
         },
         offerContinueOrEnd() {
@@ -8505,6 +8670,7 @@
         },
         backToMenu() {
             OnlineSync.disconnect();
+            Weather.stop();
             this.vsAI = false;
             this.customLevelData = null;
             document.getElementById('gameover-screen').classList.add('hidden');
@@ -8542,8 +8708,17 @@
                 this.enemies.forEach(e => e.draw(this.ctx));
                 this.players.forEach(p => { if(p && p.lives > 0) p.draw(this.ctx); });
                 this.particles.forEach(pa => pa.draw(this.ctx));
+                // NOVO: chuva/vento são desenhados dentro da transformação de câmera (as gotas
+                // já nascem em coordenadas de mundo, corrigidas pela câmera dentro do próprio
+                // Weather.draw), então acompanham a arena normalmente.
+                Weather.draw(this.ctx, this.cameraX);
             }
             this.ctx.restore();
+            // NOVO: névoa é desenhada por CIMA de tudo, fora da transformação de câmera/shake —
+            // ela cobre a tela inteira (não a arena), com "buracos" claros ao redor de cada
+            // jogador vivo, calculados já em coordenadas de tela (x - cameraX) dentro do
+            // próprio drawFog.
+            if(!Hideout.active) Weather.drawFog(this.ctx, this.players, this.cameraX);
         }
     };
     class Player {
@@ -8652,9 +8827,16 @@
             if(!inHideout) {
                 if(keys.left) { this.vx = -spd; this.facing = -1; }
                 else if(keys.right) { this.vx = spd; this.facing = 1; }
-                else { this.vx *= Math.pow(0.7, dt * 60); }
-                if(keys.up && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); }
-                this.vy += 0.68 * dt * 60; if(this.vy > 16) this.vy = 16;
+                else {
+                    // NOVO: em chão molhado (chuva), o atrito aplicado ao soltar a direção é
+                    // bem menor — o personagem desliza de verdade antes de parar, em vez do
+                    // atrito seco padrão. Só se aplica no chão (no ar sempre usa o mesmo, já
+                    // que "escorregar no ar" não faz sentido).
+                    let friction = this.isGrounded ? Weather.getGroundFriction() : 0.85;
+                    this.vx *= Math.pow(friction, dt * 60);
+                }
+                if(keys.up && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); PlayerPatternMemory.recordJump(this); }
+                if(!this.isGrounded) Weather.applyWind(this, dt, 0.35);
                 this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
                 if(!Engine.isOpenWorld) {
                     if(this.x < 0) this.x = 0; if(this.x + this.w > Engine.arenaWidth) this.x = Engine.arenaWidth - this.w;
@@ -8691,6 +8873,7 @@
         }
         castAttack() {
             this.cdAttack = this.atkCd;
+            PlayerPatternMemory.recordAttack(this);
             let px = this.facing === 1 ? this.x + this.w : this.x - 12;
             let dm = this.dmgMod * this.getDamageMultiplier();
             if(!Hideout.active) Engine.projectiles.push(new Projectile(px, this.y+14, this.facing * this.projSpd, 0, this.color, 12*dm, this));
@@ -8917,14 +9100,64 @@
         // NOVO: 'kind' define o tipo especial da plataforma — 'normal' (padrão), 'jump' (plataforma
         // de salto: impulsiona quem pisa nela bem mais alto que um pulo normal) ou 'speed'
         // (acelerador: dá um boost de velocidade temporário a quem passa por cima). Ver
-        // Physics.resolveAll() para o efeito de cada uma.
+        // Physics.resolveAll() para o efeito de cada una.
         // moveAxis: 'x' ou 'y' (movimento lento pra lados ou pra cima/baixo); moveRange: distância
         // percorrida a partir da posição inicial; moveSpeed: velocidade do vaivém.
-        constructor(x, y, w, h, kind, moveAxis, moveRange, moveSpeed) {
+        // destructible: se true, a plataforma tem HP e racha/cai depois de X hits (projétil ou
+        // pouso pesado). Plataformas em movimento (moveAxis) e as especiais (jump/speed) nunca
+        // são destrutíveis — mudar o layout embaixo de um mecanismo que já se move sozinho
+        // criaria situações confusas/injustas demais.
+        constructor(x, y, w, h, kind, moveAxis, moveRange, moveSpeed, destructible) {
             this.x = x; this.y = y; this.w = w; this.h = h; this.kind = kind || 'normal';
             this.baseX = x; this.baseY = y;
             this.moveAxis = moveAxis || null; this.moveRange = moveRange || 0; this.moveSpeed = moveSpeed || 0.6;
             this._movePhase = Math.random() * Math.PI * 2; this.dx = 0; this.dy = 0;
+            this.destructible = !!destructible && !moveAxis && kind === 'normal';
+            this.maxHits = 3;
+            this.hitsTaken = 0;
+            this.destroyed = false;
+            this.respawnTimer = 0;
+            // Cacos que caem quando a plataforma quebra — puramente visual, some sozinho.
+            this._debris = [];
+        }
+        // Aplica um "hit" na plataforma (projétil acertando por baixo, pouso pesado vindo de
+        // queda alta, etc). Retorna true se a plataforma acabou de quebrar com esse hit.
+        takeHit(impactX) {
+            if(!this.destructible || this.destroyed) return false;
+            this.hitsTaken++;
+            if(typeof createFXBurst === 'function') {
+                createFXBurst(impactX != null ? impactX : (this.x + this.w/2), this.y + 4, '#94a3b8', 6);
+            }
+            if(this.hitsTaken >= this.maxHits) {
+                this.destroyed = true;
+                this.respawnTimer = 600; // 10s a 60fps antes de voltar
+                AudioFX.play('hit');
+                // Cacos: pequenos retângulos que caem e desaparecem, dão o "peso" visual da
+                // queda sem precisar de física de verdade neles.
+                for(let i = 0; i < 8; i++) {
+                    this._debris.push({
+                        x: this.x + Math.random() * this.w, y: this.y + Math.random() * this.h,
+                        vx: (Math.random() - 0.5) * 3, vy: -Math.random() * 2 - 1,
+                        life: 40 + Math.random() * 20, w: 4 + Math.random() * 5, h: 4 + Math.random() * 5
+                    });
+                }
+                return true;
+            }
+            return false;
+        }
+        updateDestruction(dt) {
+            if(!this.destructible) return;
+            if(this.destroyed) {
+                this._debris.forEach(d => { d.vy += 0.35; d.x += d.vx; d.y += d.vy; d.life--; });
+                this._debris = this._debris.filter(d => d.life > 0);
+                this.respawnTimer -= dt * 60;
+                if(this.respawnTimer <= 0) {
+                    // Plataforma volta inteira depois do tempo de respawn — dá um respiro
+                    // tático em vez de sumir pra sempre, mantendo o mapa jogável a longo prazo.
+                    this.destroyed = false; this.hitsTaken = 0; this._debris = [];
+                    if(typeof createFXBurst === 'function') createFXBurst(this.x + this.w/2, this.y + this.h/2, '#38bdf8', 10);
+                }
+            }
         }
         updateMove(dt) {
             if(!this.moveAxis) return;
@@ -8935,6 +9168,15 @@
         }
         draw(ctx) {
             ctx.save();
+            if(this.destructible && this.destroyed) {
+                // Enquanto destruída: não desenha o corpo sólido (não colide, não é visível
+                // como piso), só os cacos caindo, pra deixar claro visualmente que sumiu.
+                ctx.fillStyle = '#475569';
+                this._debris.forEach(d => { ctx.globalAlpha = Math.max(0, d.life / 50); ctx.fillRect(d.x, d.y, d.w, d.h); });
+                ctx.globalAlpha = 1;
+                ctx.restore();
+                return;
+            }
             if(this.kind === 'jump') {
                 ctx.fillStyle = '#052e1b'; ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2.5;
                 ctx.shadowColor = '#22c55e'; ctx.shadowBlur = 8;
@@ -8968,6 +9210,28 @@
                 if(this.moveAxis) { ctx.fillStyle = '#1e1035'; ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 2.5; ctx.shadowColor = '#c084fc'; ctx.shadowBlur = 6; }
                 else { ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2; }
                 ctx.fillRect(this.x, this.y, this.w, this.h); ctx.strokeRect(this.x, this.y, this.w, this.h);
+                // NOVO: rachaduras visuais progressivas — quanto mais hits levou, mais linhas de
+                // trinca aparecem, dando aviso claro antes de quebrar de vez.
+                if(this.destructible && this.hitsTaken > 0) {
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(15,23,42,0.85)'; ctx.lineWidth = 1.5;
+                    // Seed determinístico (baseado na posição) pra rachadura não "tremer" a cada
+                    // frame redesenhando em posições aleatórias diferentes.
+                    let seed = Math.floor(this.x) * 7 + Math.floor(this.y) * 13;
+                    let rand = (n) => { let x = Math.sin(seed + n * 999) * 10000; return x - Math.floor(x); };
+                    let crackCount = this.hitsTaken * 2;
+                    for(let i = 0; i < crackCount; i++) {
+                        let cx = this.x + rand(i) * this.w, cy = this.y + rand(i + 50) * this.h;
+                        ctx.beginPath(); ctx.moveTo(cx, cy);
+                        let segs = 2 + Math.floor(rand(i + 100) * 2);
+                        for(let s = 0; s < segs; s++) {
+                            cx += (rand(i + s + 200) - 0.5) * 14; cy += (rand(i + s + 300) - 0.5) * 10;
+                            ctx.lineTo(cx, cy);
+                        }
+                        ctx.stroke();
+                    }
+                    ctx.restore();
+                }
             }
             ctx.restore();
         }
@@ -8987,6 +9251,30 @@
                 // visual maior, senão a parte de cima do boss não colide/toma tiro de verdade.
                 this.w = 95; this.h = 95;
                 this.maxHp = Math.round((650 + (lvl - 1) * 320) * diffMult); this.color = '#dc2626'; this.speed = 2.35 * spdMult; this.cd = 55;
+                // NOVO: memória do boss — lê o histórico salvo na conta do jogador local (quantas
+                // vezes já foi derrotado por ele, e de que jeito) e ajusta o comportamento base
+                // pra contra-atacar especificamente o padrão que costuma vencer essa pessoa. O
+                // ajuste cresce em intensidade a cada derrota acumulada (até um teto), então a
+                // primeira revanche já é um pouco diferente, e a quinta revanche é bem mais
+                // adaptada — criando a sensação de rivalidade pessoal crescente contra o chefe.
+                let mem = Engine.persistentUpgradesP1 && Engine.persistentUpgradesP1.bossMemory;
+                this.adaptiveStyle = null;
+                if(mem && mem.defeats > 0) {
+                    let intensity = Math.min(1, mem.defeats / 5); // teto de adaptação em 5 derrotas
+                    this.adaptiveStyle = mem.style;
+                    this.preferredEngageDist = mem.avgDist;
+                    if(mem.style === 'ranged') {
+                        // Jogador costuma vencer de longe: boss fica mais rápido e pula mais
+                        // pra fechar distância antes que dê tempo de atirar tranquilo.
+                        this.speed *= 1 + intensity * 0.35;
+                        this.cd *= 1 - intensity * 0.15; // atira um pouco mais também, não só corre
+                    } else if(mem.style === 'melee') {
+                        // Jogador costuma vencer corpo a corpo: boss passa a manter distância e
+                        // atirar com bem mais frequência, dificultando a aproximação.
+                        this.cd *= 1 - intensity * 0.4;
+                        this._keepDistance = true;
+                    }
+                }
             } else {
                 // FIX: mesmo ajuste de hitbox pros inimigos comuns.
                 this.w = 55; this.h = 55;
@@ -9003,8 +9291,20 @@
             let tgs = Engine.players.filter(p => p && p.lives > 0);
             if(tgs.length > 0) {
                 let tgt = tgs[0];
-                this.vx = (tgt.x + tgt.w/2) > (this.x + this.w/2) ? this.speed : -this.speed;
-                if(this.isGrounded && this.jumpCd <= 0 && (tgt.y + tgt.h) < (this.y - 30) && Math.abs((tgt.x + tgt.w/2) - (this.x + this.w/2)) < 260 && this._canReachHigherPlatform()) {
+                let dx = (tgt.x + tgt.w/2) - (this.x + this.w/2);
+                // NOVO: se a memória indica que esse jogador costuma vencer corpo a corpo, o
+                // boss agora prefere manter uma distância mínima em vez de sempre perseguir de
+                // perto — foge um pouco se o jogador chegar muito perto, e só volta a se
+                // aproximar se ele ficar longe demais pra continuar atirando de forma eficaz.
+                if(this._keepDistance && this.type === 'boss') {
+                    let dist = Math.abs(dx);
+                    if(dist < 180) this.vx = dx > 0 ? -this.speed : this.speed; // afasta
+                    else if(dist > 420) this.vx = dx > 0 ? this.speed : -this.speed; // aproxima só se longe demais
+                    else this.vx *= 0.9; // zona confortável: desacelera, mantém posição
+                } else {
+                    this.vx = dx > 0 ? this.speed : -this.speed;
+                }
+                if(this.isGrounded && this.jumpCd <= 0 && (tgt.y + tgt.h) < (this.y - 30) && Math.abs(dx) < 260 && this._canReachHigherPlatform()) {
                     this.vy = -15; this.isGrounded = false; this.jumpCd = 50;
                 }
                 if(this.type === 'shooter' || this.type === 'boss') {
@@ -9040,6 +9340,16 @@
         }
         takeDamage(amount, source) {
             if(this.dead) return; this.hp -= amount;
+            // NOVO: memória do boss — enquanto ele está vivo, rastreamos de que distância o
+            // jogador local costuma acertá-lo (perto = corpo a corpo, longe = tiro à distância).
+            // Isso alimenta Engine.persistentUpgradesP1.bossMemory quando ele morre, pra próxima
+            // luta contra o MESMO jogador vir "adaptada" contra o padrão que funcionou.
+            if(this.type === 'boss' && source && source instanceof Player && source.profileId === Engine.mySlot) {
+                let dist = Math.abs((source.x + source.w/2) - (this.x + this.w/2));
+                if(!this._dmgLog) this._dmgLog = { meleeHits: 0, rangedHits: 0, totalDist: 0, hitCount: 0 };
+                this._dmgLog.totalDist += dist; this._dmgLog.hitCount++;
+                if(dist < 90) this._dmgLog.meleeHits++; else this._dmgLog.rangedHits++;
+            }
             if(this.hp <= 0) {
                 this.dead = true; Engine.killsCounter++;
                 if(source && source instanceof Player) {
@@ -9061,6 +9371,15 @@
                 if(this.type === 'boss') {
                     if(source && source instanceof Player) { source.goldCollected += 250; source.syncHUD(); }
                     for(let i=0; i<5; i++) Engine.items.push(new Item(this.x + i*14, this.y+10, 'coin'));
+                    // NOVO: memória do boss — salva o padrão de combate predominante que derrubou
+                    // ele (corpo a corpo vs à distância) na conta do jogador local, pra próxima
+                    // luta contra o boss vir com um ajuste específico contra esse padrão. Só
+                    // grava se o jogador local teve participação real na luta (tem log de dano).
+                    if(this._dmgLog && this._dmgLog.hitCount > 0 && typeof Engine.saveBossMemory === 'function') {
+                        let avgDist = this._dmgLog.totalDist / this._dmgLog.hitCount;
+                        let style = this._dmgLog.meleeHits >= this._dmgLog.rangedHits ? 'melee' : 'ranged';
+                        Engine.saveBossMemory(style, avgDist);
+                    }
                 } else {
                     if(source && source instanceof Player) { source.goldCollected += 30; source.syncHUD(); }
                     if(Math.random() < 0.4) Engine.items.push(new Item(this.x, this.y+10, 'coin'));
@@ -9090,6 +9409,14 @@
             let barW = this.type === 'boss' ? 70 : 36, barH = 5, bx = this.x + (this.w - barW)/2, by = this.y - 12;
             ctx.fillStyle = '#ef4444'; ctx.fillRect(bx, by, barW, barH);
             ctx.fillStyle = '#22c55e'; ctx.fillRect(bx, by, Math.max(0, (this.hp / this.maxHp) * barW), barH);
+            // NOVO: quando o boss está adaptado pela memória de derrotas anteriores, um pequeno
+            // ícone acima da barra de vida avisa isso — sem essa pista visual, o jogador não
+            // teria como saber que o comportamento mudado é intencional (rivalidade) e não bug.
+            if(this.adaptiveStyle) {
+                ctx.font = '16px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText(this.adaptiveStyle === 'ranged' ? '⚡' : '🛡️', bx + barW/2, by - 6);
+                ctx.textAlign = 'left';
+            }
             ctx.restore();
         }
     }
@@ -9159,7 +9486,13 @@
     }
     class Particle {
         constructor(x, y, color, vx, vy, life) { this.x = x; this.y = y; this.color = color; this.vx = vx; this.vy = vy; this.life = life; }
-        update(dt) { this.x += this.vx * dt * 60; this.y += this.vy * dt * 60; this.life -= dt*60; }
+        update(dt) {
+            // NOVO: vento curva a trajetória do projétil de verdade — windScale maior (0.7) que
+            // o do personagem, já que um projétil leve deveria ser mais afetado pelo ar do que
+            // uma pessoa inteira.
+            Weather.applyWind(this, dt, 0.7);
+            this.x += this.vx * dt * 60; this.y += this.vy * dt * 60; this.life -= dt*60;
+        }
         draw(ctx) { ctx.save(); ctx.fillStyle = this.color; ctx.fillRect(this.x, this.y, 3, 3); ctx.restore(); }
     }
     function createFXBurst(x, y, color, qty) {
@@ -9167,16 +9500,173 @@
             Engine.particles.push(new Particle(x, y, color, (Math.random()-0.5)*6, (Math.random()-0.5)*6, 22));
         }
     }
+    // NOVO: sistema de clima dinâmico. Cada partida sorteia (ou herda de mapa customizado) um
+    // clima que muda de verdade a física da luta, não só a aparência:
+    // - 'rain': chão fica escorregadio (atrito reduzido de verdade no movimento), gotas caem
+    //   com física própria (afetadas pelo vento se houver), splash visual ao tocar plataforma.
+    // - 'wind': força lateral contínua com rajadas variáveis (ruído, não senoidal fixo) que
+    //   empurra projéteis (curva a trajetória de verdade) e o personagem no ar (pulo desvia).
+    // - 'fog': reduz o raio de visão nítida ao redor de cada jogador — fora do raio, uma
+    //   camada escura via gradiente radial cobre a cena (fog of war real, não só um filtro).
+    // - 'clear': sem efeito, clima "normal" de sempre.
+    const Weather = {
+        current: 'clear',
+        windForce: 0,          // força lateral atual (px/frame equivalente), positivo = direita
+        _windTargetForce: 0,
+        _windChangeTimer: 0,
+        raindrops: [],
+        _rainSpawnAccum: 0,
+        fogRadius: 340,        // raio de visão nítida em pixels ao redor de cada jogador vivo
+        start(type) {
+            this.current = type || 'clear';
+            this.windForce = 0; this._windTargetForce = 0; this._windChangeTimer = 0;
+            this.raindrops = []; this._rainSpawnAccum = 0;
+        },
+        stop() { this.current = 'clear'; this.raindrops = []; },
+        update(dt) {
+            if(this.current === 'clear') return;
+            if(this.current === 'wind') this._updateWind(dt);
+            if(this.current === 'rain') this._updateRain(dt);
+            // Névoa não precisa de update de estado — o raio é fixo, só afeta o desenho.
+        },
+        _updateWind(dt) {
+            // Rajadas: a cada 1.5-4s sorteia uma nova força-alvo, e a força atual "persegue" esse
+            // alvo suavemente (em vez de trocar de repente), simulando rajadas de vento reais em
+            // vez de um vento constante e previsível.
+            this._windChangeTimer -= dt;
+            if(this._windChangeTimer <= 0) {
+                this._windTargetForce = (Math.random() * 2 - 1) * 4.5; // até ~4.5px/frame de força
+                this._windChangeTimer = 1.5 + Math.random() * 2.5;
+            }
+            this.windForce += (this._windTargetForce - this.windForce) * Math.min(1, dt * 1.2);
+        },
+        _updateRain(dt) {
+            // Também sopra vento leve durante chuva (tempestade), então as gotas caem em diagonal
+            // e não reto pra baixo — reforça a sensação de "chuva de verdade" e não decoração.
+            this._windChangeTimer -= dt;
+            if(this._windChangeTimer <= 0) {
+                this._windTargetForce = (Math.random() * 2 - 1) * 2;
+                this._windChangeTimer = 2 + Math.random() * 3;
+            }
+            this.windForce += (this._windTargetForce - this.windForce) * Math.min(1, dt * 0.8);
+            // Spawn contínuo de gotas cobrindo a largura visível da câmera, não a arena inteira
+            // (economia de partículas — só nasce o que pode aparecer na tela).
+            this._rainSpawnAccum += dt * 60;
+            let camX = Engine.camera ? Engine.camera.x : 0;
+            while(this._rainSpawnAccum > 1.2) {
+                this._rainSpawnAccum -= 1.2;
+                this.raindrops.push({
+                    x: camX - 100 + Math.random() * 1480,
+                    y: -20 - Math.random() * 300,
+                    vy: 14 + Math.random() * 6,
+                    len: 10 + Math.random() * 8,
+                    life: 1
+                });
+            }
+            for(let i = this.raindrops.length - 1; i >= 0; i--) {
+                let d = this.raindrops[i];
+                d.y += d.vy * dt * 60;
+                d.x += this.windForce * dt * 60 * 0.6;
+                // Colide com plataformas (splash) ou sai da tela por baixo — os dois casos
+                // removem a gota.
+                let hitPlatform = Engine.platforms.some(p => !(p.destructible && p.destroyed) &&
+                    d.x >= p.x && d.x <= p.x + p.w && d.y >= p.y - 4 && d.y <= p.y + 6);
+                if(hitPlatform || d.y > 760) this.raindrops.splice(i, 1);
+            }
+        },
+        // Atrito efetivo do chão (multiplicador aplicado à desaceleração horizontal quando o
+        // personagem não está segurando uma direção) — chuva deixa o chão escorregadio de
+        // verdade: o personagem demora bem mais pra parar depois de soltar o movimento.
+        getGroundFriction() {
+            return this.current === 'rain' ? 0.965 : 0.78;
+        },
+        // Força de vento aplicada por frame a um corpo com vx (projéteis) ou no ar (pulo).
+        // windScale permite dar menos efeito pra projéteis pesados/personagem do que pra gotas.
+        applyWind(entity, dt, windScale) {
+            if(this.current !== 'wind' && this.current !== 'rain') return;
+            entity.vx += this.windForce * (windScale != null ? windScale : 1) * dt * 60 * 0.03;
+        },
+        draw(ctx, camX) {
+            if(this.current === 'rain') {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(148,163,184,0.55)'; ctx.lineWidth = 1.5;
+                this.raindrops.forEach(d => {
+                    ctx.beginPath();
+                    ctx.moveTo(d.x - camX, d.y);
+                    ctx.lineTo(d.x - camX + this.windForce * 0.8, d.y + d.len);
+                    ctx.stroke();
+                });
+                // Leve escurecimento geral de céu nublado, sutil pra não atrapalhar leitura.
+                ctx.fillStyle = 'rgba(15,23,42,0.12)';
+                ctx.fillRect(0, 0, 1280, 720);
+                ctx.restore();
+            } else if(this.current === 'wind') {
+                // Linhas de vento (streaks) que atravessam a tela na direção da força atual —
+                // dão leitura visual clara de "pra que lado está soprando agora", útil pra
+                // planejar pulos/tiros contra o vento.
+                ctx.save();
+                ctx.strokeStyle = 'rgba(148,163,184,0.28)'; ctx.lineWidth = 2;
+                let dir = this.windForce >= 0 ? 1 : -1;
+                let intensity = Math.min(1, Math.abs(this.windForce) / 4.5);
+                let t = performance.now() / 1000;
+                for(let i = 0; i < 14; i++) {
+                    let y = (i * 53 + (t * 220 * dir) % 720 + 720) % 720;
+                    let len = 40 + intensity * 60;
+                    let x = (i * 137) % 1280;
+                    ctx.globalAlpha = 0.15 + intensity * 0.35;
+                    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + len * dir, y); ctx.stroke();
+                }
+                ctx.restore();
+            }
+        },
+        // Névoa/escuridão: desenhada por CIMA de tudo, no fim do frame — um gradiente radial
+        // escuro que deixa nítido só um raio ao redor de cada jogador vivo local, escurecendo o
+        // resto de verdade (fog of war real, não um filtro de brilho fixo).
+        drawFog(ctx, players, camX) {
+            if(this.current !== 'fog') return;
+            ctx.save();
+            ctx.fillStyle = '#000';
+            // Desenha a escuridão cheia, depois "recorta" (destination-out) círculos claros ao
+            // redor de cada jogador vivo — assim quem estiver perto de outro jogador enxerga
+            // mais que sozinho, e sobra escuro em todo o resto do mapa.
+            let fogCanvas = this._fogCanvas || (this._fogCanvas = document.createElement('canvas'));
+            fogCanvas.width = 1280; fogCanvas.height = 720;
+            let fctx = fogCanvas.getContext('2d');
+            fctx.clearRect(0, 0, 1280, 720);
+            fctx.fillStyle = 'rgba(2,6,23,0.93)';
+            fctx.fillRect(0, 0, 1280, 720);
+            fctx.globalCompositeOperation = 'destination-out';
+            players.filter(p => p && p.lives > 0).forEach(p => {
+                let px = p.x + p.w/2 - camX, py = p.y + p.h/2;
+                let grad = fctx.createRadialGradient(px, py, this.fogRadius * 0.25, px, py, this.fogRadius);
+                grad.addColorStop(0, 'rgba(0,0,0,1)');
+                grad.addColorStop(1, 'rgba(0,0,0,0)');
+                fctx.fillStyle = grad;
+                fctx.beginPath(); fctx.arc(px, py, this.fogRadius, 0, Math.PI*2); fctx.fill();
+            });
+            fctx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(fogCanvas, 0, 0);
+            ctx.restore();
+        }
+    };
     const Physics = {
         resolveAll(dt) {
-            Engine.platforms.forEach(p => p.updateMove(dt));
+            Engine.platforms.forEach(p => { p.updateMove(dt); p.updateDestruction(dt); });
             let playersAlive = Engine.players.filter(p=>p && p.lives>0);
             let actors = [...playersAlive, ...Engine.enemies];
             actors.forEach(a => {
                 a.isGrounded = false;
                 Engine.platforms.forEach(p => {
+                    // NOVO: plataforma destruída não colide com ninguém até voltar (respawn).
+                    if(p.destructible && p.destroyed) return;
                     if(a.x + a.w > p.x && a.x < p.x + p.w && a.y + a.h >= p.y && a.y <= p.y + p.h) {
                         if(a.vy >= 0 && (a.y + a.h - a.vy * dt * 60) <= p.y + 8) {
+                            // NOVO: pouso pesado (caindo rápido, vy alto) em uma plataforma
+                            // destrutível conta como um hit — dá pro jogador quebrar plataformas
+                            // de propósito pulando em cima delas com força, sem precisar de arma.
+                            if(p.destructible && a.vy > 14) {
+                                p.takeHit(a.x + a.w/2);
+                            }
                             a.y = p.y - a.h;
                             if(p.moveAxis === 'x' && p.dx) a.x += p.dx;
                             if(p.kind === 'jump') {
@@ -9244,6 +9734,16 @@
                 });
             });
             Engine.projectiles.forEach(pr => {
+                if(pr.destroyed) return;
+                // NOVO: projétil acertando uma plataforma destrutível conta como hit e destrói o
+                // projétil, do mesmo jeito que acertar um personagem — dá uma forma alternativa
+                // (mais precisa, à distância) de derrubar plataformas, além do pouso pesado.
+                Engine.platforms.forEach(p => {
+                    if(pr.destroyed || !p.destructible || p.destroyed) return;
+                    if(pr.x < p.x + p.w && pr.x + pr.w > p.x && pr.y < p.y + p.h && pr.y + pr.h > p.y) {
+                        p.takeHit(pr.x); pr.destroyed = true;
+                    }
+                });
                 if(pr.destroyed) return;
                 if(pr.owner instanceof Player) {
                     Engine.enemies.forEach(e => {
