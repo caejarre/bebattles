@@ -8836,6 +8836,12 @@
                     this.vx *= Math.pow(friction, dt * 60);
                 }
                 if(keys.up && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); PlayerPatternMemory.recordJump(this); }
+                // FIX CRÍTICO: esta linha (gravidade) tinha sido acidentalmente apagada ao
+                // adicionar o efeito de vento nesta mesma área do código — sem ela, this.vy
+                // nunca aumentava com o tempo, e o personagem ficava flutuando parado no ar
+                // pra sempre, sem cair nem colidir com nada (o resto da física de plataforma
+                // depende de vy pra saber se está "caindo em cima" de algo).
+                this.vy += 0.68 * dt * 60; if(this.vy > 16) this.vy = 16;
                 if(!this.isGrounded) Weather.applyWind(this, dt, 0.35);
                 this.x += this.vx * dt * 60; this.y += this.vy * dt * 60;
                 if(!Engine.isOpenWorld) {
@@ -9097,22 +9103,24 @@
         }
     }
     class Platform {
-        // NOVO: 'kind' define o tipo especial da plataforma — 'normal' (padrão), 'jump' (plataforma
-        // de salto: impulsiona quem pisa nela bem mais alto que um pulo normal) ou 'speed'
-        // (acelerador: dá um boost de velocidade temporário a quem passa por cima). Ver
-        // Physics.resolveAll() para o efeito de cada una.
-        // moveAxis: 'x' ou 'y' (movimento lento pra lados ou pra cima/baixo); moveRange: distância
-        // percorrida a partir da posição inicial; moveSpeed: velocidade do vaivém.
-        // destructible: se true, a plataforma tem HP e racha/cai depois de X hits (projétil ou
-        // pouso pesado). Plataformas em movimento (moveAxis) e as especiais (jump/speed) nunca
-        // são destrutíveis — mudar o layout embaixo de um mecanismo que já se move sozinho
-        // criaria situações confusas/injustas demais.
+        // destructible: por padrão, TODA plataforma normal (sem kind especial, sem movimento,
+        // e que não seja um "chão" largo — largura até 420px) já nasce destrutível — o
+        // parâmetro serve pra FORÇAR não-destrutível (passando false) num caso específico, não
+        // pra precisar marcar manualmente cada uma. O chão (plataformas bem largas, o piso
+        // principal do mapa) nunca é destrutível por padrão, senão o mapa ficaria sem chão
+        // nenhum depois de algumas quebras — mas ainda pode ser marcado destructible=true
+        // explicitamente se um mapa quiser um chão quebrável de propósito. Plataformas em
+        // movimento (moveAxis) e as especiais (jump/speed) nunca são destrutíveis — mudar o
+        // layout embaixo de um mecanismo que já se move sozinho criaria situações
+        // confusas/injustas demais.
         constructor(x, y, w, h, kind, moveAxis, moveRange, moveSpeed, destructible) {
             this.x = x; this.y = y; this.w = w; this.h = h; this.kind = kind || 'normal';
             this.baseX = x; this.baseY = y;
             this.moveAxis = moveAxis || null; this.moveRange = moveRange || 0; this.moveSpeed = moveSpeed || 0.6;
             this._movePhase = Math.random() * Math.PI * 2; this.dx = 0; this.dy = 0;
-            this.destructible = !!destructible && !moveAxis && kind === 'normal';
+            let looksLikeFloor = w > 420;
+            let wantsDestructible = destructible === undefined ? !looksLikeFloor : !!destructible;
+            this.destructible = wantsDestructible && !moveAxis && this.kind === 'normal';
             this.maxHits = 3;
             this.hitsTaken = 0;
             this.destroyed = false;
