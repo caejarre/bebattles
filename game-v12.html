@@ -183,6 +183,8 @@
         #lbl-gameover-stats { font-size: 1.2rem; color: #94a3b8; line-height: 1.6; max-width: 600px; }
         @keyframes pulse { from { transform: scale(1) translateX(-50%); opacity: 0.8; } to { transform: scale(1.05) translateX(-50%); opacity: 1; } }
         /* ═══════════ SOCIAL: busca, perfil, convites ═══════════ */
+        .match-bonus-card { background:#0f172a; border-radius:12px; padding:16px; width:220px; cursor:pointer; transition:transform 0.15s ease; }
+        .match-bonus-card:hover { transform:translateY(-4px) scale(1.03); }
         .social-box { background:#0f172a; border:1px solid #1e293b; border-radius:12px; padding:24px; width:480px; max-width:calc(100vw - 32px); max-height:min(640px, 92vh); display:flex; flex-direction:column; gap:14px; overflow-y:auto; box-sizing:border-box; }
         .social-search-row { display:flex; gap:8px; }
         .social-results { display:flex; flex-direction:column; gap:8px; overflow-y:auto; max-height:340px; }
@@ -520,18 +522,10 @@
         </div>
     </div>
     <div id="menu-screen" class="screen hidden">
-        <!-- NOVO: zonas invisíveis nos 4 cantos da tela — easter egg mobile (ver
-             Engine._checkCornerTap). Ficam por cima de tudo (z-index alto) mas pequenas o
-             suficiente (60x60px) pra não atrapalhar nenhum botão real do menu, que nunca fica
-             exatamente colado nos 4 cantos absolutos da tela. -->
-        <div onclick="Engine._checkCornerTap('tl')" style="position:fixed; top:0; left:0; width:60px; height:60px; z-index:5; cursor:default;"></div>
-        <div onclick="Engine._checkCornerTap('tr')" style="position:fixed; top:0; right:0; width:60px; height:60px; z-index:5; cursor:default;"></div>
-        <div onclick="Engine._checkCornerTap('bl')" style="position:fixed; bottom:0; left:0; width:60px; height:60px; z-index:5; cursor:default;"></div>
-        <div onclick="Engine._checkCornerTap('br')" style="position:fixed; bottom:0; right:0; width:60px; height:60px; z-index:5; cursor:default;"></div>
         <div class="menu-main-panel">
             <div class="menu-title-area" style="position:relative;">
                 <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                    <h1 style="margin:0; display:flex; align-items:center; gap:10px;"><img src="logobebattles.png" alt="BE BATTLES" style="height:clamp(72px, 12vw, 110px); width:auto; max-width:70vw; display:block;"><span style="font-size:0.6em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></h1>
+                    <h1 style="margin:0; display:flex; align-items:center; gap:10px;"><img src="logobebattles.png" alt="BE BATTLES" onpointerdown="Engine.startLogoHold()" onpointerup="Engine.cancelLogoHold()" onpointerleave="Engine.cancelLogoHold()" onpointercancel="Engine.cancelLogoHold()" style="height:clamp(72px, 12vw, 110px); width:auto; max-width:70vw; display:block; -webkit-user-select:none; user-select:none;"><span style="font-size:0.6em; color:#38bdf8; -webkit-text-fill-color:#38bdf8; font-weight:600; vertical-align:middle; background:#0f2744; border:1px solid #1d4ed8; border-radius:6px; padding:3px 8px; letter-spacing:1px; white-space:nowrap; display:inline-block;">V:&nbsp;7.5</span></h1>
                     <div style="display:flex; gap:6px; flex-wrap:wrap; padding-top:6px;">
                         <button id="btn-social-players" onclick="Social.openSearch()" style="padding:8px 12px; font-size:0.82rem;" data-i18n="socialPlayersBtn">🔎 Jogadores</button>
                         <button onclick="Engine.openOnlineLobby()" style="padding:8px 12px; font-size:0.82rem; background:#1e3a8a; border-color:#1d4ed8; color:#93c5fd;" data-i18n="socialOnlineBtn">🌐 Online</button>
@@ -1068,12 +1062,18 @@
             </div>
             <div id="skin-editor-palette" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:6px;"></div>
             <input type="color" id="skin-editor-custom-color" value="#38bdf8" style="width:100%; height:34px; border:none; border-radius:6px; cursor:pointer; margin-bottom:8px;">
+            <button id="skin-editor-eraser-btn" onclick="SkinEditor.toggleEraser()" style="width:100%; padding:8px; background:#334155; border:1px solid #64748b; color:#e2e8f0; border-radius:6px; cursor:pointer; font-weight:700; font-size:0.8rem; margin-bottom:8px;">🧹 <span id="skin-editor-eraser-label">Borracha</span></button>
             <div style="display:flex; gap:8px;">
                 <button onclick="SkinEditor.clear()" style="flex:1; padding:9px; background:#334155; border:none; color:#e2e8f0; border-radius:6px; cursor:pointer;" data-i18n="skinEditorClearBtn">🗑 Limpar</button>
-                <button onclick="SkinEditor.save()" style="flex:2; padding:9px; background:linear-gradient(to right,#6366f1,#8b5cf6); border:none; color:#fff; font-weight:800; border-radius:6px; cursor:pointer;" data-i18n="skinEditorSaveBtn">💾 Salvar como Skin (💰 <span id="skin-editor-price">2000</span>)</button>
+                <button onclick="SkinEditor.save()" id="skin-editor-save-btn" style="flex:2; padding:9px; background:linear-gradient(to right,#6366f1,#8b5cf6); border:none; color:#fff; font-weight:800; border-radius:6px; cursor:pointer;">💾 <span id="skin-editor-save-label">Salvar como Skin</span> (💰 <span id="skin-editor-price">10000</span>)</button>
             </div>
             <div id="skin-editor-msg" style="font-size:0.75rem; min-height:1em;"></div>
         </div>
+    </div>
+    <div id="match-bonus-screen" class="screen hidden" style="justify-content:center; align-items:center; flex-direction:column; gap:20px;">
+        <h2 style="font-size:1.4rem; color:#f1f5f9; margin:0;" data-i18n="matchBonusTitle">⚔️ Escolha Seu Bônus</h2>
+        <p style="font-size:0.8rem; color:#94a3b8; margin:0;" data-i18n="matchBonusHint">Vale só para esta partida</p>
+        <div id="match-bonus-cards" style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center; max-width:900px;"></div>
     </div>
     <div id="group-create-screen" class="screen hidden" style="justify-content:center; align-items:center;">
         <div class="social-box" style="display:flex; flex-direction:column; gap:12px;">
@@ -1281,7 +1281,33 @@
             ach_champion_name: "Campeão", ach_champion_desc: "Vença 10 partidas.",
             ach_legend_name: "Lenda", ach_legend_desc: "Alcance o nível 10.",
             cosColor_default: "Padrão do Arquétipo", cosColor_gold: "Dourado", cosColor_purple: "Roxo", cosColor_cyan: "Ciano", cosColor_pink: "Rosa", cosColor_white: "Branco", cosColor_obsidian: "Obsidiana",
-            cosSkin_default: "Padrão", cosSkin_stripes: "Listras", cosSkin_glow: "Brilho", cosSkin_stars: "Estrelado", cosSkin_flame: "Chamas", cosSkin_secret: "✨ Secreta",
+            cosSkin_default: "Padrão", cosSkin_stripes: "Listras", cosSkin_glow: "Brilho", cosSkin_stars: "Estrelado", cosSkin_flame: "Chamas", cosSkin_secret: "✨ Secreta", cosSkin_custom: "🎨 Personalizada",
+            matchBonusTitle: "⚔️ Escolha Seu Bônus", matchBonusHint: "Vale só para esta partida",
+            bonusRarity_common: "Comum", bonusRarity_uncommon: "Incomum", bonusRarity_rare: "Raro", bonusRarity_epic: "Épico", bonusRarity_legendary: "Lendário",
+            bonusStat_dmg: "dano", bonusStat_spd: "velocidade", bonusStat_atkspd: "vel. de ataque", bonusStat_range: "alcance", bonusStat_crit: "dano crítico", bonusStat_hp: "vida máxima",
+            bonusStat_shielddur: "duração do escudo", bonusStat_heal: "cura", bonusStat_dmgtaken: "dano recebido", bonusStat_dashspd: "recarga do dash", bonusStat_jumphigh: "pulo muito mais alto",
+            bonusStat_ghostdash: "atravessa inimigos após o dash", bonusStat_gold: "ouro", bonusStat_xp: "XP", bonusStat_itemfind: "mais itens e baús", bonusStat_shopprice: "preço da loja",
+            bonusStat_magnet: "raio de coleta bem maior", bonusStat_freezeshots: "tiros desaceleram inimigos", bonusStat_explosivekills: "inimigos explodem ao morrer", bonusStat_luck: "mais chance de eventos bons",
+            bonus_fury_name: "Fúria", bonus_fury_desc: "Golpes mais fortes, mas você fica mais lento pra se posicionar.",
+            bonus_gatling_name: "Metralhadora", bonus_gatling_desc: "Atire muito mais rápido, cada tiro individual causa menos dano.",
+            bonus_sniper_name: "Atirador", bonus_sniper_desc: "Seus tiros alcançam muito mais longe, mas recarregam mais devagar.",
+            bonus_critical_name: "Crítico", bonus_critical_desc: "Golpes críticos muito mais fortes, ao custo de um pouco de vida máxima.",
+            bonus_tank_name: "Tanque", bonus_tank_desc: "Muito mais resistente, mas pesado demais pra se mover rápido.",
+            bonus_reinforcedShield_name: "Escudo Reforçado", bonus_reinforcedShield_desc: "Seu escudo protege por muito mais tempo.",
+            bonus_regen_name: "Regeneração", bonus_regen_desc: "Curas recuperam muito mais vida, mas você ataca mais devagar.",
+            bonus_armor_name: "Blindagem", bonus_armor_desc: "Reduz o dano recebido de qualquer fonte.",
+            bonus_runner_name: "Corredor", bonus_runner_desc: "Muito mais rápido pelo mapa, com golpes um pouco mais fracos.",
+            bonus_ninja_name: "Ninja", bonus_ninja_desc: "Use o dash com muito mais frequência.",
+            bonus_acrobat_name: "Acrobata", bonus_acrobat_desc: "Pule muito mais alto, ideal pra mapas verticais.",
+            bonus_ghost_name: "Fantasma", bonus_ghost_desc: "Atravesse inimigos por um tempo logo depois de usar o dash.",
+            bonus_tycoon_name: "Magnata", bonus_tycoon_desc: "Ganhe bem mais ouro durante a partida.",
+            bonus_scholar_name: "Estudioso", bonus_scholar_desc: "Ganhe muito mais experiência com esta partida.",
+            bonus_treasureHunter_name: "Caçador de Tesouros", bonus_treasureHunter_desc: "Itens e baús aparecem com muito mais frequência.",
+            bonus_merchant_name: "Mercador", bonus_merchant_desc: "Upgrades comprados durante a partida saem mais baratos.",
+            bonus_magnet_name: "Ímã", bonus_magnet_desc: "Colete moedas e itens de uma distância bem maior.",
+            bonus_frost_name: "Congelante", bonus_frost_desc: "Seus tiros desaceleram qualquer inimigo atingido.",
+            bonus_explosive_name: "Explosivo", bonus_explosive_desc: "Inimigos derrotados por você podem explodir, atingindo quem estiver perto.",
+            bonus_lucky_name: "Sortudo", bonus_lucky_desc: "Aumenta a chance de eventos positivos acontecerem na partida.",
             netRewardLabel: "Recompensas", playerLabel: "Jogador",
             modeLabelOpenWorld: "MUNDO ABERTO", modeLabelBoss: "Chefe Nível", modeLabelWave: "Onda",
             hideoutAlertTitle: "Esconderijo Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Sair: E",
@@ -1474,6 +1500,7 @@
             tut32Title: "Corrida de Obstáculos", tut32Body: "No lobby online, escolha o modo 🏁 Corrida ao criar sua sala! É uma disputa de habilidade, sem combate: pule por plataformas (algumas quebram, outras se movem) até chegar na linha de chegada. Quem chegar primeiro vence — sua posição de chegada (1º, 2º...) aparece na tela assim que você cruzar a linha.",
             tut33Title: "Crie Sua Própria Skin", tut33Body: "Na loja, use o botão <b>🎨 Criar Sua Skin</b> para abrir o editor! Pinte cada quadradinho do personagem com as cores da paleta ou escolha uma cor personalizada. Salvar pela primeira vez custa ouro, mas depois você pode editar o desenho livremente. Sua criação vira uma skin equipável como qualquer outra.",
             tut34Title: "Ciclo Dia/Noite", tut34Body: "No Modo Infinito, a iluminação do mapa muda gradualmente conforme o tempo de sobrevivência passa — escurecendo até a 'meia-noite' e clareando de novo depois. É só atmosfera, não afeta a jogabilidade nem a dificuldade.",
+            tut36Title: "Bônus de Partida", tut36Body: "Antes de cada partida, escolha 1 entre 3 bônus aleatórios! Cada um dá uma vantagem forte com uma desvantagem equivalente — não existe escolha 'certa', só estilos diferentes de jogar. O bônus vale só pra aquela partida e some no fim; a próxima sorteia 3 novos. Bônus mais raros (cores diferentes na carta) têm efeitos mais criativos, mas nunca são mais fortes que os comuns.",
             tut29Title: "A IA Aprende com Você", tut29Body: "Nas partidas contra IA, o bot observa seu jeito de jogar (se ataca de perto ou de longe, se é agressivo ou defensivo) e se adapta sutilmente nas próximas partidas contra o mesmo padrão. Quanto mais você joga do mesmo jeito, mais o bot aprende a te enfrentar — muda seu estilo de vez em quando pra manter ele surpreso!",
             tut19Title: "Comprando e Equipando Armas", tut19Body: "Compre armas na loja com seu ouro — quanto mais forte, mais cara! Depois de comprar, vá em <b>Arma Equipada</b> na tela inicial e selecione qual arma comprada você quer usar na partida.",
             tutSvgMove: "mover", tutSvgJump: "pular", tutSvgAttack: "atacar", tutSvgSpecial: "especial",
@@ -1574,7 +1601,33 @@
             ach_champion_name: "Champion", ach_champion_desc: "Win 10 matches.",
             ach_legend_name: "Legend", ach_legend_desc: "Reach level 10.",
             cosColor_default: "Archetype Default", cosColor_gold: "Gold", cosColor_purple: "Purple", cosColor_cyan: "Cyan", cosColor_pink: "Pink", cosColor_white: "White", cosColor_obsidian: "Obsidian",
-            cosSkin_default: "Default", cosSkin_stripes: "Stripes", cosSkin_glow: "Glow", cosSkin_stars: "Starry", cosSkin_flame: "Flame", cosSkin_secret: "✨ Secret",
+            cosSkin_default: "Default", cosSkin_stripes: "Stripes", cosSkin_glow: "Glow", cosSkin_stars: "Starry", cosSkin_flame: "Flame", cosSkin_secret: "✨ Secret", cosSkin_custom: "🎨 Custom",
+            matchBonusTitle: "⚔️ Choose Your Bonus", matchBonusHint: "Only lasts for this match",
+            bonusRarity_common: "Common", bonusRarity_uncommon: "Uncommon", bonusRarity_rare: "Rare", bonusRarity_epic: "Epic", bonusRarity_legendary: "Legendary",
+            bonusStat_dmg: "damage", bonusStat_spd: "speed", bonusStat_atkspd: "attack speed", bonusStat_range: "range", bonusStat_crit: "crit damage", bonusStat_hp: "max HP",
+            bonusStat_shielddur: "shield duration", bonusStat_heal: "healing", bonusStat_dmgtaken: "damage taken", bonusStat_dashspd: "dash cooldown", bonusStat_jumphigh: "much higher jump",
+            bonusStat_ghostdash: "phase through enemies after dash", bonusStat_gold: "gold", bonusStat_xp: "XP", bonusStat_itemfind: "more items and chests", bonusStat_shopprice: "shop prices",
+            bonusStat_magnet: "much larger pickup radius", bonusStat_freezeshots: "shots slow enemies", bonusStat_explosivekills: "enemies explode on death", bonusStat_luck: "higher chance of good events",
+            bonus_fury_name: "Fury", bonus_fury_desc: "Hit harder, but you'll be slower to reposition.",
+            bonus_gatling_name: "Gatling", bonus_gatling_desc: "Fire much faster, each individual shot deals less damage.",
+            bonus_sniper_name: "Sharpshooter", bonus_sniper_desc: "Your shots reach much further, but reload slower.",
+            bonus_critical_name: "Critical", bonus_critical_desc: "Much stronger critical hits, at the cost of some max HP.",
+            bonus_tank_name: "Tank", bonus_tank_desc: "Much tougher, but too heavy to move fast.",
+            bonus_reinforcedShield_name: "Reinforced Shield", bonus_reinforcedShield_desc: "Your shield protects for much longer.",
+            bonus_regen_name: "Regeneration", bonus_regen_desc: "Heals recover much more HP, but you attack slower.",
+            bonus_armor_name: "Armor", bonus_armor_desc: "Reduces damage taken from any source.",
+            bonus_runner_name: "Runner", bonus_runner_desc: "Much faster across the map, with slightly weaker hits.",
+            bonus_ninja_name: "Ninja", bonus_ninja_desc: "Use your dash much more often.",
+            bonus_acrobat_name: "Acrobat", bonus_acrobat_desc: "Jump much higher, great for vertical maps.",
+            bonus_ghost_name: "Ghost", bonus_ghost_desc: "Phase through enemies for a while right after dashing.",
+            bonus_tycoon_name: "Tycoon", bonus_tycoon_desc: "Earn much more gold during the match.",
+            bonus_scholar_name: "Scholar", bonus_scholar_desc: "Earn much more experience from this match.",
+            bonus_treasureHunter_name: "Treasure Hunter", bonus_treasureHunter_desc: "Items and chests appear much more often.",
+            bonus_merchant_name: "Merchant", bonus_merchant_desc: "Upgrades bought during the match cost less.",
+            bonus_magnet_name: "Magnet", bonus_magnet_desc: "Collect coins and items from a much greater distance.",
+            bonus_frost_name: "Frost", bonus_frost_desc: "Your shots slow down any enemy hit.",
+            bonus_explosive_name: "Explosive", bonus_explosive_desc: "Enemies you defeat can explode, hitting anyone nearby.",
+            bonus_lucky_name: "Lucky", bonus_lucky_desc: "Increases the chance of positive events happening in the match.",
             netRewardLabel: "Rewards", playerLabel: "Player",
             modeLabelOpenWorld: "OPEN WORLD", modeLabelBoss: "Boss Level", modeLabelWave: "Wave",
             hideoutAlertTitle: "Secret Hideout", hideoutAlertEnter: "Enter: E", hideoutHudExit: "Exit: E",
@@ -1766,6 +1819,7 @@
             tut32Title: "Obstacle Race", tut32Body: "In the online lobby, pick the 🏁 Race mode when creating your room! It's a test of skill, no combat: jump across platforms (some break, some move) until you reach the finish line. Whoever gets there first wins — your finishing position (1st, 2nd...) shows up on screen as soon as you cross the line.",
             tut33Title: "Create Your Own Skin", tut33Body: "In the shop, use the <b>🎨 Create Your Skin</b> button to open the editor! Paint each square of the character with colors from the palette or pick a custom color. Saving for the first time costs gold, but after that you can edit the drawing freely. Your creation becomes an equippable skin like any other.",
             tut34Title: "Day/Night Cycle", tut34Body: "In Infinite Mode, the map's lighting gradually shifts as your survival time passes — darkening toward 'midnight' and brightening again afterward. It's purely atmospheric, doesn't affect gameplay or difficulty.",
+            tut36Title: "Match Bonuses", tut36Body: "Before each match, pick 1 of 3 random bonuses! Each gives a strong advantage with an equivalent drawback — there's no 'correct' pick, just different playstyles. The bonus only lasts for that match and disappears at the end; the next one rolls 3 new ones. Rarer bonuses (different card colors) have more creative effects, but are never stronger than common ones.",
             tut29Title: "The AI Learns From You", tut29Body: "In matches against AI, the bot observes how you play (whether you attack up close or from range, whether you're aggressive or defensive) and subtly adapts in future matches against the same pattern. The more you play the same way, the more the bot learns to face you — switch up your style now and then to keep it guessing!",
             tut19Title: "Buying and Equipping Weapons", tut19Body: "Buy weapons in the shop with your gold — the stronger, the pricier! After buying, go to <b>Equipped Weapon</b> on the main screen and select which purchased weapon you want to use in the match.",
             tutSvgMove: "move", tutSvgJump: "jump", tutSvgAttack: "attack", tutSvgSpecial: "special",
@@ -1866,7 +1920,33 @@
             ach_champion_name: "Champion", ach_champion_desc: "Gewinne 10 Partien.",
             ach_legend_name: "Legende", ach_legend_desc: "Erreiche Level 10.",
             cosColor_default: "Archetyp-Standard", cosColor_gold: "Gold", cosColor_purple: "Lila", cosColor_cyan: "Türkis", cosColor_pink: "Pink", cosColor_white: "Weiß", cosColor_obsidian: "Obsidian",
-            cosSkin_default: "Standard", cosSkin_stripes: "Streifen", cosSkin_glow: "Leuchten", cosSkin_stars: "Sternenglanz", cosSkin_flame: "Flammen", cosSkin_secret: "✨ Geheim",
+            cosSkin_default: "Standard", cosSkin_stripes: "Streifen", cosSkin_glow: "Leuchten", cosSkin_stars: "Sternenglanz", cosSkin_flame: "Flammen", cosSkin_secret: "✨ Geheim", cosSkin_custom: "🎨 Benutzerdefiniert",
+            matchBonusTitle: "⚔️ Wähle Deinen Bonus", matchBonusHint: "Gilt nur für dieses Match",
+            bonusRarity_common: "Gewöhnlich", bonusRarity_uncommon: "Ungewöhnlich", bonusRarity_rare: "Selten", bonusRarity_epic: "Episch", bonusRarity_legendary: "Legendär",
+            bonusStat_dmg: "Schaden", bonusStat_spd: "Geschwindigkeit", bonusStat_atkspd: "Angriffsgeschwindigkeit", bonusStat_range: "Reichweite", bonusStat_crit: "kritischer Schaden", bonusStat_hp: "max. Leben",
+            bonusStat_shielddur: "Schilddauer", bonusStat_heal: "Heilung", bonusStat_dmgtaken: "erhaltener Schaden", bonusStat_dashspd: "Dash-Abklingzeit", bonusStat_jumphigh: "viel höherer Sprung",
+            bonusStat_ghostdash: "durchquert Gegner nach dem Dash", bonusStat_gold: "Gold", bonusStat_xp: "XP", bonusStat_itemfind: "mehr Items und Truhen", bonusStat_shopprice: "Shop-Preise",
+            bonusStat_magnet: "viel größerer Aufsammelradius", bonusStat_freezeshots: "Schüsse verlangsamen Gegner", bonusStat_explosivekills: "Gegner explodieren beim Tod", bonusStat_luck: "höhere Chance auf gute Ereignisse",
+            bonus_fury_name: "Wut", bonus_fury_desc: "Schlage härter zu, bist aber langsamer beim Positionieren.",
+            bonus_gatling_name: "Gatling", bonus_gatling_desc: "Schieße viel schneller, jeder einzelne Schuss verursacht weniger Schaden.",
+            bonus_sniper_name: "Scharfschütze", bonus_sniper_desc: "Deine Schüsse reichen viel weiter, laden aber langsamer nach.",
+            bonus_critical_name: "Kritisch", bonus_critical_desc: "Viel stärkere kritische Treffer, auf Kosten von etwas maximalem Leben.",
+            bonus_tank_name: "Panzer", bonus_tank_desc: "Viel widerstandsfähiger, aber zu schwer, um sich schnell zu bewegen.",
+            bonus_reinforcedShield_name: "Verstärkter Schild", bonus_reinforcedShield_desc: "Dein Schild schützt viel länger.",
+            bonus_regen_name: "Regeneration", bonus_regen_desc: "Heilungen stellen viel mehr Leben wieder her, aber du greifst langsamer an.",
+            bonus_armor_name: "Rüstung", bonus_armor_desc: "Reduziert erhaltenen Schaden aus jeder Quelle.",
+            bonus_runner_name: "Läufer", bonus_runner_desc: "Viel schneller über die Karte, mit etwas schwächeren Treffern.",
+            bonus_ninja_name: "Ninja", bonus_ninja_desc: "Nutze deinen Dash viel häufiger.",
+            bonus_acrobat_name: "Akrobat", bonus_acrobat_desc: "Springe viel höher, ideal für vertikale Karten.",
+            bonus_ghost_name: "Geist", bonus_ghost_desc: "Durchquere Gegner für eine Weile direkt nach dem Dash.",
+            bonus_tycoon_name: "Magnat", bonus_tycoon_desc: "Verdiene viel mehr Gold während des Matches.",
+            bonus_scholar_name: "Gelehrter", bonus_scholar_desc: "Erhalte viel mehr Erfahrung aus diesem Match.",
+            bonus_treasureHunter_name: "Schatzsucher", bonus_treasureHunter_desc: "Items und Truhen erscheinen viel häufiger.",
+            bonus_merchant_name: "Händler", bonus_merchant_desc: "Während des Matches gekaufte Upgrades kosten weniger.",
+            bonus_magnet_name: "Magnet", bonus_magnet_desc: "Sammle Münzen und Items aus viel größerer Entfernung.",
+            bonus_frost_name: "Frost", bonus_frost_desc: "Deine Schüsse verlangsamen jeden getroffenen Gegner.",
+            bonus_explosive_name: "Explosiv", bonus_explosive_desc: "Von dir besiegte Gegner können explodieren und alle in der Nähe treffen.",
+            bonus_lucky_name: "Glückspilz", bonus_lucky_desc: "Erhöht die Chance auf positive Ereignisse im Match.",
             netRewardLabel: "Belohnungen", playerLabel: "Spieler",
             modeLabelOpenWorld: "OFFENE WELT", modeLabelBoss: "Boss-Level", modeLabelWave: "Welle",
             hideoutAlertTitle: "Geheimes Versteck", hideoutAlertEnter: "Eintreten: E", hideoutHudExit: "Verlassen: E",
@@ -2053,6 +2133,7 @@
             tut32Title: "Hindernisrennen", tut32Body: "Wähle im Online-Lobby den Modus 🏁 Rennen, wenn du deinen Raum erstellst! Es ist ein Geschicklichkeitstest, kein Kampf: Springe über Plattformen (manche brechen, manche bewegen sich), bis du die Ziellinie erreichst. Wer zuerst dort ankommt, gewinnt — deine Zielposition (1., 2. ...) erscheint auf dem Bildschirm, sobald du die Linie überquerst.",
             tut33Title: "Erstelle Deine Eigene Skin", tut33Body: "Nutze im Shop die Schaltfläche <b>🎨 Erstelle Deine Skin</b>, um den Editor zu öffnen! Bemale jedes Quadrat des Charakters mit Farben aus der Palette oder wähle eine eigene Farbe. Das erste Speichern kostet Gold, danach kannst du die Zeichnung frei bearbeiten. Deine Kreation wird zu einer ausrüstbaren Skin wie jede andere.",
             tut34Title: "Tag/Nacht-Zyklus", tut34Body: "Im Unendlich-Modus verändert sich die Beleuchtung der Karte allmählich, während deine Überlebenszeit vergeht — wird dunkler bis zur 'Mitternacht' und danach wieder heller. Das ist rein atmosphärisch und beeinflusst weder Gameplay noch Schwierigkeit.",
+            tut36Title: "Match-Boni", tut36Body: "Wähle vor jedem Match 1 von 3 zufälligen Boni! Jeder gibt einen starken Vorteil mit einem gleichwertigen Nachteil — es gibt keine 'richtige' Wahl, nur verschiedene Spielstile. Der Bonus gilt nur für dieses Match und verschwindet am Ende; das nächste würfelt 3 neue aus. Seltenere Boni (andere Kartenfarben) haben kreativere Effekte, sind aber nie stärker als gewöhnliche.",
             tut29Title: "Die KI Lernt von Dir", tut29Body: "In Matches gegen die KI beobachtet der Bot, wie du spielst (ob du aus der Nähe oder Ferne angreifst, ob du aggressiv oder defensiv bist) und passt sich in zukünftigen Matches subtil an dieses Muster an. Je öfter du auf die gleiche Weise spielst, desto mehr lernt der Bot, dich zu bekämpfen — wechsle ab und zu deinen Stil, um ihn zu überraschen!",
             tut19Title: "Waffen kaufen und ausrüsten", tut19Body: "Kaufe Waffen im Laden mit deinem Gold — je stärker, desto teurer! Wähle nach dem Kauf unter <b>Ausgerüstete Waffe</b> auf dem Hauptbildschirm, welche gekaufte Waffe du im Match nutzen möchtest.",
             tutSvgMove: "bewegen", tutSvgJump: "springen", tutSvgAttack: "angreifen", tutSvgSpecial: "spezial",
@@ -2153,7 +2234,33 @@
             ach_champion_name: "Campeón", ach_champion_desc: "Gana 10 partidas.",
             ach_legend_name: "Leyenda", ach_legend_desc: "Alcanza el nivel 10.",
             cosColor_default: "Predeterminado del Arquetipo", cosColor_gold: "Dorado", cosColor_purple: "Morado", cosColor_cyan: "Cian", cosColor_pink: "Rosa", cosColor_white: "Blanco", cosColor_obsidian: "Obsidiana",
-            cosSkin_default: "Predeterminado", cosSkin_stripes: "Rayas", cosSkin_glow: "Brillo", cosSkin_stars: "Estrellado", cosSkin_flame: "Llamas", cosSkin_secret: "✨ Secreta",
+            cosSkin_default: "Predeterminado", cosSkin_stripes: "Rayas", cosSkin_glow: "Brillo", cosSkin_stars: "Estrellado", cosSkin_flame: "Llamas", cosSkin_secret: "✨ Secreta", cosSkin_custom: "🎨 Personalizada",
+            matchBonusTitle: "⚔️ Elige Tu Bono", matchBonusHint: "Solo dura esta partida",
+            bonusRarity_common: "Común", bonusRarity_uncommon: "Poco Común", bonusRarity_rare: "Raro", bonusRarity_epic: "Épico", bonusRarity_legendary: "Legendario",
+            bonusStat_dmg: "daño", bonusStat_spd: "velocidad", bonusStat_atkspd: "vel. de ataque", bonusStat_range: "alcance", bonusStat_crit: "daño crítico", bonusStat_hp: "vida máxima",
+            bonusStat_shielddur: "duración del escudo", bonusStat_heal: "curación", bonusStat_dmgtaken: "daño recibido", bonusStat_dashspd: "recarga del dash", bonusStat_jumphigh: "salto mucho más alto",
+            bonusStat_ghostdash: "atraviesa enemigos tras el dash", bonusStat_gold: "oro", bonusStat_xp: "XP", bonusStat_itemfind: "más ítems y cofres", bonusStat_shopprice: "precios de la tienda",
+            bonusStat_magnet: "radio de recolección mucho mayor", bonusStat_freezeshots: "los disparos ralentizan enemigos", bonusStat_explosivekills: "los enemigos explotan al morir", bonusStat_luck: "más probabilidad de eventos buenos",
+            bonus_fury_name: "Furia", bonus_fury_desc: "Golpea más fuerte, pero serás más lento para reposicionarte.",
+            bonus_gatling_name: "Ametralladora", bonus_gatling_desc: "Dispara mucho más rápido, cada disparo individual causa menos daño.",
+            bonus_sniper_name: "Tirador", bonus_sniper_desc: "Tus disparos llegan mucho más lejos, pero recargan más despacio.",
+            bonus_critical_name: "Crítico", bonus_critical_desc: "Golpes críticos mucho más fuertes, a costa de algo de vida máxima.",
+            bonus_tank_name: "Tanque", bonus_tank_desc: "Mucho más resistente, pero demasiado pesado para moverse rápido.",
+            bonus_reinforcedShield_name: "Escudo Reforzado", bonus_reinforcedShield_desc: "Tu escudo protege durante mucho más tiempo.",
+            bonus_regen_name: "Regeneración", bonus_regen_desc: "Las curaciones recuperan mucha más vida, pero atacas más despacio.",
+            bonus_armor_name: "Blindaje", bonus_armor_desc: "Reduce el daño recibido de cualquier fuente.",
+            bonus_runner_name: "Corredor", bonus_runner_desc: "Mucho más rápido por el mapa, con golpes un poco más débiles.",
+            bonus_ninja_name: "Ninja", bonus_ninja_desc: "Usa tu dash con mucha más frecuencia.",
+            bonus_acrobat_name: "Acróbata", bonus_acrobat_desc: "Salta mucho más alto, ideal para mapas verticales.",
+            bonus_ghost_name: "Fantasma", bonus_ghost_desc: "Atraviesa enemigos por un tiempo justo después de usar el dash.",
+            bonus_tycoon_name: "Magnate", bonus_tycoon_desc: "Gana mucho más oro durante la partida.",
+            bonus_scholar_name: "Erudito", bonus_scholar_desc: "Gana mucha más experiencia con esta partida.",
+            bonus_treasureHunter_name: "Cazatesoros", bonus_treasureHunter_desc: "Los ítems y cofres aparecen con mucha más frecuencia.",
+            bonus_merchant_name: "Mercader", bonus_merchant_desc: "Las mejoras compradas durante la partida cuestan menos.",
+            bonus_magnet_name: "Imán", bonus_magnet_desc: "Recolecta monedas e ítems desde una distancia mucho mayor.",
+            bonus_frost_name: "Escarcha", bonus_frost_desc: "Tus disparos ralentizan a cualquier enemigo alcanzado.",
+            bonus_explosive_name: "Explosivo", bonus_explosive_desc: "Los enemigos que derrotas pueden explotar, golpeando a quien esté cerca.",
+            bonus_lucky_name: "Afortunado", bonus_lucky_desc: "Aumenta la probabilidad de que ocurran eventos positivos en la partida.",
             netRewardLabel: "Recompensas", playerLabel: "Jugador",
             modeLabelOpenWorld: "MUNDO ABIERTO", modeLabelBoss: "Nivel de Jefe", modeLabelWave: "Oleada",
             hideoutAlertTitle: "Escondite Secreto", hideoutAlertEnter: "Entrar: E", hideoutHudExit: "Salir: E",
@@ -2340,6 +2447,7 @@
             tut32Title: "Carrera de Obstáculos", tut32Body: "¡En el lobby en línea, elige el modo 🏁 Carrera al crear tu sala! Es una prueba de habilidad, sin combate: salta entre plataformas (algunas se rompen, otras se mueven) hasta llegar a la meta. Quien llegue primero gana — tu posición de llegada (1º, 2º...) aparece en pantalla en cuanto cruces la línea.",
             tut33Title: "Crea Tu Propia Skin", tut33Body: "¡En la tienda, usa el botón <b>🎨 Crea Tu Skin</b> para abrir el editor! Pinta cada cuadro del personaje con colores de la paleta o elige un color personalizado. Guardar por primera vez cuesta oro, pero después puedes editar el dibujo libremente. Tu creación se convierte en una skin equipable como cualquier otra.",
             tut34Title: "Ciclo Día/Noche", tut34Body: "En el Modo Infinito, la iluminación del mapa cambia gradualmente conforme pasa tu tiempo de supervivencia — oscureciendo hasta la 'medianoche' y aclarando de nuevo después. Es solo atmósfera, no afecta la jugabilidad ni la dificultad.",
+            tut36Title: "Bonos de Partida", tut36Body: "¡Antes de cada partida, elige 1 de 3 bonos aleatorios! Cada uno da una ventaja fuerte con una desventaja equivalente — no hay elección 'correcta', solo estilos de juego diferentes. El bono solo dura esa partida y desaparece al final; la siguiente sortea 3 nuevos. Los bonos más raros (colores de carta diferentes) tienen efectos más creativos, pero nunca son más fuertes que los comunes.",
             tut29Title: "La IA Aprende de Ti", tut29Body: "En las partidas contra la IA, el bot observa tu forma de jugar (si atacas de cerca o a distancia, si eres agresivo o defensivo) y se adapta sutilmente en futuras partidas contra el mismo patrón. Cuanto más juegas de la misma manera, más aprende el bot a enfrentarte — ¡cambia tu estilo de vez en cuando para mantenerlo adivinando!",
             tut19Title: "Comprar y Equipar Armas", tut19Body: "Compra armas en la tienda con tu oro — ¡cuanto más fuerte, más cara! Después de comprar, ve a <b>Arma Equipada</b> en la pantalla principal y selecciona qué arma comprada quieres usar en la partida.",
             tutSvgMove: "mover", tutSvgJump: "saltar", tutSvgAttack: "atacar", tutSvgSpecial: "especial",
@@ -2440,7 +2548,33 @@
             ach_champion_name: "Campione", ach_champion_desc: "Vinci 10 partite.",
             ach_legend_name: "Leggenda", ach_legend_desc: "Raggiungi il livello 10.",
             cosColor_default: "Predefinito dell'Archetipo", cosColor_gold: "Oro", cosColor_purple: "Viola", cosColor_cyan: "Ciano", cosColor_pink: "Rosa", cosColor_white: "Bianco", cosColor_obsidian: "Ossidiana",
-            cosSkin_default: "Predefinito", cosSkin_stripes: "Strisce", cosSkin_glow: "Bagliore", cosSkin_stars: "Stellato", cosSkin_flame: "Fiamme", cosSkin_secret: "✨ Segreta",
+            cosSkin_default: "Predefinito", cosSkin_stripes: "Strisce", cosSkin_glow: "Bagliore", cosSkin_stars: "Stellato", cosSkin_flame: "Fiamme", cosSkin_secret: "✨ Segreta", cosSkin_custom: "🎨 Personalizzata",
+            matchBonusTitle: "⚔️ Scegli il Tuo Bonus", matchBonusHint: "Vale solo per questa partita",
+            bonusRarity_common: "Comune", bonusRarity_uncommon: "Non Comune", bonusRarity_rare: "Raro", bonusRarity_epic: "Epico", bonusRarity_legendary: "Leggendario",
+            bonusStat_dmg: "danno", bonusStat_spd: "velocità", bonusStat_atkspd: "vel. d'attacco", bonusStat_range: "gittata", bonusStat_crit: "danno critico", bonusStat_hp: "vita massima",
+            bonusStat_shielddur: "durata dello scudo", bonusStat_heal: "cura", bonusStat_dmgtaken: "danno subito", bonusStat_dashspd: "ricarica dello scatto", bonusStat_jumphigh: "salto molto più alto",
+            bonusStat_ghostdash: "attraversa i nemici dopo lo scatto", bonusStat_gold: "oro", bonusStat_xp: "XP", bonusStat_itemfind: "più oggetti e forzieri", bonusStat_shopprice: "prezzi del negozio",
+            bonusStat_magnet: "raggio di raccolta molto più ampio", bonusStat_freezeshots: "i colpi rallentano i nemici", bonusStat_explosivekills: "i nemici esplodono alla morte", bonusStat_luck: "più probabilità di eventi positivi",
+            bonus_fury_name: "Furia", bonus_fury_desc: "Colpisci più forte, ma sarai più lento nel riposizionarti.",
+            bonus_gatling_name: "Mitragliatrice", bonus_gatling_desc: "Spara molto più velocemente, ogni singolo colpo infligge meno danno.",
+            bonus_sniper_name: "Cecchino", bonus_sniper_desc: "I tuoi colpi arrivano molto più lontano, ma ricaricano più lentamente.",
+            bonus_critical_name: "Critico", bonus_critical_desc: "Colpi critici molto più forti, a costo di un po' di vita massima.",
+            bonus_tank_name: "Carro Armato", bonus_tank_desc: "Molto più resistente, ma troppo pesante per muoversi velocemente.",
+            bonus_reinforcedShield_name: "Scudo Rinforzato", bonus_reinforcedShield_desc: "Il tuo scudo protegge molto più a lungo.",
+            bonus_regen_name: "Rigenerazione", bonus_regen_desc: "Le cure recuperano molta più vita, ma attacchi più lentamente.",
+            bonus_armor_name: "Corazza", bonus_armor_desc: "Riduce il danno subito da qualsiasi fonte.",
+            bonus_runner_name: "Corridore", bonus_runner_desc: "Molto più veloce sulla mappa, con colpi leggermente più deboli.",
+            bonus_ninja_name: "Ninja", bonus_ninja_desc: "Usa lo scatto molto più spesso.",
+            bonus_acrobat_name: "Acrobata", bonus_acrobat_desc: "Salta molto più in alto, ideale per mappe verticali.",
+            bonus_ghost_name: "Fantasma", bonus_ghost_desc: "Attraversa i nemici per un po' subito dopo lo scatto.",
+            bonus_tycoon_name: "Magnate", bonus_tycoon_desc: "Guadagna molto più oro durante la partita.",
+            bonus_scholar_name: "Studioso", bonus_scholar_desc: "Guadagna molta più esperienza da questa partita.",
+            bonus_treasureHunter_name: "Cacciatore di Tesori", bonus_treasureHunter_desc: "Oggetti e forzieri appaiono molto più spesso.",
+            bonus_merchant_name: "Mercante", bonus_merchant_desc: "I potenziamenti acquistati durante la partita costano meno.",
+            bonus_magnet_name: "Magnete", bonus_magnet_desc: "Raccogli monete e oggetti da una distanza molto maggiore.",
+            bonus_frost_name: "Gelo", bonus_frost_desc: "I tuoi colpi rallentano qualsiasi nemico colpito.",
+            bonus_explosive_name: "Esplosivo", bonus_explosive_desc: "I nemici sconfitti da te possono esplodere, colpendo chiunque sia vicino.",
+            bonus_lucky_name: "Fortunato", bonus_lucky_desc: "Aumenta la probabilità che accadano eventi positivi nella partita.",
             netRewardLabel: "Ricompense", playerLabel: "Giocatore",
             modeLabelOpenWorld: "MONDO APERTO", modeLabelBoss: "Livello Boss", modeLabelWave: "Ondata",
             hideoutAlertTitle: "Nascondiglio Segreto", hideoutAlertEnter: "Entra: E", hideoutHudExit: "Esci: E",
@@ -2627,6 +2761,7 @@
             tut32Title: "Corsa a Ostacoli", tut32Body: "Nella lobby online, scegli la modalità 🏁 Corsa quando crei la tua stanza! È una prova di abilità, senza combattimento: salta tra le piattaforme (alcune si rompono, altre si muovono) fino al traguardo. Chi arriva primo vince — la tua posizione di arrivo (1°, 2°...) appare sullo schermo appena attraversi la linea.",
             tut33Title: "Crea la Tua Skin", tut33Body: "Nel negozio, usa il pulsante <b>🎨 Crea la Tua Skin</b> per aprire l'editor! Dipingi ogni quadratino del personaggio con i colori della palette o scegli un colore personalizzato. Salvare per la prima volta costa oro, ma dopo puoi modificare il disegno liberamente. La tua creazione diventa una skin equipaggiabile come qualsiasi altra.",
             tut34Title: "Ciclo Giorno/Notte", tut34Body: "Nella Modalità Infinita, l'illuminazione della mappa cambia gradualmente mentre passa il tuo tempo di sopravvivenza — scurendosi fino alla 'mezzanotte' e schiarendosi di nuovo dopo. È puramente atmosferico, non influisce sul gameplay né sulla difficoltà.",
+            tut36Title: "Bonus Partita", tut36Body: "Prima di ogni partita, scegli 1 tra 3 bonus casuali! Ognuno offre un vantaggio forte con uno svantaggio equivalente — non esiste una scelta 'giusta', solo stili di gioco diversi. Il bonus vale solo per quella partita e scompare alla fine; la prossima ne sorteggia 3 nuovi. I bonus più rari (colori di carta diversi) hanno effetti più creativi, ma non sono mai più forti di quelli comuni.",
             tut29Title: "L'IA Impara da Te", tut29Body: "Nelle partite contro l'IA, il bot osserva il tuo modo di giocare (se attacchi da vicino o a distanza, se sei aggressivo o difensivo) e si adatta sottilmente nelle partite future contro lo stesso schema. Più giochi allo stesso modo, più il bot impara ad affrontarti — cambia il tuo stile ogni tanto per tenerlo all'oscuro!",
             tut19Title: "Acquistare ed Equipaggiare Armi", tut19Body: "Compra armi nel negozio con il tuo oro — più sono forti, più costano! Dopo l'acquisto, vai su <b>Arma Equipaggiata</b> nella schermata principale e seleziona quale arma acquistata vuoi usare nella partita.",
             tutSvgMove: "muovi", tutSvgJump: "salta", tutSvgAttack: "attacca", tutSvgSpecial: "speciale",
@@ -2727,7 +2862,33 @@
             ach_champion_name: "Champion", ach_champion_desc: "Gagnez 10 parties.",
             ach_legend_name: "Légende", ach_legend_desc: "Atteignez le niveau 10.",
             cosColor_default: "Défaut de l'Archétype", cosColor_gold: "Or", cosColor_purple: "Violet", cosColor_cyan: "Cyan", cosColor_pink: "Rose", cosColor_white: "Blanc", cosColor_obsidian: "Obsidienne",
-            cosSkin_default: "Défaut", cosSkin_stripes: "Rayures", cosSkin_glow: "Lueur", cosSkin_stars: "Étoilé", cosSkin_flame: "Flammes", cosSkin_secret: "✨ Secrète",
+            cosSkin_default: "Défaut", cosSkin_stripes: "Rayures", cosSkin_glow: "Lueur", cosSkin_stars: "Étoilé", cosSkin_flame: "Flammes", cosSkin_secret: "✨ Secrète", cosSkin_custom: "🎨 Personnalisée",
+            matchBonusTitle: "⚔️ Choisissez Votre Bonus", matchBonusHint: "Ne vaut que pour cette partie",
+            bonusRarity_common: "Commun", bonusRarity_uncommon: "Peu Commun", bonusRarity_rare: "Rare", bonusRarity_epic: "Épique", bonusRarity_legendary: "Légendaire",
+            bonusStat_dmg: "dégâts", bonusStat_spd: "vitesse", bonusStat_atkspd: "vitesse d'attaque", bonusStat_range: "portée", bonusStat_crit: "dégâts critiques", bonusStat_hp: "PV max",
+            bonusStat_shielddur: "durée du bouclier", bonusStat_heal: "soin", bonusStat_dmgtaken: "dégâts subis", bonusStat_dashspd: "récupération du dash", bonusStat_jumphigh: "saut bien plus haut",
+            bonusStat_ghostdash: "traverse les ennemis après le dash", bonusStat_gold: "or", bonusStat_xp: "XP", bonusStat_itemfind: "plus d'objets et coffres", bonusStat_shopprice: "prix du magasin",
+            bonusStat_magnet: "rayon de collecte bien plus grand", bonusStat_freezeshots: "les tirs ralentissent les ennemis", bonusStat_explosivekills: "les ennemis explosent à leur mort", bonusStat_luck: "plus de chance d'événements positifs",
+            bonus_fury_name: "Fureur", bonus_fury_desc: "Frappez plus fort, mais vous serez plus lent pour vous repositionner.",
+            bonus_gatling_name: "Gatling", bonus_gatling_desc: "Tirez beaucoup plus vite, chaque tir individuel inflige moins de dégâts.",
+            bonus_sniper_name: "Tireur d'Élite", bonus_sniper_desc: "Vos tirs portent beaucoup plus loin, mais rechargent plus lentement.",
+            bonus_critical_name: "Critique", bonus_critical_desc: "Coups critiques bien plus puissants, au prix d'un peu de PV max.",
+            bonus_tank_name: "Tank", bonus_tank_desc: "Bien plus résistant, mais trop lourd pour se déplacer vite.",
+            bonus_reinforcedShield_name: "Bouclier Renforcé", bonus_reinforcedShield_desc: "Votre bouclier protège bien plus longtemps.",
+            bonus_regen_name: "Régénération", bonus_regen_desc: "Les soins récupèrent bien plus de PV, mais vous attaquez plus lentement.",
+            bonus_armor_name: "Blindage", bonus_armor_desc: "Réduit les dégâts subis de toute source.",
+            bonus_runner_name: "Coureur", bonus_runner_desc: "Bien plus rapide sur la carte, avec des coups légèrement plus faibles.",
+            bonus_ninja_name: "Ninja", bonus_ninja_desc: "Utilisez votre dash bien plus souvent.",
+            bonus_acrobat_name: "Acrobate", bonus_acrobat_desc: "Sautez bien plus haut, idéal pour les cartes verticales.",
+            bonus_ghost_name: "Fantôme", bonus_ghost_desc: "Traversez les ennemis pendant un moment juste après le dash.",
+            bonus_tycoon_name: "Magnat", bonus_tycoon_desc: "Gagnez bien plus d'or pendant la partie.",
+            bonus_scholar_name: "Érudit", bonus_scholar_desc: "Gagnez bien plus d'expérience avec cette partie.",
+            bonus_treasureHunter_name: "Chasseur de Trésors", bonus_treasureHunter_desc: "Les objets et coffres apparaissent bien plus souvent.",
+            bonus_merchant_name: "Marchand", bonus_merchant_desc: "Les améliorations achetées pendant la partie coûtent moins cher.",
+            bonus_magnet_name: "Aimant", bonus_magnet_desc: "Collectez pièces et objets depuis une bien plus grande distance.",
+            bonus_frost_name: "Givre", bonus_frost_desc: "Vos tirs ralentissent tout ennemi touché.",
+            bonus_explosive_name: "Explosif", bonus_explosive_desc: "Les ennemis que vous vainquez peuvent exploser, touchant ceux à proximité.",
+            bonus_lucky_name: "Chanceux", bonus_lucky_desc: "Augmente la chance d'événements positifs pendant la partie.",
             netRewardLabel: "Récompenses", playerLabel: "Joueur",
             modeLabelOpenWorld: "MONDE OUVERT", modeLabelBoss: "Niveau Boss", modeLabelWave: "Vague",
             hideoutAlertTitle: "Cachette Secrète", hideoutAlertEnter: "Entrer : E", hideoutHudExit: "Sortir : E",
@@ -2914,6 +3075,7 @@
             tut32Title: "Course d'Obstacles", tut32Body: "Dans le lobby en ligne, choisissez le mode 🏁 Course en créant votre salle ! C'est un test d'adresse, sans combat : sautez sur des plateformes (certaines se cassent, d'autres bougent) jusqu'à la ligne d'arrivée. Le premier arrivé gagne — votre position d'arrivée (1er, 2e...) s'affiche à l'écran dès que vous franchissez la ligne.",
             tut33Title: "Créez Votre Propre Skin", tut33Body: "Dans le magasin, utilisez le bouton <b>🎨 Créez Votre Skin</b> pour ouvrir l'éditeur ! Peignez chaque carré du personnage avec les couleurs de la palette ou choisissez une couleur personnalisée. Le premier enregistrement coûte de l'or, mais ensuite vous pouvez modifier le dessin librement. Votre création devient une skin équipable comme les autres.",
             tut34Title: "Cycle Jour/Nuit", tut34Body: "En Mode Infini, l'éclairage de la carte change progressivement au fil de votre temps de survie — s'assombrissant jusqu'à 'minuit' puis s'éclaircissant à nouveau. C'est purement atmosphérique, ça n'affecte ni le gameplay ni la difficulté.",
+            tut36Title: "Bonus de Partie", tut36Body: "Avant chaque partie, choisissez 1 bonus parmi 3 tirés au hasard ! Chacun donne un avantage fort avec un inconvénient équivalent — il n'y a pas de choix 'correct', juste des styles de jeu différents. Le bonus ne vaut que pour cette partie et disparaît à la fin ; la suivante en tire 3 nouveaux. Les bonus plus rares (couleurs de carte différentes) ont des effets plus créatifs, mais ne sont jamais plus forts que les communs.",
             tut29Title: "L'IA Apprend de Vous", tut29Body: "Dans les parties contre l'IA, le bot observe votre façon de jouer (si vous attaquez de près ou à distance, si vous êtes agressif ou défensif) et s'adapte subtilement dans les parties suivantes contre le même schéma. Plus vous jouez de la même façon, plus le bot apprend à vous affronter — changez de style de temps en temps pour le déstabiliser !",
             tut19Title: "Acheter et Équiper des Armes", tut19Body: "Achetez des armes dans la boutique avec votre or — plus elles sont puissantes, plus elles coûtent cher ! Après l'achat, allez dans <b>Arme Équipée</b> sur l'écran principal et choisissez quelle arme achetée utiliser en match.",
             tutSvgMove: "bouger", tutSvgJump: "sauter", tutSvgAttack: "attaquer", tutSvgSpecial: "spécial",
@@ -3136,6 +3298,7 @@
                 { icon: '🏁', title: t('tut32Title'), body: t('tut32Body') },
                 { icon: '🎨', title: t('tut33Title'), body: t('tut33Body') },
                 { icon: '🌗', title: t('tut34Title'), body: t('tut34Body') },
+                { icon: '⚔️', title: t('tut36Title'), body: t('tut36Body') },
                 { icon: '⚙️', title: t('tut11Title'), body: t('tut11Body') }
             );
             return list;
@@ -5790,13 +5953,18 @@
             let readyConns = this.conns.filter(c=>c.ready);
             if(readyConns.length < 1) return;
             this._matchStarting = true;
-            let cos1 = (Engine.persistentUpgradesP1.cosmetics) || {color:null, skin:'default'};
-            let roster = [{slot:1, name:Engine.getProfileName(1), arch:Engine.selectedArchP1, col:cos1.color, skn:cos1.skin, cskin:cos1.customSkinGrid||null}];
-            readyConns.forEach(c => roster.push({slot:c.slot, name:c.name||'Convidado', arch:c.arch||'vilan', col:c.col||null, skn:c.skn||'default', cskin:c.cskin||null}));
-            // NOVO: envia o modo escolhido pelo host junto do roster, pra convidados iniciarem
-            // exatamente o mesmo modo (ver Engine.startOnlineMatch()).
-            readyConns.forEach(c => { try{ c.conn.send({type:'start', roster, mySlot:c.slot, mode:this.desiredMode}); }catch(e){} });
-            Engine.startOnlineMatch(roster, 1, this.desiredMode);
+            // NOVO: host escolhe seu Bônus de Partida antes de começar — convidados escolhem o
+            // deles separadamente assim que a partida chegar pra eles (ver startOnlineMatch()
+            // chamando MatchBonuses.openChoice também do lado guest, se aplicável).
+            MatchBonuses.openChoice(() => {
+                let cos1 = (Engine.persistentUpgradesP1.cosmetics) || {color:null, skin:'default'};
+                let roster = [{slot:1, name:Engine.getProfileName(1), arch:Engine.selectedArchP1, col:cos1.color, skn:cos1.skin, cskin:cos1.customSkinGrid||null}];
+                readyConns.forEach(c => roster.push({slot:c.slot, name:c.name||'Convidado', arch:c.arch||'vilan', col:c.col||null, skn:c.skn||'default', cskin:c.cskin||null}));
+                // NOVO: envia o modo escolhido pelo host junto do roster, pra convidados iniciarem
+                // exatamente o mesmo modo (ver Engine.startOnlineMatch()).
+                readyConns.forEach(c => { try{ c.conn.send({type:'start', roster, mySlot:c.slot, mode:this.desiredMode}); }catch(e){} });
+                Engine.startOnlineMatch(roster, 1, this.desiredMode);
+            });
         },
         _setupHostConn(entry) {
             let conn = entry.conn;
@@ -5868,7 +6036,7 @@
                     document.getElementById('btn-join-room').disabled=false;
                     this.disconnect();
                 } else if(data.type==='start'){
-                    Engine.startOnlineMatch(data.roster, data.mySlot, data.mode);
+                    MatchBonuses.openChoice(() => Engine.startOnlineMatch(data.roster, data.mySlot, data.mode));
                 } else if(data.type==='state'){
                     this._apply(data);
                 }
@@ -6148,6 +6316,161 @@
         // usado pra ajustar sutilmente os parâmetros efetivos do bot a cada partida seguinte
         // contra IA — dando a sensação real de "esse bot está ficando bom em me vencer",
         // sem precisar de rede nem de um modelo de verdade.
+        // ==================== MatchBonuses ====================
+        // NOVO: Sistema de Bônus de Partida — antes de cada partida (vs IA, online, boss, horda)
+        // o jogador escolhe 1 de 3 cartas sorteadas. O bônus vale só naquela partida (aplicado
+        // como multiplicador temporário em Player, resetado ao criar um Player novo) e nunca
+        // persiste — cada partida sorteia 3 novas cartas do zero.
+        // Cada bônus tem vantagem + desvantagem equivalente (nenhum é estritamente melhor que
+        // outro) e uma raridade que só afeta a CHANCE de aparecer no sorteio, não o poder do
+        // efeito em si — bônus raros têm efeitos mais criativos/situacionais, não mais fortes.
+        const MatchBonuses = {
+            RARITY_WEIGHTS: { common: 100, uncommon: 55, rare: 28, epic: 12, legendary: 4 },
+            RARITY_COLORS: { common: '#94a3b8', uncommon: '#4ade80', rare: '#38bdf8', epic: '#c084fc', legendary: '#fbbf24' },
+            catalog: [
+                // Ataque
+                { id:'fury', cat:'attack', rarity:'common', icon:'🔥', mods:{dmgMult:1.20, spdMult:0.85} },
+                { id:'gatling', cat:'attack', rarity:'common', icon:'⚡', mods:{atkCdMult:0.75, dmgMult:0.85} },
+                { id:'sniper', cat:'attack', rarity:'uncommon', mods:{projSpdMult:1.30, atkCdMult:1.20}, icon:'🎯' },
+                { id:'critical', cat:'attack', rarity:'rare', mods:{critMult:1.35, maxHpMult:0.90}, icon:'💥' },
+                // Defesa
+                { id:'tank', cat:'defense', rarity:'common', mods:{maxHpMult:1.30, spdMult:0.80}, icon:'🛡️' },
+                { id:'reinforcedShield', cat:'defense', rarity:'uncommon', mods:{shieldDurMult:1.50, dmgMult:0.85}, icon:'🔰' },
+                { id:'regen', cat:'defense', rarity:'uncommon', mods:{healMult:1.40, atkCdMult:1.20}, icon:'💚' },
+                { id:'armor', cat:'defense', rarity:'rare', mods:{dmgTakenMult:0.80, spdMult:0.85}, icon:'🦾' },
+                // Mobilidade
+                { id:'runner', cat:'mobility', rarity:'common', mods:{spdMult:1.30, dmgMult:0.85}, icon:'💨' },
+                { id:'ninja', cat:'mobility', rarity:'uncommon', mods:{dashCdMult:0.60, maxHpMult:0.80}, icon:'🥷' },
+                { id:'acrobat', cat:'mobility', rarity:'common', mods:{jumpMult:1.35, dmgMult:0.85}, icon:'🤸' },
+                { id:'ghost', cat:'mobility', rarity:'epic', mods:{ghostDash:true, atkCdMult:1.20}, icon:'👻' },
+                // Economia
+                { id:'tycoon', cat:'economy', rarity:'common', mods:{goldMult:1.35, dmgMult:0.85}, icon:'💰' },
+                { id:'scholar', cat:'economy', rarity:'common', mods:{xpMult:1.40, maxHpMult:0.80}, icon:'📚' },
+                { id:'treasureHunter', cat:'economy', rarity:'uncommon', mods:{itemFindMult:1.5, spdMult:0.85}, icon:'🗺️' },
+                { id:'merchant', cat:'economy', rarity:'rare', mods:{shopDiscount:0.20, dmgMult:0.90}, icon:'🏪' },
+                // Utilidade
+                { id:'magnet', cat:'utility', rarity:'uncommon', mods:{magnetMult:2.5, spdMult:0.85}, icon:'🧲' },
+                { id:'frost', cat:'utility', rarity:'rare', mods:{freezeShots:true, dmgMult:0.85}, icon:'❄️' },
+                { id:'explosive', cat:'utility', rarity:'epic', mods:{explosiveKills:true, atkCdMult:1.20}, icon:'💣' },
+                { id:'lucky', cat:'utility', rarity:'legendary', mods:{luckMult:1.5, maxHpMult:0.80}, icon:'🍀' }
+            ],
+            current: null, // bônus escolhido nesta partida (ou null se nenhum)
+            _pendingChoice: null, // as 3 cartas sorteadas aguardando escolha
+            // Sorteia 3 bônus distintos (nunca repete o mesmo id nas 3 cartas), com chance
+            // proporcional à raridade de cada um.
+            rollThree() {
+                let pool = this.catalog.slice();
+                let picks = [];
+                for(let i = 0; i < 3 && pool.length > 0; i++) {
+                    let totalWeight = pool.reduce((sum, b) => sum + this.RARITY_WEIGHTS[b.rarity], 0);
+                    let roll = Math.random() * totalWeight, acc = 0, chosenIdx = 0;
+                    for(let j = 0; j < pool.length; j++) {
+                        acc += this.RARITY_WEIGHTS[pool[j].rarity];
+                        if(roll <= acc) { chosenIdx = j; break; }
+                    }
+                    picks.push(pool[chosenIdx]);
+                    pool.splice(chosenIdx, 1);
+                }
+                return picks;
+            },
+            // Abre a tela de escolha antes da partida começar de verdade. onChosen(bonusOrNull)
+            // é chamado assim que o jogador escolher uma carta.
+            openChoice(onChosen) {
+                this._pendingChoice = this.rollThree();
+                this._onChosenCb = onChosen;
+                let wrap = document.getElementById('match-bonus-cards');
+                wrap.innerHTML = '';
+                this._pendingChoice.forEach((b, idx) => {
+                    let color = this.RARITY_COLORS[b.rarity];
+                    let card = document.createElement('div');
+                    card.className = 'match-bonus-card';
+                    card.style.cssText = `border:2px solid ${color}; box-shadow:0 0 16px -4px ${color};`;
+                    let advText = this._advantageText(b), disText = this._disadvantageText(b);
+                    card.innerHTML = `
+                        <div style="font-size:2.2rem; text-align:center;">${b.icon}</div>
+                        <div style="text-align:center; font-weight:800; color:${color}; font-size:1rem; margin:4px 0;">${t('bonus_' + b.id + '_name')}</div>
+                        <div style="text-align:center; font-size:0.68rem; color:${color}; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">${t('bonusRarity_' + b.rarity)}</div>
+                        <div style="font-size:0.78rem; color:#4ade80; margin-bottom:4px;">▲ ${advText}</div>
+                        <div style="font-size:0.78rem; color:#f87171; margin-bottom:8px;">▼ ${disText}</div>
+                        <div style="font-size:0.7rem; color:#94a3b8;">${t('bonus_' + b.id + '_desc')}</div>
+                    `;
+                    card.onclick = () => this._chooseCard(idx);
+                    wrap.appendChild(card);
+                });
+                document.getElementById('match-bonus-screen').classList.remove('hidden');
+            },
+            _chooseCard(idx) {
+                let chosen = this._pendingChoice[idx];
+                this.current = chosen;
+                document.getElementById('match-bonus-screen').classList.add('hidden');
+                let cb = this._onChosenCb; this._onChosenCb = null; this._pendingChoice = null;
+                if(cb) cb(chosen);
+            },
+            // Descrições curtas geradas a partir dos mods, pra não precisar escrever manualmente
+            // o texto de cada vantagem/desvantagem em cada idioma — só os números mudam.
+            _advantageText(b) {
+                let m = b.mods, parts = [];
+                if(m.dmgMult > 1) parts.push(`+${Math.round((m.dmgMult-1)*100)}% ${t('bonusStat_dmg')}`);
+                if(m.spdMult > 1) parts.push(`+${Math.round((m.spdMult-1)*100)}% ${t('bonusStat_spd')}`);
+                if(m.atkCdMult < 1) parts.push(`+${Math.round((1-m.atkCdMult)*100)}% ${t('bonusStat_atkspd')}`);
+                if(m.projSpdMult > 1) parts.push(`+${Math.round((m.projSpdMult-1)*100)}% ${t('bonusStat_range')}`);
+                if(m.critMult > 1) parts.push(`+${Math.round((m.critMult-1)*100)}% ${t('bonusStat_crit')}`);
+                if(m.maxHpMult > 1) parts.push(`+${Math.round((m.maxHpMult-1)*100)}% ${t('bonusStat_hp')}`);
+                if(m.shieldDurMult > 1) parts.push(`+${Math.round((m.shieldDurMult-1)*100)}% ${t('bonusStat_shielddur')}`);
+                if(m.healMult > 1) parts.push(`+${Math.round((m.healMult-1)*100)}% ${t('bonusStat_heal')}`);
+                if(m.dmgTakenMult < 1) parts.push(`-${Math.round((1-m.dmgTakenMult)*100)}% ${t('bonusStat_dmgtaken')}`);
+                if(m.dashCdMult < 1) parts.push(`+${Math.round((1-m.dashCdMult)*100)}% ${t('bonusStat_dashspd')}`);
+                if(m.jumpMult > 1) parts.push(t('bonusStat_jumphigh'));
+                if(m.ghostDash) parts.push(t('bonusStat_ghostdash'));
+                if(m.goldMult > 1) parts.push(`+${Math.round((m.goldMult-1)*100)}% ${t('bonusStat_gold')}`);
+                if(m.xpMult > 1) parts.push(`+${Math.round((m.xpMult-1)*100)}% ${t('bonusStat_xp')}`);
+                if(m.itemFindMult > 1) parts.push(t('bonusStat_itemfind'));
+                if(m.shopDiscount > 0) parts.push(`-${Math.round(m.shopDiscount*100)}% ${t('bonusStat_shopprice')}`);
+                if(m.magnetMult > 1) parts.push(t('bonusStat_magnet'));
+                if(m.freezeShots) parts.push(t('bonusStat_freezeshots'));
+                if(m.explosiveKills) parts.push(t('bonusStat_explosivekills'));
+                if(m.luckMult > 1) parts.push(t('bonusStat_luck'));
+                return parts.join(', ');
+            },
+            _disadvantageText(b) {
+                let m = b.mods, parts = [];
+                if(m.dmgMult < 1) parts.push(`-${Math.round((1-m.dmgMult)*100)}% ${t('bonusStat_dmg')}`);
+                if(m.spdMult < 1) parts.push(`-${Math.round((1-m.spdMult)*100)}% ${t('bonusStat_spd')}`);
+                if(m.atkCdMult > 1) parts.push(`-${Math.round((m.atkCdMult-1)*100)}% ${t('bonusStat_atkspd')}`);
+                if(m.maxHpMult < 1) parts.push(`-${Math.round((1-m.maxHpMult)*100)}% ${t('bonusStat_hp')}`);
+                return parts.join(', ');
+            },
+            // Aplica o bônus escolhido a um Player recém-criado — chamado logo após new Player(...)
+            // em todos os pontos que iniciam partida. Não faz nada se nenhum bônus foi escolhido
+            // (ex.: modo espectador, ou partida iniciada sem passar pela tela de escolha).
+            applyToPlayer(player) {
+                if(!this.current || player.profileId !== Engine.mySlot) return;
+                let m = this.current.mods;
+                if(m.dmgMult) player.dmgMod *= m.dmgMult;
+                if(m.spdMult) player.bonusSpdMult = (player.bonusSpdMult || 1) * m.spdMult;
+                if(m.atkCdMult) player.atkCd = Math.round(player.atkCd * m.atkCdMult);
+                if(m.projSpdMult) player.projSpd *= m.projSpdMult;
+                if(m.critMult) player.critMult = (player.critMult || 1.5) * m.critMult;
+                if(m.maxHpMult) { player.maxHp = Math.round(player.maxHp * m.maxHpMult); player.hp = player.maxHp; }
+                if(m.shieldDurMult) player.shieldDurMult = m.shieldDurMult;
+                if(m.healMult) player.healMult = m.healMult;
+                if(m.dmgTakenMult) player.dmgTakenMult = m.dmgTakenMult;
+                if(m.dashCdMult) player.dashCdMult = m.dashCdMult;
+                if(m.jumpMult) player.jumpMult = m.jumpMult;
+                if(m.ghostDash) player.hasGhostDash = true;
+                if(m.goldMult) player.goldMult = m.goldMult;
+                if(m.xpMult) player.xpMult = m.xpMult;
+                if(m.itemFindMult) player.itemFindMult = m.itemFindMult;
+                if(m.shopDiscount) player.shopDiscount = m.shopDiscount;
+                if(m.magnetMult) player.magnetMult = m.magnetMult;
+                if(m.freezeShots) player.freezeShots = true;
+                if(m.explosiveKills) player.explosiveKills = true;
+                if(m.luckMult) player.luckMult = m.luckMult;
+            },
+            clear() { this.current = null; }
+        };
+        // ==================== fim MatchBonuses ====================
+
         const PlayerPatternMemory = {
             // Estado acumulado DURANTE a partida atual — zerado a cada nova partida.
             session: null,
@@ -7146,7 +7469,7 @@
                 let el = document.getElementById('hud-p'+i);
                 if(el) el.classList.toggle('hidden', !roster.some(r => r.slot === i));
             }
-            this.players.forEach(p => { p.inventory.potion = Math.max(1, p.inventory.potion); p.syncHUD(); });
+            this.players.forEach(p => { p.inventory.potion = Math.max(1, p.inventory.potion); p.syncHUD(); MatchBonuses.applyToPlayer(p); });
             this.state = 'IN_GAME';
             setTimeout(() => { this.activeMatch = true; }, 600);
         },
@@ -8025,19 +8348,15 @@
         // pressionada no menu.
         _eggSequence: ['arrowup','arrowup','arrowdown','arrowdown','arrowleft','arrowright','arrowleft','arrowright','b','a'],
         // NOVO: versão mobile do easter egg — como o Konami Code (teclado) não tem equivalente
-        // em toque, criamos uma sequência de toques nos 4 cantos da tela do menu, repetida 2x
-        // (repetir evita disparar sem querer com toques aleatórios). Alimenta o MESMO buffer e
-        // checagem do Konami Code, só que com rótulos próprios ('tl'/'tr'/'bl'/'br' = top-left,
-        // top-right, bottom-left, bottom-right) em vez de teclas.
-        _cornerEggSequence: ['tl','tr','bl','br','tl','tr','bl','br'],
-        _checkCornerTap(corner) {
-            if(!this._cornerBuffer) this._cornerBuffer = [];
-            this._cornerBuffer.push(corner);
-            if(this._cornerBuffer.length > this._cornerEggSequence.length) this._cornerBuffer.shift();
-            if(this._cornerBuffer.length === this._cornerEggSequence.length && this._cornerBuffer.every((c, i) => c === this._cornerEggSequence[i])) {
-                this._cornerBuffer = [];
-                this.unlockEasterEggSkin();
-            }
+        // em toque, e a tentativa anterior (tocar nos 4 cantos da tela) atrapalhava outros
+        // botões do menu e não funcionava bem, trocamos por segurar o logo/título do jogo por
+        // alguns segundos (ver o próprio elemento da logo no HTML, com onpointerdown/up).
+        _logoHoldTimer: null,
+        startLogoHold() {
+            this._logoHoldTimer = setTimeout(() => { this.unlockEasterEggSkin(); this._logoHoldTimer = null; }, 2500);
+        },
+        cancelLogoHold() {
+            if(this._logoHoldTimer) { clearTimeout(this._logoHoldTimer); this._logoHoldTimer = null; }
         },
         _checkEasterEggSequence(k) {
             if(!this._eggBuffer) this._eggBuffer = [];
@@ -8252,7 +8571,13 @@
             this.customLevelData = levelData;
             this.startMatch();
         },
+        // NOVO: startMatch() agora só decide SE mostra a tela de escolha de bônus antes de
+        // chamar a lógica real (_startMatchInternal). Isso evita duplicar toda a lógica de
+        // montagem de mapa/jogadores só pra inserir uma tela no meio do fluxo.
         startMatch() {
+            MatchBonuses.openChoice(() => this._startMatchInternal());
+        },
+        _startMatchInternal() {
             document.getElementById('menu-screen').classList.add('hidden');
             this.round = 1; this.killsCounter = 0; this.spawnTimer = 0; this.goldSpawnTimer = 0; this.bossSpawnTimer = 999; this.powerupSpawnTimer = 0; this.powerupSpawnTarget = 14 + Math.random()*10; this.isPaused = false; document.getElementById('pause-screen').classList.add('hidden');
             this.matchTookDamage = false; this.killStreak = 0; this.killStreakTimer = 0; this.infinitoStartTime = Date.now();
@@ -8372,6 +8697,10 @@
             }
             let p3el = document.getElementById('hud-p3'); if(p3el) p3el.classList.add('hidden');
             let p4el = document.getElementById('hud-p4'); if(p4el) p4el.classList.add('hidden');
+            // NOVO: aplica o Bônus de Partida escolhido (ver MatchBonuses) ao jogador local —
+            // a própria função já filtra por profileId === Engine.mySlot, então é seguro
+            // chamar pra todos os jogadores da lista sem afetar bots/outros jogadores.
+            this.players.forEach(p => MatchBonuses.applyToPlayer(p));
             if(this.customLevelData && this.customLevelData.spawn && this.players[0]) {
                 this.players[0].x = this.customLevelData.spawn.x; this.players[0].y = this.customLevelData.spawn.y;
             }
@@ -8402,7 +8731,12 @@
             if(p && p.lives > 0 && p.dashCooldown <= 0) {
                 p.vx = p.facing * (p.baseSpd * 2.5);
                 p.shieldTime = Math.max(p.shieldTime, 10);
-                p.dashCooldown = 40;
+                // NOVO: Bônus "Ninja" recarrega o dash mais rápido (dashCdMult < 1).
+                p.dashCooldown = Math.round(40 * (p.dashCdMult || 1));
+                // NOVO: Bônus "Fantasma" — atravessa inimigos por alguns segundos após o dash.
+                // Reaproveitamos shieldTime (já ignora dano) mas marcamos ghostPhaseTime à parte
+                // pra também ignorar colisão sólida com inimigos, não só dano.
+                if(p.hasGhostDash) p.ghostPhaseTime = 90; // 1.5s a 60fps
                 PlayerPatternMemory.recordDash(p);
                 createFXBurst(p.x+p.w/2, p.y+p.h/2, '#ffffff', 5);
             }
@@ -8880,6 +9214,9 @@
         },
         triggerMatchEnd(winner, titleMsg, descMsg) {
             this.state = 'GAMEOVER'; this.activeMatch = false;
+            // NOVO: o Bônus de Partida vale só pra esta partida — limpa aqui, garantindo que a
+            // próxima nunca herde o bônus anterior mesmo se algo pular a tela de escolha.
+            MatchBonuses.clear();
             let specBanner = document.getElementById('spectator-banner'); if(specBanner) specBanner.classList.add('hidden');
             Hideout.active = false;
             document.getElementById('hideout-hud').style.display = 'none';
@@ -8888,6 +9225,13 @@
             document.getElementById('lbl-gameover-title').innerText = titleMsg;
             this._lastEndInfo = { type: 'elim', winnerId: winner ? winner.id : null };
             let myP = this.players.find(p => p && p.id === this.mySlot);
+            // NOVO: Bônus de Partida "Magnata" (mais ouro) e "Estudioso" (mais XP) — aplicados
+            // aqui, centralizado no total acumulado ao fim da partida, em vez de em cada ponto
+            // individual de coleta espalhado pelo código (mais simples e seguro de manter).
+            if(myP && MatchBonuses.current) {
+                if(myP.goldMult) myP.goldCollected = Math.round(myP.goldCollected * myP.goldMult);
+                if(myP.xpMult) myP._xpBonusMult = myP.xpMult; // lido em registerMatchStats() se existir
+            }
             let iWon = !!(winner && winner.id === this.mySlot);
             if(this.vsAI) {
                 // Recompensa do modo Contra IA: NÃO depende do ouro coletado na partida, e sim
@@ -9108,6 +9452,10 @@
             // plataforma, mas vindo de um item que aparece aleatoriamente durante a partida.
             if(this.powerupSpeedTimer > 0) spd += 3.2;
             spd = Math.min(spd, Engine.MAX_PLAYER_SPEED + 6.4);
+            // NOVO: multiplicador de velocidade do Bônus de Partida (ex.: Corredor +30%,
+            // Tanque -20%) — aplicado depois do teto normal, igual a lentidão de gelo, pra
+            // ficar proporcional a qualquer velocidade já alcançada.
+            if(this.bonusSpdMult) spd *= this.bonusSpdMult;
             // NOVO: lentidão de gelo (arma elemental) é aplicada por último, multiplicando o
             // resultado final — assim reduz proporcionalmente qualquer boost já somado, em vez
             // de competir por ordem de soma/limite máximo.
@@ -9190,7 +9538,7 @@
                     let friction = this.isGrounded ? Weather.getGroundFriction() : 0.85;
                     this.vx *= Math.pow(friction, dt * 60);
                 }
-                if(keys.up && this.isGrounded) { this.vy = -16.5; this.isGrounded = false; AudioFX.play('jump'); PlayerPatternMemory.recordJump(this); }
+                if(keys.up && this.isGrounded) { this.vy = -16.5 * (this.jumpMult || 1); this.isGrounded = false; AudioFX.play('jump'); PlayerPatternMemory.recordJump(this); }
                 // FIX CRÍTICO: esta linha (gravidade) tinha sido acidentalmente apagada ao
                 // adicionar o efeito de vento nesta mesma área do código — sem ela, this.vy
                 // nunca aumentava com o tempo, e o personagem ficava flutuando parado no ar
@@ -9279,6 +9627,9 @@
                 return;
             }
             if(this.shieldTime > 0) return;
+            // NOVO: Bônus de Partida "Blindagem" reduz o dano recebido — aplicado aqui, no dano
+            // já calculado, pra afetar qualquer fonte (projétil, contato, elemental).
+            if(this.dmgTakenMult) amount *= this.dmgTakenMult;
             this.hp -= amount; AudioFX.play('hit');
             if(this.profileId === Engine.mySlot) { Engine.matchTookDamage = true; Engine.killStreak = 0; Engine.killStreakTimer = 0; }
             if(this.hp <= 0) { this.lives--; if(this.lives > 0) { this.hp = this.maxHp; this.y = 100; this.vy = 0; } }
@@ -9844,7 +10195,13 @@
                     if(this.cd <= 0) {
                         let projDmg = this.type === 'boss' ? 34 : 12;
                         let projY = this.type === 'boss' ? (this.y + this.h - 15) : (this.y + 10);
-                        Engine.projectiles.push(new Projectile(this.x, projY, this.vx > 0 ? 7 : -7, 0, this.color, projDmg, this));
+                        // FIX: usava this.vx (velocidade atual) pra decidir a direção do tiro —
+                        // mas vx podia estar zerado/errado por inércia (especialmente com o
+                        // comportamento _keepDistance, que desacelera o boss até quase 0 na
+                        // "zona confortável"), fazendo o tiro sair na direção OPOSTA ao alvo,
+                        // parecendo aleatório/quebrado. dx (posição relativa real ao alvo) é a
+                        // fonte de verdade correta pra isso, não a velocidade momentânea.
+                        Engine.projectiles.push(new Projectile(this.x, projY, dx > 0 ? 7 : -7, 0, this.color, projDmg, this));
                         this.cd = this.type === 'boss' ? 95 : 130;
                     }
                 }
@@ -10071,7 +10428,12 @@
     const SkinEditor = {
         COLS: 8, ROWS: 11,
         palette: ['#f8fafc','#94a3b8','#1e293b','#000000','#ef4444','#f97316','#eab308','#22c55e','#06b6d4','#3b82f6','#8b5cf6','#ec4899'],
-        grid: null, selectedColor: '#38bdf8', _ctx: null,
+        grid: null, selectedColor: '#38bdf8', _ctx: null, eraserMode: false,
+        toggleEraser() {
+            this.eraserMode = !this.eraserMode;
+            let btn = document.getElementById('skin-editor-eraser-btn');
+            if(btn) btn.style.background = this.eraserMode ? '#dc2626' : '#334155';
+        },
         open() {
             document.getElementById('skin-editor-screen').classList.remove('hidden');
             let upg = Engine.persistentUpgradesP1;
@@ -10080,11 +10442,12 @@
                 ? upg.customSkinDraft.map(row => row.slice())
                 : Array.from({length: this.ROWS}, () => Array(this.COLS).fill(null));
             let priceEl = document.getElementById('skin-editor-price'); if(priceEl) priceEl.textContent = this.PRICE;
+            let labelEl = document.getElementById('skin-editor-save-label'); if(labelEl) labelEl.textContent = t('skinEditorSaveBtn').replace('💾 ', '');
             this._renderPalette();
             this._renderCanvas();
         },
         close() { document.getElementById('skin-editor-screen').classList.add('hidden'); },
-        PRICE: 2000,
+        PRICE: 10000,
         _renderPalette() {
             let wrap = document.getElementById('skin-editor-palette'); wrap.innerHTML = '';
             this.palette.forEach(hex => {
@@ -10128,7 +10491,7 @@
                     let py = (ev.clientY - rect.top) / rect.height * canvas.height;
                     let c = Math.floor(px / cellW), r = Math.floor(py / cellH);
                     if(r < 0 || r >= this.ROWS || c < 0 || c >= this.COLS) return;
-                    this.grid[r][c] = this.selectedColor;
+                    this.grid[r][c] = this.eraserMode ? null : this.selectedColor;
                     this._renderCanvas();
                 };
                 let painting = false;
